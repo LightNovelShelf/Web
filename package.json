@@ -1,0 +1,74 @@
+{
+  "name": "v2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "core-js": "^3.16.2",
+    "element-plus": "^1.0.2-beta.70",
+    "register-service-worker": "^1.7.2",
+    "vue": "^3.2.3",
+    "vue-router": "^4.0.0-0",
+    "vuex": "^4.0.0-0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "@vue/cli-plugin-babel": "~4.5.13",
+    "@vue/cli-plugin-eslint": "~4.5.13",
+    "@vue/cli-plugin-pwa": "~4.5.13",
+    "@vue/cli-plugin-router": "~4.5.13",
+    "@vue/cli-plugin-typescript": "~4.5.13",
+    "@vue/cli-plugin-vuex": "~4.5.13",
+    "@vue/cli-service": "~4.5.13",
+    "@vue/compiler-sfc": "^3.2.3",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "babel-plugin-component": "^1.1.1",
+    "eslint": "^6.8.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-vue": "^7.16.0",
+    "prettier": "^2.3.2",
+    "sass": "^1.38.0",
+    "sass-loader": "^8.0.2",
+    "typescript": "~4.3.5",
+    "vue-cli-plugin-element-plus": "~0.0.13"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended",
+      "@vue/typescript/recommended",
+      "@vue/prettier",
+      "@vue/prettier/@typescript-eslint"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "rules": {
+      "no-unused-vars": 0,
+      "no-unused-labels": 0,
+      "quotes": [
+        1,
+        "single"
+      ],
+      "semi": [
+        1,
+        "never"
+      ]
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
