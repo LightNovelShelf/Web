@@ -6,13 +6,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { createTheme, inputDark, datePickerDark } from 'naive-ui'
+import { createTheme, datePickerDark } from 'naive-ui'
 import { zhCN, dateZhCN } from 'naive-ui'
 
 export default defineComponent({
   setup() {
     return {
-      darkTheme: createTheme([inputDark, datePickerDark]),
+      darkTheme: createTheme([datePickerDark]),
       zhCN,
       dateZhCN
     }
