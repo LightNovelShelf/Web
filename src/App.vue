@@ -1,22 +1,20 @@
 <template>
-  <el-config-provider :locale="locale">
+  <n-config-provider :theme="darkTheme" :locale="zhCN" :date-locale="dateZhCN">
     <router-view />
-  </el-config-provider>
+  </n-config-provider>
 </template>
 
 <script lang="ts">
-import { ElConfigProvider } from 'element-plus'
-import zhCn from 'element-plus/lib/locale/lang/zh-cn'
 import { defineComponent } from 'vue'
+import { createTheme, inputDark, datePickerDark } from 'naive-ui'
+import { zhCN, dateZhCN } from 'naive-ui'
 
 export default defineComponent({
-  name: 'App',
-  components: {
-    ElConfigProvider
-  },
-  data() {
+  setup() {
     return {
-      locale: zhCn
+      darkTheme: createTheme([inputDark, datePickerDark]),
+      zhCN,
+      dateZhCN
     }
   }
 })
