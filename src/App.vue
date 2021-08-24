@@ -42,7 +42,7 @@
           <div class="content">
             <router-view />
           </div>
-          <!-- <n-layout-footer class="footer" bordered>我是footer，关于本站，用户协议等，设定仅在home出现</n-layout-footer> -->
+          <!-- <n-layout-footer class="footer" bordered>我是footer，关于本站，用户协议等，可以设定仅在home出现</n-layout-footer> -->
         </n-layout>
       </n-layout>
     </n-layout>
