@@ -11,10 +11,14 @@ import {
   NSpace,
   NMenu,
   NIcon,
-  NInput
+  NInput,
+  NAvatar,
+  NTooltip,
+  NCascader
 } from 'naive-ui'
-import { App } from '@vue/runtime-core'
 import 'vfonts/Roboto.css'
+import { App } from '@vue/runtime-core'
+import { HomeFilled, BookRound, ForumFilled, AnnouncementFilled, MessageFilled, InfoFilled } from '@vicons/material'
 
 export default function installNaiveUI(app: App): void {
   const naive = create({
@@ -30,8 +34,20 @@ export default function installNaiveUI(app: App): void {
       NSpace,
       NMenu,
       NIcon,
-      NInput
+      NInput,
+      NAvatar,
+      NTooltip,
+      NCascader
     ]
   })
   app.use(naive)
+}
+
+export const icon = {
+  HomeFilled,
+  BookRound,
+  ForumFilled,
+  AnnouncementFilled,
+  MessageFilled,
+  InfoFilled
 }

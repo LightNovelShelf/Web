@@ -1,13 +1,16 @@
 <template>
-  <div>这是首页</div>
+  <div>这是社区</div>
 </template>
 
 <script>
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
+  name: 'Community',
   setup() {
     return {}
   }
 })
 </script>
+
+<style scoped></style>
