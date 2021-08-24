@@ -14,7 +14,12 @@ import {
   NInput,
   NAvatar,
   NTooltip,
-  NCascader
+  NCascader,
+  NCard,
+  NGrid,
+  NGi,
+  NList,
+  NListItem
 } from 'naive-ui'
 import 'vfonts/Roboto.css'
 import { App } from '@vue/runtime-core'
@@ -37,7 +42,12 @@ export default function installNaiveUI(app: App): void {
       NInput,
       NAvatar,
       NTooltip,
-      NCascader
+      NCascader,
+      NCard,
+      NGrid,
+      NGi,
+      NList,
+      NListItem
     ]
   })
   app.use(naive)

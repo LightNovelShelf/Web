@@ -1,6 +1,6 @@
 <template>
   <n-space>
-    <div style="min-width: 400px">
+    <div>
       <n-cascader
         v-model="value"
         :options="options"
