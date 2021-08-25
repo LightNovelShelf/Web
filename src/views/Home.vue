@@ -4,6 +4,7 @@
     <n-grid :x-gap="12" :y-gap="8" cols="1 600:2">
       <n-grid-item>
         <n-card
+          type="success"
           title="最近更新"
           :segmented="{
             content: 'hard',
@@ -31,17 +32,20 @@
                     }"
                   >
                   </div>
+                  <n-element tag="div" class="book-tag">
+                    <span style="font-size: 12px">录入</span>
+                  </n-element>
                 </template>
                 <div class="book-name">
-                  <n-ellipsis :line-clamp="2">
+                  <div class="book-name-text" :title="book.name">
                     {{ book.name }}
-                  </n-ellipsis>
+                  </div>
                 </div>
               </n-card>
             </n-col>
           </n-row>
         </n-card>
-        <n-card title="网站统计" style="margin-top: 12px">
+        <n-card type="success" title="网站统计" style="margin-top: 12px">
           <n-row>
             <n-col :span="8">
               <n-statistic label="当前在线">114,514</n-statistic>
@@ -110,7 +114,8 @@ export default defineComponent({
       bookData: [
         {
           cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
-          name: '我是书名，我很短'
+          name: '我是书名，我很短',
+          type: '录入'
         },
         {
           cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
@@ -139,13 +144,31 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import '../assets/style/mixin';
+
 :deep(ul:first-child) {
   margin-top: 0;
+}
+
+.book-tag {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0 6px;
+  border-radius: 1em 0 0 1em;
 }
 
 .book-name {
   display: flex;
   align-items: center;
+  --font-size: 12px;
+  font-size: var(--font-size);
   height: calc(var(--font-size) * var(--line-height) * 2);
+
+  .book-name-text {
+    @include ellipsis(2);
+  }
 }
 </style>
