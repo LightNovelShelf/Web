@@ -30,11 +30,11 @@ export default defineComponent({
       options: [
         {
           label: '上架时间',
-          value: 'last',
+          value: 'last'
         },
         {
           label: '最近更新',
-          value: 'new',
+          value: 'new'
         },
         {
           label: '人气值',

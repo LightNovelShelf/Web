@@ -36,7 +36,6 @@
             :options="menuOptions"
             :render-label="renderMenuLabel"
           />
-          <div class="online">在线：114514</div>
         </n-layout-sider>
         <n-layout :native-scrollbar="false">
           <div class="content">
@@ -52,7 +51,7 @@
 <script>
 import { defineComponent, h, ref } from 'vue'
 import { zhCN, dateZhCN, NIcon } from 'naive-ui'
-import { icon } from '@/plugins/naive-ui.ts'
+import { icon } from './plugins/naive-ui.ts'
 
 function renderIcon(icon) {
   return () => (
@@ -101,14 +100,13 @@ const menuOptions = [
   {
     label: '社区',
     key: 'community',
+    disabled: true,
     icon: renderIcon(icon.ForumFilled)
   }
 ]
 
 export default defineComponent({
-  components: {
-    ...icon
-  },
+  components: icon,
   setup() {
     return {
       zhCN,

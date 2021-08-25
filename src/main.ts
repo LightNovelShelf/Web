@@ -3,8 +3,7 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-import installNaiveUI from '@/plugins/naive-ui.ts'
+import naive from './plugins/naive-ui.ts'
 
 const app = createApp(App)
-installNaiveUI(app)
-app.use(store).use(router).mount('#app')
+app.use(store).use(router).use(naive).mount('#app')
