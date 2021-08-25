@@ -19,39 +19,24 @@ import {
   NGrid,
   NGi,
   NList,
-  NListItem
+  NListItem,
+  NText,
+  NRow,
+  NCol,
+  NStatistic,
+  NEllipsis
 } from 'naive-ui'
 import 'vfonts/Roboto.css'
-import { App } from '@vue/runtime-core'
-import { HomeFilled, BookRound, ForumFilled, AnnouncementFilled, MessageFilled, InfoFilled } from '@vicons/material'
-
-export default function installNaiveUI(app: App): void {
-  const naive = create({
-    components: [
-      NButton,
-      NConfigProvider,
-      NH2,
-      NLayout,
-      NLayoutFooter,
-      NLayoutSider,
-      NLayoutHeader,
-      NImage,
-      NSpace,
-      NMenu,
-      NIcon,
-      NInput,
-      NAvatar,
-      NTooltip,
-      NCascader,
-      NCard,
-      NGrid,
-      NGi,
-      NList,
-      NListItem
-    ]
-  })
-  app.use(naive)
-}
+import {
+  HomeFilled,
+  BookRound,
+  ForumFilled,
+  AnnouncementFilled,
+  MessageFilled,
+  InfoFilled,
+  KeyboardArrowRightFilled,
+  SaveFilled
+} from '@vicons/material'
 
 export const icon = {
   HomeFilled,
@@ -59,5 +44,41 @@ export const icon = {
   ForumFilled,
   AnnouncementFilled,
   MessageFilled,
-  InfoFilled
+  InfoFilled,
+  KeyboardArrowRightFilled,
+  SaveFilled
 }
+
+const components = [
+  NButton,
+  NConfigProvider,
+  NH2,
+  NLayout,
+  NLayoutFooter,
+  NLayoutSider,
+  NLayoutHeader,
+  NImage,
+  NSpace,
+  NMenu,
+  NIcon,
+  NInput,
+  NAvatar,
+  NTooltip,
+  NCascader,
+  NCard,
+  NGrid,
+  NGi,
+  NList,
+  NListItem,
+  NText,
+  NRow,
+  NCol,
+  NStatistic,
+  NEllipsis
+]
+
+const naive = create({
+  components: components
+})
+
+export default naive
