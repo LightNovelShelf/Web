@@ -24,7 +24,9 @@ import {
   NRow,
   NCol,
   NStatistic,
-  NEllipsis
+  NEllipsis,
+  NTag,
+  NElement
 } from 'naive-ui'
 import 'vfonts/Roboto.css'
 import {
@@ -74,7 +76,9 @@ const components = [
   NRow,
   NCol,
   NStatistic,
-  NEllipsis
+  NEllipsis,
+  NTag,
+  NElement
 ]
 
 const naive = create({

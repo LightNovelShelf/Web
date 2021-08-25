@@ -1,0 +1,13 @@
+html,
+body {
+  overflow: hidden;
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+
+.flex-space {
+  flex: 1;
+}
