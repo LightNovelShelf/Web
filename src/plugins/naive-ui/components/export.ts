@@ -25,5 +25,6 @@ export {
   NStatistic,
   NEllipsis,
   NTag,
-  NElement
+  NElement,
+  NPagination
 } from 'naive-ui'
