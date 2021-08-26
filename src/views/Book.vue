@@ -1,17 +1,21 @@
 <template>
-  <n-space>
-    <div>
-      <n-cascader
-        v-model="value"
-        :options="options"
-        :cascade="cascade"
-        :leaf-only="leafOnly"
-        :show-path="showPath"
-        :filterable="filterable"
-        placeholder="没啥用的值"
-      />
-    </div>
-  </n-space>
+  <div style="max-width: 80vw;margin: 0 auto">
+    <n-space justify="space-around" size="large">
+      <div>
+        <n-cascader
+          v-model="value"
+          :options="options"
+          :cascade="cascade"
+          :leaf-only="leafOnly"
+          :show-path="showPath"
+          :filterable="filterable"
+          placeholder="排序方式"
+          style="min-width: 100px"
+        />
+      </div>
+      <n-pagination v-model:page="page" :page-count="100" />
+    </n-space>
+  </div>
 </template>
 
 <script>
@@ -26,7 +30,7 @@ export default defineComponent({
       showPath: true,
       hoverTrigger: false,
       filterable: false,
-      value: null,
+      value: 'last',
       options: [
         {
           label: '上架时间',
@@ -58,7 +62,8 @@ export default defineComponent({
             }
           ]
         }
-      ]
+      ],
+      page: 1
     }
   },
   setup() {
