@@ -68,7 +68,7 @@
   </n-config-provider>
 </template>
 
-<script>
+<script lang="tsx">
 import { computed, defineComponent, h, ref } from 'vue'
 import { zhCN, dateZhCN, NIcon } from 'naive-ui'
 import { icon } from './plugins/naive-ui'
