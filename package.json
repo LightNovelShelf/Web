@@ -10,7 +10,7 @@
   "dependencies": {
     "@mdi/js": "^5.9.55",
     "core-js": "^3.16.3",
-    "naive-ui": "^2.16.5",
+    "naive-ui": "^2.16.6",
     "register-service-worker": "^1.7.2",
     "vfonts": "^0.1.0",
     "vue": "^3.2.6",

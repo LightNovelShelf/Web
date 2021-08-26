@@ -22,26 +22,7 @@
           </template>
           <n-row>
             <n-col v-for="(book, index) in bookData" :key="index" :span="8" style="padding: 6px">
-              <n-card content-style="padding: 3px;">
-                <template #cover>
-                  <div
-                    :style="{
-                      paddingBottom: '150%',
-                      backgroundImage: `url('${book.cover}')`,
-                      backgroundSize: 'cover'
-                    }"
-                  >
-                  </div>
-                  <n-element tag="div" class="book-tag">
-                    <span style="font-size: 12px">录入</span>
-                  </n-element>
-                </template>
-                <div class="book-name">
-                  <div class="book-name-text" :title="book.name">
-                    {{ book.name }}
-                  </div>
-                </div>
-              </n-card>
+              <book-card :book="book"></book-card>
             </n-col>
           </n-row>
         </n-card>
@@ -105,17 +86,20 @@
 
 <script>
 import { defineComponent } from 'vue'
+import bookCard from '@/components/bookCard'
 import { icon } from '../plugins/naive-ui'
 
 export default defineComponent({
-  components: icon,
+  components: {
+    ...icon,
+    bookCard
+  },
   setup() {
     return {
       bookData: [
         {
           cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
-          name: '我是书名，我很短',
-          type: '录入'
+          name: '我是书名，我很短'
         },
         {
           cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
@@ -144,31 +128,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '../assets/style/mixin';
-
 :deep(ul:first-child) {
   margin-top: 0;
-}
-
-.book-tag {
-  position: absolute;
-  top: 6px;
-  right: 0;
-  background-color: var(--primary-color);
-  color: white;
-  padding: 0 6px;
-  border-radius: 1em 0 0 1em;
-}
-
-.book-name {
-  display: flex;
-  align-items: center;
-  --font-size: 12px;
-  font-size: var(--font-size);
-  height: calc(var(--font-size) * var(--line-height) * 2);
-
-  .book-name-text {
-    @include ellipsis(2);
-  }
 }
 </style>
