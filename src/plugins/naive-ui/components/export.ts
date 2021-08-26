@@ -1,5 +1,4 @@
 export {
-  create,
   NButton,
   NConfigProvider,
   NH2,
