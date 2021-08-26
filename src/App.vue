@@ -36,6 +36,26 @@
             :options="menuOptions"
             :render-label="renderMenuLabel"
           />
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              position: absolute;
+              bottom: 24px;
+              left: 0;
+              right: 0;
+            "
+          >
+            <n-tooltip :placement="collapsed ? 'top-start' : 'top'">
+              <template #trigger>
+                <n-icon size="24">
+                  <OfflineBoltFilled />
+                </n-icon>
+              </template>
+              当前离线
+            </n-tooltip>
+          </div>
         </n-layout-sider>
         <n-layout :native-scrollbar="false">
           <div class="content">

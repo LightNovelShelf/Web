@@ -1,6 +1,6 @@
 <template>
   <div style="max-width: 80vw; margin: 0 auto">
-    <div style="display: flex; justify-content: space-around">
+    <div style="display: flex; justify-content: flex-start">
       <n-cascader
         v-model:value="value"
         :options="options"
@@ -11,8 +11,6 @@
         placeholder="排序方式"
         style="max-width: 150px"
       />
-
-      <n-pagination v-model:page="page" :page-count="100" />
     </div>
 
     <n-grid :x-gap="12" :y-gap="8" cols="3 700:4 1000:5 1300:6" style="padding-top: 24px">
@@ -20,6 +18,11 @@
         <book-card :book="book"></book-card>
       </n-grid-item>
     </n-grid>
+
+    <div style="display: flex; justify-content: center;padding-top: 24px">
+      <n-pagination v-model:page="page" :page-count="100" />
+    </div>
+
   </div>
 </template>
 
@@ -74,6 +77,10 @@ export default defineComponent({
       ],
       page: 2,
       bookData: [
+        {
+          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
+          name: '我是书名，我很短'
+        },
         {
           cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
           name: '我是书名，我很短'
