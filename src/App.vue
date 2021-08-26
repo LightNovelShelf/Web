@@ -51,7 +51,7 @@
 <script>
 import { defineComponent, h, ref } from 'vue'
 import { zhCN, dateZhCN, NIcon } from 'naive-ui'
-import { icon } from './plugins/naive-ui.ts'
+import { icon } from './plugins/naive-ui'
 
 function renderIcon(icon) {
   return () => (
