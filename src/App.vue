@@ -69,13 +69,13 @@
 </template>
 
 <script lang="tsx">
-import { computed, defineComponent, h, ref } from 'vue'
+import { Component, computed, defineComponent, h, ref } from 'vue'
 import { zhCN, dateZhCN, NIcon } from 'naive-ui'
 import { icon } from './plugins/naive-ui'
 
 import { useAppStore } from '@/store'
 
-function renderIcon(icon) {
+function renderIcon(icon: Component) {
   return () => (
     <NIcon>
       <icon />
@@ -140,7 +140,7 @@ export default defineComponent({
       activeKey: ref(null),
       search: ref(null),
       menuOptions,
-      renderMenuLabel(option) {
+      renderMenuLabel(option: any) {
         if ('href' in option) {
           return h('a', { href: option.href, target: '_blank' }, option.label)
         }
