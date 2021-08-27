@@ -19,19 +19,18 @@
       </n-grid-item>
     </n-grid>
 
-    <div style="display: flex; justify-content: center;padding-top: 24px">
+    <div style="display: flex; justify-content: center; padding-top: 24px">
       <n-pagination v-model:page="page" :page-count="100" />
     </div>
-
   </div>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-import bookCard from "@/components/bookCard";
+import bookCard from '@/components/bookCard'
 
 export default defineComponent({
-  components:{
+  components: {
     bookCard
   },
   name: 'Book',
@@ -114,6 +113,4 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>
