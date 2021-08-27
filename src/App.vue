@@ -11,7 +11,7 @@
             </template>
             欢迎来稿一个新的网站图标
           </n-tooltip>
-          <div>轻书架</div>
+          <div @click="changAppName">{{ appName }}</div>
         </n-space>
 
         <n-input class="search" autosize v-model:value="search" type="text" placeholder="搜索" />
@@ -68,12 +68,14 @@
   </n-config-provider>
 </template>
 
-<script>
-import { defineComponent, h, ref } from 'vue'
+<script lang="tsx">
+import { Component, computed, defineComponent, h, ref } from 'vue'
 import { zhCN, dateZhCN, NIcon } from 'naive-ui'
 import { icon } from './plugins/naive-ui'
 
-function renderIcon(icon) {
+import { useAppStore } from '@/store'
+
+function renderIcon(icon: Component) {
   return () => (
     <NIcon>
       <icon />
@@ -128,6 +130,8 @@ const menuOptions = [
 export default defineComponent({
   components: icon,
   setup() {
+    const appStore = useAppStore()
+
     return {
       zhCN,
       dateZhCN,
@@ -136,11 +140,15 @@ export default defineComponent({
       activeKey: ref(null),
       search: ref(null),
       menuOptions,
-      renderMenuLabel(option) {
+      renderMenuLabel(option: any) {
         if ('href' in option) {
           return h('a', { href: option.href, target: '_blank' }, option.label)
         }
         return option.label
+      },
+      appName: computed(() => appStore.appName),
+      changAppName() {
+        appStore.asyncReverse()
       }
     }
   }
@@ -178,9 +186,6 @@ export default defineComponent({
     .search {
       min-width: 200px;
       max-width: 300px;
-    }
-
-    .header-user {
     }
   }
 
