@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 80vw; margin: 0 auto">
+  <div style="max-width: 80vw" class="mx-auto">
     <div style="display: flex; justify-content: flex-start">
       <n-cascader
         v-model:value="value"
@@ -27,13 +27,13 @@
 
 <script>
 import { defineComponent } from 'vue'
-import bookCard from '@/components/bookCard'
+import BookCard from '@/components/BookCard'
 
 export default defineComponent({
   components: {
-    bookCard
+    BookCard
   },
-  name: 'Book',
+  name: 'BookList',
   data() {
     return {
       leafOnly: true,

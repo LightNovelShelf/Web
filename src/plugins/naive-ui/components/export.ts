@@ -1,11 +1,13 @@
 export {
   NButton,
   NConfigProvider,
+  NGlobalStyle,
   NH2,
   NLayout,
   NLayoutFooter,
   NLayoutSider,
   NLayoutHeader,
+  NLayoutContent,
   NImage,
   NSpace,
   NMenu,
@@ -26,5 +28,6 @@ export {
   NEllipsis,
   NTag,
   NElement,
-  NPagination
+  NPagination,
+  NBackTop
 } from 'naive-ui'
