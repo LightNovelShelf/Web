@@ -1,6 +1,7 @@
 html,
 body {
   overflow: hidden;
+  background-color: #f6f7f9;
 }
 
 .flex-align-center {
@@ -10,4 +11,9 @@ body {
 
 .flex-space {
   flex: 1;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
 }

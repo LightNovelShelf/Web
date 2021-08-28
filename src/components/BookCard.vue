@@ -41,7 +41,7 @@ export default defineComponent({
   right: 0;
   background-color: var(--primary-color);
   color: white;
-  padding: 0 6px;
+  padding: 0 3px 0 6px;
   border-radius: 1em 0 0 1em;
 }
 

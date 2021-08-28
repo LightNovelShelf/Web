@@ -1,5 +1,5 @@
 <template>
-  <div style="margin: 0 auto; max-width: 80vw">
+  <div style="max-width: 80vw" class="mx-auto">
     <!-- 默认是1，容器超过600px变2 -->
     <n-grid :x-gap="12" :y-gap="8" cols="1 600:2">
       <n-grid-item>
@@ -86,13 +86,13 @@
 
 <script>
 import { defineComponent } from 'vue'
-import bookCard from '@/components/bookCard'
+import BookCard from '@/components/BookCard'
 import { icon } from '../plugins/naive-ui'
 
 export default defineComponent({
   components: {
     ...icon,
-    bookCard
+    BookCard
   },
   setup() {
     return {
