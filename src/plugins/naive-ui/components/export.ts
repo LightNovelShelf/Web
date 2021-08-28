@@ -29,5 +29,8 @@ export {
   NTag,
   NElement,
   NPagination,
-  NBackTop
+  NBackTop,
+  NBadge,
+  NPopover,
+  NThing
 } from 'naive-ui'

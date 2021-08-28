@@ -81,7 +81,7 @@ const menuOptions = [
       {
         label: '原创',
         key: '原创'
-      },
+      }
     ]
   },
   {
