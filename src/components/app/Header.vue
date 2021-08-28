@@ -14,7 +14,26 @@
 
     <n-input class="search" autosize v-model:value="search" type="text" placeholder="搜索" />
     <div style="flex: 1"></div>
-    <n-avatar round size="medium" src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" />
+    <n-space class="action" align="center" justify="center">
+      <n-badge dot>
+        <n-text>消息</n-text>
+      </n-badge>
+      <n-badge dot>
+        <n-text>动态</n-text>
+      </n-badge>
+      <n-badge dot>
+        <n-text>历史记录</n-text>
+      </n-badge>
+      <n-popover :show-arrow="false" placement="bottom-end" trigger="click">
+        <template #trigger>
+          <n-avatar round size="medium" src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" />
+        </template>
+        <template #header>
+          <span>这里放用户信息</span>
+        </template>
+        <n-text strong depth="1">这里放一堆按钮</n-text>
+      </n-popover>
+    </n-space>
   </n-layout-header>
 </template>
 
@@ -58,6 +77,10 @@ export default defineComponent({
   .search {
     min-width: 200px;
     max-width: 300px;
+  }
+
+  .action:nth-child(n) {
+    cursor: pointer;
   }
 }
 </style>
