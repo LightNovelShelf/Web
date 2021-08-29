@@ -98,27 +98,27 @@ export default defineComponent({
     return {
       bookData: [
         {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
+          cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
           name: '我是书名，我很短'
         },
         {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
+          cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
           name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
+          cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
           name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
+          cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
           name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
+          cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
           name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
+          cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
           name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         }
       ]

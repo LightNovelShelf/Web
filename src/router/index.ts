@@ -4,15 +4,15 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'App',
-    redirect: 'home'
+    redirect: 'BookInfo'
   },
   {
-    path: '/home',
+    path: '/Home',
     name: 'Home',
     component: () => import('../views/Home.vue')
   },
   {
-    path: '/announcement',
+    path: '/Announcement',
     name: 'Announcement',
     component: () => import('../views/Announcement.vue')
   },

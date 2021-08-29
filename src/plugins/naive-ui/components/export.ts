@@ -1,5 +1,6 @@
 export {
   NButton,
+  NButtonGroup,
   NConfigProvider,
   NGlobalStyle,
   NH2,
