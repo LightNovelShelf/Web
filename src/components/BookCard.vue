@@ -5,7 +5,9 @@
         :style="{
           paddingBottom: '150%',
           backgroundImage: `url('${book.cover}')`,
-          backgroundSize: 'cover'
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat'
         }"
       >
       </div>

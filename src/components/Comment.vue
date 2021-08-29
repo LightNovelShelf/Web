@@ -1,15 +1,15 @@
 <template>
   <n-card title="评论" :content-style="contentStyle">
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
-    公告内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
+    评论内容<br />
     <template #action>
       <n-pagination style="justify-content: center" v-model:page="page" :page-count="100" />
     </template>
