@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@mdi/js": "^5.9.55",
+    "@microsoft/signalr": "^5.0.9",
+    "@microsoft/signalr-protocol-msgpack": "^5.0.9",
     "core-js": "^3.16.3",
     "naive-ui": "^2.16.6",
     "pinia": "^2.0.0-rc.6",
