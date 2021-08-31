@@ -45,7 +45,6 @@ export const useAppStore = defineStore('app', {
     },
     connectServer() {
       const connect = async () => {
-        console.log('connect')
         this.connection = new HubConnectionBuilder()
           .withUrl(`${process.env.VUE_APP_API_SERVER}/hub/api`)
           .withHubProtocol(new MessagePackHubProtocol())
@@ -62,6 +61,12 @@ export const useAppStore = defineStore('app', {
         }
       }
       return connect()
+    },
+    invoke(name: string, ...arg: any[]): Promise<any> {
+      if (this.connection && this.isConnected) {
+        return this.connection.invoke(name, ...arg)
+      }
+      return Promise.resolve()
     },
     async asyncReverse() {
       await Promise.resolve()
