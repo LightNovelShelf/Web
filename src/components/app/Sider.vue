@@ -100,7 +100,11 @@ export default defineComponent({
   name: 'Sider',
   setup() {
     const appStore = useAppStore()
-    appStore.connectServer()
+    appStore.connectServer().then(() => {
+      appStore.invoke('Test', 1, '2').then((res) => {
+        console.log(res)
+      })
+    })
 
     return {
       collapsed: ref(true),
