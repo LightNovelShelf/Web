@@ -1,5 +1,5 @@
 <template>
-  <n-card content-style="padding: 4px;">
+  <n-card :bordered="false" content-style="padding: 4px;" footer-style="padding: 0">
     <template #cover>
       <div
         :style="{
@@ -14,6 +14,13 @@
       <n-element tag="div" class="book-tag">
         <span style="font-size: 12px">录入</span>
       </n-element>
+    </template>
+    <template #footer>
+      <div style="display: flex; padding: 0 4px">
+        <n-text depth="3">无语</n-text>
+        <div class="flex-space"></div>
+        <n-text depth="3">1小时前</n-text>
+      </div>
     </template>
     <div class="book-name">
       <div class="book-name-text" :title="book.name">
