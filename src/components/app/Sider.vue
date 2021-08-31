@@ -43,8 +43,7 @@
 import { Component, defineComponent, h, ref } from 'vue'
 import { icon } from '../../plugins/naive-ui/icon'
 import { NIcon } from 'naive-ui'
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
-import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
+import { useAppStore } from '@/store'
 
 function renderIcon(icon: Component) {
   return () => (
@@ -100,14 +99,10 @@ export default defineComponent({
   },
   name: 'Sider',
   setup() {
-    let connection: HubConnection = new HubConnectionBuilder()
-      .withUrl(`${process.env.VUE_APP_API_SERVER}/hub/api`)
-      .withHubProtocol(new MessagePackHubProtocol())
-      .configureLogging(LogLevel.Information)
-      .build()
+    const appStore = useAppStore()
+    appStore.connectServer()
 
     return {
-      connection,
       collapsed: ref(true),
       activeKey: ref(null),
       search: ref(null),
@@ -119,21 +114,6 @@ export default defineComponent({
         return option.label
       }
     }
-  },
-  methods: {
-    async start() {
-      try {
-        this.connection.onclose(this.start)
-        await this.connection.start()
-        console.log('SignalR Connected.')
-      } catch (err) {
-        console.log(err)
-        setTimeout(this.start, 5000)
-      }
-    }
-  },
-  mounted() {
-    this.start()
   }
 })
 </script>
