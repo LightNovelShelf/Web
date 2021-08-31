@@ -45,19 +45,21 @@ export const useAppStore = defineStore('app', {
     },
     connectServer() {
       const connect = async () => {
-        this.connection = new HubConnectionBuilder()
-          .withUrl(`${process.env.VUE_APP_API_SERVER}/hub/api`)
-          .withHubProtocol(new MessagePackHubProtocol())
-          .configureLogging(LogLevel.Information)
-          .build()
+        if (!this.isConnected) {
+          this.connection = new HubConnectionBuilder()
+            .withUrl(`${process.env.VUE_APP_API_SERVER}/hub/api`)
+            .withHubProtocol(new MessagePackHubProtocol())
+            .configureLogging(LogLevel.Information)
+            .build()
 
-        try {
-          this.connection.onclose(connect)
-          await this.connection.start()
-          console.log('SignalR Connected.')
-        } catch (err) {
-          console.log(err)
-          setTimeout(connect, 5000)
+          try {
+            await this.connection.start()
+            this.connection.onclose(connect)
+            console.log('SignalR Connected.')
+          } catch (err) {
+            console.log(err)
+            setTimeout(connect, 5000)
+          }
         }
       }
       return connect()
