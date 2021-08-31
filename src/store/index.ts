@@ -16,6 +16,7 @@ import { defineStore } from 'pinia'
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { HubConnectionState } from '@microsoft/signalr/dist/esm/HubConnection'
+import { MessageModel } from './result'
 
 /** @url https://pinia.esm.dev/getting-started.html */
 
@@ -45,7 +46,8 @@ export const useAppStore = defineStore('app', {
     },
     connectServer() {
       const connect = async () => {
-        if (!this.isConnected) {
+        // close事件触发后，isConnected的值还是true，所以这里重新判断
+        if (this.connection?.state !== HubConnectionState.Connected) {
           this.connection = new HubConnectionBuilder()
             .withUrl(`${process.env.VUE_APP_API_SERVER}/hub/api`)
             .withHubProtocol(new MessagePackHubProtocol())
@@ -53,12 +55,12 @@ export const useAppStore = defineStore('app', {
             .build()
 
           try {
-            await this.connection.start()
             this.connection.onclose(connect)
+            await this.connection.start()
             console.log('SignalR Connected.')
           } catch (err) {
-            console.log(err)
             setTimeout(connect, 5000)
+            throw err
           }
         }
       }
@@ -69,6 +71,17 @@ export const useAppStore = defineStore('app', {
         return this.connection.invoke(name, ...arg)
       }
       return Promise.resolve()
+    },
+    invokeWait(name: string, ...arg: any[]): Promise<MessageModel<any>> {
+      return new Promise((resolve, reject) => {
+        this.connectServer()
+          .then(() => {
+            this.connection!.invoke(name, ...arg).then((res: MessageModel<any>) => {
+              resolve(res)
+            })
+          })
+          .catch((error) => reject(error))
+      })
     },
     async asyncReverse() {
       await Promise.resolve()

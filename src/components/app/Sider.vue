@@ -29,18 +29,26 @@
     >
       <n-tooltip :placement="collapsed ? 'top-start' : 'top'">
         <template #trigger>
-          <n-icon size="24">
-            <OfflineBoltFilled />
-          </n-icon>
+          <n-element v-if="isOnline">
+            <n-icon color="var(--success-color)" size="24">
+              <OnlinePredictionFilled />
+            </n-icon>
+          </n-element>
+          <n-element v-else>
+            <n-icon color="var(--error-color)" size="24">
+              <OfflineBoltFilled />
+            </n-icon>
+          </n-element>
         </template>
-        当前离线
+        <span v-if="isOnline">当前在线</span>
+        <span v-else>当前离线</span>
       </n-tooltip>
     </div>
   </n-layout-sider>
 </template>
 
 <script lang="tsx">
-import { Component, defineComponent, h, ref } from 'vue'
+import { Component, defineComponent, h, ref, computed } from 'vue'
 import { icon } from '../../plugins/naive-ui/icon'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/store'
@@ -100,10 +108,8 @@ export default defineComponent({
   name: 'Sider',
   setup() {
     const appStore = useAppStore()
-    appStore.connectServer().then(() => {
-      appStore.invoke('Test', 1, '2').then((res) => {
-        console.log(res)
-      })
+    appStore.invokeWait('GetBookList', 1).then((res) => {
+      console.log(res)
     })
 
     return {
@@ -111,6 +117,7 @@ export default defineComponent({
       activeKey: ref(null),
       search: ref(null),
       menuOptions,
+      isOnline: computed(() => appStore.isConnected),
       renderMenuLabel(option: any) {
         if ('href' in option) {
           return h('a', { href: option.href, target: '_blank' }, option.label)
