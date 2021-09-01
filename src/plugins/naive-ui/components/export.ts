@@ -33,5 +33,7 @@ export {
   NBackTop,
   NBadge,
   NPopover,
-  NThing
+  NThing,
+  NNotificationProvider,
+  NMessageProvider
 } from 'naive-ui'

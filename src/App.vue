@@ -6,9 +6,13 @@
       <n-layout class="content-wrapper" has-sider>
         <app-sider />
         <n-layout-content :native-scrollbar="false">
-          <div class="content">
-            <router-view />
-          </div>
+          <n-notification-provider>
+            <n-message-provider>
+              <div class="content">
+                <router-view />
+              </div>
+            </n-message-provider>
+          </n-notification-provider>
           <!-- <n-layout-footer class="footer" bordered>我是footer，关于本站，用户协议等，可以设定仅在home出现</n-layout-footer> -->
         </n-layout-content>
       </n-layout>

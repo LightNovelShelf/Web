@@ -17,8 +17,9 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Announcement.vue')
   },
   {
-    path: '/BookList',
+    path: '/BookList/:page?',
     name: 'BookList',
+    props: true,
     component: () => import('../views/BookList.vue')
   },
   {
