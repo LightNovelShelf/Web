@@ -50,6 +50,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '../assets/style/mixin';
 
+:deep(.n-card-cover) {
+  border: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
 .book-tag {
   position: absolute;
   top: 6px;

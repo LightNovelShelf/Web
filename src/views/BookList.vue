@@ -30,7 +30,7 @@
 import { defineComponent, ref } from 'vue'
 import BookCard from '@/components/BookCard.vue'
 import { useBookStore } from '@/store/book'
-import { useRoute } from 'vue-router'
+import { useLoadingBar } from 'naive-ui'
 
 const bookStore = useBookStore()
 
@@ -57,17 +57,10 @@ export default defineComponent({
       }
     }
   },
-  data() {
-    return {
-      bookData: [],
-      pageData: {
-        totalPage: 1
-      }
-    }
-  },
   setup(props) {
     // let route = useRoute()
     console.log(props.page)
+    const loadingBar = useLoadingBar()
 
     return {
       leafOnly: ref(true),
@@ -107,16 +100,20 @@ export default defineComponent({
             }
           ]
         }
-      ]
-    }
-  },
-  methods: {
-    request(page) {
-      bookStore.GetBookList(~~page, true).then((serverData) => {
-        this.bookData = serverData.Response.Data
-        this.pageData.totalPage = serverData.Response.TotalPages
-        console.log(serverData)
-      })
+      ],
+      bookData: ref([]),
+      pageData: ref({
+        totalPage: 1
+      }),
+      request(page) {
+        loadingBar.start()
+        bookStore.GetBookList(~~page, true).then((serverData) => {
+          this.bookData = serverData.Response.Data
+          this.pageData.totalPage = serverData.Response.TotalPages
+          loadingBar.finish()
+          console.log(serverData)
+        })
+      }
     }
   },
   beforeRouteUpdate(to, from, next) {

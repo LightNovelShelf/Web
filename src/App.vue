@@ -8,9 +8,11 @@
         <n-layout-content :native-scrollbar="false">
           <n-notification-provider>
             <n-message-provider>
-              <div class="content">
-                <router-view />
-              </div>
+              <n-loading-bar-provider>
+                <div class="content">
+                  <router-view />
+                </div>
+              </n-loading-bar-provider>
             </n-message-provider>
           </n-notification-provider>
           <!-- <n-layout-footer class="footer" bordered>我是footer，关于本站，用户协议等，可以设定仅在home出现</n-layout-footer> -->

@@ -35,5 +35,6 @@ export {
   NPopover,
   NThing,
   NNotificationProvider,
-  NMessageProvider
+  NMessageProvider,
+  NLoadingBarProvider
 } from 'naive-ui'
