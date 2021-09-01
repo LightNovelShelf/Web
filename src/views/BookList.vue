@@ -107,12 +107,14 @@ export default defineComponent({
       }),
       request(page) {
         loadingBar.start()
-        bookStore.GetBookList(~~page, true).then((serverData) => {
-          this.bookData = serverData.Response.Data
-          this.pageData.totalPage = serverData.Response.TotalPages
-          loadingBar.finish()
-          console.log(serverData)
-        })
+        bookStore
+          .GetBookList(~~page, true)
+          .then((serverData) => {
+            this.bookData = serverData.Response.Data
+            this.pageData.totalPage = serverData.Response.TotalPages
+            console.log(serverData)
+          })
+          .finally(() => loadingBar.finish())
       }
     }
   },
