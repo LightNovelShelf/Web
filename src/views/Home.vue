@@ -1,7 +1,7 @@
 <template>
   <div style="max-width: 80vw" class="mx-auto">
     <!-- 默认是1，容器超过600px变2 -->
-    <n-grid :x-gap="12" :y-gap="8" cols="1 600:2">
+    <n-grid :x-gap="12" :y-gap="8" responsive="screen" cols="1 m:2 l:2 xl:2 2xl:2">
       <n-grid-item>
         <n-card
           type="success"
@@ -98,28 +98,28 @@ export default defineComponent({
     return {
       bookData: [
         {
-          cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
-          name: '我是书名，我很短'
+          Cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
+          Title: '我是书名，我很短'
         },
         {
-          cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         },
         {
-          cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
         }
       ]
     }

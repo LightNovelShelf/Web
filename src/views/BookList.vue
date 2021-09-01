@@ -13,35 +13,69 @@
       />
     </div>
 
-    <n-grid :x-gap="12" :y-gap="8" cols="3 700:4 1000:5 1300:6" style="padding-top: 24px">
-      <n-grid-item v-for="(book, index) in bookData" :key="index">
+    <n-grid :x-gap="12" :y-gap="8" responsive="screen" cols="3 s:4 m:5 l:6 xl:6 2xl:6" style="padding-top: 24px">
+      <n-grid-item v-for="book in bookData" :key="book['Id']">
         <book-card :book="book"></book-card>
       </n-grid-item>
     </n-grid>
 
     <div style="display: flex; justify-content: center; padding-top: 24px">
-      <n-pagination v-model:page="page" :page-count="100" />
+      <n-pagination v-model:page="currentPage" :page-count="pageData.totalPage" />
     </div>
+    <n-back-top />
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import BookCard from '@/components/BookCard'
+import { defineComponent, ref } from 'vue'
+import BookCard from '@/components/BookCard.vue'
+import { useBookStore } from '@/store/book'
+import { useRoute } from 'vue-router'
+
+const bookStore = useBookStore()
 
 export default defineComponent({
   components: {
     BookCard
   },
   name: 'BookList',
+  props: {
+    page: {
+      type: [Number, String],
+      default: 1
+    }
+  },
+  computed: {
+    currentPage: {
+      get() {
+        let _page = ~~this.page
+        if (_page === 0) _page = 1
+        return _page
+      },
+      set(val) {
+        this.$router.push({ to: 'BookList', params: { page: val } })
+      }
+    }
+  },
   data() {
     return {
-      leafOnly: true,
-      cascade: true,
-      showPath: true,
-      hoverTrigger: false,
-      filterable: false,
-      value: 'last',
+      bookData: [],
+      pageData: {
+        totalPage: 1
+      }
+    }
+  },
+  setup(props) {
+    // let route = useRoute()
+    console.log(props.page)
+
+    return {
+      leafOnly: ref(true),
+      cascade: ref(true),
+      showPath: ref(true),
+      hoverTrigger: ref(false),
+      filterable: ref(false),
+      value: ref('last'),
       options: [
         {
           label: '上架时间',
@@ -73,42 +107,24 @@ export default defineComponent({
             }
           ]
         }
-      ],
-      page: 2,
-      bookData: [
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
-          name: '我是书名，我很短'
-        },
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
-          name: '我是书名，我很短'
-        },
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
-        },
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
-        },
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
-        },
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/780cd596dc21.webp',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
-        },
-        {
-          cover: 'https://neptune.noire.cc:233/images/2021/08/22/16d63ec3cae1.md.webp',
-          name: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
-        }
       ]
     }
   },
-  setup() {
-    return {}
+  methods: {
+    request(page) {
+      bookStore.GetBookList(~~page, true).then((serverData) => {
+        this.bookData = serverData.Response.Data
+        this.pageData.totalPage = serverData.Response.TotalPages
+        console.log(serverData)
+      })
+    }
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.request(to.params.page)
+    next()
+  },
+  mounted() {
+    this.request(this.currentPage)
   }
 })
 </script>

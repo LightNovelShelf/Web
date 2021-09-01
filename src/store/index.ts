@@ -24,7 +24,8 @@ import { MessageModel } from './result'
 export const useAppStore = defineStore('app', {
   state: () => ({
     appName: '轻书架',
-    connection: null as null | HubConnection
+    connection: null as null | HubConnection,
+    connectPromise: null as null | Promise<any>
   }),
   getters: {
     doubleRepeat: (state) => state.appName.repeat(2),
@@ -64,13 +65,20 @@ export const useAppStore = defineStore('app', {
           }
         }
       }
-      return connect()
-    },
-    invoke(name: string, ...arg: any[]): Promise<any> {
-      if (this.connection && this.isConnected) {
-        return this.connection.invoke(name, ...arg)
+      if (this.connectPromise != null) return this.connectPromise
+      else {
+        this.connectPromise = connect().finally(() => (this.connectPromise = null))
+        return this.connectPromise
       }
-      return Promise.resolve()
+    },
+    invoke(waitConnect: boolean, name: string, ...arg: any[]): Promise<any> {
+      if (waitConnect) return this.invokeWait(name, ...arg)
+      else {
+        if (this.connection && this.isConnected) {
+          return this.connection.invoke(name, ...arg)
+        }
+        return Promise.resolve()
+      }
     },
     invokeWait(name: string, ...arg: any[]): Promise<MessageModel<any>> {
       return new Promise((resolve, reject) => {

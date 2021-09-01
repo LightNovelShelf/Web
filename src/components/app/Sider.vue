@@ -14,6 +14,7 @@
       :collapsed-width="64"
       :collapsed-icon-size="22"
       :options="menuOptions"
+      v-model:value="activeKey"
       :render-label="renderMenuLabel"
     />
     <div
@@ -48,10 +49,11 @@
 </template>
 
 <script lang="tsx">
-import { Component, defineComponent, h, ref, computed } from 'vue'
+import { Component, defineComponent, ref, computed } from 'vue'
 import { icon } from '../../plugins/naive-ui/icon'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/store'
+import { useRoute } from 'vue-router'
 
 function renderIcon(icon: Component) {
   return () => (
@@ -64,38 +66,45 @@ function renderIcon(icon: Component) {
 const menuOptions = [
   {
     label: '首页',
-    key: 'home',
-    route: 'home',
+    key: 'Home',
+    route: 'Home',
     icon: renderIcon(icon.HomeFilled)
   },
   {
     label: '公告',
-    key: 'announcement',
-    route: 'announcement',
+    key: 'Announcement',
+    route: 'Announcement',
     icon: renderIcon(icon.AnnouncementFilled)
   },
   {
     label: '小说',
-    key: 'book',
+    key: 'BookList',
     icon: renderIcon(icon.BookRound),
+    route: 'BookList',
     children: [
       {
         label: '全部',
-        key: '全部'
+        key: 'BookList',
+        route: 'BookList'
       },
       {
         label: '日轻',
-        key: '日轻'
+        key: '日轻',
+        disabled: true,
+        route: 'BookList'
       },
       {
         label: '原创',
-        key: '原创'
+        key: '原创',
+        disabled: true,
+        route: 'BookList'
       }
     ]
   },
   {
     label: '社区',
-    key: 'community',
+    key: 'Community',
+    route: 'Community',
     disabled: true,
     icon: renderIcon(icon.ForumFilled)
   }
@@ -107,20 +116,25 @@ export default defineComponent({
   },
   name: 'Sider',
   setup() {
-    const appStore = useAppStore()
-    appStore.invokeWait('GetBookList', 1).then((res) => {
-      console.log(res)
+    const route = useRoute()
+    let activeKey = computed({
+      get: () => route.name,
+      set: (val) => {
+        console.log(val)
+      }
     })
+    const appStore = useAppStore()
+    appStore.connectServer()
 
     return {
       collapsed: ref(true),
-      activeKey: ref(null),
+      activeKey,
       search: ref(null),
       menuOptions,
       isOnline: computed(() => appStore.isConnected),
       renderMenuLabel(option: any) {
-        if ('href' in option) {
-          return h('a', { href: option.href, target: '_blank' }, option.label)
+        if (!option.disabled && !option.children) {
+          return <router-link to={{ name: option.route }}>{option.label}</router-link>
         }
         return option.label
       }

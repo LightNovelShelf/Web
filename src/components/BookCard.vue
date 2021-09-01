@@ -4,7 +4,7 @@
       <div
         :style="{
           paddingBottom: '150%',
-          backgroundImage: `url('${book.cover}')`,
+          backgroundImage: `url('${midPic}')`,
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat'
@@ -23,8 +23,8 @@
       </div>
     </template>
     <div class="book-name">
-      <div class="book-name-text" :title="book.name">
-        {{ book.name }}
+      <div class="book-name-text" :title="book['Title']">
+        {{ book['Title'] }}
       </div>
     </div>
   </n-card>
@@ -32,11 +32,17 @@
 
 <script>
 import { defineComponent } from 'vue'
+import { midPic } from '../utils/book'
 
 export default defineComponent({
   name: 'bookCard',
   props: {
     book: Object
+  },
+  computed: {
+    midPic() {
+      return midPic(this.book['Cover'])
+    }
   }
 })
 </script>
