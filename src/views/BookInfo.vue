@@ -52,7 +52,8 @@
 
 <script>
 import { defineComponent } from 'vue'
-import Comment from '@/components/Comment'
+import Comment from '@/components/Comment.vue'
+import { useAppStore } from '../store'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -66,6 +67,12 @@ export default defineComponent({
         cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg'
       }
     }
+  },
+  mounted() {
+    const appStore = useAppStore()
+    appStore.connectServer().then(() => {
+      appStore.invoke(false, 'GetBookInfo', 318).then((res) => console.log(res))
+    })
   }
 })
 </script>
