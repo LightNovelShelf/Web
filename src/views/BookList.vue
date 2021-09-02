@@ -56,8 +56,6 @@ export default defineComponent({
     }
   },
   setup(props) {
-    // let route = useRoute()
-    console.log(props.page)
     const bookStore = useBookStore()
     const loadingBar = useLoadingBar()
 
@@ -106,8 +104,8 @@ export default defineComponent({
       }),
       request(page) {
         loadingBar.start()
-        bookStore
-          .getBookList(~~page)
+        return bookStore
+          .GetBookList(~~page, true)
           .then((serverData) => {
             this.bookData = serverData.Response.Data
             this.pageData.totalPage = serverData.Response.TotalPages
@@ -118,8 +116,7 @@ export default defineComponent({
     }
   },
   beforeRouteUpdate(to, from, next) {
-    this.request(to.params.page)
-    next()
+    this.request(to.params.page).finally(() => next())
   },
   mounted() {
     this.request(this.currentPage)
