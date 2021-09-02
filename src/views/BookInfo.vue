@@ -6,7 +6,7 @@
           <div
             :style="{
               paddingBottom: '150%',
-              backgroundImage: `url('${book.cover}')`,
+              backgroundImage: `url('${book['Cover']}')`,
               backgroundPosition: 'center center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat'
@@ -15,11 +15,12 @@
           </div>
         </n-grid-item>
         <n-grid-item>
-          <n-h2>《{{ book.title }}》</n-h2>
-          <div>作者：xxx</div>
-          <div>更新：xxx</div>
+          <n-h2>《{{ book['Title'] }}》</n-h2>
+          <div>作者：{{ book['Author'] }}</div>
+          <div>更新：{{ book['LastUpdateTime'] }}</div>
           <div style="margin-top: 24px">
-            <div>简介</div><div style="opacity: 0.6">xxx<br />xxx</div>
+            <div>简介</div>
+            <div class="introduction" v-html="book['Introduction']"></div>
           </div>
           <div style="margin-top: 24px"></div>
           <n-space>
@@ -36,13 +37,7 @@
       </n-grid>
 
       <div style="text-align: center; margin-top: 24px">
-        <div>第一章</div>
-        <div>第一章</div>
-        <div>第一章</div>
-        <div>第一章</div>
-        <div>第一章</div>
-        <div>第一章</div>
-        <div>第一章</div>
+        <div v-for="(item, index) in book['Chapter']" :key="index">{{ item }}</div>
       </div>
     </n-card>
     <comment style="margin-top: 24px" />
@@ -51,23 +46,38 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import Comment from '@/components/Comment'
+import { defineComponent, ref, reactive, onMounted } from 'vue'
+import Comment from '@/components/Comment.vue'
+import { useBookStore } from '@/store/book'
 
 export default defineComponent({
   name: 'BookInfo',
   components: {
     Comment
   },
-  data() {
+  setup() {
+    const bookStore = useBookStore()
+    let book = ref({})
+    onMounted(async () => {
+      let res = await bookStore.getBookInfo(318)
+      book.value = res.Response
+      console.log(res)
+    })
+
     return {
-      book: {
-        title: '我是书名',
-        cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg'
-      }
+      book
     }
   }
 })
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.introduction {
+  opacity: 0.6;
+  line-height: 1;
+  padding-top: 6px;
+  :deep(p) {
+    margin: 0;
+  }
+}
+</style>

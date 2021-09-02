@@ -27,12 +27,10 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, reactive } from 'vue'
 import BookCard from '@/components/BookCard.vue'
 import { useBookStore } from '@/store/book'
 import { useLoadingBar } from 'naive-ui'
-
-const bookStore = useBookStore()
 
 export default defineComponent({
   components: {
@@ -60,6 +58,7 @@ export default defineComponent({
   setup(props) {
     // let route = useRoute()
     console.log(props.page)
+    const bookStore = useBookStore()
     const loadingBar = useLoadingBar()
 
     return {
@@ -108,7 +107,7 @@ export default defineComponent({
       request(page) {
         loadingBar.start()
         bookStore
-          .GetBookList(~~page, true)
+          .getBookList(~~page)
           .then((serverData) => {
             this.bookData = serverData.Response.Data
             this.pageData.totalPage = serverData.Response.TotalPages
