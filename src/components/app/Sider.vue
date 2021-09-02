@@ -124,9 +124,6 @@ export default defineComponent({
       }
     })
     const appStore = useAppStore()
-    appStore.connectServer().then(() => {
-      appStore.invoke(false, 'GetBookInfo', 318).then((res) => console.log(res))
-    })
 
     return {
       collapsed: ref(true),
