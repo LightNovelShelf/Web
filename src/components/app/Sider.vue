@@ -53,6 +53,7 @@ import { Component, defineComponent, ref, computed } from 'vue'
 import { icon } from '../../plugins/naive-ui/icon'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/store'
+import { useChapterStore } from '@/store/chapter'
 import { useRoute } from 'vue-router'
 
 function renderIcon(icon: Component) {
@@ -124,7 +125,10 @@ export default defineComponent({
       }
     })
     const appStore = useAppStore()
-    appStore.connectServer()
+    appStore.connectServer().then(() => {
+      var chapterStore = useChapterStore()
+      chapterStore.getChapterContent(318, 1).then(console.log)
+    })
 
     return {
       collapsed: ref(true),
