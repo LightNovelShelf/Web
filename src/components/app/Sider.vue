@@ -49,7 +49,7 @@
 </template>
 
 <script lang="tsx">
-import { Component, defineComponent, ref, computed } from 'vue'
+import { Component, defineComponent, ref, computed, onMounted } from 'vue'
 import { icon } from '../../plugins/naive-ui/icon'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/store'
@@ -125,9 +125,11 @@ export default defineComponent({
       }
     })
     const appStore = useAppStore()
-    appStore.connectServer().then(() => {
-      var chapterStore = useChapterStore()
-      chapterStore.getChapterContent(318, 1).then(console.log)
+    onMounted(() => {
+      appStore.connectServer().then(() => {
+        var chapterStore = useChapterStore()
+        chapterStore.getChapterContent(318, 1).then(console.log)
+      })
     })
 
     return {
