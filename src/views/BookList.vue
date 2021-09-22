@@ -4,10 +4,10 @@
       <n-cascader
         v-model:value="value"
         :options="options"
-        :cascade="cascade"
-        :leaf-only="leafOnly"
-        :show-path="showPath"
-        :filterable="filterable"
+        :cascade="true"
+        check-strategy="child"
+        :show-path="true"
+        :filterable="false"
         placeholder="排序方式"
         style="max-width: 150px"
       />
@@ -60,11 +60,7 @@ export default defineComponent({
     const loadingBar = useLoadingBar()
 
     return {
-      leafOnly: ref(true),
-      cascade: ref(true),
-      showPath: ref(true),
       hoverTrigger: ref(false),
-      filterable: ref(false),
       value: ref('last'),
       options: [
         {
