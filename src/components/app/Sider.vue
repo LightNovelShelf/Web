@@ -5,7 +5,7 @@
     :collapsed-width="64"
     width="var(--slider-width)"
     :collapsed="collapsed"
-    show-trigger
+    show-trigger="bar"
     @collapse="collapsed = true"
     @expand="collapsed = false"
   >
@@ -31,14 +31,10 @@
       <n-tooltip :placement="collapsed ? 'top-start' : 'top'">
         <template #trigger>
           <n-element v-if="isOnline">
-            <n-icon color="var(--success-color)" size="24">
-              <OnlinePredictionFilled />
-            </n-icon>
+            <svg-icon color="var(--success-color)" size="24" :path="icon.mdiBroadcast" />
           </n-element>
           <n-element v-else>
-            <n-icon color="var(--error-color)" size="24">
-              <OfflineBoltFilled />
-            </n-icon>
+            <svg-icon color="var(--error-color)" size="24" :path="icon.mdiBroadcastOff" />
           </n-element>
         </template>
         <span v-if="isOnline">当前在线</span>
@@ -49,19 +45,14 @@
 </template>
 
 <script lang="tsx">
-import { Component, defineComponent, ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { icon } from '../../plugins/naive-ui/icon'
-import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/store'
 import { useChapterStore } from '@/store/chapter'
 import { useRoute } from 'vue-router'
 
-function renderIcon(icon: Component) {
-  return () => (
-    <NIcon>
-      <icon />
-    </NIcon>
-  )
+function renderIcon(icon: string) {
+  return () => <svg-icon path={icon} />
 }
 
 const menuOptions = [
@@ -69,18 +60,18 @@ const menuOptions = [
     label: '首页',
     key: 'Home',
     route: 'Home',
-    icon: renderIcon(icon.HomeFilled)
+    icon: renderIcon(icon.mdiHome)
   },
   {
     label: '公告',
     key: 'Announcement',
     route: 'Announcement',
-    icon: renderIcon(icon.AnnouncementFilled)
+    icon: renderIcon(icon.mdiBullhorn)
   },
   {
     label: '小说',
     key: 'BookList',
-    icon: renderIcon(icon.BookRound),
+    icon: renderIcon(icon.mdiBook),
     route: 'BookList',
     children: [
       {
@@ -107,14 +98,11 @@ const menuOptions = [
     key: 'Community',
     route: 'Community',
     disabled: true,
-    icon: renderIcon(icon.ForumFilled)
+    icon: renderIcon(icon.mdiForum)
   }
 ]
 
 export default defineComponent({
-  components: {
-    ...icon
-  },
   name: 'Sider',
   setup() {
     const route = useRoute()
@@ -127,12 +115,13 @@ export default defineComponent({
     const appStore = useAppStore()
     onMounted(() => {
       appStore.connectServer().then(() => {
-        var chapterStore = useChapterStore()
+        let chapterStore = useChapterStore()
         chapterStore.getChapterContent(318, 1).then(console.log)
       })
     })
 
     return {
+      icon,
       collapsed: ref(true),
       activeKey,
       search: ref(null),

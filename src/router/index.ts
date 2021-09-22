@@ -4,26 +4,26 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'App',
-    redirect: 'BookInfo'
+    redirect: 'bookinfo'
   },
   {
-    path: '/Home',
+    path: '/home',
     name: 'Home',
     component: () => import('../views/Home.vue')
   },
   {
-    path: '/Announcement',
+    path: '/announcement',
     name: 'Announcement',
     component: () => import('../views/Announcement.vue')
   },
   {
-    path: '/BookList/:page?',
+    path: '/booklist/:page?',
     name: 'BookList',
     props: true,
     component: () => import('../views/BookList.vue')
   },
   {
-    path: '/BookInfo',
+    path: '/bookinfo',
     name: 'BookInfo',
     component: () => import('../views/BookInfo.vue')
   }

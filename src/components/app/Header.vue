@@ -3,9 +3,7 @@
     <n-space class="header-title">
       <n-tooltip placement="bottom-start">
         <template #trigger>
-          <n-icon :size="24">
-            <InfoFilled />
-          </n-icon>
+          <svg-icon :size="24" :path="icon.mdiInformation" />
         </template>
         欢迎来稿一个新的网站图标
       </n-tooltip>
@@ -44,13 +42,11 @@ import { useAppStore } from '@/store'
 
 export default defineComponent({
   name: 'Header',
-  components: {
-    ...icon
-  },
   setup() {
     const appStore = useAppStore()
 
     return {
+      icon,
       search: ref(''),
 
       appName: computed(() => appStore.appName),

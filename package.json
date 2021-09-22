@@ -5,42 +5,41 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --modern",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "n": "ncu"
   },
   "dependencies": {
-    "@mdi/js": "^5.9.55",
-    "@microsoft/signalr": "^5.0.9",
-    "@microsoft/signalr-protocol-msgpack": "^5.0.9",
-    "core-js": "^3.16.4",
-    "naive-ui": "^2.16.7",
-    "pinia": "^2.0.0-rc.6",
+    "@mdi/js": "^6.1.95",
+    "@microsoft/signalr": "^5.0.10",
+    "@microsoft/signalr-protocol-msgpack": "^5.0.10",
+    "core-js": "^3.18.0",
+    "naive-ui": "^2.19.1",
+    "pinia": "2.0.0-rc.8",
     "register-service-worker": "^1.7.2",
-    "vfonts": "^0.1.0",
-    "vue": "^3.2.6",
-    "vue-router": "^4.0.0-0"
+    "vue": "^3.2.13",
+    "vue-router": "^4.0.11"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.30.0",
-    "@typescript-eslint/parser": "^4.30.0",
-    "@vicons/material": "^0.11.0",
-    "@vue/babel-plugin-jsx": "^1.0.6",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
     "@vue/cli-plugin-babel": "~4.5.13",
     "@vue/cli-plugin-eslint": "~4.5.13",
     "@vue/cli-plugin-pwa": "~4.5.13",
     "@vue/cli-plugin-router": "~4.5.13",
     "@vue/cli-plugin-typescript": "~4.5.13",
     "@vue/cli-service": "~4.5.13",
-    "@vue/compiler-sfc": "^3.2.6",
+    "@vue/compiler-sfc": "^3.2.13",
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "babel-plugin-component": "^1.1.1",
-    "eslint": "^6.8.0",
-    "eslint-plugin-prettier": "^3.4.1",
-    "eslint-plugin-vue": "^7.17.0",
-    "prettier": "^2.3.2",
-    "sass": "^1.38.2",
-    "sass-loader": "^8.0.2",
-    "typescript": "~4.4.2"
+    "eslint": "^7.32.0",
+    "npm-check-updates": "^11.8.5",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^7.18.0",
+    "prettier": "^2.4.1",
+    "sass": "^1.42.0",
+    "sass-loader": "8.0.2",
+    "typescript": "~4.4.3"
   },
   "eslintConfig": {
     "root": true,
@@ -55,7 +54,7 @@
       "@vue/prettier/@typescript-eslint"
     ],
     "parserOptions": {
-      "ecmaVersion": 2020
+      "ecmaVersion": 2021
     },
     "rules": {
       "no-unused-vars": 0,

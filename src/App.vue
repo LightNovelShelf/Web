@@ -25,13 +25,11 @@
 <script lang="tsx">
 import { computed, defineComponent } from 'vue'
 import { zhCN, dateZhCN } from 'naive-ui'
-import { icon } from './plugins/naive-ui'
 import { AppSider, AppHeader } from '@/components/app/index'
 import { useAppStore } from '@/store'
 
 export default defineComponent({
   components: {
-    ...icon,
     AppSider,
     AppHeader
   },

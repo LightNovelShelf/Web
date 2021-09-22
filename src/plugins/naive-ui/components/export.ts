@@ -3,7 +3,6 @@ export {
   NButtonGroup,
   NConfigProvider,
   NGlobalStyle,
-  NH2,
   NLayout,
   NLayoutFooter,
   NLayoutSider,
@@ -12,7 +11,6 @@ export {
   NImage,
   NSpace,
   NMenu,
-  NIcon,
   NInput,
   NAvatar,
   NTooltip,
@@ -36,5 +34,9 @@ export {
   NThing,
   NNotificationProvider,
   NMessageProvider,
-  NLoadingBarProvider
+  NLoadingBarProvider,
+  NSpin,
+  NDrawer,
+  NDrawerContent,
+  NH2
 } from 'naive-ui'
