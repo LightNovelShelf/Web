@@ -56,7 +56,7 @@
       "@vue/prettier/@typescript-eslint"
     ],
     "parserOptions": {
-      "ecmaVersion": 2021
+      "ecmaVersion": "latest"
     },
     "rules": {
       "no-unused-vars": 0,
