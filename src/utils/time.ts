@@ -106,7 +106,7 @@ export function now(): DateTime {
 }
 
 /** 获取 "xx天前" 这类文案 */
-export function toNow(time: DateTime, locale?: 'zh' | 'zh-CN' | 'zh-TW'): string {
+export function toNow(time: DateTime, locale?: string): string {
   // 无效的时间会返回null，与类型标注不符
   return time.toRelative({ locale }) ?? FALLBACK_TIME_FORMAT_RESULT
 }
