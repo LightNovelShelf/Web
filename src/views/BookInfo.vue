@@ -17,7 +17,8 @@
         <n-grid-item>
           <n-h2>《{{ book['Title'] }}》</n-h2>
           <div>作者：{{ book['Author'] }}</div>
-          <div>更新：{{ book['LastUpdateTime'] }}</div>
+          <!-- <div>更新：{{ lastUpdateTime }}</div> -->
+          <div>更新：{{ book.LastUpdateTimeDesc }}</div>
           <div style="margin-top: 24px">
             <div>简介</div>
             <div class="introduction" v-html="book['Introduction']"></div>
@@ -45,10 +46,14 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref, reactive, onMounted } from 'vue'
+<script lang="ts">
+import { defineComponent, ref, onMounted, computed } from 'vue'
+// eslint-disable-next-line no-redeclare
 import Comment from '@/components/Comment.vue'
 import { useBookStore } from '@/store/book'
+// import { useToNow } from '@/composition/useToNow'
+import { useTickSource } from '@/composition/useTickSource'
+import { toNow } from '@/utils/time'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -57,15 +62,28 @@ export default defineComponent({
   },
   setup() {
     const bookStore = useBookStore()
-    let book = ref({})
+    let book = ref<any>({})
     onMounted(async () => {
       let res = await bookStore.getBookInfo(318)
       book.value = res.Response
-      console.log(res)
+      // 这里改成当前时间容易看效果 @todo 移除debug逻辑
+      book.value.LastUpdateTime = new Date()
+
+      // 这个键值是用来存放格式化文案
+      book.value.LastUpdateTimeDesc = ''
+    })
+
+    // 1. 适合少数键值，好处是比较简单明了，坏处是每个键值都要单独取值再export
+    // const lastUpdateTime = useToNow(computed<Date>(() => book.value.LastUpdateTime))
+
+    // 2. 适合批量更新的，好处是不用额外导出变量，坏处是import的东西变多了，需要自己手动格式化
+    useTickSource(() => {
+      book.value.LastUpdateTimeDesc = toNow(book.value.LastUpdateTime)
     })
 
     return {
       book
+      // lastUpdateTime
     }
   }
 })
