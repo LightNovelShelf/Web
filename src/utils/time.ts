@@ -16,30 +16,25 @@ const FALLBACK_TIME_FORMAT_RESULT = 'invalid_date'
  * 3. 字符串 - 2021-09-26 18:35 SQL样式
  * 4. 字符串 - 2021-09-26T18:35 等符合 iso-8601 标准的样式
  */
-export function parseTime(time: string | number | null | undefined): DateTime {
+export function parseTime(time: string | number | null | undefined | Date): DateTime {
   let parsed = FALLBACK_TIME
   if (time === null || time === undefined) {
     return parsed
   }
 
-  // 时间戳
-  if (typeof time === 'number' || time === `${+time}`) {
+  if (time instanceof Date) {
+    // 目前书架用的websocket + msgpack 协议，返回的是 Date 实例
+    parsed = DateTime.fromJSDate(time)
+  } else if (typeof time === 'number' || time === `${+time}`) {
     parsed = DateTime.fromMillis(+time)
+  } else {
+    // 老的书架都是SQL样式: 2021-09-26 18:35
+    parsed = DateTime.fromSQL(time)
 
-    // 无效数字的场景
     if (!parsed.isValid) {
-      parsed = FALLBACK_TIME
+      // 尝试用ISO再解一次
+      parsed = DateTime.fromISO(time)
     }
-
-    return parsed
-  }
-
-  // 目前书架都是SQL样式: 2021-09-26 18:35
-  parsed = DateTime.fromSQL(time)
-
-  if (!parsed.isValid) {
-    // 尝试用ISO再解一次
-    parsed = DateTime.fromISO(time)
   }
 
   // 如果还是无效，就按照 null/undefined 这类无效的逻辑来处理
