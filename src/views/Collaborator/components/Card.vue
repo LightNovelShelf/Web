@@ -3,7 +3,7 @@
     :class="{
       com_waterfall_item: true,
       [props.size]: true,
-      [props.class]: true
+      [props.class ?? '']: true
     }"
     ref="{ref}"
   >
@@ -28,14 +28,11 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Card, CardSize } from '@/types/collaborator'
-import { defineComponent, defineProps } from 'vue'
+import { defineProps } from 'vue'
 
-export default defineComponent(() => {
-  const props = defineProps<{ class?: string; size: CardSize; data: Card }>()
-  return { props }
-})
+const props = defineProps<{ class?: string; size: CardSize; data: Card }>()
 </script>
 
 <style lang="scss">
