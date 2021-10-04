@@ -12,36 +12,40 @@
       >
       </div>
       <n-element tag="div" class="book-tag">
-        <span style="font-size: 12px">录入</span>
+        <span style="font-size: 12px">{{ book.Category.ShortName }}</span>
       </n-element>
     </template>
     <template #footer>
       <div style="display: flex; padding: 0 4px">
-        <n-text depth="3">无语</n-text>
+        <n-text depth="3">{{ book.UserName }}</n-text>
         <div class="flex-space"></div>
-        <n-text depth="3">1小时前</n-text>
+        <n-text depth="3">{{ updateTime }}</n-text>
       </div>
     </template>
     <div class="book-name">
-      <div class="book-name-text" :title="book['Title']">
-        {{ book['Title'] }}
+      <div class="book-name-text" :title="book?.Title">
+        {{ book.Title }}
       </div>
     </div>
   </n-card>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import { midPic } from '../utils/book'
+import { defineComponent, computed } from 'vue'
+import { midPic } from '@/utils/book'
+import { useToNow } from '@/composition/useToNow'
 
 export default defineComponent({
   name: 'bookCard',
   props: {
-    book: Object
+    book: {
+      type: Object
+    }
   },
-  computed: {
-    midPic() {
-      return midPic(this.book['Cover'])
+  setup(props) {
+    return {
+      midPic: computed(() => midPic(props.book.Cover)),
+      updateTime: useToNow(computed(() => props.book.LastUpdateTime))
     }
   }
 })
