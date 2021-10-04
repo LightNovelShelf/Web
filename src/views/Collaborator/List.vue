@@ -49,7 +49,7 @@ onMounted(() => {
   resizeObserver.observe(masonryContainerNodeRef.value)
 })
 onBeforeUnmount(() => {
-  masonryInstance.value.destory()
+  masonryInstance.value.destroy()
   resizeObserver.disconnect()
 })
 </script>

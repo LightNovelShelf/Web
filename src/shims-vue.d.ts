@@ -20,7 +20,7 @@ declare module 'masonry-layout' {
       }
     )
     layout(): void
-    destory(): void
+    destroy(): void
   }
 
   export default masonry
