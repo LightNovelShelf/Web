@@ -47,11 +47,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue'
-// eslint-disable-next-line no-redeclare
+import { defineComponent, ref, onMounted } from 'vue'
 import Comment from '@/components/Comment.vue'
 import { useBookStore } from '@/store/book'
-// import { useToNow } from '@/composition/useToNow'
 import { useTickSource } from '@/composition/useTickSource'
 import { toNow } from '@/utils/time'
 
@@ -66,15 +64,10 @@ export default defineComponent({
     onMounted(async () => {
       let res = await bookStore.getBookInfo(318)
       book.value = res.Response
-      // 这里改成当前时间容易看效果 @todo 移除debug逻辑
-      book.value.LastUpdateTime = new Date()
 
       // 这个键值是用来存放格式化文案
       book.value.LastUpdateTimeDesc = ''
     })
-
-    // 1. 适合少数键值，好处是比较简单明了，坏处是每个键值都要单独取值再export
-    // const lastUpdateTime = useToNow(computed<Date>(() => book.value.LastUpdateTime))
 
     // 2. 适合批量更新的，好处是不用额外导出变量，坏处是import的东西变多了，需要自己手动格式化
     useTickSource(() => {
@@ -85,7 +78,6 @@ export default defineComponent({
 
     return {
       book
-      // lastUpdateTime
     }
   }
 })
