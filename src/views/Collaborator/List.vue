@@ -38,7 +38,7 @@ const resizeObserver = new ResizeObserver(relayoutHandle)
 
 onMounted(() => {
   masonryInstance.value = new masonry(masonryListNodeRef.value, {
-    itemSelector: '.grid-item',
+    itemSelector: '.js-masonry-item',
     gutter: 15,
     fitWidth: true,
     // 这里我也忘了原来什么情况下有nano，可能原本有后来又没了（需求变更），这里先写下
@@ -58,11 +58,10 @@ onBeforeUnmount(() => {
   <div class="collaborator" ref="masonryContainerNodeRef">
     <!-- collaborator_list 宽随子元素 -->
     <div class="collaborator_list" ref="masonryListNodeRef">
-      <!-- grid-item 这个class是给masonry定位子元素用的 -->
       <card-item
         v-for="item in collaborators"
         :key="item.key"
-        class="grid-item"
+        class="js-masonry-item"
         :data="item"
         :size="size"
         @resize="relayoutHandle"
