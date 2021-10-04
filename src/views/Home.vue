@@ -15,9 +15,7 @@
           <template #header-extra>
             <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
               <b>更多</b>
-              <n-icon>
-                <KeyboardArrowRightFilled />
-              </n-icon>
+              <svg-icon :path="icon.mdiArrowRight" />
             </n-text>
           </template>
           <n-row>
@@ -48,9 +46,7 @@
                 <div style="font-size: 17px"><b>公告</b></div>
                 <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
                   <b>更多</b>
-                  <n-icon>
-                    <KeyboardArrowRightFilled />
-                  </n-icon>
+                  <svg-icon :path="icon.mdiArrowRight" />
                 </n-text>
               </n-space>
             </template>
@@ -66,9 +62,7 @@
                 <div style="font-size: 17px"><b>更新日志</b></div>
                 <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
                   <b>更多</b>
-                  <n-icon>
-                    <KeyboardArrowRightFilled />
-                  </n-icon>
+                  <svg-icon :path="icon.mdiArrowRight" />
                 </n-text>
               </n-space>
             </template>
@@ -91,35 +85,65 @@ import { icon } from '../plugins/naive-ui'
 
 export default defineComponent({
   components: {
-    ...icon,
     BookCard
   },
   setup() {
     return {
+      icon,
       bookData: [
         {
-          Cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
-          Title: '我是书名，我很短'
+          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
+          Title: '我是书名，我很短',
+          UserName: '无语',
+          Category: {
+            ShortName: '录入'
+          },
+          LastUpdateTime: new Date()
         },
         {
-          Cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长长长很长很长长很长很长',
+          UserName: '无语',
+          Category: {
+            ShortName: '录入'
+          },
+          LastUpdateTime: new Date()
         },
         {
-          Cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长长长很长很长长很长很长',
+          UserName: '无语',
+          Category: {
+            ShortName: '录入'
+          },
+          LastUpdateTime: new Date()
         },
         {
-          Cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长很长很长长很长很长长很长长很长很长长很长很长',
+          UserName: '无语',
+          Category: {
+            ShortName: '录入'
+          },
+          LastUpdateTime: new Date()
         },
         {
-          Cover: 'https://i0.hdslb.com/bfs/album/1cb53e28eb458d5e751ef48c6f5bfbae4a9b4f80.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长长很长很长长很长很长很长长很长很长长很长很长',
+          UserName: '无语',
+          Category: {
+            ShortName: '录入'
+          },
+          LastUpdateTime: new Date()
         },
         {
-          Cover: 'https://i0.hdslb.com/bfs/album/ac1c3f7eb88f968dbe89a73d7265bd0c350c816b.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长'
+          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
+          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长长很长很长长很长很长很长长很长很长长很长很长',
+          UserName: '无语',
+          Category: {
+            ShortName: '录入'
+          },
+          LastUpdateTime: new Date()
         }
       ]
     }

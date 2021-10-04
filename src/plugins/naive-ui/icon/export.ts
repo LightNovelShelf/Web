@@ -1,6 +1,7 @@
 export {
   mdiMagnify,
   mdiArrowLeft,
+  mdiArrowRight,
   mdiMenu,
   mdiHome,
   mdiInformation,
