@@ -54,10 +54,10 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-  <!-- com_waterfall_container宽随父容器 -->
-  <div class="com_waterfall_container" ref="masonryContainerNodeRef">
-    <!-- com_waterfall_list宽随子元素 -->
-    <div class="com_waterfall_list" ref="masonryListNodeRef">
+  <!-- collaborator 宽随父容器 -->
+  <div class="collaborator" ref="masonryContainerNodeRef">
+    <!-- collaborator_list 宽随子元素 -->
+    <div class="collaborator_list" ref="masonryListNodeRef">
       <!-- grid-item 这个class是给masonry定位子元素用的 -->
       <card-item
         v-for="item in collaborators"
@@ -70,22 +70,21 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
-<style lang="scss">
-.com_waterfall_container {
+<style lang="scss" scoped>
+.collaborator {
   color: rgba(#000, 0.87);
   letter-spacing: 0.01071em;
   max-width: 100%;
   font-weight: 400;
   margin-left: auto;
   margin-right: auto;
-  &,
-  & * {
+
+  &， &:deep(*) {
     box-sizing: border-box;
   }
-
-  .com_waterfall_list {
-    margin-left: auto;
-    margin-right: auto;
-  }
+}
+.collaborator_list {
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>
