@@ -5,34 +5,33 @@
       [props.size]: true,
       [props.class ?? '']: true
     }"
-    ref="{ref}"
   >
     <div className="com_waterfall_item_avast">
-      <img
-        src="{avast}"
-        onLoad="{imgLoadedHandle}"
-        onError="{errorHandle}"
-        onClick="{avastClickHandle}"
-        referrerPolicy="no-referrer"
-      />
+      <img :src="data.avast" @load="imgLoadedHandle" @error="errorHandle" referrerPolicy="no-referrer" />
     </div>
     <div className="com_waterfall_item_text_meta">
-      <div className="com_waterfall_item_text_nickname">
-        {data.nickname} {data.retired === GO_BOOL.yes ? (
-        <div className="retiredTag" title="荣誉退休"> 休 </div>
-        ) : null}
-      </div>
-      <div className="com_waterfall_item_text_job">{data.job}</div>
+      <div className="com_waterfall_item_text_nickname">{{ props.data.nickname }}</div>
+      <!-- <div className="com_waterfall_item_text_job">{{ data.job }}</div> -->
     </div>
-    <div className="com_waterfall_item_bio">{data.bio}</div>
+    <div className="com_waterfall_item_bio">{{ data.bio }}</div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Card, CardSize } from '@/types/collaborator'
-import { defineProps } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps<{ class?: string; size: CardSize; data: Card }>()
+const emit = defineEmits<{
+  (event: 'resize'): void
+}>()
+
+const imgLoadedHandle = () => {
+  emit('resize')
+}
+const errorHandle = () => {
+  emit('resize')
+}
 </script>
 
 <style lang="scss">
