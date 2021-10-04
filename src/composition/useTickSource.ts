@@ -20,14 +20,14 @@ import { onUnmounted } from 'vue'
  * ```
  */
 export function useTickSource(cb: () => unknown, ms = 1000): () => void {
-  const shouldContinute = { value: true }
+  const shouldContinue = { value: true }
   /** 停止循环 */
   const unsubscribe = () => {
-    shouldContinute.value = false
+    shouldContinue.value = false
   }
 
   async function loop() {
-    while (shouldContinute.value) {
+    while (shouldContinue.value) {
       await sleep(ms)
       cb()
     }
