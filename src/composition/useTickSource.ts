@@ -28,8 +28,8 @@ export function useTickSource(cb: () => unknown, ms = 1000): () => void {
 
   async function loop() {
     while (shouldContinue.value) {
-      await sleep(ms)
       cb()
+      await sleep(ms)
     }
   }
 
