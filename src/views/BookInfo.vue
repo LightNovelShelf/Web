@@ -78,7 +78,9 @@ export default defineComponent({
 
     // 2. 适合批量更新的，好处是不用额外导出变量，坏处是import的东西变多了，需要自己手动格式化
     useTickSource(() => {
-      book.value.LastUpdateTimeDesc = toNow(book.value.LastUpdateTime)
+      if (book.value.LastUpdateTime) {
+        book.value.LastUpdateTimeDesc = toNow(book.value.LastUpdateTime)
+      }
     })
 
     return {
