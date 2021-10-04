@@ -26,7 +26,6 @@
 import { computed, defineComponent } from 'vue'
 import { zhCN, dateZhCN, useOsTheme, darkTheme } from 'naive-ui'
 import { AppSider, AppHeader } from '@/components/app/index'
-import { useAppStore } from '@/store'
 
 export default defineComponent({
   components: {
@@ -34,7 +33,6 @@ export default defineComponent({
     AppHeader
   },
   setup() {
-    const appStore = useAppStore()
     const osThemeRef = useOsTheme()
 
     return {

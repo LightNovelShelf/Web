@@ -11,9 +11,9 @@
         }"
       >
       </div>
-      <n-element tag="div" class="book-tag">
-        <span style="font-size: 12px">{{ book.Category.ShortName }}</span>
-      </n-element>
+      <div class="book-tag" :style="{ backgroundColor: themeVars.primaryColor }">
+        <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
+      </div>
     </template>
     <template #footer>
       <div style="display: flex; padding: 0 4px">
@@ -34,6 +34,7 @@
 import { defineComponent, computed } from 'vue'
 import { midPic } from '@/utils/book'
 import { useToNow } from '@/composition/useToNow'
+import { useThemeVars } from 'naive-ui'
 
 export default defineComponent({
   name: 'bookCard',
@@ -43,7 +44,10 @@ export default defineComponent({
     }
   },
   setup(props) {
+    let themeVars = useThemeVars()
+
     return {
+      themeVars,
       midPic: computed(() => midPic(props.book.Cover)),
       updateTime: useToNow(computed(() => props.book.LastUpdateTime))
     }
@@ -63,7 +67,6 @@ export default defineComponent({
   position: absolute;
   top: 6px;
   right: 0;
-  background-color: var(--primary-color);
   color: white;
   padding: 0 3px 0 6px;
   border-radius: 1em 0 0 1em;
