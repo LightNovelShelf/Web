@@ -17,7 +17,7 @@ const masonryWrapNodeRef = ref<HTMLDivElement>(document.createElement('div'))
 const masonryInstance = ref<masonry>(new masonry(masonryWrapNodeRef.value))
 
 /** 是否是宽屏，设置图片为对应大小央视 */
-const isWide = useMedia('(min-width: 1080px)')
+const isWide = useMedia(ref('(min-width: 1080px)'))
 /** 预设大小枚举 */
 const size = computed<CardSize>(() => {
   return isWide ? CardSize.normal : CardSize.small
