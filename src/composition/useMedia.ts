@@ -1,33 +1,39 @@
-import { ref, Ref, watchEffect, onUnmounted } from 'vue'
+import { ref, Ref, watch, onUnmounted } from 'vue'
 
 /**
- * 返回一个定时刷新的 'xx天前' 文案
+ * 返回当前屏幕是否匹配传入的query
+ *
+ * @example
+ * ```
+ * useMedia(ref('(min-width: 1080px)'))
+ * ```
  */
-export function useMedia(query: string, defaultVal = false): Ref<boolean> {
+export function useMedia(query: Ref<string>, defaultVal = false): Ref<boolean> {
   /** 是否匹配 */
   const isMatch = ref(defaultVal)
-  /** 根据query构建的MediaQueryList语法 */
-  const mql = ref<MediaQueryList>(window.matchMedia(query))
+
+  let mql: MediaQueryList = window.matchMedia(query.value)
 
   /** 因为 MediaQueryList change的时候不会触发vue的渲染，所以这里用一个callback来单独触发一次 */
   const matchChangeHandle = () => {
-    isMatch.value = mql.value.matches
+    isMatch.value = mql.matches
   }
 
-  /** 根据query重建mql */
-  const rematchHandle = () => {
-    /** 先清理 */
-    mql.value.removeEventListener('change', matchChangeHandle)
-    /** 重建 */
-    mql.value = window.matchMedia(query)
-    /** 重新监听 */
-    mql.value.addEventListener('change', matchChangeHandle)
-  }
-  // rematchHandle里touch过的值变化了就重新运行一次，这里对应的就是query
-  watchEffect(rematchHandle)
+  // query里变化了就重新监听
+  watch(
+    () => query,
+    (nextQuery) => {
+      /** 先清理 */
+      mql.removeEventListener('change', matchChangeHandle)
+      /** 重建 */
+      mql = window.matchMedia(nextQuery.value)
+      /** 重新监听 */
+      mql.addEventListener('change', matchChangeHandle)
+    }
+  )
 
   onUnmounted(() => {
-    mql.value.removeEventListener('change', matchChangeHandle)
+    mql.removeEventListener('change', matchChangeHandle)
   })
 
   return isMatch
