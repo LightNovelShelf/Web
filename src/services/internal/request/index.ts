@@ -1,2 +1,2 @@
-export { requestWithSignalr, signalrEvtEmiter } from './signalr'
+export { requestWithSignalr, isConnected } from './signalr'
 export { requestWithFetch } from './fetch'
