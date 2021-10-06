@@ -26,11 +26,12 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, ref } from 'vue'
 import BookCard from '@/components/BookCard.vue'
-import { useBookStore } from '@/store/book'
 import { useLoadingBar } from 'naive-ui'
+import { getBookList } from '@/services/book'
+import { BookInList } from '@/services/book/types'
 
 export default defineComponent({
   components: {
@@ -56,8 +57,8 @@ export default defineComponent({
     }
   },
   setup() {
-    const bookStore = useBookStore()
     const loadingBar = useLoadingBar()
+    const bookData = ref<BookInList[]>([])
 
     return {
       hoverTrigger: ref(false),
@@ -94,17 +95,16 @@ export default defineComponent({
           ]
         }
       ],
-      bookData: ref([]),
+      bookData,
       pageData: ref({
         totalPage: 1
       }),
       request(page) {
         loadingBar.start()
-        return bookStore
-          .getBookList(~~page, true)
+        return getBookList(~~page)
           .then((serverData) => {
-            this.bookData = serverData.Response.Data
-            this.pageData.totalPage = serverData.Response.TotalPages
+            this.bookData = serverData.Data
+            this.pageData.totalPage = serverData.TotalPages
             console.log(serverData)
           })
           .finally(() => loadingBar.finish())

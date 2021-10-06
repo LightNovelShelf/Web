@@ -15,7 +15,7 @@
           </div>
         </n-grid-item>
         <n-grid-item>
-          <n-h2>《{{ book['Title'] }}》</n-h2>
+          <n-h2 @click="getInfo">《{{ book['Title'] }}》</n-h2>
           <div>作者：{{ book['Author'] }}</div>
           <!-- <div>更新：{{ lastUpdateTime }}</div> -->
           <div>更新：{{ book.LastUpdateTimeDesc }}</div>
@@ -49,9 +49,9 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
 import Comment from '@/components/Comment.vue'
-import { useBookStore } from '@/store/book'
 import { useTickSource } from '@/composition/useTickSource'
 import { toNow } from '@/utils/time'
+import { getBookInfo } from '@/services/book'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -59,15 +59,16 @@ export default defineComponent({
     Comment
   },
   setup() {
-    const bookStore = useBookStore()
     let book = ref<any>({})
-    onMounted(async () => {
-      let res = await bookStore.getBookInfo(318)
-      book.value = res.Response
+    const getInfo = async () => {
+      let res = await getBookInfo(318)
+      book.value = res
 
       // 这个键值是用来存放格式化文案
       book.value.LastUpdateTimeDesc = ''
-    })
+    }
+
+    onMounted(getInfo)
 
     // 2. 适合批量更新的，好处是不用额外导出变量，坏处是import的东西变多了，需要自己手动格式化
     useTickSource(() => {
@@ -77,7 +78,8 @@ export default defineComponent({
     })
 
     return {
-      book
+      book,
+      getInfo
     }
   }
 })
