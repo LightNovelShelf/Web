@@ -9,7 +9,50 @@ let connection: null | HubConnection = null
 /** 记录Promie避免多次发起链接 */
 let connectPromise: null | Promise<HubConnection> = null
 
-/** 返回一个可用的 signalr 实例 */
+class SignalrEvtEmiter {
+  private connectedListeners = new Set<() => void>()
+  private closeListeners = new Set<() => void>()
+  private statusChangeListeners = new Set<(connected: boolean) => void>()
+  private lastConnected = false
+
+  public started() {
+    this.connectedListeners.forEach((cb) => cb())
+    this.statusChangeListeners.forEach((cb) => cb(true))
+    this.lastConnected = true
+  }
+  public closed() {
+    this.closeListeners.forEach((cb) => cb())
+    this.statusChangeListeners.forEach((cb) => cb(false))
+    this.lastConnected = false
+  }
+  public lastConnectedStatus = () => {
+    return this.lastConnected
+  }
+
+  public onStart(cb: () => void) {
+    this.connectedListeners.add(cb)
+    return () => {
+      this.connectedListeners.delete(cb)
+    }
+  }
+  public onClose(cb: () => void) {
+    this.closeListeners.add(cb)
+    return () => {
+      this.closeListeners.delete(cb)
+    }
+  }
+  public onStatusChange(cb: (connected: boolean) => void) {
+    this.statusChangeListeners.add(cb)
+    return () => {
+      this.statusChangeListeners.delete(cb)
+    }
+  }
+}
+
+/** signalr事件监听 */
+export const signalrEvtEmiter = new SignalrEvtEmiter()
+
+/** 返回一个 signalr 实例 */
 export const getSignalr = (): Promise<HubConnection> => {
   if (connection) {
     return Promise.resolve(connection)
@@ -26,6 +69,7 @@ export const getSignalr = (): Promise<HubConnection> => {
 
       /** 并待其start完成 */
       await hub.start()
+      signalrEvtEmiter.started()
 
       return hub
     })()
@@ -41,8 +85,8 @@ export const getSignalr = (): Promise<HubConnection> => {
       /** 意外关闭时清除缓存 */
       connection.onclose(() => {
         connection = null
+        signalrEvtEmiter.closed()
       })
-      // catch分支不处理，一次失败后就等下个请求再继续重连，不再这里做循环重连，维护不慎容易爆炸
     })
   }
 

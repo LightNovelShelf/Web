@@ -1,2 +1,2 @@
-export { requestWithSignalr, getSignalr } from './signalr'
+export { requestWithSignalr, signalrEvtEmiter } from './signalr'
 export { requestWithFetch } from './fetch'
