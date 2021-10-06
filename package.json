@@ -46,37 +46,6 @@
     "sass-loader": "8.0.2",
     "typescript": "~4.4.3"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended",
-      "@vue/typescript/recommended",
-      "@vue/prettier",
-      "@vue/prettier/@typescript-eslint"
-    ],
-    "parserOptions": {
-      "ecmaVersion": "latest"
-    },
-    "rules": {
-      "no-unused-vars": 0,
-      "no-unused-labels": 0,
-      "@typescript-eslint/no-var-requires": 0,
-      "@typescript-eslint/no-explicit-any": 0,
-      "@typescript-eslint/no-non-null-assertion": 0,
-      "quotes": [
-        1,
-        "single"
-      ],
-      "semi": [
-        1,
-        "never"
-      ]
-    }
-  },
   "browserslist": [
     "> 1%",
     "not OperaMini all"
