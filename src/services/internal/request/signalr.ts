@@ -1,5 +1,6 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
+import { ref } from 'vue'
 
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
@@ -9,48 +10,24 @@ let connection: null | HubConnection = null
 /** 记录Promie避免多次发起链接 */
 let connectPromise: null | Promise<HubConnection> = null
 
-class SignalrEvtEmiter {
-  private connectedListeners = new Set<() => void>()
-  private closeListeners = new Set<() => void>()
-  private statusChangeListeners = new Set<(connected: boolean) => void>()
-  private lastConnected = false
+/** signalr联通情况监听 */
+export const isConnected = ref<boolean>(false)
 
-  public started() {
-    this.connectedListeners.forEach((cb) => cb())
-    this.statusChangeListeners.forEach((cb) => cb(true))
-    this.lastConnected = true
-  }
-  public closed() {
-    this.closeListeners.forEach((cb) => cb())
-    this.statusChangeListeners.forEach((cb) => cb(false))
-    this.lastConnected = false
-  }
-  public lastConnectedStatus = () => {
-    return this.lastConnected
-  }
+/** 失败重连需要相隔10s */
+const RECONNECT_TIMEOUT = 10 * 1000
 
-  public onStart(cb: () => void) {
-    this.connectedListeners.add(cb)
-    return () => {
-      this.connectedListeners.delete(cb)
-    }
+/** 单例句柄，保险 */
+let lastReConnect = 0
+/** 延时重连 */
+const reConnect = () => {
+  if (lastReConnect) {
+    clearTimeout(lastReConnect)
   }
-  public onClose(cb: () => void) {
-    this.closeListeners.add(cb)
-    return () => {
-      this.closeListeners.delete(cb)
-    }
-  }
-  public onStatusChange(cb: (connected: boolean) => void) {
-    this.statusChangeListeners.add(cb)
-    return () => {
-      this.statusChangeListeners.delete(cb)
-    }
-  }
+  lastReConnect = setTimeout(() => {
+    getSignalr()
+    lastReConnect = 0
+  }, RECONNECT_TIMEOUT) as unknown as number
 }
-
-/** signalr事件监听 */
-export const signalrEvtEmiter = new SignalrEvtEmiter()
 
 /** 返回一个 signalr 实例 */
 export const getSignalr = (): Promise<HubConnection> => {
@@ -68,8 +45,13 @@ export const getSignalr = (): Promise<HubConnection> => {
         .build()
 
       /** 并待其start完成 */
-      await hub.start()
-      signalrEvtEmiter.started()
+      try {
+        await hub.start()
+      } catch (e) {
+        reConnect()
+        throw e
+      }
+      isConnected.value = true
 
       return hub
     })()
@@ -85,7 +67,8 @@ export const getSignalr = (): Promise<HubConnection> => {
       /** 意外关闭时清除缓存 */
       connection.onclose(() => {
         connection = null
-        signalrEvtEmiter.closed()
+        isConnected.value = false
+        reConnect()
       })
     })
   }
