@@ -4,7 +4,7 @@
       <div
         :style="{
           paddingBottom: '150%',
-          backgroundImage: `url('${midPic}')`,
+          backgroundImage: `url('${pic}')`,
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat'
@@ -30,29 +30,17 @@
   </n-card>
 </template>
 
-<script>
-import { defineComponent, computed } from 'vue'
+<script lang="ts" setup>
+import { computed, defineProps } from 'vue'
 import { midPic } from '@/utils/book'
 import { useToNow } from '@/composition/useToNow'
 import { useThemeVars } from 'naive-ui'
+import { BookInList } from '@/services/book/types'
 
-export default defineComponent({
-  name: 'bookCard',
-  props: {
-    book: {
-      type: Object
-    }
-  },
-  setup(props) {
-    let themeVars = useThemeVars()
-
-    return {
-      themeVars,
-      midPic: computed(() => midPic(props.book.Cover)),
-      updateTime: useToNow(computed(() => props.book.LastUpdateTime))
-    }
-  }
-})
+const props = defineProps<{ book: BookInList }>()
+const themeVars = useThemeVars()
+const pic = computed(() => midPic(props.book.Cover))
+const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 </script>
 
 <style lang="scss" scoped>

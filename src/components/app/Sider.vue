@@ -45,11 +45,10 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent, ref, computed, onMounted } from 'vue'
-import { icon } from '../../plugins/naive-ui/icon'
-import { useAppStore } from '@/store'
-import { useChapterStore } from '@/store/chapter'
+import { defineComponent, ref, computed } from 'vue'
+import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
+import { useOnline } from '@/composition/useOnline'
 
 function renderIcon(icon: string) {
   return () => <svg-icon path={icon} />
@@ -112,13 +111,6 @@ export default defineComponent({
         console.log(val)
       }
     })
-    const appStore = useAppStore()
-    onMounted(() => {
-      appStore.connectServer().then(() => {
-        let chapterStore = useChapterStore()
-        chapterStore.getChapterContent(318, 1).then(console.log)
-      })
-    })
 
     return {
       icon,
@@ -126,7 +118,7 @@ export default defineComponent({
       activeKey,
       search: ref(null),
       menuOptions,
-      isOnline: computed(() => appStore.isConnected),
+      isOnline: useOnline(),
       renderMenuLabel(option: any) {
         if (!option.disabled && !option.children) {
           return <router-link to={{ name: option.route }}>{option.label}</router-link>
