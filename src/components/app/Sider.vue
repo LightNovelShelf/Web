@@ -49,7 +49,7 @@ import { defineComponent, ref, computed, onMounted } from 'vue'
 import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
 import { useOnline } from '@/composition/useOnline'
-import { getChapterContent } from '@/services/book'
+import { getChapterContent } from '@/services/chapter'
 
 function renderIcon(icon: string) {
   return () => <svg-icon path={icon} />
