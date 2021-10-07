@@ -45,10 +45,11 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
 import { useOnline } from '@/composition/useOnline'
+import { getChapterContent } from '@/services/book'
 
 function renderIcon(icon: string) {
   return () => <svg-icon path={icon} />
@@ -110,6 +111,10 @@ export default defineComponent({
       set: (val) => {
         console.log(val)
       }
+    })
+
+    onMounted(async () => {
+      console.log(await getChapterContent(318, 1))
     })
 
     return {
