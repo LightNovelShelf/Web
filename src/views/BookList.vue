@@ -27,11 +27,45 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
+import { onBeforeRouteUpdate, useRouter } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useLoadingBar } from 'naive-ui'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
+
+const options = [
+  {
+    label: '上架时间',
+    value: 'last'
+  },
+  {
+    label: '最近更新',
+    value: 'new'
+  },
+  {
+    label: '人气值',
+    value: 'rank',
+    children: [
+      {
+        label: '日榜',
+        value: 'daily'
+      },
+      {
+        label: '周榜',
+        value: 'weekly'
+      },
+      {
+        label: '月榜',
+        value: 'Monthly'
+      },
+      {
+        label: '总榜',
+        value: 'all'
+      }
+    ]
+  }
+]
 
 export default defineComponent({
   components: {
@@ -44,78 +78,48 @@ export default defineComponent({
       default: 1
     }
   },
-  computed: {
-    currentPage: {
+  setup(props) {
+    const router = useRouter()
+    const loadingBar = useLoadingBar()
+    const bookData = ref<BookInList[]>([])
+    const pageData = ref({
+      totalPage: 1
+    })
+    const currentPage = computed({
       get() {
-        let _page = ~~this.page
+        let _page = ~~props.page
         if (_page === 0) _page = 1
         return _page
       },
-      set(val) {
-        this.$router.push({ to: 'BookList', params: { page: val } })
+      set(val: number) {
+        router.push({ name: 'BookList', params: { page: val } })
       }
+    })
+
+    function request(page) {
+      loadingBar.start()
+      return getBookList(~~page)
+        .then((serverData) => {
+          bookData.value = serverData.Data
+          pageData.value.totalPage = serverData.TotalPages
+          console.log(serverData)
+        })
+        .finally(() => loadingBar.finish())
     }
-  },
-  setup() {
-    const loadingBar = useLoadingBar()
-    const bookData = ref<BookInList[]>([])
+
+    onBeforeRouteUpdate((to, from, next) => {
+      request(to.params.page).finally(() => next())
+    })
+
+    onMounted(() => request(currentPage.value))
 
     return {
-      hoverTrigger: ref(false),
+      currentPage,
       value: ref('last'),
-      options: [
-        {
-          label: '上架时间',
-          value: 'last'
-        },
-        {
-          label: '最近更新',
-          value: 'new'
-        },
-        {
-          label: '人气值',
-          value: 'rank',
-          children: [
-            {
-              label: '日榜',
-              value: 'daily'
-            },
-            {
-              label: '周榜',
-              value: 'weekly'
-            },
-            {
-              label: '月榜',
-              value: 'Monthly'
-            },
-            {
-              label: '总榜',
-              value: 'all'
-            }
-          ]
-        }
-      ],
       bookData,
-      pageData: ref({
-        totalPage: 1
-      }),
-      request(page) {
-        loadingBar.start()
-        return getBookList(~~page)
-          .then((serverData) => {
-            this.bookData = serverData.Data
-            this.pageData.totalPage = serverData.TotalPages
-            console.log(serverData)
-          })
-          .finally(() => loadingBar.finish())
-      }
+      pageData,
+      options
     }
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.request(to.params.page).finally(() => next())
-  },
-  mounted() {
-    this.request(this.currentPage)
   }
 })
 </script>
