@@ -3,8 +3,8 @@ import { requestWithSignalr } from '../internal/request'
 import * as Types from './types'
 
 /** 获取书籍列表 */
-export function getBookList(page: number) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookList', page)
+export function getBookList(param: Types.GetBookListRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetBookList', param)
 }
 /** 获取书籍信息 */
 export function getBookInfo(bid: number) {
