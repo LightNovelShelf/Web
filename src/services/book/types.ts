@@ -12,3 +12,7 @@ export interface BookInList {
 
 export interface GetBookListRes extends ListResult<BookInList> {}
 export interface GetBookInfoRes {}
+
+export interface GetBookListRequest {
+  Page: number
+}

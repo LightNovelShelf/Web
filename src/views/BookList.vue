@@ -98,7 +98,7 @@ export default defineComponent({
 
     function request(page) {
       loadingBar.start()
-      return getBookList(~~page)
+      return getBookList({ Page: ~~page })
         .then((serverData) => {
           bookData.value = serverData.Data
           pageData.value.totalPage = serverData.TotalPages

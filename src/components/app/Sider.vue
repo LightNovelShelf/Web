@@ -114,7 +114,7 @@ export default defineComponent({
     })
 
     onMounted(async () => {
-      console.log(await getChapterContent(318, 1))
+      console.log(await getChapterContent({ SortNum: 1, Bid: 318 }))
     })
 
     return {
