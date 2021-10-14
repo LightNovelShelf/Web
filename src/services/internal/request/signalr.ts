@@ -5,7 +5,7 @@ import { ref } from 'vue'
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
 
-/** signalr的连接中枢（配置中心） */
+/** signalr 连接中心 */
 const hub: HubConnection = new HubConnectionBuilder()
   .withUrl(HOST, {
     accessTokenFactory() {
@@ -44,7 +44,7 @@ const reConnectLater = () => {
   }, RECONNECT_TIMEOUT) as unknown as number
 }
 
-/** 返回一个 signalr 实例 */
+/** 返回一个 signalr 连接中心 */
 export const getSignalr = (): Promise<HubConnection> => {
   /** 如果实例已连接 */
   if (isConnected.value) {
@@ -68,6 +68,7 @@ export const getSignalr = (): Promise<HubConnection> => {
   return connectPromise
 }
 
+/** 通过 signalr 发送请求 */
 export const requestWithSignalr = async <Res = unknown, Data extends unknown[] = unknown[]>(
   url: string,
   ...data: Data
