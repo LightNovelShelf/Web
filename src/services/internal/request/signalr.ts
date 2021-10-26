@@ -4,6 +4,15 @@ import { ref } from 'vue'
 
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
+/** 失败重连等待的时长，ms */
+const RECONNECT_TIMEOUT = 10 * 1000
+
+/** 记录Promie避免重复start */
+let connectPromise: null | Promise<HubConnection> = null
+/** signalr连接情况标志 */
+export const isConnected = ref<boolean>(false)
+/** 最后一次重连setTimeout句柄 */
+const lastReConnect = ref<number>(0)
 
 /** signalr 连接中心 */
 const hub: HubConnection = new HubConnectionBuilder()
@@ -17,35 +26,25 @@ const hub: HubConnection = new HubConnectionBuilder()
   .configureLogging(LogLevel.Information)
   .build()
 
-/** signalr连接情况标志 */
-export const isConnected = ref<boolean>(false)
 /** 断联时更新连接情况 */
 hub.onclose(() => {
   isConnected.value = false
   reConnectLater()
 })
 
-/** 记录Promie避免重复start */
-let connectPromise: null | Promise<HubConnection> = null
-
-/** 失败重连等待的时长，ms */
-const RECONNECT_TIMEOUT = 10 * 1000
-
-/** 单例句柄，保险 */
-let lastReConnect = 0
 /** 延时重连 */
 const reConnectLater = () => {
-  if (lastReConnect) {
-    clearTimeout(lastReConnect)
+  if (lastReConnect.value) {
+    clearTimeout(lastReConnect.value)
   }
-  lastReConnect = setTimeout(() => {
+  lastReConnect.value = setTimeout(() => {
     getSignalr()
-    lastReConnect = 0
+    lastReConnect.value = 0
   }, RECONNECT_TIMEOUT) as unknown as number
 }
 
 /** 返回一个 signalr 连接中心 */
-export const getSignalr = (): Promise<HubConnection> => {
+export function getSignalr(): Promise<HubConnection> {
   /** 如果实例已连接 */
   if (isConnected.value) {
     return Promise.resolve(hub)
@@ -69,10 +68,10 @@ export const getSignalr = (): Promise<HubConnection> => {
 }
 
 /** 通过 signalr 发送请求 */
-export const requestWithSignalr = async <Res = unknown, Data extends unknown[] = unknown[]>(
+export async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknown[]>(
   url: string,
   ...data: Data
-): Promise<Res> => {
+): Promise<Res> {
   const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
   if (Status === 200 && Success) {
     return Response
