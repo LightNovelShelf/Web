@@ -2,6 +2,8 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref } from 'vue'
 
+import { tryResponseFromCache } from './cache'
+
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
 /** 失败重连等待的时长，ms */
@@ -33,18 +35,22 @@ hub.onclose(() => {
 })
 
 /** 延时重连 */
-const reConnectLater = () => {
+function reConnectLater() {
+  // 1. 如果已经有重连定时器，就不用覆盖设置了
   if (lastReConnect.value) {
-    clearTimeout(lastReConnect.value)
+    return
   }
-  lastReConnect.value = setTimeout(() => {
-    getSignalr()
-    lastReConnect.value = 0
-  }, RECONNECT_TIMEOUT) as unknown as number
+
+  // 2. 没有已有的重连定时器，新建一个
+  lastReConnect.value = setTimeout(getSignalr, RECONNECT_TIMEOUT) as unknown as number
 }
 
 /** 返回一个 signalr 连接中心 */
-export function getSignalr(): Promise<HubConnection> {
+function getSignalr(): Promise<HubConnection> {
+  /** 清空重连定时器记录 */
+  clearTimeout(lastReConnect.value)
+  lastReConnect.value = 0
+
   /** 如果实例已连接 */
   if (isConnected.value) {
     return Promise.resolve(hub)
@@ -72,6 +78,14 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   url: string,
   ...data: Data
 ): Promise<Res> {
+  if (!isConnected.value) {
+    try {
+      return await tryResponseFromCache(url, ...data)
+    } catch (e) {
+      // 如果不是离线；或者如果没有cache；吞掉这个错误，走正常的请求流程
+    }
+  }
+
   const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
   if (Status === 200 && Success) {
     return Response

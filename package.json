@@ -13,6 +13,7 @@
     "@microsoft/signalr": "^5.0.11",
     "@microsoft/signalr-protocol-msgpack": "^5.0.11",
     "core-js": "^3.19.0",
+    "localforage": "^1.10.0",
     "luxon": "^2.0.2",
     "masonry-layout": "^4.2.2",
     "naive-ui": "^2.19.11",
