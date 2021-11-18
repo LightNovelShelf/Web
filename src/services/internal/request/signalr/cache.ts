@@ -8,6 +8,21 @@ export async function tryResponseFromCache<Res = unknown, Data extends unknown[]
   url: string,
   ...data: Data
 ): Promise<Res> {
-  /** @todo 应该还要想办法结合data来取值 */
-  return cacheDB.get(url) as any
+  const key = JSON.stringify({ url, data })
+  const val = await cacheDB.get(key)
+  if (val) {
+    return val as Promise<any>
+  }
+
+  return Promise.reject('unfound')
+}
+
+/** 更新对应url的cache */
+export function updateResponseCache<Res = unknown, Data extends unknown[] = unknown[]>(
+  url: string,
+  res: Res,
+  ...data: Data
+): void {
+  const key = JSON.stringify({ url, data })
+  cacheDB.set(key, res)
 }
