@@ -82,7 +82,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     try {
       return await tryResponseFromCache(url, ...data)
     } catch (e) {
-      // 如果不是离线；或者如果没有cache；吞掉这个错误，走正常的请求流程
+      // 如果没有cache；吞掉这个错误，走正常的请求流程
     }
   }
 
