@@ -88,6 +88,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
   if (Status === 200 && Success) {
+    // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
     updateResponseCache(url, Response, ...data)
     return Response
   }
