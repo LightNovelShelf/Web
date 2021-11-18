@@ -48,7 +48,7 @@ export class DB {
   public get = (key: string) => {
     return this.db.getItem(key)
   }
-  /** 获取DB储存 */
+  /** 更新DB储存 */
   public set = (key: string, val: any) => {
     return this.db.setItem(key, val)
   }
