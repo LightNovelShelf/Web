@@ -2,7 +2,7 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref } from 'vue'
 
-import { tryResponseFromCache } from './cache'
+import { tryResponseFromCache, updateResponseCache } from './cache'
 
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
@@ -88,6 +88,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
   if (Status === 200 && Success) {
+    updateResponseCache(url, Response, ...data)
     return Response
   }
 

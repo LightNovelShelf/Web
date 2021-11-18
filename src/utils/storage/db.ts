@@ -5,7 +5,7 @@ if (!window.indexedDB) {
 }
 
 /** APP实例tag，用来方便同域名调试不同实例 */
-const TAG: string = process.env.VUE_APP_TAG
+const TAG: string = process.env.VUE_APP_TAG || 'eBook_Shelf'
 
 export class DB {
   /** 返回一个DB实例 */
@@ -47,5 +47,9 @@ export class DB {
   /** 获取DB储存 */
   public get = (key: string) => {
     return this.db.getItem(key)
+  }
+  /** 获取DB储存 */
+  public set = (key: string, val: any) => {
+    return this.db.setItem(key, val)
   }
 }
