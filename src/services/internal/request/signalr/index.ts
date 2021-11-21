@@ -73,11 +73,28 @@ function getSignalr(): Promise<HubConnection> {
   return connectPromise
 }
 
-/** 通过 signalr 发送请求 */
+/**
+ * 通过 signalr 发送请求
+ *
+ * @url https://github.com/LightNovelShelf/Web/issues/7
+ *
+ * @description
+ * 1. 保证 signalr 一定会触发connect
+ * 2. 读取连接状态，如果断联就检查缓存
+ *
+ * 3.1. 如果缓存读取成功，返回
+ *
+ * 3.2. 如果缓存失效，等待 signalr 连接成功后invoke请求
+ *
+ * 3.2.1. 请求成功，更新缓存并返回结果
+ * 3.2.2. 请求失败，throw error
+ */
 export async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknown[]>(
   url: string,
   ...data: Data
 ): Promise<Res> {
+  const signalr = getSignalr()
+
   if (!isConnected.value) {
     try {
       return await tryResponseFromCache(url, ...data)
@@ -86,7 +103,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     }
   }
 
-  const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
+  const { Success, Response, Status, Msg } = await (await signalr).invoke(url, ...data)
   if (Status === 200 && Success) {
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
     updateResponseCache(url, Response, ...data)
