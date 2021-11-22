@@ -48,7 +48,7 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
-import { useOnline } from '@/composition/useOnline'
+import { useIsOnline } from '@/services/composition'
 import { getChapterContent } from '@/services/chapter'
 
 function renderIcon(icon: string) {
@@ -123,7 +123,7 @@ export default defineComponent({
       activeKey,
       search: ref(null),
       menuOptions,
-      isOnline: useOnline(),
+      isOnline: useIsOnline(),
       renderMenuLabel(option: any) {
         if (!option.disabled && !option.children) {
           return <router-link to={{ name: option.route }}>{option.label}</router-link>

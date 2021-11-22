@@ -6,14 +6,12 @@ import { tryResponseFromCache, updateResponseCache } from './cache'
 
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
-/** 失败重连等待的时长，ms */
-const RECONNECT_TIMEOUT = 10 * 1000
 
-/** 记录Promie避免重复start */
-let connectPromise: null | Promise<HubConnection> = null
-/** signalr连接情况标志 */
+/** @internal 记录Promie避免重复start */
+export const connectPromise = ref<null | Promise<HubConnection>>(null)
+/** @internal signalr连接情况标志 */
 export const isConnected = ref<boolean>(false)
-/** 最后一次重连setTimeout句柄 */
+/** 最后一次重连定时器句柄 */
 const lastReConnect = ref<number>(0)
 
 /** signalr 连接中心 */
@@ -42,7 +40,7 @@ function reConnectLater() {
   }
 
   // 2. 没有已有的重连定时器，新建一个
-  lastReConnect.value = setTimeout(getSignalr, RECONNECT_TIMEOUT) as unknown as number
+  lastReConnect.value = setTimeout(getSignalr, 10 * 1000) as unknown as number
 }
 
 /** 返回一个 signalr 连接中心 */
@@ -57,29 +55,33 @@ function getSignalr(): Promise<HubConnection> {
   }
 
   /** 否则检查是否有正在进行的连接 */
-  if (!connectPromise) {
-    connectPromise = hub.start().then(() => hub)
+  if (!connectPromise.value) {
+    connectPromise.value = hub.start().then(() => hub)
 
     /** 记录已连接标志 */
-    connectPromise.then(() => (isConnected.value = true))
+    connectPromise.value.then(() => (isConnected.value = true))
     /** start抛出错误后，安排重连 */
-    connectPromise.catch(reConnectLater)
+    connectPromise.value.catch(reConnectLater)
     /** start完成后清除Promise，避免掉线重连时发现有Promise就不执行重连操作 */
-    connectPromise.finally(() => {
-      connectPromise = null
+    connectPromise.value.finally(() => {
+      connectPromise.value = null
     })
   }
 
-  return connectPromise
+  return connectPromise.value
 }
+/** 立即运行一次保证连接ws服务器，并记录成Promise */
+const firstConnect: Promise<void> = getSignalr().catch(() => void 0)
 
 /**
  * 通过 signalr 发送请求
  *
+ * @internal
+ *
  * @url https://github.com/LightNovelShelf/Web/issues/7
  *
  * @description
- * 1. 保证 signalr 一定会触发connect
+ * 1. 保证首次connect期间不读取缓存
  * 2. 读取连接状态，如果断联就检查缓存
  *
  * 3.1. 如果缓存读取成功，返回
@@ -93,7 +95,8 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   url: string,
   ...data: Data
 ): Promise<Res> {
-  const signalr = getSignalr()
+  // 等待第一次connect
+  await firstConnect
 
   if (!isConnected.value) {
     try {
@@ -103,12 +106,15 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     }
   }
 
-  const { Success, Response, Status, Msg } = await (await signalr).invoke(url, ...data)
+  const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
   if (Status === 200 && Success) {
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
     updateResponseCache(url, Response, ...data)
     return Response
   }
+
+  // @todo 暂不确定请求失败后是否使用缓存代替：
+  // 如果有两个接口的内容互为呼应，前一个请求成功，是更新后的内容，而后一个请求失败，如果回退使用缓存则可能会出现内容之间脱钩的问题
 
   throw new Error(Msg || '未知服务错误')
 }
