@@ -71,7 +71,7 @@ function getSignalr(): Promise<HubConnection> {
   return connectPromise.value
 }
 /** 立即运行一次保证连接ws服务器，并记录成Promise */
-const firstConnect: Promise<void> = getSignalr().catch(() => void 0)
+const firstConnect = getSignalr()
 
 /**
  * 通过 signalr 发送请求
@@ -96,7 +96,11 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   ...data: Data
 ): Promise<Res> {
   // 等待第一次connect
-  await firstConnect
+  try {
+    await firstConnect
+  } catch (e) {
+    // 不需要管错误，这里只关注连过就好
+  }
 
   if (!isConnected.value) {
     try {
