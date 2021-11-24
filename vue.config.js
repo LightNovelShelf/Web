@@ -5,11 +5,21 @@ function resolve(dir) {
 
 module.exports = {
   productionSourceMap: false,
+
   configureWebpack: {
     resolve: {
       alias: {
         '@': resolve('src')
       }
     }
-  }
+  },
+
+  pluginOptions: {
+    quasar: {
+      importStrategy: 'kebab',
+      rtlSupport: false
+    }
+  },
+
+  transpileDependencies: ['quasar']
 }

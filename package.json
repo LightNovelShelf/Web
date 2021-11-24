@@ -12,6 +12,7 @@
     "@mdi/js": "^6.4.95",
     "@microsoft/signalr": "^5.0.12",
     "@microsoft/signalr-protocol-msgpack": "^5.0.12",
+    "@quasar/extras": "^1.0.0",
     "core-js": "^3.19.1",
     "localforage": "^1.10.0",
     "luxon": "^2.1.1",
@@ -19,6 +20,7 @@
     "naive-ui": "^2.21.1",
     "nanoid": "^3.1.30",
     "pinia": "2.0.4",
+    "quasar": "^2.0.0",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.20",
     "vue-router": "^4.0.12"
@@ -42,9 +44,10 @@
     "eslint-plugin-vue": "^7.20.0",
     "npm-check-updates": "^12.0.2",
     "prettier": "^2.4.1",
-    "sass": "^1.43.4",
-    "sass-loader": "8.0.2",
-    "typescript": "4.4.4"
+    "sass": "1.32.12",
+    "sass-loader": "^10.1.0",
+    "typescript": "4.4.4",
+    "vue-cli-plugin-quasar": "~4.0.4"
   },
   "browserslist": [
     "> 1%",
