@@ -1,20 +1,18 @@
 <template>
   <n-card :bordered="false" content-style="padding: 4px;" footer-style="padding: 0">
     <template #cover>
-      <div
-        :style="{
-          paddingBottom: '150%',
-          backgroundImage: `url('${pic}')`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat'
-        }"
-      >
-      </div>
+      <q-img :src="cover" :ratio="2 / 3" />
       <div class="book-tag" :style="{ backgroundColor: themeVars.primaryColor }">
         <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
       </div>
     </template>
+
+    <div class="book-name">
+      <div class="book-name-text" :title="book?.Title">
+        {{ book.Title }}
+      </div>
+    </div>
+
     <template #footer>
       <div style="display: flex; padding: 0 4px">
         <n-text depth="3">{{ book.UserName }}</n-text>
@@ -22,11 +20,6 @@
         <n-text depth="3">{{ updateTime }}</n-text>
       </div>
     </template>
-    <div class="book-name">
-      <div class="book-name-text" :title="book?.Title">
-        {{ book.Title }}
-      </div>
-    </div>
   </n-card>
 </template>
 
@@ -39,7 +32,7 @@ import { BookInList } from '@/services/book/types'
 
 const props = defineProps<{ book: BookInList }>()
 const themeVars = useThemeVars()
-const pic = computed(() => midPic(props.book.Cover))
+const cover = computed(() => midPic(props.book.Cover))
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 </script>
 

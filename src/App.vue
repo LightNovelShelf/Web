@@ -23,9 +23,10 @@
 </template>
 
 <script lang="tsx">
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, watch } from 'vue'
 import { zhCN, dateZhCN, useOsTheme, darkTheme } from 'naive-ui'
 import { AppSider, AppHeader } from '@/components/app/index'
+import { useQuasar } from 'quasar'
 
 export default defineComponent({
   components: {
@@ -34,6 +35,14 @@ export default defineComponent({
   },
   setup() {
     const osThemeRef = useOsTheme()
+
+    const $q = useQuasar()
+    watch(
+      () => $q.dark.isActive,
+      (val) => {
+        console.log(val ? 'On dark mode' : 'On light mode')
+      }
+    )
 
     return {
       zhCN,
