@@ -1,37 +1,35 @@
 <template>
-  <n-card :bordered="false" content-style="padding: 4px;" footer-style="padding: 0">
-    <template #cover>
+  <div>
+    <div class="book-cover">
       <q-img :src="cover" :ratio="2 / 3" />
-      <div class="book-tag" :style="{ backgroundColor: themeVars.primaryColor }">
+      <div class="book-tag bg-primary">
         <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
-      </div>
-    </template>
-
-    <div class="book-name">
-      <div class="book-name-text" :title="book?.Title">
-        {{ book.Title }}
       </div>
     </div>
 
-    <template #footer>
-      <div style="display: flex; padding: 0 4px">
-        <n-text depth="3">{{ book.UserName }}</n-text>
-        <div class="flex-space"></div>
-        <n-text depth="3">{{ updateTime }}</n-text>
+    <div style="padding: 4px">
+      <div class="book-name">
+        <div class="book-name-text" :title="book?.Title">
+          {{ book.Title }}
+        </div>
       </div>
-    </template>
-  </n-card>
+    </div>
+
+    <div style="display: flex; padding: 0 4px">
+      <n-text depth="3">{{ book.UserName }}</n-text>
+      <div class="flex-space"></div>
+      <n-text depth="3">{{ updateTime }}</n-text>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, defineProps } from 'vue'
 import { midPic } from '@/utils/book'
 import { useToNow } from '@/composition/useToNow'
-import { useThemeVars } from 'naive-ui'
 import { BookInList } from '@/services/book/types'
 
 const props = defineProps<{ book: BookInList }>()
-const themeVars = useThemeVars()
 const cover = computed(() => midPic(props.book.Cover))
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 </script>
@@ -39,14 +37,15 @@ const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 <style lang="scss" scoped>
 @import '../assets/style/mixin';
 
-:deep(.n-card-cover) {
-  border: 1px solid var(--border-color);
+.book-cover {
+  position: relative;
+  border: 1px solid rgb(239, 239, 245);
   box-sizing: border-box;
 }
 
 .book-tag {
   position: absolute;
-  top: 6px;
+  top: 8px;
   right: 0;
   color: white;
   padding: 0 3px 0 6px;
@@ -57,6 +56,8 @@ const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
   display: flex;
   align-items: center;
   --font-size: 12px;
+  --line-height: 1.6;
+  line-height: var(--line-height);
   font-size: var(--font-size);
   height: calc(var(--font-size) * var(--line-height) * 2);
 
