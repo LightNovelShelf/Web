@@ -12,4 +12,6 @@ $negative  : #C10015;
 $info      : #31CCEC;
 $warning   : #F2C037;
 
-@import '~quasar-variables-styl'
+// TODO 很想把这个文件夹放其他地方，但是会报错
+
+@import '~quasar-variables-styl';
