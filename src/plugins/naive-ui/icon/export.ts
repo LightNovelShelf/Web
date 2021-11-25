@@ -9,5 +9,8 @@ export {
   mdiBook,
   mdiForum,
   mdiBroadcast,
-  mdiBroadcastOff
+  mdiBroadcastOff,
+  mdiBell,
+  mdiHistory,
+  mdiMessageText
 } from '@mdi/js'

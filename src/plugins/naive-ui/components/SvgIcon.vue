@@ -1,22 +1,23 @@
 <template>
-  <naive-icon v-bind="$attrs">
+  <q-icon :size="size" :tag="tag" :color="color" :left="left" :right="right">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path fill="currentColor" :d="path" />
     </svg>
-  </naive-icon>
+  </q-icon>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from 'vue'
-import { NIcon as naiveIcon } from 'naive-ui'
 
 export default defineComponent({
   name: 'SvgIcon',
-  components: {
-    naiveIcon
-  },
   props: {
-    path: String
+    size: String,
+    tag: String,
+    color: String,
+    path: String,
+    left: Boolean,
+    right: Boolean
   },
   setup() {
     return {}

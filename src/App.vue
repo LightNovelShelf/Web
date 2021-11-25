@@ -1,6 +1,5 @@
 <template>
   <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="theme">
-    <n-global-style />
     <n-layout class="app">
       <app-header />
       <n-layout class="content-wrapper" has-sider>
@@ -15,7 +14,6 @@
               </n-loading-bar-provider>
             </n-message-provider>
           </n-notification-provider>
-          <!-- <n-layout-footer class="footer" bordered>我是footer，关于本站，用户协议等，可以设定仅在home出现</n-layout-footer> -->
         </n-layout-content>
       </n-layout>
     </n-layout>
@@ -23,10 +21,9 @@
 </template>
 
 <script lang="tsx">
-import { computed, defineComponent, watch } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { zhCN, dateZhCN, useOsTheme, darkTheme } from 'naive-ui'
 import { AppSider, AppHeader } from '@/components/app/index'
-import { useQuasar } from 'quasar'
 
 export default defineComponent({
   components: {
@@ -35,14 +32,6 @@ export default defineComponent({
   },
   setup() {
     const osThemeRef = useOsTheme()
-
-    const $q = useQuasar()
-    watch(
-      () => $q.dark.isActive,
-      (val) => {
-        console.log(val ? 'On dark mode' : 'On light mode')
-      }
-    )
 
     return {
       zhCN,
@@ -56,7 +45,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 :global(.app) {
   --header-height: 64px;
-  --side-padding: 24px;
+  --side-padding: 12px;
   --slider-width: 220px;
   --content-padding-w: 36px;
   --content-padding-v: 24px;

@@ -30,12 +30,8 @@
     >
       <n-tooltip :placement="collapsed ? 'top-start' : 'top'">
         <template #trigger>
-          <n-element v-if="isOnline">
-            <svg-icon color="var(--success-color)" size="24" :path="icon.mdiBroadcast" />
-          </n-element>
-          <n-element v-else>
-            <svg-icon color="var(--error-color)" size="24" :path="icon.mdiBroadcastOff" />
-          </n-element>
+          <svg-icon v-if="isOnline" color="positive" size="1.715em" :path="icon.mdiBroadcast" />
+          <svg-icon v-else color="negative" size="1.715em" :path="icon.mdiBroadcastOff" />
         </template>
         <span v-if="isOnline">当前在线</span>
         <span v-else>当前离线</span>
