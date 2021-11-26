@@ -30,8 +30,8 @@
     >
       <n-tooltip :placement="collapsed ? 'top-start' : 'top'">
         <template #trigger>
-          <svg-icon v-if="isOnline" color="positive" size="1.715em" :path="icon.mdiBroadcast" />
-          <svg-icon v-else color="negative" size="1.715em" :path="icon.mdiBroadcastOff" />
+          <q-icon v-if="isOnline" color="positive" size="1.715em" :name="icon.mdiBroadcast" />
+          <q-icon v-else color="negative" size="1.715em" :name="icon.mdiBroadcastOff" />
         </template>
         <span v-if="isOnline">当前在线</span>
         <span v-else>当前离线</span>
@@ -46,9 +46,10 @@ import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
 import { getChapterContent } from '@/services/chapter'
+import { QIcon } from 'quasar'
 
 function renderIcon(icon: string) {
-  return () => <svg-icon path={icon} />
+  return () => <QIcon name={icon} />
 }
 
 const menuOptions = [

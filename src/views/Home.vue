@@ -15,7 +15,7 @@
           <template #header-extra>
             <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
               <b>更多</b>
-              <svg-icon :path="icon.mdiArrowRight" />
+              <q-icon :name="icon.mdiArrowRight" />
             </n-text>
           </template>
           <n-row>
@@ -46,7 +46,7 @@
                 <div style="font-size: 17px"><b>公告</b></div>
                 <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
                   <b>更多</b>
-                  <svg-icon :path="icon.mdiArrowRight" />
+                  <q-icon :name="icon.mdiArrowRight" />
                 </n-text>
               </n-space>
             </template>
@@ -62,7 +62,7 @@
                 <div style="font-size: 17px"><b>更新日志</b></div>
                 <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
                   <b>更多</b>
-                  <svg-icon :path="icon.mdiArrowRight" />
+                  <q-icon :path="icon.mdiArrowRight" />
                 </n-text>
               </n-space>
             </template>
