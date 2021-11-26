@@ -18,7 +18,7 @@
       <q-btn round dense flat>
         <q-badge color="red" text-color="white" floating> 222 </q-badge>
         <q-tooltip>通知</q-tooltip>
-        <svg-icon :path="icon.mdiBell"></svg-icon>
+        <q-icon :name="icon.mdiBell"></q-icon>
       </q-btn>
 
       <q-btn round dense flat label="动态">
@@ -28,7 +28,7 @@
       <q-btn round dense flat>
         <q-badge color="red" text-color="white" floating> 99+ </q-badge>
         <q-tooltip>通知</q-tooltip>
-        <svg-icon :path="icon.mdiMessageText"></svg-icon>
+        <q-icon :name="icon.mdiMessageText"></q-icon>
       </q-btn>
 
       <div />
@@ -50,11 +50,9 @@
 import { computed, defineComponent, ref } from 'vue'
 import { icon } from '@/plugins/naive-ui'
 import { useAppStore } from '@/store'
-import SvgIcon from '@/plugins/naive-ui/components/SvgIcon.vue'
 
 export default defineComponent({
   name: 'Header',
-  components: { SvgIcon },
   setup() {
     const appStore = useAppStore()
 

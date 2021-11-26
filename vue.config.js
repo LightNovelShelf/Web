@@ -7,7 +7,12 @@ function resolve(dir) {
 
 module.exports = {
   productionSourceMap: false,
-
+  chainWebpack: (config) => {
+    config.plugin('html').tap((args) => {
+      args[0].title = '轻书架'
+      return args
+    })
+  },
   configureWebpack: {
     plugins: [new ProvidePlugin({ process: 'process' })],
     resolve: {
@@ -15,19 +20,17 @@ module.exports = {
         '@': resolve('src')
       },
       fallback: {
-        // assert: require.resolve('assert/'),
-        // util: require.resolve('util/'),
+        assert: require.resolve('assert/'),
+        util: require.resolve('util/'),
         process: require.resolve('process/browser')
       }
     }
   },
-
   pluginOptions: {
     quasar: {
       importStrategy: 'kebab',
       rtlSupport: false
     }
   },
-
   transpileDependencies: ['quasar']
 }
