@@ -19,7 +19,6 @@
 
 <script lang="ts" setup>
 import { Card, CardSize } from '@/types/collaborator'
-import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps<{ class?: string; size: CardSize; data: Card }>()
 const emit = defineEmits<{

@@ -1,7 +1,7 @@
 {
-  "name": "web",
+  "name": "light_novel_shelf",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -36,11 +36,11 @@
     "@vue/cli-plugin-typescript": "~5.0.0-rc.1",
     "@vue/cli-service": "~5.0.0-rc.1",
     "@vue/compiler-sfc": "^3.2.22",
-    "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^9.1.0",
     "assert": "^2.0.0",
     "babel-plugin-component": "^1.1.1",
     "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.1.1",
     "npm-check-updates": "^12.0.2",
