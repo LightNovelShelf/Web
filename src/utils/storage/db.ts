@@ -4,13 +4,58 @@ if (!window.indexedDB) {
   throw new Error('unsupport browser')
 }
 
+/** 应用版本；版本变更时会清空上一版本的数据库 */
+const APP_VER: number = +process.env.VUE_APP_VER
 /** APP实例tag，用来方便同域名调试不同实例 */
-const TAG: string = process.env.VUE_APP_TAG || 'eBook_Shelf'
+const APP_NAME: string = process.env.VUE_APP_NAME || 'eBook_Shelf'
+
+/**
+ * 储存数据库元数据的数据库
+ *
+ * @description
+ * 因为 localforage 的getItem操作是异步操作，没法在 DB 的 constructor 里完成操作
+ * 所以这里用 localStorage 起了个简单的轮子
+ */
+class MetaDB {
+  private config: Record<string, { version?: number }> = {}
+  private static NAME = APP_NAME + '__DB_META'
+
+  constructor() {
+    try {
+      this.config = JSON.parse(localStorage.getItem(MetaDB.NAME) ?? '{}')
+    } catch (e) {
+      this.config = {}
+      localStorage.setItem(MetaDB.NAME, JSON.stringify(this.config))
+    }
+  }
+
+  // 这里使用setVer而不是setItem是因为现在场景比较简单，直接setVer简化概念与类型声明
+  // 以后有多个key设置时再另外写具体逻辑（包括各个key的空值适配等）
+
+  /** 设置版本 */
+  public setDBVer(DB_NAME: string, ver: number): void {
+    if (!this.config[DB_NAME]) {
+      this.config[DB_NAME] = {}
+    }
+    this.config[DB_NAME].version = ver
+    localStorage.setItem(MetaDB.NAME, JSON.stringify(this.config))
+  }
+  /** 读取版本 */
+  public getDBVer(DB_NAME: string): number {
+    return this.config[DB_NAME]?.version ?? 1
+  }
+}
+
+const metaDBInstance = new MetaDB()
 
 export class DB {
   /** 返回一个DB实例 */
-  private static createDB(VER: number, DB_DESC: string) {
+  private static createInstance(name: string, VER: number, DB_DESC: string) {
     return localforage.createInstance({
+      /** 库名, 一个应用一个库 */
+      name: APP_NAME,
+      /** 表名 */
+      storeName: name,
       version: VER,
       description: DB_DESC,
       driver: localforage.INDEXEDDB
@@ -18,7 +63,7 @@ export class DB {
   }
 
   /** 当前版本 */
-  private static readonly CURRENT_VER: number = +process.env.VUE_APP_VER
+  private static readonly CURRENT_VER = APP_VER
 
   /** db实例 */
   private db: LocalForage
@@ -29,19 +74,19 @@ export class DB {
     /** DB描述 */
     DB_DESC = ''
   ) {
-    /** 存储DB版本号的STORAGE_KEY */
-    const LAST_VER_STORAGE_KEY = TAG + '_DB_VER_' + DB_NAME
-
     /** 客户端已有的DB版本 */
-    const LAST_VER = +(localStorage.getItem(LAST_VER_STORAGE_KEY) || DB.CURRENT_VER)
+    const LAST_VER = metaDBInstance.getDBVer(DB_NAME)
 
     /** 查询是否有现存的DB */
     if (LAST_VER && LAST_VER !== DB.CURRENT_VER) {
-      DB.createDB(LAST_VER, DB_DESC).clear()
+      debugger
+      DB.createInstance(DB_NAME, LAST_VER, DB_DESC).dropInstance()
     }
 
-    localStorage.setItem(LAST_VER_STORAGE_KEY, DB.CURRENT_VER.toString())
-    this.db = DB.createDB(DB.CURRENT_VER, DB_DESC)
+    // 就算相同也要set一次，保证初版应用也能记录到
+    metaDBInstance.setDBVer(DB_NAME, DB.CURRENT_VER)
+
+    this.db = DB.createInstance(DB_NAME, DB.CURRENT_VER, DB_DESC)
   }
 
   /** 获取DB储存 */
