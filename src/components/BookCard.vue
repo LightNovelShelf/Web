@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="book-cover">
-      <q-img :src="cover" :ratio="2 / 3" />
+      <q-img :src="cover" :ratio="2 / 3" @error="error = true" />
       <div class="book-tag bg-primary">
         <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
       </div>
@@ -24,13 +24,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps } from 'vue'
+import { computed, ref } from 'vue'
 import { midPic } from '@/utils/book'
 import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
 
+const error = ref(false)
 const props = defineProps<{ book: BookInList }>()
-const cover = computed(() => midPic(props.book.Cover))
+const cover = computed(() => (error.value ? props.book.Cover : midPic(props.book.Cover)))
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 </script>
 
