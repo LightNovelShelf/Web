@@ -1,43 +1,22 @@
 <template>
-  <n-layout-sider
-    bordered
-    collapse-mode="width"
-    :collapsed-width="64"
-    width="var(--slider-width)"
-    :collapsed="collapsed"
-    show-trigger="bar"
-    @collapse="collapsed = true"
-    @expand="collapsed = false"
-  >
-    <n-menu
-      :collapsed="collapsed"
-      :collapsed-width="64"
-      :collapsed-icon-size="22"
-      :options="menuOptions"
-      v-model:value="activeKey"
-      :render-label="renderMenuLabel"
-    />
-    <div
-      style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        bottom: 24px;
-        left: 0;
-        right: 0;
-      "
-    >
-      <n-tooltip :placement="collapsed ? 'top-start' : 'top'">
-        <template #trigger>
-          <q-icon v-if="isOnline" color="positive" size="1.715em" :name="icon.mdiBroadcast" />
-          <q-icon v-else color="negative" size="1.715em" :name="icon.mdiBroadcastOff" />
+  <q-drawer v-model="siderShow" show-if-above bordered class="bg-grey-2" :width="240">
+    <q-scroll-area class="fit">
+      <q-list padding v-for="index in [1, 2, 3, 4, 5]" :key="index">
+        <template v-for="option in menuOptions" :key="option.key">
+          <q-separator class="q-my-md" v-if="option.label === 'separator'" />
+
+          <q-item v-ripple clickable v-else>
+            <q-item-section avatar>
+              <q-icon color="grey" :name="option.icon" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ option.label }}</q-item-label>
+            </q-item-section>
+          </q-item>
         </template>
-        <span v-if="isOnline">当前在线</span>
-        <span v-else>当前离线</span>
-      </n-tooltip>
-    </div>
-  </n-layout-sider>
+      </q-list>
+    </q-scroll-area>
+  </q-drawer>
 </template>
 
 <script lang="tsx">
@@ -46,56 +25,39 @@ import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
 import { getChapterContent } from '@/services/chapter'
-import { QIcon } from 'quasar'
-
-function renderIcon(icon: string) {
-  return () => <QIcon name={icon} />
-}
+import { useSider } from './useSider'
 
 const menuOptions = [
   {
     label: '首页',
     key: 'Home',
     route: 'Home',
-    icon: renderIcon(icon.mdiHome)
+    icon: icon.mdiHome
   },
   {
     label: '公告',
     key: 'Announcement',
     route: 'Announcement',
-    icon: renderIcon(icon.mdiBullhorn)
+    icon: icon.mdiBullhorn
   },
   {
     label: '小说',
     key: 'BookList',
-    icon: renderIcon(icon.mdiBook),
-    route: 'BookList',
-    children: [
-      {
-        label: '全部',
-        key: 'BookList',
-        route: 'BookList'
-      },
-      {
-        label: '日轻',
-        key: '日轻',
-        disabled: true,
-        route: 'BookList'
-      },
-      {
-        label: '原创',
-        key: '原创',
-        disabled: true,
-        route: 'BookList'
-      }
-    ]
+    icon: icon.mdiBook,
+    route: 'BookList'
+  },
+  {
+    label: 'separator',
+    key: 'separator 1',
+    icon: null,
+    route: null
   },
   {
     label: '社区',
     key: 'Community',
     route: 'Community',
     disabled: true,
-    icon: renderIcon(icon.mdiForum)
+    icon: icon.mdiForum
   }
 ]
 
@@ -110,13 +72,15 @@ export default defineComponent({
       }
     })
 
+    const { siderShow } = useSider()
+
     onMounted(async () => {
       console.log(await getChapterContent({ SortNum: 1, Bid: 318 }))
     })
 
     return {
       icon,
-      collapsed: ref(true),
+      siderShow,
       activeKey,
       search: ref(null),
       menuOptions,

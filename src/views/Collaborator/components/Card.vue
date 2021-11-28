@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits, ref } from 'vue'
+import { ref } from 'vue'
 
 import { Card } from '@/types/collaborator'
 import { useResizeObserver } from '@/composition/useResizeObserver'

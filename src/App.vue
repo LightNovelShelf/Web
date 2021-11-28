@@ -1,22 +1,20 @@
 <template>
   <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="theme">
-    <n-layout class="app">
+    <q-layout view="hHh LpR fFf" class="bg-grey-1">
       <app-header />
-      <n-layout class="content-wrapper" has-sider>
-        <app-sider />
-        <n-layout-content :native-scrollbar="false">
-          <n-notification-provider>
-            <n-message-provider>
-              <n-loading-bar-provider>
-                <div class="content">
-                  <router-view />
-                </div>
-              </n-loading-bar-provider>
-            </n-message-provider>
-          </n-notification-provider>
-        </n-layout-content>
-      </n-layout>
-    </n-layout>
+      <app-sider />
+      <q-page-container>
+        <n-notification-provider>
+          <n-message-provider>
+            <n-loading-bar-provider>
+              <div style="padding: 24px 12px">
+                <router-view />
+              </div>
+            </n-loading-bar-provider>
+          </n-message-provider>
+        </n-notification-provider>
+      </q-page-container>
+    </q-layout>
   </n-config-provider>
 </template>
 

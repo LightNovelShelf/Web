@@ -3,16 +3,7 @@
     <n-card>
       <n-grid x-gap="24" y-gap="6" cols="1 600:2">
         <n-grid-item>
-          <div
-            :style="{
-              paddingBottom: '150%',
-              backgroundImage: `url('${book['Cover']}')`,
-              backgroundPosition: 'center center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat'
-            }"
-          >
-          </div>
+          <q-img :src="book.Cover" :ratio="2 / 3" />
         </n-grid-item>
         <n-grid-item>
           <n-h2 @click="getInfo">《{{ book['Title'] }}》</n-h2>
