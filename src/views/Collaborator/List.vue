@@ -1,89 +1,57 @@
 <script lang="tsx" setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import masonry from 'masonry-layout'
-import { debounce } from 'lodash-es'
-import { useMedia } from '@/composition/useMedia'
-import { CardSize } from '@/types/collaborator'
+import { ref } from 'vue'
 
 import { useCollaborators } from './store'
 
 import CardItem from './components/Card.vue'
+import { useResizeObserver } from '@/composition/useResizeObserver'
+import { debounceInFrame } from '@/utils/debounceInFrame'
+import { useMasonry } from '@/composition/useMasonry'
 
 /** 数据源 */
 const { collaborators } = useCollaborators()
-/** 列表容器 */
-const masonryContainerNodeRef = ref<HTMLDivElement>(document.createElement('div'))
-/** 列表节点 */
-const masonryListNodeRef = ref<HTMLDivElement>(document.createElement('div'))
-/** masonry实例 */
-const masonryInstance = ref<masonry>(new masonry(masonryListNodeRef.value))
+/** 列表容器，宽度随着父容器，用于监听父容器宽度是否改变（但window没改变，如菜单展开） */
+const wrapNodeRef = ref<HTMLDivElement>(document.createElement('div'))
+/** 列表节点，masonry列表容器 */
+const masonryNodeRef = ref<HTMLDivElement>(document.createElement('div'))
 
-/** 是否是宽屏，设置图片为对应大小央视 */
-const isWide = useMedia(ref('(min-width: 1080px)'))
-/** 预设大小枚举 */
-const size = computed<CardSize>(() => {
-  return isWide ? CardSize.normal : CardSize.small
-})
+const { layout } = useMasonry(masonryNodeRef)
 
-/** 内部图片加载完毕等，重新触发一次masonry排版 */
-const relayoutHandle = debounce(
-  () => {
-    masonryInstance.value.layout()
-  },
-  50,
-  { trailing: true }
-)
+/** 重排 */
+const relayoutHandle = debounceInFrame(layout)
 
-const resizeObserver = new ResizeObserver(relayoutHandle)
-
-onMounted(() => {
-  masonryInstance.value = new masonry(masonryListNodeRef.value, {
-    itemSelector: '.js-masonry-item',
-    gutter: 15,
-    fitWidth: true,
-    // 这里我也忘了原来什么情况下有nano，可能原本有后来又没了（需求变更），这里先写下
-    columnWidth: size.value === CardSize.nano ? 100 : 240
-  })
-
-  /** 监听布局变化（侧边菜单展开等） */
-  resizeObserver.observe(masonryContainerNodeRef.value)
-})
-onBeforeUnmount(() => {
-  masonryInstance.value.destroy()
-  resizeObserver.disconnect()
-})
+/**
+ * 监听列表容器
+ *
+ * @description
+ * masonry实例本身有监听window.onResize之类的事件
+ * resize时触发过多函数回调跟这个 resizeObserver 没太大关系
+ */
+useResizeObserver(wrapNodeRef, relayoutHandle)
 </script>
 <template>
   <!-- collaborator 宽随父容器 -->
-  <div class="collaborator" ref="masonryContainerNodeRef">
+  <div class="wrap" ref="wrapNodeRef">
     <!-- collaborator_list 宽随子元素 -->
-    <div class="collaborator_list" ref="masonryListNodeRef">
+    <div class="list" ref="masonryNodeRef">
       <card-item
         v-for="item in collaborators"
         :key="item.key"
         class="js-masonry-item"
         :data="item"
-        :size="size"
         @resize="relayoutHandle"
       />
     </div>
   </div>
 </template>
 <style lang="scss" scoped>
-.collaborator {
-  color: rgba(#000, 0.87);
-  letter-spacing: 0.01071em;
-  max-width: 100%;
-  font-weight: 400;
-  margin-left: auto;
-  margin-right: auto;
-
-  &， &:deep(*) {
-    box-sizing: border-box;
-  }
+.wrap {
+  box-sizing: border-box;
 }
-.collaborator_list {
-  margin-left: auto;
-  margin-right: auto;
+.list {
+  position: relative;
+}
+.js-masonry-item {
+  position: absolute;
 }
 </style>
