@@ -1,63 +1,60 @@
 <template>
-  <div
-    :class="{
-      com_waterfall_item: true,
-      [props.size]: true,
-      [props.class ?? '']: true
-    }"
-  >
-    <div className="com_waterfall_item_avast">
-      <img :src="data.avast" @load="imgLoadedHandle" @error="errorHandle" referrerPolicy="no-referrer" />
+  <div class="wrap" :class="{ [props.class]: true }">
+    <div class="avast">
+      <img :src="data.avast" ref="imageRef" @load="loadedHandle" @error="loadedHandle" referrerPolicy="no-referrer" />
     </div>
-    <div className="com_waterfall_item_text_meta">
-      <div className="com_waterfall_item_text_nickname">{{ props.data.nickname }}</div>
-      <!-- <div className="com_waterfall_item_text_job">{{ data.job }}</div> -->
+    <div class="text_meta">
+      <div class="nickname">{{ props.data.nickname }}</div>
+      <div class="bio">{{ data.bio }}</div>
     </div>
-    <div className="com_waterfall_item_bio">{{ data.bio }}</div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Card, CardSize } from '@/types/collaborator'
+import { defineProps, defineEmits, ref } from 'vue'
 
-const props = defineProps<{ class?: string; size: CardSize; data: Card }>()
+import { Card } from '@/types/collaborator'
+import { useResizeObserver } from '@/composition/useResizeObserver'
+
+const props = defineProps<{ class?: string; data: Card }>()
 const emit = defineEmits<{
   (event: 'resize'): void
 }>()
 
-const imgLoadedHandle = () => {
+const imageRef = ref<HTMLImageElement>(null)
+
+const resizeHandle = () => {
   emit('resize')
 }
-const errorHandle = () => {
-  emit('resize')
+
+/** 采用 ResizeObserver 降低card文字内容被遮挡的可能性 */
+const { observer } = useResizeObserver(imageRef, resizeHandle)
+
+const loadedHandle = () => {
+  resizeHandle()
+  observer.disconnect()
 }
 </script>
 
-<style lang="scss">
-.flexBox {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-.com_waterfall_item {
-  width: 240px;
+<style lang="scss" scoped>
+.wrap {
   border-radius: 8px;
-  // padding: 10px;
-  margin-bottom: 10px;
-  box-sizing: border-box;
-  // border: 1px 1px #262626;
-  border-radius: 4px;
   background-color: #fff;
-  box-shadow: 0px 1px 3px 0px rgba(#000, 0.2), 0px 1px 1px 0px rgba(#000, 0.14), 0px 2px 1px -1px rgba(#000, 0.12);
+  box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
   overflow: hidden;
-  .com_waterfall_item_avast {
-    display: block;
+
+  transition: transform 0.2s;
+
+  &,
+  &:deep(*) {
+    box-sizing: border-box;
+  }
+
+  .avast {
     font-size: 0;
+    background-color: rgba(#000, 0.05);
+
     img {
-      // border-top-left-radius: 8px;
-      // border-top-right-radius: 8px;
       width: 100%;
       height: 100%;
       min-height: 100px;
@@ -65,107 +62,26 @@ const errorHandle = () => {
       object-position: top center;
     }
   }
-  .com_waterfall_item_text_meta {
+  .text_meta {
     color: #262626;
-    // display: flex;
-    // justify-content: space-between;
-    padding: 16px;
-    padding-bottom: 12px;
-    .com_waterfall_item_text_nickname {
-      font-size: 24px;
-      line-height: 1.33;
-      font-weight: bold;
-    }
-    .com_waterfall_item_text_job {
-      color: rgba(#000, 0.54);
-      font-size: 14px;
-    }
-    .com_waterfall_item_text_nickname,
-    .com_waterfall_item_text_job {
-      text-align: left;
-      word-break: break-all;
-    }
-    .retiredTag {
-      color: gray;
-      border: 1px solid gray;
-      border-radius: 2px;
-      width: 1.3em;
-      height: 1.3em;
-      line-height: 1.3em;
-      font-weight: normal;
-      text-align: center;
-      display: inline-block;
-      transform: scale(0.4) translateY(10px);
-      margin-left: 4px;
-      transform-origin: left top;
-    }
-  }
-  .com_waterfall_item_bio {
+    margin: 16px;
     font-size: 14px;
-    // margin-top: 1em;
-    line-height: 1.5;
     text-align: left;
-    padding: 16px;
-    padding-top: 0;
+  }
+  .nickname {
+    font-size: 24px;
+    line-height: 1.33;
+    font-weight: bold;
+  }
+  .bio {
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+
+  .nickname,
+  .bio {
     white-space: pre-line;
     word-break: break-all;
-  }
-
-  &.retired {
-    .com_waterfall_item_text_nickname,
-    .com_waterfall_item_bio {
-      color: rgba(#000, 0.54);
-      word-break: break-all;
-      white-space: pre-wrap;
-    }
-  }
-
-  &.small {
-    @extend .flexBox;
-    justify-content: space-between;
-    flex-wrap: wrap;
-
-    .com_waterfall_item_text_meta {
-      flex: 1;
-    }
-
-    .com_waterfall_item_avast {
-      width: 100px;
-      height: 100px;
-      flex-shrink: 0;
-    }
-
-    .com_waterfall_item_text_nickname {
-      font-size: 16px;
-    }
-    .com_waterfall_item_text_job {
-      margin-top: 0.4em;
-    }
-    .com_waterfall_item_bio {
-      width: 100%;
-      margin-top: 1em;
-      padding: 8px;
-    }
-  }
-
-  &.nano {
-    background-color: transparent;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-
-    .com_waterfall_item_avast {
-      width: 100%;
-      height: 100%;
-
-      cursor: pointer;
-    }
-
-    .com_waterfall_item_text_meta,
-    .com_waterfall_item_bio {
-      display: none;
-    }
   }
 }
 </style>
