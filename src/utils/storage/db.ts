@@ -79,7 +79,6 @@ export class DB {
 
     /** 查询是否有现存的DB */
     if (LAST_VER && LAST_VER !== DB.CURRENT_VER) {
-      debugger
       DB.createInstance(DB_NAME, LAST_VER, DB_DESC).dropInstance()
     }
 
