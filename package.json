@@ -6,12 +6,12 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "u": "ncu -x @microsoft/signalr*"
+    "u": "ncu"
   },
   "dependencies": {
     "@mdi/js": "^6.5.95",
-    "@microsoft/signalr": "^5.0.12",
-    "@microsoft/signalr-protocol-msgpack": "^5.0.12",
+    "@microsoft/signalr": "^6.0.0",
+    "@microsoft/signalr-protocol-msgpack": "^6.0.0",
     "@quasar/extras": "^1.12.1",
     "core-js": "^3.19.1",
     "localforage": "^1.10.0",

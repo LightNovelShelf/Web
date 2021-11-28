@@ -1,7 +1,10 @@
-html,
-body {
-  overflow: hidden;
-  background-color: #f6f7f9;
+html{
+  overflow-y: scroll;
+  //background-color: #f6f7f9;
+}
+
+body{
+  overflow-y: hidden;
 }
 
 .q-badge--floating{
