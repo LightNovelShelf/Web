@@ -12,11 +12,11 @@ const imgs: string[] = [
 const mock = (): Card[] => {
   return new Array(40).fill('').map((_, idx) => {
     return {
-      key: nanoid(),
-      id: nanoid(),
-      avast: imgs[idx % imgs.length],
-      nickname: nanoid(idx % 2 === 1 ? 40 : 6),
-      bio: nanoid(idx % 2 === 1 ? 40 : 6)
+      Id: nanoid(),
+      Job: 'Epub',
+      Avatar: imgs[idx % imgs.length],
+      Title: nanoid(idx % 2 === 1 ? 40 : 6),
+      Description: nanoid(idx % 2 === 1 ? 40 : 6)
     }
   })
 }

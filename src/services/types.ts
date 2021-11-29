@@ -4,7 +4,7 @@ export interface RequestConfig<Param, Data> {
   signal?: AbortSignal
   /** 拼接在url上的参数 */
   param?: Param
-  /** 放在urlbody上的参数 */
+  /** 放在url body上的参数 */
   data?: Data
   /** 请求方法 */
   method?: 'GET' | 'POST'

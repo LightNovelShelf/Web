@@ -1,11 +1,11 @@
 <template>
   <div class="wrap" :class="{ [props.class]: true }">
-    <div class="avast">
-      <img :src="data.avast" ref="imageRef" @load="loadedHandle" @error="loadedHandle" referrerPolicy="no-referrer" />
+    <div class="avatar">
+      <img :src="data.Avatar" ref="imageRef" @load="loadedHandle" @error="loadedHandle" referrerPolicy="no-referrer" />
     </div>
     <div class="text_meta">
-      <div class="nickname">{{ props.data.nickname }}</div>
-      <div class="bio">{{ data.bio }}</div>
+      <div class="nickname">{{ data.Title }}</div>
+      <div class="description">{{ data.Description }}</div>
     </div>
   </div>
 </template>
@@ -50,7 +50,7 @@ const loadedHandle = () => {
     box-sizing: border-box;
   }
 
-  .avast {
+  .avatar {
     font-size: 0;
     background-color: rgba(#000, 0.05);
 
@@ -73,13 +73,13 @@ const loadedHandle = () => {
     line-height: 1.33;
     font-weight: bold;
   }
-  .bio {
+  .description {
     line-height: 1.5;
     margin-top: 12px;
   }
 
   .nickname,
-  .bio {
+  .description {
     white-space: pre-line;
     word-break: break-all;
   }

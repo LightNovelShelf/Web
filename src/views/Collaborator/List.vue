@@ -1,15 +1,19 @@
 <script lang="tsx" setup>
 import { ref } from 'vue'
-
-import { useCollaborators } from './store'
-
 import CardItem from './components/Card.vue'
 import { useResizeObserver } from '@/composition/useResizeObserver'
 import { debounceInFrame } from '@/utils/debounceInFrame'
 import { useMasonry } from '@/composition/useMasonry'
+import { getCollaboratorList } from '@/services/context'
+import { Card } from '@/types/collaborator'
 
 /** 数据源 */
-const { collaborators } = useCollaborators()
+const collaborators = ref<Card[]>([])
+const loading = ref(true)
+getCollaboratorList().then((res) => {
+  collaborators.value = res
+  loading.value = false
+})
 /** 列表容器，宽度随着父容器，用于监听父容器宽度是否改变（但window没改变，如菜单展开） */
 const wrapNodeRef = ref<HTMLDivElement>(document.createElement('div'))
 /** 列表节点，masonry列表容器 */
@@ -18,7 +22,7 @@ const masonryNodeRef = ref<HTMLDivElement>(document.createElement('div'))
 const { layout } = useMasonry(masonryNodeRef)
 
 /** 重排 */
-const relayoutHandle = debounceInFrame(layout)
+const reLayoutHandle = debounceInFrame(layout)
 
 /**
  * 监听列表容器
@@ -27,7 +31,7 @@ const relayoutHandle = debounceInFrame(layout)
  * masonry实例本身有监听window.onResize之类的事件
  * resize时触发过多函数回调跟这个 resizeObserver 没太大关系
  */
-useResizeObserver(wrapNodeRef, relayoutHandle)
+useResizeObserver(wrapNodeRef, reLayoutHandle)
 </script>
 <template>
   <!-- collaborator 宽随父容器 -->
@@ -36,12 +40,13 @@ useResizeObserver(wrapNodeRef, relayoutHandle)
     <div class="list" ref="masonryNodeRef">
       <card-item
         v-for="item in collaborators"
-        :key="item.key"
+        :key="item.Id"
         class="js-masonry-item"
         :data="item"
-        @resize="relayoutHandle"
+        @resize="reLayoutHandle"
       />
     </div>
+    <q-inner-loading :showing="loading" label="请等待..." label-class="text-teal" label-style="font-size: 1.1em" />
   </div>
 </template>
 <style lang="scss" scoped>
