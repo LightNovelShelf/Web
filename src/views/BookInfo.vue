@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 import Comment from '@/components/Comment.vue'
 import { useTickSource } from '@/composition/useTickSource'
 import { toNow } from '@/utils/time'
@@ -49,11 +49,13 @@ export default defineComponent({
   components: {
     Comment
   },
-  setup() {
+  props: {
+    bid: String
+  },
+  setup(props) {
     let book = ref<any>({})
     const getInfo = async () => {
-      let res = await getBookInfo(318)
-      book.value = res
+      book.value = await getBookInfo(~~props.bid)
 
       // 这个键值是用来存放格式化文案
       book.value.LastUpdateTimeDesc = ''

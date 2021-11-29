@@ -3,27 +3,26 @@
     <!-- 默认是1，容器超过600px变2 -->
     <n-grid :x-gap="12" :y-gap="8" responsive="screen" cols="1 m:2 l:2 xl:2 2xl:2">
       <n-grid-item>
-        <n-card
-          type="success"
-          title="最近更新"
-          :segmented="{
-            content: 'hard',
-            footer: 'soft'
-          }"
-          content-style="padding:0;"
-        >
-          <template #header-extra>
-            <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
-              <b>更多</b>
-              <q-icon :name="icon.mdiArrowRight" />
-            </n-text>
-          </template>
-          <n-row>
-            <n-col v-for="(book, index) in bookData" :key="index" :span="8" style="padding: 6px">
-              <book-card :book="book"></book-card>
-            </n-col>
-          </n-row>
-        </n-card>
+        <q-card>
+          <q-card-section>
+            <div class="row flex-center">
+              <div class="text-h6">最近更新</div>
+              <q-space />
+              <div class="text-subtitle2">更多</div>
+            </div>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section>
+            <!-- TODO 以后用Grid替换 -->
+            <div class="row q-col-gutter-sm">
+              <div class="col-4" v-for="(book, index) in bookData" :key="index" style="box-sizing: border-box">
+                <book-card :book="book"></book-card>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
         <n-card type="success" title="网站统计" style="margin-top: 12px">
           <n-row>
             <n-col :span="8">

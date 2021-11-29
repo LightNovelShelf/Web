@@ -3,7 +3,7 @@
     <q-toolbar>
       <q-btn flat dense round aria-label="Menu" :icon="icon.mdiMenu" @click="siderShow = !siderShow" />
 
-      <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs">
+      <div class="row q-ml-xs cursor-pointer flex-center non-selectable" v-if="$q.screen.gt.xs" style="padding: 0 12px">
         <div class="row flex-center">
           <q-icon size="24" :name="icon.mdiInformation" />
           <q-tooltip anchor="bottom right" self="top right"> 欢迎来稿一个新的网站图标 </q-tooltip>
@@ -11,7 +11,7 @@
         <q-toolbar-title shrink class="text-weight-bold" @click="changAppName">
           {{ appName }}
         </q-toolbar-title>
-      </q-btn>
+      </div>
 
       <q-input dense outlined square v-model="search" placeholder="搜索" />
 
@@ -19,13 +19,9 @@
 
       <div class="q-gutter-sm row items-center no-wrap">
         <q-btn round dense flat>
-          <q-badge color="red" text-color="white" floating> 222 </q-badge>
+          <q-badge color="red" text-color="white" floating> 22 </q-badge>
           <q-tooltip>通知</q-tooltip>
           <q-icon :name="icon.mdiBell"></q-icon>
-        </q-btn>
-
-        <q-btn round dense flat label="动态">
-          <q-badge color="red" text-color="white" rounded floating></q-badge>
         </q-btn>
 
         <q-btn round dense flat>
@@ -34,7 +30,7 @@
           <q-icon :name="icon.mdiMessageText"></q-icon>
         </q-btn>
 
-        <div style="width: 20px" />
+        <div style="width: 10px" />
 
         <n-popover :show-arrow="false" placement="bottom-end" trigger="click">
           <template #trigger>
@@ -44,8 +40,8 @@
             <span>这里放用户信息</span>
           </template>
           <n-text strong depth="1">这里放一堆按钮</n-text>
-        </n-popover></div
-      >
+        </n-popover>
+      </div>
     </q-toolbar>
   </q-header>
 </template>
