@@ -97,7 +97,8 @@ export default defineComponent({
           Category: {
             ShortName: '录入'
           },
-          LastUpdateTime: new Date()
+          LastUpdateTime: new Date(),
+          Id: 381
         },
         {
           Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
@@ -106,7 +107,8 @@ export default defineComponent({
           Category: {
             ShortName: '录入'
           },
-          LastUpdateTime: new Date()
+          LastUpdateTime: new Date(),
+          Id: 381
         },
         {
           Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
@@ -115,7 +117,8 @@ export default defineComponent({
           Category: {
             ShortName: '录入'
           },
-          LastUpdateTime: new Date()
+          LastUpdateTime: new Date(),
+          Id: 381
         },
         {
           Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
@@ -124,7 +127,8 @@ export default defineComponent({
           Category: {
             ShortName: '录入'
           },
-          LastUpdateTime: new Date()
+          LastUpdateTime: new Date(),
+          Id: 381
         },
         {
           Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
@@ -133,7 +137,8 @@ export default defineComponent({
           Category: {
             ShortName: '录入'
           },
-          LastUpdateTime: new Date()
+          LastUpdateTime: new Date(),
+          Id: 381
         },
         {
           Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
@@ -142,7 +147,8 @@ export default defineComponent({
           Category: {
             ShortName: '录入'
           },
-          LastUpdateTime: new Date()
+          LastUpdateTime: new Date(),
+          Id: 381
         }
       ]
     }
