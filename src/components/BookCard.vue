@@ -1,11 +1,13 @@
 <template>
   <div>
-    <div class="book-cover">
-      <q-img :src="cover" :ratio="2 / 3" @error="error = true" />
-      <div class="book-tag bg-primary">
-        <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
+    <router-link :to="{ name: 'BookInfo', params: { bid: props.book.Id } }">
+      <div class="book-cover">
+        <q-img :src="cover" :ratio="2 / 3" @error="error = true" />
+        <div class="book-tag bg-primary">
+          <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
+        </div>
       </div>
-    </div>
+    </router-link>
 
     <div style="padding: 4px">
       <div class="book-name">

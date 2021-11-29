@@ -1,11 +1,17 @@
 <template>
   <q-drawer v-model="siderShow" show-if-above bordered class="bg-grey-2" :width="240">
     <q-scroll-area class="fit">
-      <q-list padding v-for="index in [1, 2, 3, 4, 5]" :key="index">
+      <q-list padding>
         <template v-for="option in menuOptions" :key="option.key">
           <q-separator class="q-my-md" v-if="option.label === 'separator'" />
 
-          <q-item v-ripple clickable v-else>
+          <q-item
+            :to="(option.disabled ?? true) && option.route ? { name: option.route } : null"
+            :disable="option.disabled"
+            :v-ripple="option.disabled ?? true"
+            clickable
+            v-else
+          >
             <q-item-section avatar>
               <q-icon color="grey" :name="option.icon" />
             </q-item-section>
@@ -27,7 +33,7 @@ import { isConnected } from '@/services/utils'
 import { getChapterContent } from '@/services/chapter'
 import { useSider } from './useSider'
 
-const menuOptions = [
+const menuOptions: Array<Record<string, any>> = [
   {
     label: '首页',
     key: 'Home',
@@ -47,10 +53,15 @@ const menuOptions = [
     route: 'BookList'
   },
   {
+    label: '订阅内容',
+    key: 'Subscriptions',
+    route: 'Subscriptions',
+    disabled: true,
+    icon: icon.mdiBullhorn
+  },
+  {
     label: 'separator',
-    key: 'separator 1',
-    icon: null,
-    route: null
+    key: 'separator 1'
   },
   {
     label: '社区',
@@ -58,6 +69,42 @@ const menuOptions = [
     route: 'Community',
     disabled: true,
     icon: icon.mdiForum
+  },
+  {
+    label: '阅读历史',
+    key: 'History',
+    route: 'History',
+    disabled: true,
+    icon: icon.mdiHistory
+  },
+  {
+    label: 'separator',
+    key: 'separator 2'
+  },
+  {
+    label: '设置',
+    key: 'Setting',
+    route: 'Setting',
+    disabled: true,
+    icon: icon.mdiCog
+  },
+  {
+    label: '帮助',
+    key: 'Help',
+    route: 'Help',
+    disabled: true,
+    icon: icon.mdiHelpCircle
+  },
+  {
+    label: '发送反馈',
+    key: 'send_feedback',
+    icon: icon.mdiMessageAlert
+  },
+  {
+    label: '贡献列表',
+    key: 'collaborator',
+    route: 'Collaborator',
+    icon: icon.mdiAccountMultiple
   }
 ]
 

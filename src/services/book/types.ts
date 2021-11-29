@@ -1,6 +1,7 @@
 import { ListResult } from '../types'
 
 export interface BookInList {
+  Id: number
   Cover: string
   LastUpdateTime: Date
   UserName: string

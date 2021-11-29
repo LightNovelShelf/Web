@@ -4,7 +4,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'App',
-    redirect: 'bookinfo'
+    redirect: { name: 'BookList' }
   },
   {
     path: '/home',
@@ -23,8 +23,9 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/BookList.vue')
   },
   {
-    path: '/bookinfo',
+    path: '/bookinfo/:bid',
     name: 'BookInfo',
+    props: true,
     component: () => import('../views/BookInfo.vue')
   },
   {
@@ -36,7 +37,14 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 })
 
 export default router

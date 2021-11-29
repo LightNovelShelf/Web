@@ -8,7 +8,10 @@
           <n-message-provider>
             <n-loading-bar-provider>
               <div style="padding: 24px 12px">
-                <router-view />
+                <router-view v-slot="{ Component }">
+                  <!-- TODO 想加个q-transition--fade，但测试下来有点问题，以后还得加个keep-alive -->
+                  <component :is="Component" />
+                </router-view>
               </div>
             </n-loading-bar-provider>
           </n-message-provider>

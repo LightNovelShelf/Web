@@ -12,5 +12,9 @@ export {
   mdiBroadcastOff,
   mdiBell,
   mdiHistory,
-  mdiMessageText
+  mdiMessageText,
+  mdiCog,
+  mdiHelpCircle,
+  mdiMessageAlert,
+  mdiAccountMultiple
 } from '@mdi/js'
