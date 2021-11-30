@@ -8,7 +8,6 @@
         <n-grid-item>
           <n-h2 @click="getInfo">《{{ book['Title'] }}》</n-h2>
           <div>作者：{{ book['Author'] }}</div>
-          <!-- <div>更新：{{ lastUpdateTime }}</div> -->
           <div>更新：{{ LastUpdateTimeDesc }}</div>
           <div style="margin-top: 24px">
             <div>简介</div>
