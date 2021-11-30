@@ -10,6 +10,6 @@ export function parseTime(date: Date | DateTime): DateTime {
 }
 
 /** 获取时间相对目前的文案描述 */
-export function toNow(date: Date | DateTime, locale?: string): string {
-  return parseTime(date).toRelative({ locale }) ?? 'invalid_date'
+export function toNow(date: Date | DateTime, base?: DateTime, locale?: string): string {
+  return parseTime(date).toRelative({ locale, base }) ?? 'invalid_date'
 }

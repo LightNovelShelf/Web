@@ -1,5 +1,5 @@
 import { sleep } from '@/utils/sleep'
-import { onUnmounted } from 'vue'
+import { onUnmounted, getCurrentInstance } from 'vue'
 
 /**
  * 指定间隔调用回调, 返回取消订阅函数
@@ -26,16 +26,22 @@ export function useTickSource(cb: () => unknown, ms = 1000): () => void {
     shouldContinue.value = false
   }
 
+  cb()
+
   async function loop() {
     while (shouldContinue.value) {
-      cb()
       await sleep(ms)
+      cb()
     }
   }
 
   loop()
 
-  onUnmounted(unsubscribe)
+  const instance = getCurrentInstance()
+  // 判断当前组件实例是否存在
+  if (instance) {
+    onUnmounted(unsubscribe)
+  }
 
   return unsubscribe
 }
