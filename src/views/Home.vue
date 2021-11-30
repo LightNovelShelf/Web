@@ -1,8 +1,7 @@
 <template>
-  <div style="max-width: 80vw" class="mx-auto">
-    <!-- 默认是1，容器超过600px变2 -->
-    <n-grid :x-gap="12" :y-gap="8" responsive="screen" cols="1 m:2 l:2 xl:2 2xl:2">
-      <n-grid-item>
+  <div style="max-width: 1920px" class="mx-auto">
+    <q-grid x-gap="12" y-gap="8" cols="2" sm="1" xs="1">
+      <q-grid-item>
         <q-card>
           <q-card-section>
             <div class="row flex-center">
@@ -15,12 +14,11 @@
           <q-separator />
 
           <q-card-section>
-            <!-- TODO 以后用Grid替换 -->
-            <div class="row q-col-gutter-sm">
-              <div class="col-4" v-for="(book, index) in bookData" :key="index" style="box-sizing: border-box">
-                <book-card :book="book"></book-card>
-              </div>
-            </div>
+            <q-grid cols="3" x-gap="8" y-gap="8">
+              <q-grid-item v-for="(book, index) in bookData" :key="index">
+                <book-card :book="book" />
+              </q-grid-item>
+            </q-grid>
           </q-card-section>
         </q-card>
         <n-card type="success" title="网站统计" style="margin-top: 12px">
@@ -36,8 +34,9 @@
             </n-col>
           </n-row>
         </n-card>
-      </n-grid-item>
-      <n-grid-item>
+      </q-grid-item>
+
+      <q-grid-item>
         <div>
           <n-list bordered>
             <template #header>
@@ -72,8 +71,8 @@
             <n-list-item> 日志5 </n-list-item>
           </n-list>
         </div>
-      </n-grid-item>
-    </n-grid>
+      </q-grid-item>
+    </q-grid>
   </div>
 </template>
 
@@ -81,9 +80,13 @@
 import { defineComponent } from 'vue'
 import BookCard from '@/components/BookCard'
 import { icon } from '../plugins/naive-ui'
+import QGrid from '@/plugins/quasar/components/QGrid'
+import QGridItem from '@/plugins/quasar/components/QGridItem'
 
 export default defineComponent({
   components: {
+    QGridItem,
+    QGrid,
     BookCard
   },
   setup() {

@@ -16,5 +16,9 @@ export {
   mdiCog,
   mdiHelpCircle,
   mdiMessageAlert,
-  mdiAccountMultiple
+  mdiAccountMultiple,
+  mdiChevronRight,
+  mdiChevronLeft,
+  mdiSkipNext,
+  mdiSkipPrevious
 } from '@mdi/js'
