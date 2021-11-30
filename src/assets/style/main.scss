@@ -1,10 +1,47 @@
 html{
   overflow-y: scroll;
-  //background-color: #f6f7f9;
+
 }
 
-body{
-  overflow-y: hidden;
+@media only screen and (min-device-width: 599px) {
+  html{
+    overflow-y: overlay;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color:rgba(130,130,130,.5);
+    -webkit-border-radius: 4px;
+    border-radius: 4px
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(130,130,130);
+    -webkit-border-radius: 4px;
+    border-radius: 4px
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: rgba(130,130,130);
+    -webkit-border-radius: 4px;
+    border-radius: 4px
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: rgba(0,0,0,0);
+    -webkit-border-radius: 4px;
+    border-radius: 0 0 8px 0
+  }
+
+  ::-webkit-scrollbar-button {
+    background-color: rgba(0,0,0,0);
+    height: 2px;
+    width: 2px
+  }
 }
 
 .q-badge--floating{
