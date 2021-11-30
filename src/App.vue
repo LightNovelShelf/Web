@@ -10,7 +10,9 @@
               <div style="padding: 24px 12px">
                 <router-view v-slot="{ Component }">
                   <!-- TODO 想加个q-transition--fade，但测试下来有点问题，以后还得加个keep-alive -->
-                  <component :is="Component" />
+                  <keep-alive>
+                    <component :is="Component" />
+                  </keep-alive>
                 </router-view>
               </div>
             </n-loading-bar-provider>
