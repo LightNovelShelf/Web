@@ -2,6 +2,9 @@
   <div class="wrap" :class="{ [props.class]: true }">
     <div class="avatar">
       <img :src="data.Avatar" ref="imageRef" @load="loadedHandle" @error="loadedHandle" referrerPolicy="no-referrer" />
+      <div class="job bg-primary">
+        <span style="font-size: 12px">{{ data.Job }}</span>
+      </div>
     </div>
     <div class="text_meta">
       <div class="nickname">{{ data.Title }}</div>
@@ -60,6 +63,15 @@ const loadedHandle = () => {
       min-height: 100px;
       object-fit: cover;
       object-position: top center;
+    }
+
+    .job {
+      position: absolute;
+      top: 8px;
+      right: 0;
+      color: white;
+      padding: 0 3px 0 6px;
+      border-radius: 12px 0 0 12px;
     }
   }
   .text_meta {
