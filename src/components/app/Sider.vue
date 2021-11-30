@@ -47,7 +47,11 @@ const menuOptions: Array<Record<string, any>> = [
     icon: icon.mdiBullhorn
   },
   {
-    label: '小说',
+    label: 'separator',
+    key: 'separator 0'
+  },
+  {
+    label: '全部小说',
     key: 'BookList',
     icon: icon.mdiBook,
     route: 'BookList'
@@ -60,6 +64,13 @@ const menuOptions: Array<Record<string, any>> = [
     icon: icon.mdiBullhorn
   },
   {
+    label: '阅读历史',
+    key: 'History',
+    route: 'History',
+    disabled: true,
+    icon: icon.mdiHistory
+  },
+  {
     label: 'separator',
     key: 'separator 1'
   },
@@ -69,13 +80,6 @@ const menuOptions: Array<Record<string, any>> = [
     route: 'Community',
     disabled: true,
     icon: icon.mdiForum
-  },
-  {
-    label: '阅读历史',
-    key: 'History',
-    route: 'History',
-    disabled: true,
-    icon: icon.mdiHistory
   },
   {
     label: 'separator',

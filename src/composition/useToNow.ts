@@ -1,7 +1,12 @@
 import { DateTime } from 'luxon'
-import { ref, Ref, ComputedRef } from 'vue'
+import { computed, ComputedRef, ref, Ref } from 'vue'
 import { parseTime, toNow } from '@/utils/time'
-import { useTickSource } from './useTickSource'
+import { useTickSource } from '@/composition/useTickSource'
+
+const base = ref(DateTime.now())
+useTickSource(() => {
+  base.value = DateTime.now()
+})
 
 /**
  * 返回一个定时刷新的 'xx天前' 文案
@@ -25,12 +30,6 @@ import { useTickSource } from './useTickSource'
  * ```
  */
 export function useToNow(date: ComputedRef<Date | DateTime>, locale?: string): Ref<string> {
-  const formated = ref('')
-
-  useTickSource(() => {
-    const dateObj = parseTime(date.value)
-    formated.value = toNow(dateObj, locale)
-  })
-
-  return formated
+  const dateObj = computed(() => parseTime(date.value))
+  return computed(() => toNow(dateObj.value, base.value, locale))
 }
