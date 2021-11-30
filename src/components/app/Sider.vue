@@ -31,7 +31,7 @@ import { icon } from '@/plugins/naive-ui/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
 import { getChapterContent } from '@/services/chapter'
-import { useSider } from './useSider'
+import { useLayout } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [
   {
@@ -123,7 +123,7 @@ export default defineComponent({
       }
     })
 
-    const { siderShow } = useSider()
+    const { siderShow } = useLayout()
 
     onMounted(async () => {
       console.log(await getChapterContent({ SortNum: 1, Bid: 318 }))

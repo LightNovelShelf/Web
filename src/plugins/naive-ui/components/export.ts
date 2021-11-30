@@ -38,5 +38,6 @@ export {
   NSpin,
   NDrawer,
   NDrawerContent,
-  NH2
+  NH2,
+  NScrollbar
 } from 'naive-ui'

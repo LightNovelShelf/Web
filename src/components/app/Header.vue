@@ -1,11 +1,11 @@
 <template>
-  <q-header elevated class="bg-white text-grey-8 q-py-xs" height-hint="58">
+  <q-header elevated class="bg-white text-grey-8 q-py-xs" :height-hint="headerHeight">
     <q-toolbar>
       <q-btn flat dense round aria-label="Menu" :icon="icon.mdiMenu" @click="siderShow = !siderShow" />
 
       <div class="row q-ml-xs cursor-pointer flex-center non-selectable" v-if="$q.screen.gt.xs" style="padding: 0 12px">
         <div class="row flex-center">
-          <q-icon size="24" :name="icon.mdiInformation" />
+          <q-icon size="24px" :name="icon.mdiInformation" />
           <q-tooltip anchor="bottom right" self="top right"> 欢迎来稿一个新的网站图标 </q-tooltip>
         </div>
         <q-toolbar-title shrink class="text-weight-bold" @click="changAppName">
@@ -50,18 +50,19 @@
 import { computed, defineComponent, ref } from 'vue'
 import { icon } from '@/plugins/naive-ui'
 import { useAppStore } from '@/store'
-import { useSider } from './useSider'
+import { useLayout } from './useLayout'
 
 export default defineComponent({
   name: 'Header',
   setup() {
     const appStore = useAppStore()
-    const { siderShow } = useSider()
+    const { siderShow, headerHeight } = useLayout()
 
     return {
       icon,
       search: ref(''),
       siderShow,
+      headerHeight,
 
       appName: computed(() => appStore.appName),
       changAppName() {
