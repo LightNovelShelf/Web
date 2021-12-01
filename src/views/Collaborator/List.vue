@@ -1,3 +1,9 @@
+<script lang="tsx">
+export default {
+  name: 'CollaboratorList'
+}
+</script>
+
 <script lang="tsx" setup>
 import { ref } from 'vue'
 import CardItem from './components/Card.vue'
