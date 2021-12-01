@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, onActivated } from 'vue'
+import { computed, defineComponent, ref, onActivated } from 'vue'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
@@ -75,7 +75,6 @@ export default defineComponent({
       book.value = await getBookInfo(~~props.bid)
     }
 
-    onMounted(getInfo)
     onActivated(getInfo)
     const LastUpdateTimeDesc = useToNow(computed(() => book.value.LastUpdateTime))
 

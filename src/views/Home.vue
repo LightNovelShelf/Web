@@ -107,7 +107,7 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent, ref, onMounted, onActivated } from 'vue'
+import { defineComponent, ref, onActivated } from 'vue'
 import BookCard from '@/components/BookCard.vue'
 import { icon } from '../plugins/naive-ui'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
@@ -125,7 +125,6 @@ export default defineComponent({
     const getInfo = async () => {
       onlineInfo.value = await getOnlineInfo()
     }
-    onMounted(getInfo)
     onActivated(getInfo)
 
     return {
