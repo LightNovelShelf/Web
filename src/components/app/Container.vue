@@ -5,8 +5,8 @@
         <n-loading-bar-provider>
           <div :style="{ padding: padding }">
             <router-view v-slot="{ Component }">
-              <!-- TODO 想加个q-transition--fade，但测试下来有点问题，以后还得加个keep-alive -->
-              <keep-alive>
+              <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
+              <keep-alive :exclude="['CollaboratorList']">
                 <component :is="Component" />
               </keep-alive>
             </router-view>
@@ -22,7 +22,7 @@ import { useQuasar } from 'quasar'
 import { computed } from 'vue'
 
 const $q = useQuasar()
-const padding = computed(() => ($q.screen.xs ? '12px' : '24px'))
+const padding = computed(() => ($q.screen.xs ? '12px' : '12px'))
 </script>
 
 <style scoped></style>

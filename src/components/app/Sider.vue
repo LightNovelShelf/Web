@@ -8,7 +8,7 @@
           <q-item
             :to="(option.disabled ?? true) && option.route ? { name: option.route } : null"
             :disable="option.disabled"
-            :v-ripple="option.disabled ?? true"
+            v-ripple="option.disabled ? !option.disabled : true"
             clickable
             v-else
           >

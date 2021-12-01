@@ -4,16 +4,17 @@
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
-            <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3" />
+            <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3"></q-img>
             <q-responsive v-else :ratio="2 / 3">
               <q-skeleton class="fit" square />
             </q-responsive>
           </q-grid-item>
           <q-grid-item span="2" xs="1" sm="1" md="1">
             <div v-if="isActive">
-              <n-h2 @click="getInfo">《{{ book['Title'] }}》</n-h2>
+              <div class="introduction" style="margin: 24px 0">书籍信息</div>
+              <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
               <div>作者：{{ book['Author'] }}</div>
-              <div>更新：{{ LastUpdateTimeDesc }}</div>
+              <div>最后更新：{{ book['LastUpdate'] }} ({{ LastUpdateTimeDesc }})</div>
               <div style="margin-top: 24px">
                 <div>简介</div>
                 <div class="introduction" v-html="book['Introduction']"></div>
@@ -41,11 +42,11 @@
           </q-grid-item>
         </q-grid>
 
-        <div style="text-align: center; margin-top: 24px">
-          <div>
-            <div v-for="(item, index) in book['Chapter']" :key="index">{{ item }}</div>
-          </div>
-        </div>
+        <q-list separator style="margin-top: 12px">
+          <q-item v-for="(item, index) in book['Chapter']" :key="index" clickable v-ripple>
+            <q-item-section>{{ item }}</q-item-section>
+          </q-item>
+        </q-list>
       </q-card-section>
     </q-card>
     <comment style="margin-top: 24px" />
