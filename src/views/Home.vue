@@ -37,40 +37,70 @@
       </q-grid-item>
 
       <q-grid-item>
-        <div>
-          <n-list bordered>
-            <template #header>
-              <n-space justify="space-between" align="flex-end">
-                <div style="font-size: 17px"><b>公告</b></div>
-                <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
-                  <b>更多</b>
-                  <q-icon :name="icon.mdiArrowRight" />
-                </n-text>
-              </n-space>
-            </template>
-            <n-list-item> 公告1 </n-list-item>
-            <n-list-item> 公告2 </n-list-item>
-            <n-list-item> 公告3 </n-list-item>
-            <n-list-item> 公告4 </n-list-item>
-            <n-list-item> 公告5 </n-list-item>
-          </n-list>
-          <n-list bordered>
-            <template #header>
-              <n-space justify="space-between">
-                <div style="font-size: 17px"><b>更新日志</b></div>
-                <n-text depth="2" tag="div" style="display: flex; align-items: center; cursor: pointer">
-                  <b>更多</b>
-                  <q-icon :path="icon.mdiArrowRight" />
-                </n-text>
-              </n-space>
-            </template>
-            <n-list-item> 日志1 </n-list-item>
-            <n-list-item> 日志2 </n-list-item>
-            <n-list-item> 日志3 </n-list-item>
-            <n-list-item> 日志4 </n-list-item>
-            <n-list-item> 日志5 </n-list-item>
-          </n-list>
-        </div>
+        <q-grid cols="1" y-gap="12">
+          <q-grid-item>
+            <q-card>
+              <q-card-section>
+                <div class="row flex-center">
+                  <div class="text-h6">公告</div>
+                  <q-space />
+                  <div class="text-subtitle2">更多</div>
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-list separator>
+                <q-item clickable v-ripple>
+                  <q-item-section>公告1</q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 公告2 </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 公告3 </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 公告4 </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 公告5 </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </q-grid-item>
+          <q-grid-item>
+            <q-card>
+              <q-card-section>
+                <div class="row flex-center">
+                  <div class="text-h6">更新日志</div>
+                  <q-space />
+                  <div class="text-subtitle2">更多</div>
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-list separator>
+                <q-item clickable v-ripple>
+                  <q-item-section>日志1</q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 日志2 </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 日志3 </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 日志4 </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section> 日志5 </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </q-grid-item>
+        </q-grid>
       </q-grid-item>
     </q-grid>
   </div>
