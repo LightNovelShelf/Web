@@ -21,16 +21,16 @@
             </q-grid>
           </q-card-section>
         </q-card>
-        <n-card type="success" title="网站统计" style="margin-top: 12px">
+        <n-card v-if="onlineInfo" type="success" title="网站统计" style="margin-top: 12px">
           <n-row>
             <n-col :span="8">
-              <n-statistic label="当前在线">114,514</n-statistic>
+              <n-statistic label="当前在线">{{ onlineInfo.OnlineCount }}</n-statistic>
             </n-col>
             <n-col :span="8">
-              <n-statistic label="今日总数">114,514</n-statistic>
+              <n-statistic label="今日总数">{{ onlineInfo.DayCount }}</n-statistic>
             </n-col>
             <n-col :span="8">
-              <n-statistic label="最高纪录">114,514</n-statistic>
+              <n-statistic label="最高纪录">{{ onlineInfo.MaxOnline }}</n-statistic>
             </n-col>
           </n-row>
         </n-card>
@@ -76,12 +76,13 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
-import BookCard from '@/components/BookCard'
+<script lang="tsx">
+import { defineComponent, ref, onMounted, onActivated } from 'vue'
+import BookCard from '@/components/BookCard.vue'
 import { icon } from '../plugins/naive-ui'
-import QGrid from '@/plugins/quasar/components/QGrid'
-import QGridItem from '@/plugins/quasar/components/QGridItem'
+import { QGrid, QGridItem } from '@/plugins/quasar/components/'
+import { OnlineInfo } from '@/services/context/type'
+import { getOnlineInfo } from '@/services/context'
 
 export default defineComponent({
   components: {
@@ -90,7 +91,15 @@ export default defineComponent({
     BookCard
   },
   setup() {
+    const onlineInfo = ref<OnlineInfo>()
+    const getInfo = async () => {
+      onlineInfo.value = await getOnlineInfo()
+    }
+    onMounted(getInfo)
+    onActivated(getInfo)
+
     return {
+      onlineInfo,
       icon,
       bookData: [
         {

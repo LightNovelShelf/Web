@@ -12,6 +12,12 @@
 //$info      : #31CCEC;
 //$warning   : #F2C037;
 
+// https://material.io/design/layout/responsive-layout-grid.html#breakpoints
+$breakpoint-xs: 599px !default;
+$breakpoint-sm: 959px !default;
+$breakpoint-md: 1263px !default;
+$breakpoint-lg: 1920px !default;
+
 // TODO 很想把这个文件夹放其他地方，但是会报错
 
 @import '~quasar-variables-styl';

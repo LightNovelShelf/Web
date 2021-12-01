@@ -1,48 +1,54 @@
 <template>
   <div>
-    <q-card flat v-if="loading">
-      <q-skeleton height="150px" square />
-
+    <q-card>
       <q-card-section>
-        <q-skeleton type="text" class="text-subtitle1" />
-        <q-skeleton type="text" width="50%" class="text-subtitle1" />
-        <q-skeleton type="text" class="text-caption" />
-      </q-card-section>
-    </q-card>
-    <div v-if="!loading">
-      <n-card>
-        <n-grid x-gap="24" y-gap="6" cols="1 600:2">
-          <n-grid-item>
-            <q-img :src="book.Cover" :ratio="2 / 3" />
-          </n-grid-item>
-          <n-grid-item>
-            <n-h2 @click="getInfo">《{{ book['Title'] }}》</n-h2>
-            <div>作者：{{ book['Author'] }}</div>
-            <div>更新：{{ LastUpdateTimeDesc }}</div>
-            <div style="margin-top: 24px">
-              <div>简介</div>
-              <div class="introduction" v-html="book['Introduction']"></div>
+        <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
+          <q-grid-item>
+            <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3" />
+            <q-responsive v-else :ratio="2 / 3">
+              <q-skeleton class="fit" square />
+            </q-responsive>
+          </q-grid-item>
+          <q-grid-item span="2" xs="1" sm="1" md="1">
+            <div v-if="isActive">
+              <n-h2 @click="getInfo">《{{ book['Title'] }}》</n-h2>
+              <div>作者：{{ book['Author'] }}</div>
+              <div>更新：{{ LastUpdateTimeDesc }}</div>
+              <div style="margin-top: 24px">
+                <div>简介</div>
+                <div class="introduction" v-html="book['Introduction']"></div>
+              </div>
+              <div style="margin-top: 24px"></div>
+
+              <n-space v-if="isActive">
+                <q-btn>加入书架</q-btn>
+                <q-btn>继续阅读</q-btn>
+              </n-space>
             </div>
-            <div style="margin-top: 24px"></div>
-            <n-space>
-              <n-button>聊天室</n-button>
-              <n-button>加入书架</n-button>
-              <n-button>分享</n-button>
-              <n-button>阅读</n-button>
-              <n-button>继续阅读(第x章)</n-button>
-            </n-space>
-            <n-space style="margin-top: 12px">
-              <n-button>编辑</n-button>
-            </n-space>
-          </n-grid-item>
-        </n-grid>
+            <div v-else class="q-gutter-md">
+              <q-skeleton />
+              <q-skeleton width="50%" />
+              <q-skeleton />
+              <q-skeleton />
+              <q-skeleton />
+              <q-skeleton height="150px" />
+              <div></div>
+              <n-space>
+                <q-skeleton type="QBtn" />
+                <q-skeleton type="QBtn" />
+              </n-space>
+            </div>
+          </q-grid-item>
+        </q-grid>
 
         <div style="text-align: center; margin-top: 24px">
-          <div v-for="(item, index) in book['Chapter']" :key="index">{{ item }}</div>
+          <div>
+            <div v-for="(item, index) in book['Chapter']" :key="index">{{ item }}</div>
+          </div>
         </div>
-      </n-card>
-      <comment style="margin-top: 24px" />
-    </div>
+      </q-card-section>
+    </q-card>
+    <comment style="margin-top: 24px" />
   </div>
 </template>
 
@@ -51,10 +57,13 @@ import { computed, defineComponent, onMounted, ref, onActivated } from 'vue'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
+import { QGrid, QGridItem } from '@/plugins/quasar/components'
 
 export default defineComponent({
   name: 'BookInfo',
   components: {
+    QGrid,
+    QGridItem,
     Comment
   },
   props: {
@@ -62,10 +71,8 @@ export default defineComponent({
   },
   setup(props) {
     let book = ref<any>({})
-    const loading = ref(true)
     const getInfo = async () => {
-      loading.value = true
-      book.value = await getBookInfo(~~props.bid).finally(() => (loading.value = false))
+      book.value = await getBookInfo(~~props.bid)
     }
 
     onMounted(getInfo)
@@ -73,7 +80,7 @@ export default defineComponent({
     const LastUpdateTimeDesc = useToNow(computed(() => book.value.LastUpdateTime))
 
     return {
-      loading,
+      isActive: computed(() => book.value.Id === ~~props.bid),
       book,
       getInfo,
       LastUpdateTimeDesc
