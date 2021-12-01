@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, withDefaults } from 'vue'
+import { ref, computed, onActivated, withDefaults } from 'vue'
 import { onBeforeRouteUpdate, useRouter } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useLoadingBar } from 'naive-ui'
@@ -101,11 +101,13 @@ function request(page) {
     .finally(() => loadingBar.finish())
 }
 
+const getList = () => request(currentPage.value)
+
 onBeforeRouteUpdate((to, from, next) => {
   request(to.params.page).finally(() => next())
 })
 
-onMounted(() => request(currentPage.value))
+onActivated(getList)
 </script>
 
 <style lang="scss" scoped></style>
