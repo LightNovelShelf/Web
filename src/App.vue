@@ -3,36 +3,21 @@
     <q-layout view="hHh LpR fFf" class="bg-grey-1">
       <app-header />
       <app-sider />
-
-      <q-page-container>
-        <n-notification-provider>
-          <n-message-provider>
-            <n-loading-bar-provider>
-              <div style="padding: 24px">
-                <router-view v-slot="{ Component }">
-                  <!-- TODO 想加个q-transition--fade，但测试下来有点问题，以后还得加个keep-alive -->
-                  <keep-alive>
-                    <component :is="Component" />
-                  </keep-alive>
-                </router-view>
-              </div>
-            </n-loading-bar-provider>
-          </n-message-provider>
-        </n-notification-provider>
-      </q-page-container>
+      <app-container />
     </q-layout>
   </n-config-provider>
 </template>
 
 <script lang="tsx">
-import { computed, defineComponent, inject } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { zhCN, dateZhCN, useOsTheme, darkTheme } from 'naive-ui'
-import { AppSider, AppHeader } from '@/components/app/index'
+import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
 
 export default defineComponent({
   components: {
     AppSider,
-    AppHeader
+    AppHeader,
+    AppContainer
   },
   setup() {
     const osThemeRef = useOsTheme()

@@ -21,7 +21,7 @@ export default defineComponent({
       type: [Number, String],
       default: 0
     },
-    // 默认显示的栅格数量
+    // 默认一行的栅格数量
     cols: {
       type: [Number, String],
       default: 24
@@ -63,7 +63,7 @@ export default defineComponent({
       width: '100%',
       display: 'grid',
       'grid-template-columns': `repeat(${cols.value}, minmax(0px, 1fr))`,
-      gap: `${props.xGap}px ${props.yGap}px`
+      gap: `${props.yGap}px ${props.xGap}px`
     }))
 
     return {
