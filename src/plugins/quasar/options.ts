@@ -3,7 +3,10 @@ import lang from 'quasar/lang/zh-CN.js'
 
 export default {
   config: {
-    dark: 'auto'
+    dark: 'auto',
+    screen: {
+      bodyClasses: true
+    }
   },
   plugins: {},
   lang: lang

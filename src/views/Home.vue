@@ -78,6 +78,7 @@
               </q-list>
             </q-card>
           </q-grid-item>
+
           <q-grid-item>
             <q-card>
               <q-card-section>
@@ -107,6 +108,23 @@
                   <q-item-section> 日志5 </q-item-section>
                 </q-item>
               </q-list>
+            </q-card>
+          </q-grid-item>
+
+          <q-grid-item>
+            <q-card>
+              <q-card-section>
+                <div class="row flex-center">
+                  <div class="text-h6">处刑列表</div>
+                  <q-space />
+                  <div class="text-subtitle2">更多</div>
+                </div>
+              </q-card-section>
+
+              <q-separator />
+              <q-card-section>
+                <div>让我们期待一下哪位帅气的小哥哥能榜上有名呢</div>
+              </q-card-section>
             </q-card>
           </q-grid-item>
         </q-grid>

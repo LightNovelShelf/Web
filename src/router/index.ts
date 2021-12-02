@@ -29,6 +29,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/BookInfo.vue')
   },
   {
+    path: '/read/:bid/:sortNum',
+    name: 'Read',
+    props: true,
+    component: () => import('../views/Read.vue')
+  },
+  {
     path: '/collaborator',
     name: 'Collaborator',
     component: () => import('../views/Collaborator/List.vue')

@@ -1,4 +1,6 @@
 /* eslint-disable */
+import { DefineComponent } from 'vue'
+
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
   const component: DefineComponent<{}, {}, any>
@@ -25,3 +27,5 @@ declare module 'masonry-layout' {
 
   export default masonry
 }
+
+// declare module 'dompurify'
