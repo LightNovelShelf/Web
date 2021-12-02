@@ -21,19 +21,28 @@
             </q-grid>
           </q-card-section>
         </q-card>
-        <n-card v-if="onlineInfo" type="success" title="网站统计" style="margin-top: 12px">
-          <n-row>
-            <n-col :span="8">
-              <n-statistic label="当前在线">{{ onlineInfo.OnlineCount }}</n-statistic>
-            </n-col>
-            <n-col :span="8">
-              <n-statistic label="今日总数">{{ onlineInfo.DayCount }}</n-statistic>
-            </n-col>
-            <n-col :span="8">
-              <n-statistic label="最高纪录">{{ onlineInfo.MaxOnline }}</n-statistic>
-            </n-col>
-          </n-row>
-        </n-card>
+
+        <q-card v-if="onlineInfo" class="online" style="margin-top: 12px">
+          <q-card-section>
+            <div class="title text-h6">网站统计</div>
+          </q-card-section>
+          <q-card-section style="padding-top: 0">
+            <div class="content row full-width">
+              <div class="col-4">
+                <div class="text-grey-7">当前在线</div>
+                <div class="text-h6">{{ onlineInfo.OnlineCount }}</div>
+              </div>
+              <div class="col-4">
+                <div class="text-grey-7">今日总数</div>
+                <div class="text-h6">{{ onlineInfo.DayCount }}</div>
+              </div>
+              <div class="col-4">
+                <div class="text-grey-7">最高纪录</div>
+                <div class="text-h6">{{ onlineInfo.MaxOnline }}</div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
       </q-grid-item>
 
       <q-grid-item>

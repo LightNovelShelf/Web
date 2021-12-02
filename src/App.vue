@@ -1,16 +1,13 @@
 <template>
-  <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="theme">
-    <q-layout view="hHh LpR fFf" class="bg-grey-1">
-      <app-header />
-      <app-sider />
-      <app-container />
-    </q-layout>
-  </n-config-provider>
+  <q-layout view="hHh LpR fFf" class="bg-grey-1">
+    <app-header />
+    <app-sider />
+    <app-container />
+  </q-layout>
 </template>
 
 <script lang="tsx">
-import { computed, defineComponent } from 'vue'
-import { zhCN, dateZhCN, useOsTheme, darkTheme } from 'naive-ui'
+import { defineComponent } from 'vue'
 import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
 
 export default defineComponent({
@@ -20,13 +17,7 @@ export default defineComponent({
     AppContainer
   },
   setup() {
-    const osThemeRef = useOsTheme()
-
-    return {
-      zhCN,
-      dateZhCN,
-      theme: computed(() => (osThemeRef.value === 'dark' ? darkTheme : null))
-    }
+    return {}
   }
 })
 </script>
