@@ -43,7 +43,13 @@
         </q-grid>
 
         <q-list separator style="margin-top: 12px">
-          <q-item v-for="(item, index) in book['Chapter']" :key="index" clickable v-ripple>
+          <q-item
+            v-for="(item, index) in book['Chapter']"
+            :key="index"
+            :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
+            clickable
+            v-ripple
+          >
             <q-item-section>{{ item }}</q-item-section>
           </q-item>
         </q-list>
@@ -97,5 +103,10 @@ export default defineComponent({
   :deep(p) {
     margin: 0;
   }
+}
+
+a {
+  color: unset;
+  text-decoration: unset;
 }
 </style>

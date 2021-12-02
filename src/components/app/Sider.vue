@@ -125,10 +125,6 @@ export default defineComponent({
 
     const { siderShow } = useLayout()
 
-    onMounted(async () => {
-      console.log(await getChapterContent({ SortNum: 1, Bid: 318 }))
-    })
-
     return {
       icon,
       siderShow,
