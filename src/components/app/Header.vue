@@ -32,15 +32,20 @@
 
         <div style="width: 10px" />
 
-        <n-popover :show-arrow="false" placement="bottom-end" trigger="click">
-          <template #trigger>
-            <n-avatar round size="medium" src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" />
-          </template>
-          <template #header>
-            <span>这里放用户信息</span>
-          </template>
-          <n-text strong depth="1">这里放一堆按钮</n-text>
-        </n-popover>
+        <q-avatar size="36px" ref="avatar">
+          <img src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" alt="" />
+        </q-avatar>
+
+        <q-menu :offset="[-40, 10]" :target="$refs.avatar">
+          <q-list separator>
+            <q-item clickable v-ripple>
+              <q-item-section>放点按钮</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>放点按钮</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
       </div>
     </q-toolbar>
   </q-header>

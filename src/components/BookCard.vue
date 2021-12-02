@@ -17,10 +17,10 @@
       </div>
     </div>
 
-    <div style="display: flex; padding: 0 4px">
-      <n-text depth="3">{{ book.UserName }}</n-text>
+    <div class="text-grey-7" style="display: flex; padding: 0 4px">
+      <div>{{ book.UserName }}</div>
       <div class="flex-space"></div>
-      <n-text depth="3">{{ updateTime }}</n-text>
+      <div>{{ updateTime }}</div>
     </div>
   </div>
 </template>

@@ -21,10 +21,10 @@
               </div>
               <div style="margin-top: 24px"></div>
 
-              <n-space v-if="isActive">
+              <div class="row q-gutter-md" v-if="isActive">
                 <q-btn>加入书架</q-btn>
                 <q-btn>继续阅读</q-btn>
-              </n-space>
+              </div>
             </div>
             <div v-else class="q-gutter-md">
               <q-skeleton />
@@ -34,10 +34,10 @@
               <q-skeleton />
               <q-skeleton height="150px" />
               <div></div>
-              <n-space>
+              <div class="row q-gutter-md">
                 <q-skeleton type="QBtn" />
                 <q-skeleton type="QBtn" />
-              </n-space>
+              </div>
             </div>
           </q-grid-item>
         </q-grid>

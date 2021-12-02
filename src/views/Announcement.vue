@@ -24,8 +24,6 @@
   <div class="title mx-auto" style="padding-top: 24px">
     <comment />
   </div>
-
-  <n-back-top :right="50" />
 </template>
 
 <script>
