@@ -10,7 +10,7 @@ export default {
     },
     notify: {},
     LoadingBar: {
-      skipHijack: true
+      skipHijack: false
     }
   },
   plugins: {
