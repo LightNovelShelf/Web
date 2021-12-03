@@ -14,16 +14,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/announcement',
     name: 'Announcement',
-    component: () => import('../views/Announcement.vue')
+    component: () => import('../views/Announcement/Announcement.vue')
   },
   {
-    path: '/booklist/:page?',
+    path: '/announcement/detail/:id',
+    name: 'AnnouncementDetail',
+    props: true,
+    component: () => import('../views/Announcement/AnnouncementDetail.vue')
+  },
+  {
+    path: '/book/list/:page?',
     name: 'BookList',
     props: true,
     component: () => import('../views/BookList.vue')
   },
   {
-    path: '/bookinfo/:bid',
+    path: '/book/info/:bid',
     name: 'BookInfo',
     props: true,
     component: () => import('../views/BookInfo.vue')
