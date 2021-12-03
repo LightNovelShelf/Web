@@ -10,9 +10,7 @@ export default {
     },
     notify: {},
     LoadingBar: {
-      color: 'purple',
-      size: '10px',
-      position: 'top'
+      skipHijack: true
     }
   },
   plugins: {
@@ -21,8 +19,3 @@ export default {
   },
   lang: lang
 }
-
-LoadingBar.setDefaults({
-  size: '2px',
-  position: 'top'
-})

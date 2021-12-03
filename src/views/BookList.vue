@@ -25,7 +25,7 @@
 import { ref, computed, onActivated, withDefaults } from 'vue'
 import { onBeforeRouteUpdate, useRouter } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
-import { useQuasar } from 'quasar'
+import { LoadingBar, useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
