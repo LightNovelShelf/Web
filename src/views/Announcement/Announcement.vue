@@ -2,7 +2,7 @@
   <!-- TODO 弄成下拉刷新 -->
   <q-list bordered separator class="rounded-borders title mx-auto">
     <q-item>
-      <q-item-section class="text-h5">公告列表</q-item-section>
+      <q-item-section class="text-h6">公告列表</q-item-section>
     </q-item>
     <q-item
       v-for="(index, data) in 5"
@@ -12,7 +12,7 @@
       v-ripple
     >
       <q-item-section>
-        <q-item-label class="text-h6">[2021.12.3] 我是公告标题</q-item-label>
+        <q-item-label class="text-subtitle1">[2021.12.3] 我是公告标题</q-item-label>
         <q-item-label caption>我是公告内容，内容，内容，内容</q-item-label>
       </q-item-section>
       <q-item-section side top>
