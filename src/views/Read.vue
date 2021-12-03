@@ -15,8 +15,8 @@
 <script lang="ts">
 import { computed, defineComponent, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import DOMPurify from 'dompurify'
 import { useQuasar } from 'quasar'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 
 export default defineComponent({
   name: 'Read',
@@ -37,18 +37,7 @@ export default defineComponent({
     }
     onActivated(getContent)
 
-    let sanitizer = null
-    if (window.Sanitizer) {
-      sanitizer = new window.Sanitizer()
-    }
-
-    const chapterContent = computed(() => {
-      if (sanitizer) {
-        return sanitizer.sanitizeFor('div', chapter.value['Content']).innerHTML
-      } else {
-        return DOMPurify.sanitize(chapter.value['Content'])
-      }
-    })
+    const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
     return {
       chapterContent,

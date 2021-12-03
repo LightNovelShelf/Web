@@ -55,7 +55,7 @@
         </q-list>
       </q-card-section>
     </q-card>
-    <comment style="margin-top: 24px" />
+    <comment style="margin-top: 12px" />
   </div>
 </template>
 
@@ -83,13 +83,12 @@ export default defineComponent({
     }
 
     onActivated(getInfo)
-    const LastUpdateTimeDesc = useToNow(computed(() => book.value.LastUpdateTime))
 
     return {
       isActive: computed(() => book.value.Id === ~~props.bid),
       book,
       getInfo,
-      LastUpdateTimeDesc
+      LastUpdateTimeDesc: useToNow(computed(() => book.value.LastUpdateTime))
     }
   }
 })
