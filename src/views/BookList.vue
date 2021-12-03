@@ -25,7 +25,7 @@
 import { ref, computed, onActivated, withDefaults } from 'vue'
 import { onBeforeRouteUpdate, useRouter } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
-import { LoadingBar, useQuasar } from 'quasar'
+import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
@@ -91,8 +91,10 @@ const currentPage = computed({
 })
 
 function request(page) {
+  let _page = ~~page
+  if (_page === 0) _page = 1
   $q.loadingBar.start()
-  return getBookList({ Page: ~~page })
+  return getBookList({ Page: _page })
     .then((serverData) => {
       bookData.value = serverData.Data
       pageData.value.totalPage = serverData.TotalPages
