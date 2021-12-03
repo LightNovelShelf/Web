@@ -21,4 +21,15 @@ $breakpoint-lg: 1920px !default;
 // $body-font-size: unset !default;
 // TODO 很想把这个文件夹放其他地方，但是会报错
 
+.q-notification{
+  transition: transform 0.5s, opacity 0.5s !important;
+}
+
+.q-badge--floating{
+  // 从naive-ui里抄来的
+  right: unset !important;
+  left: 100% !important;
+  transform: translateX(-50%)
+}
+
 @import '~quasar-variables-styl';
