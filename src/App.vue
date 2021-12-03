@@ -22,40 +22,4 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
-:global(.app) {
-  --header-height: 64px;
-  --side-padding: 12px;
-  --slider-width: 220px;
-  --content-padding-w: 36px;
-  --content-padding-v: 24px;
-}
-
-.app {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  line-height: 1;
-
-  .content-wrapper {
-    position: absolute;
-    top: var(--header-height);
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    .content {
-      padding: var(--content-padding-v) var(--content-padding-w);
-    }
-
-    .footer {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 48px;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

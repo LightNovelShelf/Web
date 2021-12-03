@@ -32,4 +32,9 @@ $breakpoint-lg: 1920px !default;
   transform: translateX(-50%)
 }
 
+.q-item__label--caption {
+  color: #757575 !important;
+}
+
 @import '~quasar-variables-styl';
+

@@ -7,7 +7,9 @@
             <div class="row flex-center">
               <div class="text-h6">最近更新</div>
               <q-space />
-              <div class="text-subtitle2">更多</div>
+              <div class="text-subtitle2">
+                <router-link :to="{ name: 'BookList', params: { page: 1 } }">更多</router-link>
+              </div>
             </div>
           </q-card-section>
 
@@ -53,27 +55,23 @@
                 <div class="row flex-center">
                   <div class="text-h6">公告</div>
                   <q-space />
-                  <div class="text-subtitle2">更多</div>
+                  <div class="text-subtitle2">
+                    <router-link :to="{ name: 'Announcement' }">更多</router-link>
+                  </div>
                 </div>
               </q-card-section>
 
               <q-separator />
 
               <q-list separator>
-                <q-item clickable v-ripple>
-                  <q-item-section>公告1</q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 公告2 </q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 公告3 </q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 公告4 </q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 公告5 </q-item-section>
+                <q-item
+                  v-for="index in 5"
+                  :key="index"
+                  :to="{ name: 'AnnouncementDetail', params: { id: index } }"
+                  clickable
+                  v-ripple
+                >
+                  <q-item-section>公告{{ index }}</q-item-section>
                 </q-item>
               </q-list>
             </q-card>
