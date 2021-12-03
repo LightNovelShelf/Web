@@ -27,10 +27,9 @@
 
 <script lang="tsx">
 import { defineComponent, ref, computed, onMounted } from 'vue'
-import { icon } from '@/plugins/naive-ui/icon'
+import { icon } from '@/plugins/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
-import { getChapterContent } from '@/services/chapter'
 import { useLayout } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [

@@ -1,13 +1,13 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
-import { ref } from 'vue'
+import { ref, getCurrentInstance, onUnmounted } from 'vue'
 
 import { tryResponseFromCache, updateResponseCache } from './cache'
 
 /** signalr接入点 */
 const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
 
-/** @internal 记录Promie避免重复start */
+/** @internal 记录Promise避免重复start */
 export const connectPromise = ref<null | Promise<HubConnection>>(null)
 /** @internal signalr连接情况标志 */
 export const isConnected = ref<boolean>(false)
@@ -121,4 +121,12 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   // 如果有两个接口的内容互为呼应，前一个请求成功，是更新后的内容，而后一个请求失败，如果回退使用缓存则可能会出现内容之间脱钩的问题
 
   throw new Error(Msg || '未知服务错误')
+}
+
+export function useServerNotify(methodName: string, cb: (...args: any[]) => void) {
+  hub.on(methodName, cb)
+  const instance = getCurrentInstance()
+  if (instance) {
+    onUnmounted(() => hub.off(methodName, cb))
+  }
 }

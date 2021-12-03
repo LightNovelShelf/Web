@@ -1,6 +1,6 @@
 import '@/styles/quasar.scss'
 import lang from 'quasar/lang/zh-CN.js'
-import { Notify } from 'quasar'
+import { Notify, LoadingBar } from 'quasar'
 
 export default {
   config: {
@@ -8,10 +8,21 @@ export default {
     screen: {
       bodyClasses: true
     },
-    notify: {}
+    notify: {},
+    LoadingBar: {
+      color: 'purple',
+      size: '10px',
+      position: 'top'
+    }
   },
   plugins: {
-    Notify
+    Notify,
+    LoadingBar
   },
   lang: lang
 }
+
+LoadingBar.setDefaults({
+  size: '2px',
+  position: 'top'
+})
