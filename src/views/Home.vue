@@ -134,7 +134,7 @@
 <script lang="tsx">
 import { defineComponent, ref, onActivated } from 'vue'
 import BookCard from '@/components/BookCard.vue'
-import { icon } from '../plugins/naive-ui'
+import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
 import { getOnlineInfo } from '@/services/context'

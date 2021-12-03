@@ -25,8 +25,8 @@
 import { ref, computed, onActivated, withDefaults } from 'vue'
 import { onBeforeRouteUpdate, useRouter } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
-import { useLoadingBar } from 'naive-ui'
-import { icon } from '@/plugins/naive-ui'
+import { useQuasar } from 'quasar'
+import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
@@ -74,7 +74,7 @@ const props = withDefaults(
 )
 
 const router = useRouter()
-const loadingBar = useLoadingBar()
+const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
 const pageData = ref({
   totalPage: 1
@@ -91,14 +91,14 @@ const currentPage = computed({
 })
 
 function request(page) {
-  loadingBar.start()
+  $q.loadingBar.start()
   return getBookList({ Page: ~~page })
     .then((serverData) => {
       bookData.value = serverData.Data
       pageData.value.totalPage = serverData.TotalPages
       console.log(serverData)
     })
-    .finally(() => loadingBar.finish())
+    .finally(() => $q.loadingBar.stop())
 }
 
 const getList = () => request(currentPage.value)

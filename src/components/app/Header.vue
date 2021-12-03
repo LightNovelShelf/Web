@@ -53,7 +53,7 @@
 
 <script lang="tsx">
 import { computed, defineComponent, ref } from 'vue'
-import { icon } from '@/plugins/naive-ui'
+import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
 import { useLayout } from './useLayout'
 
