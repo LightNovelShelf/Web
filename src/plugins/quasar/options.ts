@@ -9,8 +9,8 @@ export default {
       bodyClasses: true
     },
     notify: {},
-    LoadingBar: {
-      skipHijack: false
+    loadingBar: {
+      skipHijack: true
     }
   },
   plugins: {
