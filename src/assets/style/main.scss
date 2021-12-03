@@ -47,13 +47,6 @@ body{
   }
 }
 
-.q-badge--floating{
-  // 从naive-ui里抄来的
-  right: unset !important;
-  left: 100% !important;
-  transform: translateX(-50%)
-}
-
 .flex-align-center {
   display: flex;
   align-items: center;
@@ -79,3 +72,4 @@ body{
 .p0{
   margin: 0;
 }
+

@@ -28,4 +28,8 @@ declare module 'masonry-layout' {
   export default masonry
 }
 
-// declare module 'dompurify'
+declare global {
+  interface Window {
+    Sanitizer: any
+  }
+}

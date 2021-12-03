@@ -8,7 +8,7 @@
       <q-skeleton type="text" height="50px" />
       <q-skeleton type="text" height="100px" />
     </div>
-    <div class="read" v-else v-html="chapterContent"> </div>
+    <div class="read" v-else v-html="chapterContent" />
   </div>
 </template>
 
@@ -16,6 +16,7 @@
 import { computed, defineComponent, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import DOMPurify from 'dompurify'
+import { useQuasar } from 'quasar'
 
 export default defineComponent({
   name: 'Read',
@@ -24,13 +25,30 @@ export default defineComponent({
     sortNum: [String, Number]
   },
   setup(props) {
+    const $q = useQuasar()
     const chapter = ref({})
     const getContent = async () => {
       chapter.value = await getChapterContent({ Bid: ~~props.bid, SortNum: ~~props.sortNum })
+      $q.notify({
+        message: chapter.value['Title'],
+        color: 'purple',
+        timeout: 1500
+      })
     }
     onActivated(getContent)
 
-    const chapterContent = computed(() => DOMPurify.sanitize(chapter.value['Content']))
+    let sanitizer = null
+    if (window.Sanitizer) {
+      sanitizer = new window.Sanitizer()
+    }
+
+    const chapterContent = computed(() => {
+      if (sanitizer) {
+        return sanitizer.sanitizeFor('div', chapter.value['Content']).innerHTML
+      } else {
+        return DOMPurify.sanitize(chapter.value['Content'])
+      }
+    })
 
     return {
       chapterContent,
