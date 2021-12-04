@@ -7,7 +7,7 @@ if (window.Sanitizer) {
 
 export default function sanitizerHtml(content: string, tag = 'div') {
   if (sanitizer) {
-    return sanitizer.sanitizeFor('div', content).innerHTML
+    return sanitizer.sanitizeFor(tag, content).innerHTML
   } else {
     return DOMPurify.sanitize(content)
   }
