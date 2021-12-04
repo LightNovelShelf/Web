@@ -32,13 +32,14 @@ export function useTimeout(cb: AnyVoidFunc, delay?: number) {
 /**
  * 延时执行，当返回值被置为false就不执行
  */
-export function useTimeoutOutVue(cb: AnyVoidFunc, delay?: number) {
+export function useTimeoutOutVue(cb: AnyVoidFunc, cancelCb?: AnyVoidFunc, delay?: number) {
   /** 组件是否可见 */
   const activated = ref(true)
   const _cb = cb.bind(this)
 
   setTimeout(() => {
     if (!activated.value) {
+      if (cancelCb) cancelCb()
       return
     }
     _cb()
