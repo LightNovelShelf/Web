@@ -1,5 +1,5 @@
 import { AnyVoidFunc } from '@/types/utils'
-import { onMounted, onBeforeUnmount, onActivated, onDeactivated, ref, onUnmounted } from 'vue'
+import { onMounted, onBeforeUnmount, onActivated, onDeactivated, ref } from 'vue'
 import { useTimeout } from './useTimeout'
 
 type CleanUp = AnyVoidFunc | void | undefined | null
@@ -64,5 +64,5 @@ export function useInit(cb: UseInitCB, delay = DELAY_MS) {
   }
 
   onDeactivated(runCleanup)
-  onUnmounted(runCleanup)
+  onBeforeUnmount(runCleanup)
 }
