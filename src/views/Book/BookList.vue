@@ -105,19 +105,23 @@ function request(page) {
   loading.value = true
 
   return new Promise<void>((resolve, reject) => {
-    requested = useTimeoutOutVue(() => {
-      getBookList({ Page: _page })
-        .then((serverData) => {
-          bookData.value = serverData.Data
-          pageData.value.totalPage = serverData.TotalPages
-          resolve()
-          console.log(serverData)
-        })
-        .finally(() => {
-          $q.loadingBar.stop()
-          loading.value = false
-        })
-    }, 500)
+    requested = useTimeoutOutVue(
+      () => {
+        getBookList({ Page: _page })
+          .then((serverData) => {
+            bookData.value = serverData.Data
+            pageData.value.totalPage = serverData.TotalPages
+            resolve()
+            console.log(serverData)
+          })
+          .finally(() => {
+            $q.loadingBar.stop()
+            loading.value = false
+          })
+      },
+      () => reject('request cancel'),
+      500
+    )
   })
 }
 
@@ -125,7 +129,7 @@ const getList = () => request(currentPage.value)
 
 onBeforeRouteUpdate((to, from, next) => {
   console.log('onBeforeRouteUpdate')
-  request(to.params.page).finally(() => next())
+  request(to.params.page).then(() => next())
 })
 
 onActivated(getList)
