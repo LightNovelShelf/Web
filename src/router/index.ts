@@ -26,13 +26,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/book/list/:page?',
     name: 'BookList',
     props: true,
-    component: () => import('../views/BookList.vue')
+    component: () => import('../views/Book/BookList.vue')
   },
   {
     path: '/book/info/:bid',
     name: 'BookInfo',
     props: true,
-    component: () => import('../views/BookInfo.vue')
+    component: () => import('../views/Book/BookInfo.vue')
   },
   {
     path: '/read/:bid/:sortNum',
@@ -44,6 +44,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/collaborator',
     name: 'Collaborator',
     component: () => import('../views/Collaborator/List.vue')
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: () => import('../views/Test.vue')
   }
 ]
 

@@ -35,12 +35,21 @@ export default defineComponent({
         timeout: 1500
       })
     }
+
+    if (!CSS.supports('line-break', 'anywhere')) {
+      let message = '对不起，您的浏览器似乎无法完美使用本网站，请使用Chrome(80以上)或FireFox浏览器'
+      $q.notify({
+        message,
+        color: 'purple',
+        timeout: 3000,
+        position: 'bottom'
+      })
+    }
+
     onActivated(getContent)
 
-    const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
-
     return {
-      chapterContent,
+      chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
       chapter
     }
   }

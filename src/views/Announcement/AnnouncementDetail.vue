@@ -34,4 +34,8 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.title {
+  max-width: 900px;
+}
+</style>
