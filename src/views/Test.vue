@@ -21,12 +21,24 @@ const option = [
     func: () => CSS.supports('line-break', 'anywhere')
   },
   {
+    name: 'overflow: overlay',
+    func: () => CSS.supports('overflow', 'overlay')
+  },
+  {
+    name: '-webkit-line-clamp: number',
+    func: () => CSS.supports('-webkit-line-clamp', '2')
+  },
+  {
     name: 'WebAssembly',
     func: () => !!WebAssembly
   },
   {
     name: 'Fetch',
     func: () => !!fetch
+  },
+  {
+    name: 'Sanitizer',
+    func: () => !!window.Sanitizer
   }
 ]
 </script>
