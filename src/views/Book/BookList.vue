@@ -8,6 +8,7 @@
 
     <div style="display: flex; justify-content: center; padding-top: 24px">
       <q-pagination
+        :disable="loading"
         v-model="currentPage"
         :max="pageData.totalPage"
         direction-links
@@ -22,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, withDefaults } from 'vue'
+import { ref, computed, onActivated, withDefaults, Ref } from 'vue'
 import { onBeforeRouteUpdate, useRouter } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
@@ -30,6 +31,8 @@ import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
+import { useInit } from '@/composition/useInit'
+import { useTimeoutOutVue } from '@/composition/useTimeout'
 
 const options = [
   {
@@ -90,22 +93,38 @@ const currentPage = computed({
   }
 })
 
+let requested: Ref<boolean> | null = null
+const loading = ref(false)
 function request(page) {
+  if (requested) requested.value = false
+
   let _page = ~~page
   if (_page === 0) _page = 1
+  $q.loadingBar.stop()
   $q.loadingBar.start()
-  return getBookList({ Page: _page })
-    .then((serverData) => {
-      bookData.value = serverData.Data
-      pageData.value.totalPage = serverData.TotalPages
-      console.log(serverData)
-    })
-    .finally(() => $q.loadingBar.stop())
+  loading.value = true
+
+  return new Promise<void>((resolve, reject) => {
+    requested = useTimeoutOutVue(() => {
+      getBookList({ Page: _page })
+        .then((serverData) => {
+          bookData.value = serverData.Data
+          pageData.value.totalPage = serverData.TotalPages
+          resolve()
+          console.log(serverData)
+        })
+        .finally(() => {
+          $q.loadingBar.stop()
+          loading.value = false
+        })
+    }, 500)
+  })
 }
 
 const getList = () => request(currentPage.value)
 
 onBeforeRouteUpdate((to, from, next) => {
+  console.log('onBeforeRouteUpdate')
   request(to.params.page).finally(() => next())
 })
 
