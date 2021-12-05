@@ -23,15 +23,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, withDefaults, Ref } from 'vue'
-import { onBeforeRouteUpdate, useRouter } from 'vue-router'
+import { ref, computed, onActivated } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { useTimeoutOnRouteUpdate } from '@/composition/useTimeout'
+import { useTimeout } from '@/composition/useTimeout'
 
 const options = [
   {
@@ -66,26 +66,15 @@ const options = [
   }
 ]
 
-const props = withDefaults(
-  defineProps<{
-    page?: number | string
-  }>(),
-  {
-    page: 1
-  }
-)
-
+const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
-const pageData = ref({
-  totalPage: 1
-})
+const pageData = ref({ totalPage: 1 })
+
 const currentPage = computed({
   get() {
-    let _page = ~~props.page
-    if (_page === 0) _page = 1
-    return _page
+    return ~~route.params.page || 1
   },
   set(val: number) {
     router.push({ name: 'BookList', params: { page: val } })
@@ -93,33 +82,32 @@ const currentPage = computed({
 })
 
 const loading = ref(false)
-function request(page) {
-  let _page = ~~page
-  if (_page === 0) _page = 1
 
+const request = useTimeout(function (page: number = currentPage.value) {
   $q.loadingBar.stop()
   $q.loadingBar.start()
   loading.value = true
 
-  return getBookList({ Page: _page })
+  getBookList({ Page: page })
     .then((serverData) => {
       bookData.value = serverData.Data
       pageData.value.totalPage = serverData.TotalPages
-      console.log(serverData)
+      console.log('serverData: ', serverData)
     })
     .finally(() => {
       $q.loadingBar.stop()
       loading.value = false
     })
-}
+})
 
-const getList = () => request(currentPage.value)
+onBeforeRouteUpdate((to) => {
+  request(~~to.params.page || 1)
+})
 
-useTimeoutOnRouteUpdate((params) => {
-  return request(params.page)
-}, 500)
-
-onActivated(getList)
+/** 已经有数据（不是mounted场景）时延时请求 */
+onActivated(() => {
+  bookData.value.length ? request() : request.syncCall()
+})
 </script>
 
 <style lang="scss" scoped></style>

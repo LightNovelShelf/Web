@@ -1,48 +1,111 @@
-import { AnyVoidFunc } from '@/types/utils'
-import { getCurrentInstance, onActivated, onDeactivated, onUnmounted, ref } from 'vue'
+import { NOOP } from '@/utils/const'
+import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from '@/types/utils'
+import { onDeactivated, onUnmounted, ref } from 'vue'
 import { onBeforeRouteUpdate, RouteParams } from 'vue-router'
 
-export interface UseTimeoutAction {
+/** 延时执行 */
+export interface UseTimeoutAction<P extends any[] = any[], R = any> extends AnyAsyncFunc<P, Promise<R>> {
+  /** 同步执行cb，不走延时 */
+  syncCall: AnyFunc<P, R>
   /** 手动取消 */
-  cancel(): void
-  /** 手动恢复 */
-  resume(): void
+  cancel: AnyVoidFunc
 }
 
 /**
- * 延时执行，当组件被 deactivate 或者 unmount 的时候就不执行相关cb
+ * cancel错误，方便业务判断是cb错误还是只是取消
+ *
+ * @example
+ * ```js
+ * const fn = useTimeuot(function () { throw new Error('test') })
+ * fn().catch(e => e === CANCEL_ERR ? ( console.log('取消执行'); ) : ( console.log('执行错误'); ) )
+ * ```
+ */
+export const CANCEL_ERR = new Error('cancel')
+
+/**
+ * onActivated回调延时
  *
  * @description
- * 只能在 setup 或者 生命周期内同步执行
+ * 这个延时是为了解决
+ * **用户在快速后退页面时，会在 onActivated 周期产生大量无用请求**
+ * 的问题
  */
-export function useTimeout(cb: AnyVoidFunc, delay?: number): UseTimeoutAction {
-  /** 获取当前实例 */
-  const instance = getCurrentInstance()
-  /** 计算当前组件时候是激活状态 */
-  const currentActivated = !!(instance?.isMounted && !instance?.isDeactivated)
+const DELAY_MS = 200
 
-  /** 组件是否可见 */
-  const activated = ref(currentActivated)
+/**
+ * 延时执行
+ *
+ * @description
+ * 当组件被 deactivate 或者 unmount 的时候就取消相关cb的执行计划
+ *
+ * @description
+ * 重复调用时只有最后一次调用有效
+ *
+ * @example
+ * ```js
+ * const fn = useTimeuot(function () { fetch('baidu.com') });
+ *
+ * fn().catch(
+ *    e => e === CANCEL_ERR
+ *      ? ( console.log('取消执行') )
+ *      : ( console.log('执行错误') )
+ * )
+ * ```
+ */
+export function useTimeout<P extends any[] = any[], R = any>(
+  cb: AnyFunc<P, R>,
+  delay: number = DELAY_MS
+): UseTimeoutAction<P, R> {
+  const timeoutContext = ref<NodeJS.Timeout>()
+  const rejector = ref<(err?: unknown) => void>()
 
-  setTimeout(() => {
-    if (!activated.value) {
-      return
-    }
-    cb()
-  }, delay)
-
-  onDeactivated(() => (activated.value = false))
-  onActivated(() => (activated.value = true))
-  onUnmounted(() => (activated.value = false))
-
-  return {
-    cancel() {
-      activated.value = false
-    },
-    resume() {
-      activated.value = true
-    }
+  /** 清理context相关变量 */
+  function clean() {
+    timeoutContext.value = undefined
+    rejector.value = undefined
   }
+
+  function fn(...args: P) {
+    // 取消上一个执行计划，实现单发
+    fn.cancel()
+
+    const promise = new Promise<R>((resolve, reject) => {
+      rejector.value = reject
+
+      timeoutContext.value = setTimeout(() => {
+        try {
+          resolve(cb(...args))
+        } catch (e) {
+          reject(e)
+        }
+
+        clean()
+      }, delay)
+    })
+
+    // 兜底错误，避免开发控制台一直报错
+    // 一定要用then来兜底，用catch的话会使外部的catch无法触发从而无法监听取消事件或者cb执行错误事件
+    promise.then(NOOP, NOOP)
+
+    return promise
+  }
+
+  fn.syncCall = function (...args: P): R {
+    return cb(...args)
+  }
+  fn.cancel = function () {
+    timeoutContext.value && clearTimeout(timeoutContext.value)
+    rejector.value && rejector.value(CANCEL_ERR)
+    clean()
+  }
+
+  // 组件卸载时取消执行
+  onDeactivated(fn.cancel)
+  onUnmounted(fn.cancel)
+
+  // actived 时不管，这里只负责取消，业务自己确定调用时机，避免出现无法取消的多余执行
+
+  return fn
 }
 
 /**
