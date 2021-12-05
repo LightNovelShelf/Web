@@ -56,13 +56,13 @@ export function useTimeout<P extends any[] = any[], R = any>(
   cb: AnyFunc<P, R>,
   delay: number = DELAY_MS
 ): UseTimeoutAction<P, R> {
-  const timeoutContext = ref<NodeJS.Timeout>()
-  const rejector = ref<(err?: unknown) => void>()
+  let timeoutContext: NodeJS.Timeout | undefined
+  let rejector: ((err?: unknown) => void) | undefined
 
   /** 清理context相关变量 */
   function clean() {
-    timeoutContext.value = undefined
-    rejector.value = undefined
+    timeoutContext = undefined
+    rejector = undefined
   }
 
   function fn(...args: P) {
@@ -70,9 +70,9 @@ export function useTimeout<P extends any[] = any[], R = any>(
     fn.cancel()
 
     const promise = new Promise<R>((resolve, reject) => {
-      rejector.value = reject
+      rejector = reject
 
-      timeoutContext.value = setTimeout(() => {
+      timeoutContext = setTimeout(() => {
         try {
           resolve(cb(...args))
         } catch (e) {
@@ -94,8 +94,8 @@ export function useTimeout<P extends any[] = any[], R = any>(
     return cb(...args)
   }
   fn.cancel = function () {
-    timeoutContext.value && clearTimeout(timeoutContext.value)
-    rejector.value && rejector.value(CANCEL_ERR)
+    timeoutContext && clearTimeout(timeoutContext)
+    rejector && rejector(CANCEL_ERR)
     clean()
   }
 
