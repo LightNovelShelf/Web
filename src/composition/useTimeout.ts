@@ -1,5 +1,6 @@
 import { AnyVoidFunc } from '@/types/utils'
 import { getCurrentInstance, onActivated, onDeactivated, onUnmounted, ref } from 'vue'
+import { onBeforeRouteUpdate, RouteParams } from 'vue-router'
 
 /**
  * 延时执行，当组件被 deactivate 或者 unmount 的时候就不执行相关cb
@@ -46,4 +47,38 @@ export function useTimeoutOutVue(cb: AnyVoidFunc, cancelCb?: AnyVoidFunc, delay?
   }, delay)
 
   return activated
+}
+
+/**
+ * 在路由更新时延时执行
+ */
+export function useTimeoutOnRouteUpdate(cb: (RouteParams) => Promise<void>, delay?) {
+  let clear: AnyVoidFunc
+  const _clear = () => {
+    if (clear) {
+      clear()
+      clear = null
+    }
+  }
+
+  const _cb = cb.bind(this)
+
+  const call = (params: RouteParams) => {
+    return new Promise((resolve, reject) => {
+      const id = setTimeout(() => {
+        _cb(params).finally(resolve)
+      }, delay)
+      clear = () => {
+        clearTimeout(id)
+        reject('request cancel')
+      }
+    })
+  }
+
+  onBeforeRouteUpdate((to, form, next) => {
+    _clear()
+    call(to.params).then(next)
+  })
+  onDeactivated(_clear)
+  onUnmounted(_clear)
 }
