@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated } from 'vue'
+import { ref, computed, onActivated, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
@@ -81,27 +81,37 @@ const currentPage = computed({
   }
 })
 
-const loading = ref(false)
+const requesting = ref(false)
 
 const request = useTimeout(function (page: number = currentPage.value) {
-  $q.loadingBar.stop()
-  $q.loadingBar.start()
-  loading.value = true
+  requesting.value = true
 
-  getBookList({ Page: page })
+  return getBookList({ Page: page })
     .then((serverData) => {
       bookData.value = serverData.Data
       pageData.value.totalPage = serverData.TotalPages
       console.log('serverData: ', serverData)
     })
     .finally(() => {
-      $q.loadingBar.stop()
-      loading.value = false
+      requesting.value = false
     })
 })
 
-onBeforeRouteUpdate((to) => {
-  request(~~to.params.page || 1)
+const loading = computed(() => requesting.value || request.scheduled.value)
+
+watch(
+  () => loading.value,
+  (next, preview) => {
+    $q.loadingBar.stop()
+    if (next) {
+      $q.loadingBar.start()
+    }
+  }
+)
+
+onBeforeRouteUpdate(async (to, from, next) => {
+  await request(~~to.params.page || 1)
+  next()
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */

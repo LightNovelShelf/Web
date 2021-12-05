@@ -1,6 +1,6 @@
 import { NOOP } from '@/utils/const'
 import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from '@/types/utils'
-import { onDeactivated, onUnmounted, ref } from 'vue'
+import { onDeactivated, onUnmounted, Ref, ref } from 'vue'
 import { onBeforeRouteUpdate, RouteParams } from 'vue-router'
 
 /** 延时执行 */
@@ -9,6 +9,8 @@ export interface UseTimeoutAction<P extends any[] = any[], R = any> extends AnyA
   syncCall: AnyFunc<P, R>
   /** 手动取消 */
   cancel: AnyVoidFunc
+  /** 是否有执行任务 */
+  scheduled: Ref<boolean>
 }
 
 /** 延时执行配置项 */
@@ -65,11 +67,14 @@ export function useTimeout<P extends any[] = any[], R = any>(
 ): UseTimeoutAction<P, R> {
   let timeoutContext: NodeJS.Timeout | undefined
   let rejector: ((err?: unknown) => void) | undefined
+  /** 是否有执行计划 */
+  const scheduled = ref(false)
 
   /** 清理context相关变量 */
-  function clean() {
+  function reset() {
     timeoutContext = undefined
     rejector = undefined
+    scheduled.value = false
   }
 
   function fn(...args: P) {
@@ -77,6 +82,7 @@ export function useTimeout<P extends any[] = any[], R = any>(
     fn.cancel()
 
     const promise = new Promise<R>((resolve, reject) => {
+      scheduled.value = true
       rejector = reject
 
       timeoutContext = setTimeout(() => {
@@ -86,7 +92,7 @@ export function useTimeout<P extends any[] = any[], R = any>(
           reject(e)
         }
 
-        clean()
+        reset()
       }, delay)
     })
 
@@ -98,13 +104,19 @@ export function useTimeout<P extends any[] = any[], R = any>(
   }
 
   fn.syncCall = function (...args: P): R {
+    scheduled.value = true
+
+    // 这里setTimeout就清理，暂不考虑cb是异步函数然后等它执行完再clean的操作
+    setTimeout(reset)
     return cb(...args)
   }
   fn.cancel = function () {
     timeoutContext && clearTimeout(timeoutContext)
     rejector && rejector(CANCEL_ERR)
-    clean()
+    reset()
   }
+
+  fn.scheduled = scheduled
 
   // 组件卸载时取消执行
   onDeactivated(() => config?.cancelOnUnMount !== false && fn.cancel())
