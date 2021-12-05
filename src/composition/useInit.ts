@@ -31,15 +31,13 @@ const DELAY_MS = 200
 export function useInit(cb: UseInitCB, delay = DELAY_MS) {
   const lastCleanUp = ref<CleanUp>()
 
-  const _cb = cb.bind(this)
-
   onMounted(() => {
-    lastCleanUp.value = _cb()
+    lastCleanUp.value = cb()
   })
 
   // 激活时延时执行init逻辑
   onActivated(() => {
-    useTimeout(() => (lastCleanUp.value = _cb()), delay)
+    useTimeout(() => (lastCleanUp.value = cb()), delay)
   })
 
   /**

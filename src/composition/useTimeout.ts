@@ -2,13 +2,20 @@ import { AnyVoidFunc } from '@/types/utils'
 import { getCurrentInstance, onActivated, onDeactivated, onUnmounted, ref } from 'vue'
 import { onBeforeRouteUpdate, RouteParams } from 'vue-router'
 
+export interface UseTimeoutAction {
+  /** 手动取消 */
+  cancel(): void
+  /** 手动恢复 */
+  resume(): void
+}
+
 /**
  * 延时执行，当组件被 deactivate 或者 unmount 的时候就不执行相关cb
  *
  * @description
  * 只能在 setup 或者 生命周期内同步执行
  */
-export function useTimeout(cb: AnyVoidFunc, delay?: number) {
+export function useTimeout(cb: AnyVoidFunc, delay?: number): UseTimeoutAction {
   /** 获取当前实例 */
   const instance = getCurrentInstance()
   /** 计算当前组件时候是激活状态 */
@@ -16,18 +23,26 @@ export function useTimeout(cb: AnyVoidFunc, delay?: number) {
 
   /** 组件是否可见 */
   const activated = ref(currentActivated)
-  const _cb = cb.bind(this)
 
   setTimeout(() => {
     if (!activated.value) {
       return
     }
-    _cb()
+    cb()
   }, delay)
 
   onDeactivated(() => (activated.value = false))
   onActivated(() => (activated.value = true))
   onUnmounted(() => (activated.value = false))
+
+  return {
+    cancel() {
+      activated.value = false
+    },
+    resume() {
+      activated.value = true
+    }
+  }
 }
 
 /**
