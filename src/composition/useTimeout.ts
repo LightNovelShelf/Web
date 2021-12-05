@@ -24,7 +24,7 @@ export interface UseTimeoutConfig {
  *
  * @example
  * ```js
- * const fn = useTimeuot(function () { throw new Error('test') })
+ * const fn = useTimeout(function () { throw new Error('test') })
  * fn().catch(e => e === CANCEL_ERR ? ( console.log('取消执行'); ) : ( console.log('执行错误'); ) )
  * ```
  */
@@ -51,7 +51,7 @@ const DELAY_MS = 200
  *
  * @example
  * ```js
- * const fn = useTimeuot(function () { fetch('baidu.com') });
+ * const fn = useTimeout(function () { fetch('baidu.com') });
  *
  * fn().catch(
  *    e => e === CANCEL_ERR
@@ -122,7 +122,7 @@ export function useTimeout<P extends any[] = any[], R = any>(
   onDeactivated(() => config?.cancelOnUnMount !== false && fn.cancel())
   onUnmounted(() => config?.cancelOnUnMount !== false && fn.cancel())
 
-  // actived 时不管，这里只负责取消，业务自己确定调用时机，避免出现无法取消的多余执行
+  // activated 时不管，这里只负责取消，业务自己确定调用时机，避免出现无法取消的多余执行
 
   return fn
 }
