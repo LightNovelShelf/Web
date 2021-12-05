@@ -20,5 +20,11 @@ export {
   mdiChevronRight,
   mdiChevronLeft,
   mdiSkipNext,
-  mdiSkipPrevious
+  mdiSkipPrevious,
+  mdiAccountCircle,
+  mdiEmail,
+  mdiLock,
+  mdiSend,
+  mdiEye,
+  mdiAlertCircle
 } from '@mdi/js'
