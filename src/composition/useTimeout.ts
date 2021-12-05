@@ -11,6 +11,12 @@ export interface UseTimeoutAction<P extends any[] = any[], R = any> extends AnyA
   cancel: AnyVoidFunc
 }
 
+/** 延时执行配置项 */
+export interface UseTimeoutConfig {
+  /** 自动取消，设置为 false 可以阻止自动取消行为 */
+  cancelOnUnMount?: boolean
+}
+
 /**
  * cancel错误，方便业务判断是cb错误还是只是取消
  *
@@ -54,7 +60,8 @@ const DELAY_MS = 200
  */
 export function useTimeout<P extends any[] = any[], R = any>(
   cb: AnyFunc<P, R>,
-  delay: number = DELAY_MS
+  delay: number = DELAY_MS,
+  config?: UseTimeoutConfig
 ): UseTimeoutAction<P, R> {
   let timeoutContext: NodeJS.Timeout | undefined
   let rejector: ((err?: unknown) => void) | undefined
@@ -100,8 +107,8 @@ export function useTimeout<P extends any[] = any[], R = any>(
   }
 
   // 组件卸载时取消执行
-  onDeactivated(fn.cancel)
-  onUnmounted(fn.cancel)
+  onDeactivated(() => config?.cancelOnUnMount !== false && fn.cancel())
+  onUnmounted(() => config?.cancelOnUnMount !== false && fn.cancel())
 
   // actived 时不管，这里只负责取消，业务自己确定调用时机，避免出现无法取消的多余执行
 
