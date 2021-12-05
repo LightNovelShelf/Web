@@ -109,9 +109,8 @@ watch(
   }
 )
 
-onBeforeRouteUpdate(async (to, from, next) => {
-  await request(~~to.params.page || 1)
-  next()
+onBeforeRouteUpdate((to, from, next) => {
+  request(~~to.params.page || 1).finally(next)
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */
