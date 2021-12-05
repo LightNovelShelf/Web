@@ -8,6 +8,7 @@
 
     <div style="display: flex; justify-content: center; padding-top: 24px">
       <q-pagination
+        :disable="loading"
         v-model="currentPage"
         :max="pageData.totalPage"
         direction-links
@@ -22,14 +23,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, withDefaults } from 'vue'
-import { onBeforeRouteUpdate, useRouter } from 'vue-router'
+import { ref, computed, onActivated, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
+import { useTimeout } from '@/composition/useTimeout'
+import { NOOP } from '@/utils/const'
 
 const options = [
   {
@@ -64,52 +67,57 @@ const options = [
   }
 ]
 
-const props = withDefaults(
-  defineProps<{
-    page?: number | string
-  }>(),
-  {
-    page: 1
-  }
-)
-
+const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
-const pageData = ref({
-  totalPage: 1
-})
+const pageData = ref({ totalPage: 1 })
+
 const currentPage = computed({
   get() {
-    let _page = ~~props.page
-    if (_page === 0) _page = 1
-    return _page
+    return ~~route.params.page || 1
   },
   set(val: number) {
     router.push({ name: 'BookList', params: { page: val } })
   }
 })
 
-function request(page) {
-  let _page = ~~page
-  if (_page === 0) _page = 1
-  $q.loadingBar.start()
-  return getBookList({ Page: _page })
+const requesting = ref(false)
+
+const request = useTimeout(function (page: number = currentPage.value) {
+  requesting.value = true
+
+  return getBookList({ Page: page })
     .then((serverData) => {
       bookData.value = serverData.Data
       pageData.value.totalPage = serverData.TotalPages
-      console.log(serverData)
+      console.log('serverData: ', serverData)
     })
-    .finally(() => $q.loadingBar.stop())
-}
-
-const getList = () => request(currentPage.value)
-
-onBeforeRouteUpdate((to, from, next) => {
-  request(to.params.page).finally(() => next())
+    .finally(() => {
+      requesting.value = false
+    })
 })
 
-onActivated(getList)
+const loading = computed(() => requesting.value || request.scheduled.value)
+
+watch(
+  () => loading.value,
+  (next, preview) => {
+    $q.loadingBar.stop()
+    if (next) {
+      $q.loadingBar.start()
+    }
+  }
+)
+
+onBeforeRouteUpdate((to, from, next) => {
+  request(~~to.params.page || 1).then(() => next(), NOOP)
+})
+
+/** 已经有数据（不是mounted场景）时延时请求 */
+onActivated(() => {
+  bookData.value.length ? request() : request.syncCall()
+})
 </script>
 
 <style lang="scss" scoped></style>
