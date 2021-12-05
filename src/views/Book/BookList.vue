@@ -31,8 +31,7 @@ import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { useInit } from '@/composition/useInit'
-import { useTimeoutOutVue } from '@/composition/useTimeout'
+import { useTimeoutOnRouteUpdate } from '@/composition/useTimeout'
 
 const options = [
   {
@@ -93,44 +92,32 @@ const currentPage = computed({
   }
 })
 
-let requested: Ref<boolean> | null = null
 const loading = ref(false)
 function request(page) {
-  if (requested) requested.value = false
-
   let _page = ~~page
   if (_page === 0) _page = 1
+
   $q.loadingBar.stop()
   $q.loadingBar.start()
   loading.value = true
 
-  return new Promise<void>((resolve, reject) => {
-    requested = useTimeoutOutVue(
-      () => {
-        getBookList({ Page: _page })
-          .then((serverData) => {
-            bookData.value = serverData.Data
-            pageData.value.totalPage = serverData.TotalPages
-            resolve()
-            console.log(serverData)
-          })
-          .finally(() => {
-            $q.loadingBar.stop()
-            loading.value = false
-          })
-      },
-      () => reject('request cancel'),
-      500
-    )
-  })
+  return getBookList({ Page: _page })
+    .then((serverData) => {
+      bookData.value = serverData.Data
+      pageData.value.totalPage = serverData.TotalPages
+      console.log(serverData)
+    })
+    .finally(() => {
+      $q.loadingBar.stop()
+      loading.value = false
+    })
 }
 
 const getList = () => request(currentPage.value)
 
-onBeforeRouteUpdate((to, from, next) => {
-  console.log('onBeforeRouteUpdate')
-  request(to.params.page).then(() => next())
-})
+useTimeoutOnRouteUpdate((params) => {
+  return request(params.page)
+}, 500)
 
 onActivated(getList)
 </script>
