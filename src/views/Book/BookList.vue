@@ -32,6 +32,7 @@ import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import { useTimeout } from '@/composition/useTimeout'
+import { NOOP } from '@/utils/const'
 
 const options = [
   {
@@ -109,13 +110,8 @@ watch(
   }
 )
 
-onBeforeRouteUpdate(async (to) => {
-  try {
-    await request(~~to.params.page || 1)
-    return true
-  } catch (e) {
-    return false
-  }
+onBeforeRouteUpdate((to, from, next) => {
+  request(~~to.params.page || 1).then(() => next(), NOOP)
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */
