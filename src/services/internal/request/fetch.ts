@@ -1,6 +1,7 @@
 import { RequestConfig } from '@/services/types'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { stringifyQuery, LocationQueryRaw } from 'vue-router'
+import ServerError from '@/services/internal/ServerError'
 
 export const requestWithFetch = async <Param extends LocationQueryRaw, Data, Res>(
   url: string,
@@ -41,7 +42,13 @@ export const requestWithFetch = async <Param extends LocationQueryRaw, Data, Res
   const content = await res.json()
 
   if (res.ok) {
-    return content
+    const { Success, Response, Status, Msg } = content
+
+    if (Success) {
+      return Response
+    } else {
+      throw new ServerError({ message: Msg, status: Status })
+    }
   }
 
   throw new Error(getErrMsg(content))
