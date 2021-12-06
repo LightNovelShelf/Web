@@ -26,5 +26,7 @@ export {
   mdiLock,
   mdiSend,
   mdiEye,
-  mdiAlertCircle
+  mdiAlertCircle,
+  mdiAlert,
+  mdiExclamation
 } from '@mdi/js'

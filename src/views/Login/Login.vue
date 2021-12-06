@@ -31,7 +31,7 @@
           </template>
         </q-input>
       </div>
-      <q-btn color="primary" style="height: 50px" class="full-width" @click="_login">
+      <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" @click="_login">
         登录
         <q-icon right size="24px" :name="icon.mdiSend" />
       </q-btn>
@@ -52,6 +52,8 @@ import { ref } from 'vue'
 import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
 import app from '@/main'
 import { login } from '@/services/user'
+import { sha256 } from 'js-sha256'
+import { useQuasar } from 'quasar'
 
 app.use(VueReCaptcha, {
   siteKey: '6LfxUnwdAAAAAKx-1uwDXCb1F9zFo80KwBA614cZ',
@@ -61,19 +63,31 @@ app.use(VueReCaptcha, {
   }
 })
 
+const $q = useQuasar()
+
 const name = ref('test@acgdmzy.com')
 const password = ref('test_user')
 const isPwd = ref(true)
+const loading = ref(false)
 
 const { executeRecaptcha, recaptchaLoaded } = useReCaptcha()
 
 const _login = async () => {
-  // (optional) Wait until recaptcha has been loaded.
-  await recaptchaLoaded()
-  // Execute reCAPTCHA with action "login".
-  const token = await executeRecaptcha('login')
+  loading.value = true
 
-  login(name.value, password.value, token)
+  try {
+    await recaptchaLoaded()
+    const token = await executeRecaptcha('login')
+
+    login(name.value, sha256(password.value), token)
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: e.message
+    })
+  }
+
+  loading.value = false
 }
 </script>
 
