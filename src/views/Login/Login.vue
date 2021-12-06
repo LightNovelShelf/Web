@@ -79,7 +79,8 @@ const _login = async () => {
     await recaptchaLoaded()
     const token = await executeRecaptcha('login')
 
-    login(name.value, sha256(password.value), token)
+    const user = await login(name.value, sha256(password.value), token)
+    console.log(user)
   } catch (e) {
     $q.notify({
       type: 'negative',

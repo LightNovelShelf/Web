@@ -11,7 +11,7 @@ export function getErrMsg(err: unknown, fallbackMsg = '网络错误'): string {
     }
 
     // @ts-expect-error 3. 假定是个服务器返回的json
-    return err.message || err.msg || fallbackMsg
+    return err.message || err.Message || err.msg || err.Msg || fallbackMsg
   } catch (e) {
     // 以上都不是，就对新的error做取值
     return getErrMsg(e, fallbackMsg)

@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref, getCurrentInstance, onUnmounted } from 'vue'
+import ServerError from '@/services/internal/ServerError'
 
 import { tryResponseFromCache, updateResponseCache } from './cache'
 
@@ -111,10 +112,12 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   }
 
   const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
-  if (Status === 200 && Success) {
+  if (Success) {
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
     updateResponseCache(url, Response, ...data)
     return Response
+  } else if (Msg || Status !== null) {
+    throw new ServerError({ message: Msg, status: Status })
   }
 
   // @todo 暂不确定请求失败后是否使用缓存代替：
