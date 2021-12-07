@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :class="'read-bg absolute-top-left fit' + bgclass" :style="bgcolor + '; ' + bgsrc"></div>
+    <div class="read-bg absolute-top-left fit" :style="readStyle"></div>
     <div v-if="chapter['BookId'] !== ~~bid || chapter['SortNum'] !== ~~sortNum">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -9,17 +9,16 @@
       <q-skeleton type="text" height="50px" />
       <q-skeleton type="text" height="100px" />
     </div>
-    <div class="read" v-else v-html="chapterContent" :style="'position:relative;z-index=1;' + fontcolor + fontsize" />
+    <div class="read" v-else v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import Setting from './Setting.vue'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
-import localforage from 'localforage'
+import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({
   name: 'Read',
@@ -49,64 +48,31 @@ export default defineComponent({
       })
     }
 
-    let bgsrc = ref<string>('')
-    let bgclass = ref<string>('')
-    let bgcolor = ref<string>('')
-    let fontcolor = ref<string>('')
-    let fontsize = ref<string>('')
-
-    // Read页面时判断加载特殊背景
-    const setBackground = async () => {
-      await localforage
-        .getItem('bgColor')
-        .then(function (value: { dark: string; bg: string; color: string; fontsize: number }) {
-          switch (value.bg) {
-            case 'none':
-              bgclass.value = 'hidden'
-              bgsrc.value = ''
-              break
-            case 'paper':
-              bgclass.value = ''
-              bgsrc.value = Dark.isActive
-                ? 'background-image: url("/img/bg-paper-dark.jpeg")'
-                : 'background-image: url("/img/bg-paper.jpg")'
-              bgcolor.value = ''
-              break
-            case 'custom':
-              bgclass.value = ''
-              bgsrc.value = ''
-              bgcolor.value = 'background-color:' + value.color
-              break
-            default:
-              break
-          }
-          if (value.bg === 'custom') {
-            if (colors.brightness(value.color) < 128) {
-              fontcolor.value = 'color: #FFFFFF;'
-            } else {
-              fontcolor.value = 'color: #000000;'
-            }
-          } else {
-            fontcolor.value = ''
-          }
-          fontsize.value = 'font-size:' + (value.fontsize / 10).toString() + 'em'
-        })
-        .catch(function (err) {
-          //
-        })
-    }
+    const settingStore = useSettingStore()
+    const { readSetting } = settingStore
+    const readStyle = computed(() => ({
+      fontSize: readSetting.fontSize + 'px',
+      color:
+        readSetting.bgType === 'custom'
+          ? colors.brightness(readSetting.customColor) < 128
+            ? '#fff'
+            : '#000'
+          : 'inherit',
+      backgroundImage:
+        readSetting.bgType === 'paper'
+          ? Dark.isActive
+            ? 'url("/img/bg-paper-dark.jpeg")'
+            : 'url("/img/bg-paper.jpg")'
+          : 'initial',
+      backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
+    }))
 
     onActivated(getContent)
-    onActivated(setBackground)
 
     return {
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
       chapter,
-      bgsrc,
-      bgclass,
-      bgcolor,
-      fontcolor,
-      fontsize
+      readStyle
     }
   }
 })
