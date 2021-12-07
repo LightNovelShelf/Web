@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref, getCurrentInstance, onUnmounted } from 'vue'
+import { nanoid } from 'nanoid'
 import ServerError from '@/services/internal/ServerError'
 
 import { tryResponseFromCache, updateResponseCache } from './cache'
@@ -20,7 +21,7 @@ const hub: HubConnection = new HubConnectionBuilder()
   .withUrl(HOST, {
     accessTokenFactory() {
       /** @todo 这里会循环引用，虽然能跑但有点丑陋；真要用到这个的话，要想个优雅点的办法 */
-      return ''
+      return nanoid()
     }
   })
   .withHubProtocol(new MessagePackHubProtocol())
