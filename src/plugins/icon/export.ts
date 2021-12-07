@@ -28,5 +28,6 @@ export {
   mdiEye,
   mdiAlertCircle,
   mdiAlert,
-  mdiExclamation
+  mdiExclamation,
+  mdiFormatSize
 } from '@mdi/js'
