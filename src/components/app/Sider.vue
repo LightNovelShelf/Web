@@ -1,5 +1,11 @@
 <template>
-  <q-drawer v-model="siderShow" show-if-above bordered class="bg-grey-2" :width="240">
+  <q-drawer
+    v-model="siderShow"
+    show-if-above
+    bordered
+    :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'"
+    :width="240"
+  >
     <q-scroll-area class="fit">
       <q-list padding>
         <template v-for="option in menuOptions" :key="option.key">
@@ -88,7 +94,6 @@ const menuOptions: Array<Record<string, any>> = [
     label: '设置',
     key: 'Setting',
     route: 'Setting',
-    disabled: true,
     icon: icon.mdiCog
   },
   {
