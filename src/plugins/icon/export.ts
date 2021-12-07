@@ -20,5 +20,6 @@ export {
   mdiChevronRight,
   mdiChevronLeft,
   mdiSkipNext,
-  mdiSkipPrevious
+  mdiSkipPrevious,
+  mdiFormatSize
 } from '@mdi/js'

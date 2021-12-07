@@ -1,5 +1,9 @@
 <template>
-  <q-header elevated class="bg-white text-grey-8 q-py-xs" :height-hint="headerHeight">
+  <q-header
+    elevated
+    :class="($q.dark.isActive ? 'bg-blue-grey-10 text-secondary ' : 'bg-white text-grey-8') + ' q-py-xs'"
+    :height-hint="headerHeight"
+  >
     <q-toolbar>
       <q-btn flat dense round aria-label="Menu" :icon="icon.mdiMenu" @click="siderShow = !siderShow" />
 

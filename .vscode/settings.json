@@ -4,5 +4,8 @@
   "eslint.validate": ["vue", "javascript", "typescript", "javascriptreact", "typescriptreact"],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "octref.vetur"
   }
 }
