@@ -26,13 +26,11 @@ export const useSettingStore = defineStore('app.setting', {
       const dark = await settingDB.get('dark')
       if (dark === 'auto' || typeof dark === 'boolean') this.dark = dark
       this.isInit = false
-      console.log(this.readSetting)
     },
     async save() {
       const p1 = settingDB.set('dark', this.dark)
       const p2 = settingDB.set('readSetting', toRaw(this.readSetting))
       await Promise.all([p1, p2])
-      console.log(this)
     }
   }
 })
