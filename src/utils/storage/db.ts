@@ -89,8 +89,8 @@ export class DB {
   }
 
   /** 获取DB储存 */
-  public get = (key: string) => {
-    return this.db.getItem(key)
+  public get<T>(key: string) {
+    return this.db.getItem<T>(key)
   }
   /** 更新DB储存 */
   public set = (key: string, val: any) => {
