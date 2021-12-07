@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="read-bg absolute-top-left fit" :style="readStyle"></div>
     <div v-if="chapter['BookId'] !== ~~bid || chapter['SortNum'] !== ~~sortNum">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -8,15 +9,16 @@
       <q-skeleton type="text" height="50px" />
       <q-skeleton type="text" height="100px" />
     </div>
-    <div class="read" v-else v-html="chapterContent" />
+    <div class="read" v-else v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import { useQuasar } from 'quasar'
+import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
+import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({
   name: 'Read',
@@ -46,17 +48,43 @@ export default defineComponent({
       })
     }
 
+    const settingStore = useSettingStore()
+    const { readSetting } = settingStore
+    const readStyle = computed(() => ({
+      fontSize: readSetting.fontSize + 'px',
+      color:
+        readSetting.bgType === 'custom'
+          ? colors.brightness(readSetting.customColor) < 128
+            ? '#fff'
+            : '#000'
+          : 'inherit',
+      backgroundImage:
+        readSetting.bgType === 'paper'
+          ? Dark.isActive
+            ? 'url("/img/bg-paper-dark.jpeg")'
+            : 'url("/img/bg-paper.jpg")'
+          : 'initial',
+      backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
+    }))
+
     onActivated(getContent)
 
     return {
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
-      chapter
+      chapter,
+      readStyle
     }
   }
 })
 </script>
 
 <style scoped lang="scss">
+.read-bg {
+  z-index: 0;
+}
+.clear {
+  clear: both;
+}
 :deep(.read) {
   all: unset;
   all: revert;

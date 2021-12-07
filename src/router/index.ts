@@ -46,6 +46,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Collaborator/List.vue')
   },
   {
+    path: '/setting',
+    name: 'Setting',
+    component: () => import('../views/Setting.vue')
+  },
+  {
     path: '/test',
     name: 'Test',
     component: () => import('../views/Test.vue')

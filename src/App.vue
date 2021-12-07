@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh LpR fFf" class="bg-grey-1">
+  <q-layout view="hHh LpR fFf" :class="$q.dark.isActive ? '' : 'bg-grey-1'">
     <app-header />
     <app-sider />
     <app-container />
@@ -9,9 +9,11 @@
 <script lang="tsx">
 import { defineComponent } from 'vue'
 import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
-import { useQuasar } from 'quasar'
+import { useQuasar, Dark } from 'quasar'
 import { useServerNotify } from '@/services/utils/useServerNotify'
 import sanitizerHtml from '@/utils/sanitizeHtml'
+import localforage from 'localforage'
+import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({
   components: {
@@ -26,6 +28,9 @@ export default defineComponent({
       size: '2px',
       position: 'top'
     })
+
+    const settingStore = useSettingStore()
+    settingStore.init()
 
     useServerNotify('OnMessage', (message: string) => {
       $q.notify({
