@@ -29,5 +29,8 @@ export {
   mdiAlertCircle,
   mdiAlert,
   mdiExclamation,
-  mdiFormatSize
+  mdiFormatSize,
+  mdiTune,
+  mdiPalette,
+  mdiGradientVertical
 } from '@mdi/js'

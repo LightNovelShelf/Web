@@ -20,9 +20,9 @@ export default {
     right: icon.mdiArrowRight
   },
   colorPicker: {
-    spectrum: 'mdi-gradient-vertical',
-    tune: 'mdi-tune',
-    palette: 'mdi-palette-swatch'
+    spectrum: icon.mdiGradientVertical,
+    tune: icon.mdiTune,
+    palette: icon.mdiPalette
   },
   pullToRefresh: {
     icon: 'mdi-refresh'
