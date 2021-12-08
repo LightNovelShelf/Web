@@ -1,7 +1,7 @@
 import { RequestConfig } from '@/services/types'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { stringifyQuery, LocationQueryRaw } from 'vue-router'
-import ServerError from '@/services/internal/ServerError'
+import { ServerError } from '@/services/internal/ServerError'
 
 export const requestWithFetch = async <Param extends LocationQueryRaw, Data, Res>(
   url: string,
