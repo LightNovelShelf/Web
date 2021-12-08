@@ -118,7 +118,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     updateResponseCache(url, Response, ...data)
     return Response
   } else if (Msg || Status !== null) {
-    throw new ServerError({ message: Msg, status: Status })
+    throw new ServerError(Msg, Status)
   }
 
   // @todo 暂不确定请求失败后是否使用缓存代替：
