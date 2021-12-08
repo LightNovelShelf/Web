@@ -5,6 +5,10 @@
     "jsx": "preserve",
     "importHelpers": true,
     "strict": true,
+    // 简化Object.keys等的调用
+    "noImplicitAny": false,
+    // 简化this使用
+    "noImplicitThis": false,
     "alwaysStrict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,

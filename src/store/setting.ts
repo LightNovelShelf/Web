@@ -18,7 +18,7 @@ export const useSettingStore = defineStore('app.setting', {
   }),
   actions: {
     async init() {
-      const readSetting = await settingDB.get('readSetting')
+      const readSetting = (await settingDB.get('readSetting')) as Record<string, unknown>
       if (readSetting) {
         Object.keys(readSetting).forEach((key) => {
           this.readSetting[key] = readSetting[key]
