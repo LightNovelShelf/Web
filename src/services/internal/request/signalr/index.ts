@@ -25,10 +25,10 @@ const hub: HubConnection = new HubConnectionBuilder()
       let token = sessionToken.get()
       if (!token) {
         // 如果没有,查询是否有 longTermToken
-        const _token = `${await longTermToken.get()}`
+        const _token = await longTermToken.get()
         // 如果有, 用它来换取会话token
         if (_token) {
-          token = await refreshToken(_token)
+          token = await refreshToken('' + _token)
         }
       }
       return token
