@@ -1,10 +1,11 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
-import { ref, getCurrentInstance, onUnmounted } from 'vue'
-import { nanoid } from 'nanoid'
+import { ref } from 'vue'
 import { ServerError } from '@/services/internal/ServerError'
 
 import { tryResponseFromCache, updateResponseCache } from './cache'
+import { longTermToken, sessionToken } from '@/utils/session'
+import { refreshToken } from '@/services/user'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
@@ -19,10 +20,21 @@ const lastReConnect = ref<number>(0)
 /** signalr 连接中心 */
 const hub: HubConnection = new HubConnectionBuilder()
   .withUrl(HOST, {
-    accessTokenFactory() {
-      /** @todo 这里会循环引用，虽然能跑但有点丑陋；真要用到这个的话，要想个优雅点的办法 */
-      return nanoid()
-    }
+    async accessTokenFactory() {
+      // 查询是否已有会话token
+      let token = sessionToken.get()
+      if (!token) {
+        // 如果没有,查询是否有 longTermToken
+        const _token = `${await longTermToken.get()}`
+        // 如果有, 用它来换取会话token
+        if (_token) {
+          token = await refreshToken(_token)
+        }
+      }
+      return token
+    },
+    // 打印出所有返回的内容
+    logMessageContent: __DEV__
   })
   .withHubProtocol(new MessagePackHubProtocol())
   .configureLogging(LogLevel.Information)
@@ -73,7 +85,15 @@ function getSignalr(): Promise<HubConnection> {
   return connectPromise.value
 }
 /** 立即运行一次保证连接ws服务器，并记录成Promise */
-const firstConnect = getSignalr()
+const firstConnect: () => Promise<HubConnection> = (() => {
+  let context: Promise<HubConnection>
+  return () => {
+    if (!context) {
+      context = getSignalr()
+    }
+    return context
+  }
+})()
 
 /**
  * 通过 signalr 发送请求
@@ -99,7 +119,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 ): Promise<Res> {
   // 等待第一次connect
   try {
-    await firstConnect
+    await firstConnect()
   } catch (e) {
     // 不需要管错误，这里只关注连过就好
   }

@@ -16,6 +16,8 @@ function getEnvForDefinePlugin() {
   }, {})
 }
 
+const __DEV__ = process.env.NODE_ENV === 'development'
+
 module.exports = {
   productionSourceMap: false,
   chainWebpack: (config) => {
@@ -28,7 +30,8 @@ module.exports = {
     plugins: [
       new ProvidePlugin({ process: 'process' }),
       new DefinePlugin({
-        ...getEnvForDefinePlugin()
+        ...getEnvForDefinePlugin(),
+        __DEV__: JSON.stringify(__DEV__)
       })
     ],
     resolve: {
