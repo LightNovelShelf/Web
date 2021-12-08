@@ -54,6 +54,7 @@ import app from '@/main'
 import { login, refreshToken } from '@/services/user'
 import { sha256 } from 'js-sha256'
 import { useQuasar } from 'quasar'
+import { getErrMsg } from '@/utils/getErrMsg'
 
 app.use(VueReCaptcha, {
   siteKey: '6LfxUnwdAAAAAKx-1uwDXCb1F9zFo80KwBA614cZ',
@@ -70,14 +71,15 @@ const password = ref('test_user')
 const isPwd = ref(true)
 const loading = ref(false)
 
-const { executeRecaptcha, recaptchaLoaded } = useReCaptcha()
+const { executeRecaptcha, recaptchaLoaded } = useReCaptcha() || {}
 
 const _login = async () => {
   loading.value = true
 
   try {
-    await recaptchaLoaded()
-    const token = await executeRecaptcha('login')
+    // 忽略为空的情况，出错了由catch兜住
+    await recaptchaLoaded!()
+    const token = await executeRecaptcha!('login')
 
     const { RefreshToken } = await login(name.value, sha256(password.value), token)
     $q.notify({
@@ -88,7 +90,7 @@ const _login = async () => {
   } catch (e) {
     $q.notify({
       type: 'negative',
-      message: e.message
+      message: getErrMsg(e)
     })
   }
 
