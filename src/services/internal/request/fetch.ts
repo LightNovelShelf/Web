@@ -3,6 +3,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { stringifyQuery } from 'vue-router'
 import { ServerError } from '@/services/internal/ServerError'
 import { RequestMethod } from '@/services/types'
+import { sessionToken } from '@/utils/session'
 
 export async function requestWithFetch<Res = unknown, Data = any>(
   url: string,
@@ -53,6 +54,12 @@ export async function requestWithFetch<Res = unknown, Data = any>(
   }
 
   fetchOpt.headers = headers
+
+  const token = sessionToken.get()
+  if (token) {
+    /** @todo 目前的fetch都是无授权的, 稍后才知道真的token header是什么 */
+    fetchOpt.headers.append('token', token)
+  }
 
   const res = await fetch(url, fetchOpt)
 

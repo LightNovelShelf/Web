@@ -51,7 +51,7 @@ import { icon } from '@/plugins/icon'
 import { ref } from 'vue'
 import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
 import app from '@/main'
-import { login, refreshToken } from '@/services/user'
+import { login } from '@/services/user'
 import { sha256 } from 'js-sha256'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
@@ -77,16 +77,18 @@ const _login = async () => {
   loading.value = true
 
   try {
-    // 忽略为空的情况，出错了由catch兜住
-    await recaptchaLoaded!()
+    // 获取人机校验结果
+    await recaptchaLoaded!() // 忽略为空的情况，出错了由catch兜住
     const token = await executeRecaptcha!('login')
 
-    const { RefreshToken } = await login(name.value, sha256(password.value), token)
+    // 登录
+    await login(name.value, sha256(password.value), token)
+
     $q.notify({
       message: '登录成功'
     })
-    const jwtToken = await refreshToken(RefreshToken)
-    console.log('jwtToken', jwtToken)
+
+    /** @todo 跳转用户主页 */
   } catch (e) {
     $q.notify({
       type: 'negative',

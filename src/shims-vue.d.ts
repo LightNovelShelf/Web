@@ -9,6 +9,9 @@ declare module 'minimasonry' {
   export default foo
 }
 
+/** 开发模式 */
+declare const __DEV__: boolean
+
 /** 源站地址 */
 declare const VUE_APP_SERVER: string
 /** API服务地址 */
