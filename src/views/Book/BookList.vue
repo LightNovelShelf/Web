@@ -100,15 +100,12 @@ const request = useTimeout(function (page: number = currentPage.value) {
 
 const loading = computed(() => requesting.value || request.scheduled.value)
 
-watch(
-  () => loading.value,
-  (next, preview) => {
-    $q.loadingBar.stop()
-    if (next) {
-      $q.loadingBar.start()
-    }
+watch(loading, (nextLoading) => {
+  $q.loadingBar.stop()
+  if (nextLoading) {
+    $q.loadingBar.start()
   }
-)
+})
 
 onBeforeRouteUpdate((to, from, next) => {
   request(~~to.params.page || 1).then(() => next(), NOOP)
