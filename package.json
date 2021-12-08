@@ -15,7 +15,6 @@
     "@quasar/extras": "^1.12.1",
     "core-js": "^3.19.2",
     "dompurify": "^2.3.3",
-    "js-sha256": "^0.9.0",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
     "luxon": "^2.1.1",
