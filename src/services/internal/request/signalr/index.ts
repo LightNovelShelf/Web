@@ -147,10 +147,17 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   throw new Error(Msg || '未知服务错误')
 }
 
-export function useServerNotify(methodName: string, cb: (...args: any[]) => void) {
-  hub.on(methodName, cb)
-  const instance = getCurrentInstance()
-  if (instance) {
-    onUnmounted(() => hub.off(methodName, cb))
+export async function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
+  // 等待第一次connect
+  try {
+    await firstConnect()
+  } catch (e) {
+    // 不需要管错误，这里只关注连过就好
+  }
+
+  ;(await getSignalr()).on(methodName, cb)
+
+  return async function () {
+    ;(await getSignalr()).off(methodName, cb)
   }
 }
