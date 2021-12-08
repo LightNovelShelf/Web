@@ -7,7 +7,7 @@ import { ServerError } from '@/services/internal/ServerError'
 import { tryResponseFromCache, updateResponseCache } from './cache'
 
 /** signalr接入点 */
-const HOST = `${process.env.VUE_APP_API_SERVER}/hub/api`
+const HOST = `${VUE_APP_API_SERVER}/hub/api`
 
 /** @internal 记录Promise避免重复start */
 export const connectPromise = ref<null | Promise<HubConnection>>(null)
