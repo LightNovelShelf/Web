@@ -54,7 +54,6 @@ import app from '@/main'
 import { login, refreshToken } from '@/services/user'
 import { sha256 } from 'js-sha256'
 import { useQuasar } from 'quasar'
-import { LoginRes } from '@/services/user/type'
 
 app.use(VueReCaptcha, {
   siteKey: '6LfxUnwdAAAAAKx-1uwDXCb1F9zFo80KwBA614cZ',
@@ -80,13 +79,12 @@ const _login = async () => {
     await recaptchaLoaded()
     const token = await executeRecaptcha('login')
 
-    const loginResult = (await login(name.value, sha256(password.value), token)) as LoginRes
-    console.log(loginResult)
+    const { RefreshToken } = await login(name.value, sha256(password.value), token)
     $q.notify({
       message: '登录成功'
     })
-    const jwtToken = await refreshToken(loginResult.RefreshToken)
-    console.log(jwtToken)
+    const jwtToken = await refreshToken(RefreshToken)
+    console.log('jwtToken', jwtToken)
   } catch (e) {
     $q.notify({
       type: 'negative',
