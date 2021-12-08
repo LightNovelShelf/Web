@@ -5,9 +5,9 @@ if (!window.indexedDB) {
 }
 
 /** 应用版本；版本变更时会清空上一版本的数据库 */
-const APP_VER: number = +(process.env.VUE_APP_VER || '')
+const APP_VER: number = +VUE_APP_VER
 /** APP实例tag，用来方便同域名调试不同实例 */
-const APP_NAME: string = process.env.VUE_APP_NAME || 'eBook_Shelf'
+const APP_NAME: string = VUE_APP_NAME || 'eBook_Shelf'
 
 /**
  * 储存数据库元数据的数据库

@@ -5,7 +5,7 @@
  * @description
  * 以后可能还会把/api写入，但目前先这样
  */
-const HOST = process.env.VUE_APP_API_SERVER
+const HOST = VUE_APP_API_SERVER
 
 /**
  * 路由表
