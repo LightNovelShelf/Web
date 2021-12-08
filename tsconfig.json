@@ -3,12 +3,16 @@
     "target": "esnext",
     "module": "esnext",
     "jsx": "preserve",
-    "importHelpers": true,
-    "strict": true,
+    // 这里不需要 tsc 进行代码降级兼容,所以也不需要 importHelpers 了
+    // "importHelpers": true,
+    "strict": false,
+    // 检查空调用、空取值
+    "strictNullChecks": true,
     // 简化Object.keys等的调用
-    "noImplicitAny": false,
+    // "noImplicitAny": false,
     // 简化this使用
-    "noImplicitThis": false,
+    // "noImplicitThis": false,
+    // 默认输出 "use strict"; 屏蔽js的奇怪历史行为
     "alwaysStrict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
