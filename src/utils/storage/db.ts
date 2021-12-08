@@ -5,7 +5,7 @@ if (!window.indexedDB) {
 }
 
 /** 应用版本；版本变更时会清空上一版本的数据库 */
-const APP_VER: number = +process.env.VUE_APP_VER
+const APP_VER: number = +(process.env.VUE_APP_VER || '')
 /** APP实例tag，用来方便同域名调试不同实例 */
 const APP_NAME: string = process.env.VUE_APP_NAME || 'eBook_Shelf'
 
@@ -44,9 +44,16 @@ class MetaDB {
   public getDBVer(DB_NAME: string): number {
     return this.config[DB_NAME]?.version ?? 1
   }
-}
 
-const metaDBInstance = new MetaDB()
+  private static _instance: MetaDB | null = null
+  /** 获取MetaDB的实例；写成这个形式的好处是懒初始化 */
+  static getInstance(): MetaDB {
+    if (!MetaDB._instance) {
+      MetaDB._instance = new MetaDB()
+    }
+    return MetaDB._instance
+  }
+}
 
 export class DB {
   /** 返回一个DB实例 */
@@ -72,18 +79,25 @@ export class DB {
     /** DB名，需要保证全局唯一 */
     DB_NAME: string,
     /** DB描述 */
-    DB_DESC = ''
-  ) {
-    /** 客户端已有的DB版本 */
-    const LAST_VER = metaDBInstance.getDBVer(DB_NAME)
+    DB_DESC = '',
 
-    /** 查询是否有现存的DB */
-    if (LAST_VER && LAST_VER !== DB.CURRENT_VER) {
-      DB.createInstance(DB_NAME, LAST_VER, DB_DESC).dropInstance()
+    /** db配置 */
+    config?: {
+      /** 是否drop掉上一个版本的db @default false */
+      drop: boolean
+    }
+  ) {
+    if (config?.drop) {
+      /** 客户端已有的DB版本 */
+      const LAST_VER = MetaDB.getInstance().getDBVer(DB_NAME)
+      /** 查询是否有现存的DB */
+      if (LAST_VER && LAST_VER !== DB.CURRENT_VER) {
+        DB.createInstance(DB_NAME, LAST_VER, DB_DESC).dropInstance()
+      }
     }
 
     // 就算相同也要set一次，保证初版应用也能记录到
-    metaDBInstance.setDBVer(DB_NAME, DB.CURRENT_VER)
+    MetaDB.getInstance().setDBVer(DB_NAME, DB.CURRENT_VER)
 
     this.db = DB.createInstance(DB_NAME, DB.CURRENT_VER, DB_DESC)
   }

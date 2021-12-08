@@ -1,8 +1,9 @@
 import { ref } from 'vue'
 import { DB } from '@/utils/storage/db'
+import { DB_NAME } from '@/const/db'
 
 /** 用来储存响应的DB */
-const cacheDB = new DB('SIGNALR_CACHE', '请求缓存储存')
+const cacheDB = new DB(DB_NAME.SIGNALR_CACHE, '请求缓存储存')
 
 /** 最后一次返回的响应，目前用于监听cache使用情况 */
 export const lastResponseCache = ref<Promise<unknown>>(null)
