@@ -4,6 +4,8 @@
     "module": "esnext",
     "jsx": "preserve",
     "importHelpers": true,
+    "strict": true,
+    "alwaysStrict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
