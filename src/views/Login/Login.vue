@@ -52,7 +52,7 @@ import { ref } from 'vue'
 import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
 import app from '@/main'
 import { login } from '@/services/user'
-import { sha256 } from 'js-sha256'
+import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
 
@@ -82,7 +82,7 @@ const _login = async () => {
     const token = await executeRecaptcha!('login')
 
     // 登录
-    await login(name.value, sha256(password.value), token)
+    await login(name.value, await sha256(password.value), token)
 
     $q.notify({
       message: '登录成功'
