@@ -6,7 +6,7 @@ import { DB_NAME } from '@/const/db'
 const cacheDB = new DB(DB_NAME.SIGNALR_CACHE, '请求缓存储存')
 
 /** 最后一次返回的响应，目前用于监听cache使用情况 */
-export const lastResponseCache = ref<Promise<unknown>>(null)
+export const lastResponseCache = ref<Promise<unknown> | null>(null)
 
 /** 查询cache返回结果 */
 export async function tryResponseFromCache<Res = unknown, Data extends unknown[] = unknown[]>(

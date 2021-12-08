@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="read-bg absolute-top-left fit" :style="readStyle"></div>
-    <div v-if="chapter['BookId'] !== ~~bid || chapter['SortNum'] !== ~~sortNum">
+    <div v-if="chapter['BookId'] !== ~~(bid || '1') || chapter['SortNum'] !== ~~(sortNum || '1')">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
       <q-skeleton type="text" />
@@ -28,9 +28,9 @@ export default defineComponent({
   },
   setup(props) {
     const $q = useQuasar()
-    const chapter = ref({})
+    const chapter = ref<any>({})
     const getContent = async () => {
-      chapter.value = await getChapterContent({ Bid: ~~props.bid, SortNum: ~~props.sortNum })
+      chapter.value = await getChapterContent({ Bid: ~~(props.bid || '1'), SortNum: ~~(props.sortNum || '1') })
       $q.notify({
         message: chapter.value['Title'],
         color: 'purple',
