@@ -47,7 +47,7 @@ export const requestWithFetch = async <Param extends LocationQueryRaw, Data, Res
     if (Success) {
       return Response
     } else {
-      throw new ServerError({ message: Msg, status: Status })
+      throw new ServerError(Msg, Status)
     }
   }
 

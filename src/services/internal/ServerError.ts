@@ -1,9 +1,7 @@
 export default class ServerError extends Error {
-  public status: number
+  public readonly name = 'ServerError'
 
-  constructor({ message, status }) {
+  constructor(public readonly message = '未知错误', public readonly status: number = 500) {
     super(message)
-    this.name = 'ServerError'
-    this.status = status
   }
 }
