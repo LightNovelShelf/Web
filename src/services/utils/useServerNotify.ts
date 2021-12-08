@@ -1,5 +1,6 @@
 import { NOOP } from '@/utils/const'
-import { onUnmounted, ref } from 'vue'
+import { onUnmounted, ref, watch } from 'vue'
+import { isConnected } from '.'
 import { subscribeWithSignalr } from '../internal/request/signalr'
 
 /** 订阅某个接口返回 */
@@ -15,11 +16,21 @@ export async function useServerNotify<Res = unknown>(methodName: string, cb: (re
     }
   }
 
-  // 立即执行
-  try {
+  if (isConnected.value) {
     unsubscribor.value = await subscribeWithSignalr(methodName, cb)
-  } catch (e) {
-    // ignore
+  } else {
+    const stopWatch = watch(isConnected, async (connected) => {
+      if (connected) {
+        try {
+          unsubscribor.value = await subscribeWithSignalr(methodName, cb)
+          // 监听一次就够了, signalr断开了也会记住相关订阅回调
+          // 不停止的话会监听多次, 更麻烦
+          stopWatch()
+        } catch (e) {
+          //
+        }
+      }
+    })
   }
 
   // 卸载时自动取消订阅
