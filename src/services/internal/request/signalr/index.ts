@@ -2,7 +2,7 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref, getCurrentInstance, onUnmounted } from 'vue'
 import { nanoid } from 'nanoid'
-import ServerError from '@/services/internal/ServerError'
+import { ServerError } from '@/services/internal/ServerError'
 
 import { tryResponseFromCache, updateResponseCache } from './cache'
 
