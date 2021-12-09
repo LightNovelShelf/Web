@@ -6,9 +6,14 @@ import { ServerError } from '@/services/internal/ServerError'
 import { tryResponseFromCache, updateResponseCache } from './cache'
 import { longTermToken, sessionToken } from '@/utils/session'
 import { refreshToken } from '@/services/user'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
+/** 是否是未授权产生的signalr错误 */
+const IS_UN_AUTH_ERR = (err: unknown): boolean =>
+  /** @todo 未授权没有别的特征，只有通过message来检查 */ getErrMsg(err).includes('user is unauthorized')
 
 /** @internal 记录Promise避免重复start */
 export const connectPromise = ref<null | Promise<HubConnection>>(null)
@@ -143,6 +148,11 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
     console.log('at:', new Date().toLocaleString())
     console.groupEnd()
+
+    // 如果是未授权，通知一声
+    if (IS_UN_AUTH_ERR(e)) {
+      unAuthenticationNotify.notify()
+    }
 
     // catch & throw;
     // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住

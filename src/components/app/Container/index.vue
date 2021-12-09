@@ -9,8 +9,17 @@
       </router-view>
     </div>
   </q-page-container>
+  <!-- 登陆页跳转 -->
+  <authentication-guard />
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts">
+import { defineComponent } from 'vue'
+import AuthenticationGuard from './AuthenticationGuard.vue'
+
+export default defineComponent({
+  components: { AuthenticationGuard }
+})
+</script>
 
 <style scoped></style>
