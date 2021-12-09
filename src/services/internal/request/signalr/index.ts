@@ -196,7 +196,7 @@ export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res
   if (__DEV__ && VUE_TRACE_SERVER) {
     _cb = (res: Res): void => {
       console.groupCollapsed(`signalr subscribe data trace: '${methodName}'`)
-      console.log('reviced:', res)
+      console.log('received:', res)
       console.log('at:', new Date().toLocaleString())
       console.groupEnd()
       cb(res)
