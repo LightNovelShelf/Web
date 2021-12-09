@@ -7,7 +7,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'App',
     meta: { requiresAuth: false },
-    redirect: { name: 'BookList' }
+    redirect: { name: 'Home' }
   },
   {
     path: '/home',
