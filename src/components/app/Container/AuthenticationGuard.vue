@@ -17,7 +17,7 @@ export default defineComponent(() => {
     const { name, fullPath } = route
 
     if (name !== 'Login') {
-      router.replace({ name: 'Login', query: { from: encodeURIComponent(fullPath) } })
+      router.replace({ name: 'Login', params: { authRedirect: 1 }, query: { from: encodeURIComponent(fullPath) } })
     }
   })
 })
