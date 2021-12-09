@@ -17,7 +17,7 @@ declare const VUE_APP_SERVER: string
 /** API服务地址 */
 declare const VUE_APP_API_SERVER: string
 /** 人机检查密钥 */
-declare const CAPTCHA_SITE_KEY: string
+declare const VUE_CAPTCHA_SITE_KEY: string
 /** token有效期，ms；当前是30s */
 declare const VUE_APP_TOKEN_EXP_TIME: string
 /** APP标识，方便多实例共享localhost等域名时，区分cache前缀 */
