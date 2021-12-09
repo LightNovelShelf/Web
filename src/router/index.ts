@@ -83,6 +83,15 @@ const router = createRouter({
 })
 
 router.beforeEach(async function (to) {
+  if (to.params.authRedirect) {
+    Notify.create({
+      type: 'negative',
+      timeout: 1500,
+      position: 'bottom',
+      message: '此操作必须登录，正在前往登录页面'
+    })
+  }
+
   // 显式声明不需要授权
   if (to.meta.requiresAuth === false) {
     return
@@ -94,12 +103,14 @@ router.beforeEach(async function (to) {
     return
   }
 
-  Notify.create({
-    type: 'negative',
-    timeout: 1500,
-    position: 'bottom',
-    message: '请先登录'
-  })
+  if (!to.params.authRedirect) {
+    Notify.create({
+      type: 'negative',
+      timeout: 1500,
+      position: 'bottom',
+      message: '此页面必须登录'
+    })
+  }
 
   // 没有授权材料，跳转到登录页
   return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
