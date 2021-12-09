@@ -1,25 +1,28 @@
+import { longTermToken, sessionToken } from '@/utils/session'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'App',
+    meta: { requiresAuth: false },
     redirect: { name: 'BookList' }
   },
   {
     path: '/home',
     name: 'Home',
+    meta: { requiresAuth: false },
     component: () => import('../views/Home.vue')
   },
   {
     path: '/announcement',
     name: 'Announcement',
+    meta: { requiresAuth: false },
     component: () => import('../views/Announcement/Announcement.vue')
   },
   {
     path: '/announcement/detail/:id',
     name: 'AnnouncementDetail',
-    props: true,
     component: () => import('../views/Announcement/AnnouncementDetail.vue')
   },
   {
@@ -58,6 +61,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'Login',
+    meta: { requiresAuth: false },
     component: () => import('../views/Login/Login.vue')
   }
 ]
@@ -72,6 +76,22 @@ const router = createRouter({
       return { top: 0 }
     }
   }
+})
+
+router.beforeEach(async function (to) {
+  // 显式声明不需要授权
+  if (to.meta.requiresAuth === false) {
+    return
+  }
+
+  // 检查有没有授权所需的材料
+  if (sessionToken.get() || (await longTermToken.get())) {
+    // 有材料就算过，授权失败等情况由其它地方保证
+    return
+  }
+
+  // 没有授权材料，跳转到登录页
+  return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
 })
 
 export default router
