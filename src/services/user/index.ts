@@ -1,10 +1,8 @@
-import { requestWithFetch } from '@/services/internal/request'
+import { requestWithFetch, requestWithSignalr, rebootSignalr } from '@/services/internal/request'
 import { PATH } from '@/services/path'
 import { sessionToken, longTermToken } from '@/utils/session'
-import { checkServer, rebootServer } from '@/services/healthy'
 
 import * as Types from './type'
-export { Types as UserServicesTypes }
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
@@ -19,12 +17,12 @@ export async function login(email: string, password: string, token: string) {
   await longTermToken.set(res.RefreshToken)
 
   // 重启链接
-  await rebootServer()
+  await rebootSignalr()
 
   // 触发一次请求, 连接ws服务
   // 登录就是为了连接ws服务, 连接失败的话等于没有登录
   // 所以这里await
-  await checkServer()
+  await getMyInfo()
 
   return res
 }
@@ -41,4 +39,9 @@ export async function refreshToken(longTermToken: string) {
   }
 
   return token
+}
+
+/** 获取用户信息 */
+export async function getMyInfo() {
+  return requestWithSignalr('GetMyInfo')
 }
