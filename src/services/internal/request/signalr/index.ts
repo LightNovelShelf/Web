@@ -32,12 +32,10 @@ const hub: HubConnection = new HubConnectionBuilder()
         }
       }
       return token
-    },
-    // 打印出所有返回的内容
-    logMessageContent: __DEV__
+    }
   })
   .withHubProtocol(new MessagePackHubProtocol())
-  .configureLogging(LogLevel.Information)
+  .configureLogging(__DEV__ ? LogLevel.Information : LogLevel.Critical)
   .build()
 
 /** 断联时更新连接情况 */
@@ -132,7 +130,23 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     }
   }
 
-  const { Success, Response, Status, Msg } = await (await getSignalr()).invoke(url, ...data)
+  const res = await (await getSignalr()).invoke(url, ...data)
+  const { Success, Response, Status, Msg } = res
+
+  if (__DEV__ && VUE_TRACE_SERVER) {
+    console.groupCollapsed(`signalr request data trace: '${url}'`)
+    console.log('send:', [...data])
+    console.log('Success:', Success)
+    if (Success) {
+      console.log('Response:', Response)
+    } else {
+      console.log('Status:', Status)
+      console.log('Msg:', Msg)
+    }
+    console.log('at:', new Date().toLocaleString())
+    console.groupEnd()
+  }
+
   if (Success) {
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
     updateResponseCache(url, Response, ...data)
@@ -148,10 +162,21 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 }
 
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
+  let _cb = cb
+  if (__DEV__ && VUE_TRACE_SERVER) {
+    _cb = (res: Res): void => {
+      console.groupCollapsed(`signalr subscribe data trace: '${methodName}'`)
+      console.log('reviced:', res)
+      console.log('at:', new Date().toLocaleString())
+      console.groupEnd()
+      cb(res)
+    }
+  }
+
   // 直接on就好
-  hub.on(methodName, cb)
+  hub.on(methodName, _cb)
 
   return function () {
-    hub.off(methodName, cb)
+    hub.off(methodName, _cb)
   }
 }

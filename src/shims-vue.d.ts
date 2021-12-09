@@ -22,5 +22,7 @@ declare const VUE_CAPTCHA_SITE_KEY: string
 declare const VUE_APP_TOKEN_EXP_TIME: string
 /** APP标识，方便多实例共享localhost等域名时，区分cache前缀 */
 declare const VUE_APP_NAME: string
-/** VER更改的时候会清空缓存，避免旧缓存清空; 注意版本号需要数字格式，非0 */
+/** 版本号VER */
 declare const VUE_APP_VER: string
+/** 是否打印ws的返回信息 */
+declare const VUE_TRACE_SERVER: string
