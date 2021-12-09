@@ -130,9 +130,26 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     }
   }
 
-  const res = await (await getSignalr()).invoke(url, ...data)
-  const { Success, Response, Status, Msg } = res
+  let Success, Response, Status, Msg
 
+  // 处理请求本身就失败的情况（比如没授权）
+  try {
+    const res = await (await getSignalr()).invoke(url, ...data)
+    ;({ Success, Response, Status, Msg } = res)
+  } catch (e) {
+    console.groupCollapsed(`signalr request data trace: '${url}'`)
+    console.log('send:', [...data])
+    console.log('err:', e)
+
+    console.log('at:', new Date().toLocaleString())
+    console.groupEnd()
+
+    // catch & throw;
+    // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住
+    throw e
+  }
+
+  // 处理请求成功但响应内容提示失败的情况
   if (__DEV__ && VUE_TRACE_SERVER) {
     console.groupCollapsed(`signalr request data trace: '${url}'`)
     console.log('send:', [...data])
@@ -149,16 +166,13 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   if (Success) {
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
+    // @todo 暂不确定请求失败后是否使用缓存代替：
+    // 如果有两个接口的内容互为呼应，前一个请求成功，是更新后的内容，而后一个请求失败，如果回退使用缓存则可能会出现内容之间脱钩的问题
     updateResponseCache(url, Response, ...data)
     return Response
-  } else if (Msg || Status !== null) {
+  } else {
     throw new ServerError(Msg, Status)
   }
-
-  // @todo 暂不确定请求失败后是否使用缓存代替：
-  // 如果有两个接口的内容互为呼应，前一个请求成功，是更新后的内容，而后一个请求失败，如果回退使用缓存则可能会出现内容之间脱钩的问题
-
-  throw new Error(Msg || '未知服务错误')
 }
 
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
