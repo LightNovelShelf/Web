@@ -1,5 +1,6 @@
 import { longTermToken, sessionToken } from '@/utils/session'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { Notify } from 'quasar'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -92,6 +93,13 @@ router.beforeEach(async function (to) {
     // 有材料就算过，授权失败等情况由其它地方保证
     return
   }
+
+  Notify.create({
+    type: 'negative',
+    timeout: 1500,
+    position: 'bottom',
+    message: '请先登录'
+  })
 
   // 没有授权材料，跳转到登录页
   return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
