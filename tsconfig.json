@@ -7,7 +7,8 @@
     // "importHelpers": true,
     "strict": false,
     // 检查空调用、空取值
-    "strictNullChecks": true,
+    // strictNullChecks开了后，JB家IDE无法在vue template中识别类型
+    // "strictNullChecks": true,
     // 简化Object.keys等的调用
     // "noImplicitAny": false,
     // 简化this使用
