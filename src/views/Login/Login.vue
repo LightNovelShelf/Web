@@ -57,7 +57,9 @@ import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
 
 app.use(VueReCaptcha, {
-  siteKey: '6LfxUnwdAAAAAKx-1uwDXCb1F9zFo80KwBA614cZ',
+  // Volar 的缺陷，调用eslnt时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
+  // eslint-disable-next-line no-undef
+  siteKey: VUE_CAPTCHA_SITE_KEY,
   loaderOptions: {
     useRecaptchaNet: true,
     autoHideBadge: true
