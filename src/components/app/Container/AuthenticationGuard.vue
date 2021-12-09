@@ -17,12 +17,6 @@ export default defineComponent(() => {
     const { name, fullPath } = route
 
     if (name !== 'Login') {
-      $q.notify({
-        type: 'negative',
-        timeout: 1500,
-        position: 'bottom',
-        message: '此操作必须登录，正在前往登录页面'
-      })
       router.replace({ name: 'Login', query: { from: encodeURIComponent(fullPath) } })
     }
   })
