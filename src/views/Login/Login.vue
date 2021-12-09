@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 import { icon } from '@/plugins/icon'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
 import app from '@/main'
 import { login } from '@/services/user'
@@ -114,6 +114,17 @@ const _login = async () => {
 
   loading.value = false
 }
+
+onMounted(() => {
+  if (route.query.from) {
+    $q.notify({
+      type: 'negative',
+      timeout: 1500,
+      position: 'bottom',
+      message: '请先登录'
+    })
+  }
+})
 </script>
 
 <style scoped lang="scss"></style>
