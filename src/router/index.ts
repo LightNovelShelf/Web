@@ -23,6 +23,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/announcement/detail/:id',
     name: 'AnnouncementDetail',
+    meta: { requiresAuth: false },
     component: () => import('../views/Announcement/AnnouncementDetail.vue')
   },
   {
@@ -46,6 +47,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/collaborator',
     name: 'Collaborator',
+    meta: { requiresAuth: false },
     component: () => import('../views/Collaborator/List.vue')
   },
   {
@@ -56,6 +58,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/test',
     name: 'Test',
+    meta: { requiresAuth: false },
     component: () => import('../views/Test.vue')
   },
   {
