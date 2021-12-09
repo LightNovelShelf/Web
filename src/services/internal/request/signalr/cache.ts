@@ -23,7 +23,7 @@ export async function tryResponseFromCache<Res = unknown, Data extends unknown[]
     return val as Promise<any>
   }
 
-  return Promise.reject('unfound')
+  return Promise.reject('no found')
 }
 
 /** 更新对应url的cache */

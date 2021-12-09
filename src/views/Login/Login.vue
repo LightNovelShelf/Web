@@ -55,10 +55,10 @@ import { login } from '@/services/user'
 import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
-import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
+import { useRoute, useRouter, RouteLocationRaw } from 'vue-router'
 
 app.use(VueReCaptcha, {
-  // Volar 的缺陷，调用eslnt时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
+  // Volar 的缺陷，调用eslint时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
   // eslint-disable-next-line no-undef
   siteKey: VUE_CAPTCHA_SITE_KEY,
   loaderOptions: {
