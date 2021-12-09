@@ -1,2 +1,4 @@
-export { default as QGrid } from './QGrid.vue'
-export { default as QGridItem } from './QGridItem.vue'
+import { defineAsyncComponent } from 'vue'
+
+export const QGrid = defineAsyncComponent(() => import('./QGrid.vue'))
+export const QGridItem = defineAsyncComponent(() => import('./QGridItem.vue'))
