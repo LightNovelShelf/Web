@@ -98,6 +98,12 @@ const firstConnect: () => Promise<HubConnection> = (() => {
   }
 })()
 
+/** 强制断开当前连接 */
+export async function rebootSignalr() {
+  await hub.stop()
+  await getSignalr()
+}
+
 /**
  * 通过 signalr 发送请求
  *

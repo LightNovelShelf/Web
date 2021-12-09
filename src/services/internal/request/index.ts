@@ -1,2 +1,2 @@
-export { requestWithSignalr, subscribeWithSignalr } from './signalr'
+export { requestWithSignalr, subscribeWithSignalr, rebootSignalr } from './signalr'
 export { requestWithFetch } from './fetch'
