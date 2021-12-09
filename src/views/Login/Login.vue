@@ -55,6 +55,7 @@ import { login } from '@/services/user'
 import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
+import { useRouter } from 'vue-router'
 
 app.use(VueReCaptcha, {
   // Volar 的缺陷，调用eslnt时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
@@ -72,6 +73,7 @@ const name = ref('test@acgdmzy.com')
 const password = ref('test_user')
 const isPwd = ref(true)
 const loading = ref(false)
+const router = useRouter()
 
 const { executeRecaptcha, recaptchaLoaded } = useReCaptcha() || {}
 
@@ -98,6 +100,7 @@ const _login = async () => {
     })
   }
 
+  router.push('/home')
   loading.value = false
 }
 </script>
