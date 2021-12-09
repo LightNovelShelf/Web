@@ -1,7 +1,7 @@
 import { requestWithFetch } from '@/services/internal/request'
 import { PATH } from '@/services/path'
 import { sessionToken, longTermToken } from '@/utils/session'
-import { checkServer } from '@/services/healthy'
+import { checkServer, rebootServer } from '@/services/healthy'
 
 import * as Types from './type'
 export { Types as UserServicesTypes }
@@ -17,6 +17,9 @@ export async function login(email: string, password: string, token: string) {
 
   // 记录到DB缓存中, 方便下次会话使用它来换取token
   await longTermToken.set(res.RefreshToken)
+
+  // 重启链接
+  await rebootServer()
 
   // 触发一次请求, 连接ws服务
   // 登录就是为了连接ws服务, 连接失败的话等于没有登录
