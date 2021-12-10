@@ -1,23 +1,31 @@
 <template>
-  <div>
-    <div class="read-bg absolute-top-left fit" :style="readStyle"></div>
-    <div v-if="chapter['BookId'] !== ~~(bid || '1') || chapter['SortNum'] !== ~~(sortNum || '1')">
-      <q-skeleton type="text" height="50px" width="50%" />
-      <q-skeleton type="text" />
-      <q-skeleton type="text" />
-      <q-skeleton type="text" />
-      <q-skeleton type="text" height="50px" />
-      <q-skeleton type="text" height="100px" />
-    </div>
-    <div class="read" v-else v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
+  <div v-if="chapter['BookId'] !== ~~(bid || '1') || chapter['SortNum'] !== ~~(sortNum || '1')">
+    <q-skeleton type="text" height="50px" width="50%" />
+    <q-skeleton type="text" />
+    <q-skeleton type="text" />
+    <q-skeleton type="text" />
+    <q-skeleton type="text" height="50px" />
+    <q-skeleton type="text" height="100px" />
+  </div>
+  <div v-else>
+    <div class="read-bg absolute-top-left fit" :style="bgStyle" />
+    <div
+      ref="chapterRef"
+      class="read"
+      v-html="chapterContent"
+      style="position: relative; z-index: 1"
+      :style="readStyle"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onActivated, ref } from 'vue'
+import { computed, defineComponent, inject, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
+import { syncReading } from '@/utils/read'
+import { useLayoutStore } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({
@@ -29,6 +37,8 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar()
     const chapter = ref<any>({})
+    const chapterRef = ref(null)
+    const layoutStore = useLayoutStore()
     const getContent = async () => {
       chapter.value = await getChapterContent({ Bid: ~~(props.bid || '1'), SortNum: ~~(props.sortNum || '1') })
       $q.notify({
@@ -36,6 +46,10 @@ export default defineComponent({
         color: 'purple',
         timeout: 1500
       })
+      // TODO 这里为了让文档加载后才运行，加了个延时，得看有没有办法优雅点
+      setTimeout(() => {
+        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
+      }, 150)
     }
 
     if (!CSS.supports('line-break', 'anywhere')) {
@@ -50,14 +64,7 @@ export default defineComponent({
 
     const settingStore = useSettingStore()
     const { readSetting } = settingStore
-    const readStyle = computed(() => ({
-      fontSize: readSetting.fontSize + 'px',
-      color:
-        readSetting.bgType === 'custom'
-          ? colors.brightness(readSetting.customColor) < 128
-            ? '#fff'
-            : '#000'
-          : 'inherit',
+    const bgStyle = computed(() => ({
       backgroundImage:
         readSetting.bgType === 'paper'
           ? Dark.isActive
@@ -66,13 +73,24 @@ export default defineComponent({
           : 'initial',
       backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
     }))
+    const readStyle = computed(() => ({
+      fontSize: readSetting.fontSize + 'px',
+      color:
+        readSetting.bgType === 'custom'
+          ? colors.brightness(readSetting.customColor) < 128
+            ? '#fff'
+            : '#000'
+          : 'inherit'
+    }))
 
     onActivated(getContent)
 
     return {
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
+      chapterRef,
       chapter,
-      readStyle
+      readStyle,
+      bgStyle
     }
   }
 })

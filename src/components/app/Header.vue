@@ -59,13 +59,14 @@
 import { computed, defineComponent, ref } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
-import { useLayout } from './useLayout'
+import { useLayoutStore } from './useLayout'
+import { storeToRefs } from 'pinia'
 
 export default defineComponent({
   name: 'Header',
   setup() {
     const appStore = useAppStore()
-    const { siderShow, headerHeight } = useLayout()
+    const { siderShow, headerHeight } = storeToRefs(useLayoutStore())
 
     return {
       icon,
