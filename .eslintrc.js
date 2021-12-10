@@ -5,7 +5,8 @@ module.exports = {
     'vue/setup-compiler-macros': true
   },
   globals: {
-    Sanitizer: true
+    Sanitizer: true,
+    __DEV__: true
   },
   extends: [
     'plugin:vue/vue3-essential',
