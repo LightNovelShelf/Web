@@ -116,7 +116,7 @@ export async function syncReading(
     }
   }
   let history = await loadHistory(uid, bookParam?.BookId)
-  setTimeout(() => {
+  if (history) {
     if (`${history.Id}` === `${bookParam?.Id}` && history?.xpath) {
       try {
         let rst = document.evaluate(history?.xpath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
@@ -130,7 +130,8 @@ export async function syncReading(
         console.log(e)
       }
     }
-  }, 150)
+  }
+
   // 忘了这里为啥要清空一次，老版笨代码里面抄过来
   saveHistory(uid, bookParam?.BookId, {
     Id: bookParam?.Id,
