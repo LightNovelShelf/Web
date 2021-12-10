@@ -23,7 +23,7 @@
 
               <div class="row q-gutter-md" v-if="isActive">
                 <q-btn>加入书架</q-btn>
-                <q-btn>继续阅读</q-btn>
+                <q-btn @click="startRead">继续阅读</q-btn>
               </div>
             </div>
             <div v-else class="q-gutter-md">
@@ -61,10 +61,12 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref, onActivated } from 'vue'
+import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
+import { loadHistory } from '@/utils/read'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -77,17 +79,22 @@ export default defineComponent({
     bid: String
   },
   setup(props) {
+    const router = useRouter()
     let book = ref<any>({})
     const getInfo = async () => {
       book.value = await getBookInfo(~~(props.bid || '1'))
     }
-
+    const startRead = async () => {
+      let history = await loadHistory(0, ~~props.bid)
+      router.push({ name: 'Read', params: { bid: ~~props.bid, sortNum: history?.Id ?? 1 } })
+    }
     onActivated(getInfo)
 
     return {
       isActive: computed(() => book.value.Id === ~~(props.bid || '1')),
       book,
       getInfo,
+      startRead,
       LastUpdateTimeDesc: useToNow(computed(() => book.value.LastUpdateTime))
     }
   }
