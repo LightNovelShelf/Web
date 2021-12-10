@@ -1,6 +1,6 @@
 <template>
   <q-btn
-    v-if="book?.id"
+    v-if="bookIdInStr"
     :outline="outline"
     :color="color"
     :loading="loading"
@@ -12,13 +12,15 @@
 
 <script lang="ts" setup>
 // 加入书架按钮
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, toRaw } from 'vue'
 import { mdiHeartOutline, mdiHeartRemoveOutline } from '@/plugins/icon/export'
 import { useQuasar } from 'quasar'
 import { AnyVoidFunc } from '@/types/utils'
 import { shelfDB } from '@/utils/storage/db'
+import type { BookServicesTypes } from '@/services/book'
+import * as ShelfTypes from '@/types/shelf'
 
-const props = defineProps<{ book: { id: string } | null }>()
+const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 
 const $ = useQuasar()
 const liked = ref(false)
@@ -32,6 +34,9 @@ const label = computed(() => (liked.value ? '移出书架' : '加入书架'))
 const color = 'primary'
 const outline = computed(() => (liked.value ? true : false))
 
+/** 目前的DB方案只能接受string类型的key */
+const bookIdInStr = computed(() => (props.book?.Id ?? '') + '')
+
 /** 切换收藏与否 */
 const clickHandle = async () => {
   if (!props.book) {
@@ -43,9 +48,14 @@ const clickHandle = async () => {
   if (disMiss) disMiss()
 
   if (liked.value) {
-    await shelfDB.remove(props.book.id)
+    await shelfDB.remove(bookIdInStr.value)
   } else {
-    await shelfDB.set(props.book.id, props.book)
+    const shelfItem: ShelfTypes.SheldItem = {
+      type: ShelfTypes.SheldItemType.book,
+      index: await shelfDB.length(),
+      value: toRaw(props.book)
+    }
+    await shelfDB.set(bookIdInStr.value, shelfItem)
   }
 
   disMiss = $.notify({ message: liked.value ? '移除成功' : '加入成功' })
@@ -55,7 +65,7 @@ const clickHandle = async () => {
 }
 
 onMounted(async () => {
-  liked.value = !!(props.book && (await shelfDB.get(props.book.id)))
+  liked.value = !!(props.book && (await shelfDB.get(bookIdInStr.value)))
   loading.value = false
 })
 </script>

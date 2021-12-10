@@ -1,6 +1,7 @@
 import { requestWithSignalr } from '../internal/request'
 
 import * as Types from './types'
+export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */
 export function getBookList(param: Types.GetBookListRequest) {
