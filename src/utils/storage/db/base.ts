@@ -5,7 +5,7 @@ if (!window.indexedDB) {
 }
 
 /** 应用版本；版本变更时会清空上一版本的数据库 */
-const APP_VER: number = +VUE_APP_VER
+// const APP_VER: number = +VUE_APP_VER
 /** APP实例tag，用来方便同域名调试不同实例 */
 const APP_NAME: string = VUE_APP_NAME || 'eBook_Shelf'
 
@@ -70,7 +70,7 @@ export class DB {
   }
 
   /** 当前版本 */
-  private static readonly CURRENT_VER = APP_VER
+  private static readonly CURRENT_VER = 1
 
   /** db实例 */
   private db: LocalForage
@@ -79,23 +79,11 @@ export class DB {
     /** DB名，需要保证全局唯一 */
     DB_NAME: string,
     /** DB描述 */
-    DB_DESC = '',
+    DB_DESC = ''
 
     /** db配置 */
-    config?: {
-      /** 是否drop掉上一个版本的db @default false */
-      drop: boolean
-    }
+    // config?: {}
   ) {
-    if (config?.drop) {
-      /** 客户端已有的DB版本 */
-      const LAST_VER = MetaDB.getInstance().getDBVer(DB_NAME)
-      /** 查询是否有现存的DB */
-      if (LAST_VER && LAST_VER !== DB.CURRENT_VER) {
-        DB.createInstance(DB_NAME, LAST_VER, DB_DESC).dropInstance()
-      }
-    }
-
     // 就算相同也要set一次，保证初版应用也能记录到
     MetaDB.getInstance().setDBVer(DB_NAME, DB.CURRENT_VER)
 
@@ -109,5 +97,35 @@ export class DB {
   /** 更新DB储存 */
   public set = (key: string, val: any) => {
     return this.db.setItem(key, val)
+  }
+  /** 移除DB储存 */
+  public remove = (key: string) => {
+    return this.db.removeItem(key)
+  }
+  /** 列出DB中所有的储存项名称 */
+  public keys = (): Promise<string[]> => {
+    return this.db.keys()
+  }
+  /** 迭代DB中的所有项目 @private 因为这个API没想到能直接用的场景，同时也跟 localforage 有绑定，所以暂不导出 */
+  private iterate: <Value>(cb: (value: Value, key: string, idx: number) => void) => Promise<void> = (cb) => {
+    return this.db.iterate((value: any, key: string, idx: number) => {
+      // localforage.iterate的cb会接受返回值并据此决定是否提早结束迭代
+      // 因为这个规则不太容易记住且容易误用，故这里强制吃掉cb的任何返回
+      cb(value, key, idx)
+    })
+  }
+
+  /** 获取DB中所有的项目 */
+  public length = (): Promise<number> => {
+    return this.db.length()
+  }
+
+  /** 获取DB中所有的项目 */
+  public getItems: <Value = unknown>() => Promise<Value[]> = async () => {
+    const list: any[] = []
+
+    await this.iterate((item) => list.push(item))
+
+    return list
   }
 }
