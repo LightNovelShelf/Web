@@ -1,6 +1,6 @@
 <template>
   <q-btn
-    v-if="id"
+    v-if="book?.id"
     :outline="outline"
     :color="color"
     :loading="loading"
@@ -10,46 +10,52 @@
   />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue'
+<script lang="ts" setup>
+// 加入书架按钮
+import { computed, onMounted, ref } from 'vue'
 import { mdiHeartOutline, mdiHeartRemoveOutline } from '@/plugins/icon/export'
 import { useQuasar } from 'quasar'
-import { delay } from '@/utils/delay'
 import { AnyVoidFunc } from '@/types/utils'
+import { shelfDB } from '@/const/db'
 
-// 加入书架按钮
-export default defineComponent({
-  props: {
-    id: String
-  },
-  setup(props) {
-    const $ = useQuasar()
-    const liked = ref(false)
-    const loading = ref(false)
-    /** 收起最后一次通知 */
-    let disMiss: AnyVoidFunc
+const props = defineProps<{ book: { id: string } | null }>()
 
-    const icon = computed(() => (liked.value ? mdiHeartRemoveOutline : mdiHeartOutline))
-    const label = computed(() => (liked.value ? '移出书架' : '加入书架'))
-    const color = 'primary'
-    const outline = computed(() => (liked.value ? true : false))
+const $ = useQuasar()
+const liked = ref(false)
+// 初始值为true，待 读取好书本的加入状态 再置为false
+const loading = ref(true)
+/** 收起最后一次通知 */
+let disMiss: AnyVoidFunc
 
-    /** 切换收藏与否 */
-    const clickHandle = async () => {
-      loading.value = true
-      // 先取消，免得界面上有多个提示框
-      if (disMiss) disMiss()
+const icon = computed(() => (liked.value ? mdiHeartRemoveOutline : mdiHeartOutline))
+const label = computed(() => (liked.value ? '移出书架' : '加入书架'))
+const color = 'primary'
+const outline = computed(() => (liked.value ? true : false))
 
-      /** @todo 切换为真正的加入移除操作 */
-      await delay()()
-
-      disMiss = $.notify({ message: liked.value ? '移除成功' : '加入成功' })
-
-      liked.value = !liked.value
-      loading.value = false
-    }
-
-    return { icon, label, color, loading, outline: outline, clickHandle }
+/** 切换收藏与否 */
+const clickHandle = async () => {
+  if (!props.book) {
+    return
   }
+
+  loading.value = true
+  // 先取消，免得界面上有多个提示框
+  if (disMiss) disMiss()
+
+  if (liked.value) {
+    await shelfDB.remove(props.book.id)
+  } else {
+    await shelfDB.set(props.book.id, props.book)
+  }
+
+  disMiss = $.notify({ message: liked.value ? '移除成功' : '加入成功' })
+
+  liked.value = !liked.value
+  loading.value = false
+}
+
+onMounted(async () => {
+  liked.value = !!(props.book && (await shelfDB.get(props.book.id)))
+  loading.value = false
 })
 </script>

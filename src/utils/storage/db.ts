@@ -98,4 +98,12 @@ export class DB {
   public set = (key: string, val: any) => {
     return this.db.setItem(key, val)
   }
+  /** 移除DB储存 */
+  public remove = (key: string) => {
+    return this.db.removeItem(key)
+  }
+  /** 列出DB中所有的储存项名称 */
+  public keys = (): Promise<string[]> => {
+    return this.db.keys()
+  }
 }
