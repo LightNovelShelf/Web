@@ -1,20 +1,20 @@
 <template>
-  <div>
-    <div class="read-bg absolute-top-left fit" :style="readStyle"></div>
-    <div v-if="chapter['BookId'] !== ~~(bid || '1') || chapter['SortNum'] !== ~~(sortNum || '1')">
-      <q-skeleton type="text" height="50px" width="50%" />
-      <q-skeleton type="text" />
-      <q-skeleton type="text" />
-      <q-skeleton type="text" />
-      <q-skeleton type="text" height="50px" />
-      <q-skeleton type="text" height="100px" />
-    </div>
-    <div class="read" v-else v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
+  <div v-if="chapter['BookId'] !== ~~(bid || '1') || chapter['SortNum'] !== ~~(sortNum || '1')">
+    <q-skeleton type="text" height="50px" width="50%" />
+    <q-skeleton type="text" />
+    <q-skeleton type="text" />
+    <q-skeleton type="text" />
+    <q-skeleton type="text" height="50px" />
+    <q-skeleton type="text" height="100px" />
+  </div>
+  <div v-else>
+    <div class="read-bg absolute-top-left fit" :style="bgStyle" />
+    <div class="read" v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onActivated, ref } from 'vue'
+import { computed, defineComponent, inject, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -50,14 +50,7 @@ export default defineComponent({
 
     const settingStore = useSettingStore()
     const { readSetting } = settingStore
-    const readStyle = computed(() => ({
-      fontSize: readSetting.fontSize + 'px',
-      color:
-        readSetting.bgType === 'custom'
-          ? colors.brightness(readSetting.customColor) < 128
-            ? '#fff'
-            : '#000'
-          : 'inherit',
+    const bgStyle = computed(() => ({
       backgroundImage:
         readSetting.bgType === 'paper'
           ? Dark.isActive
@@ -66,13 +59,23 @@ export default defineComponent({
           : 'initial',
       backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
     }))
+    const readStyle = computed(() => ({
+      fontSize: readSetting.fontSize + 'px',
+      color:
+        readSetting.bgType === 'custom'
+          ? colors.brightness(readSetting.customColor) < 128
+            ? '#fff'
+            : '#000'
+          : 'inherit'
+    }))
 
     onActivated(getContent)
 
     return {
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
       chapter,
-      readStyle
+      readStyle,
+      bgStyle
     }
   }
 })

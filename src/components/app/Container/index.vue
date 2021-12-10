@@ -1,6 +1,6 @@
 <template>
   <q-page-container>
-    <div :style="{ padding: '12px' }">
+    <div :style="containerStyle">
       <router-view v-slot="{ Component }">
         <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
         <keep-alive :exclude="['CollaboratorList']">
@@ -14,11 +14,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent, provide, ref } from 'vue'
 import AuthenticationGuard from './AuthenticationGuard.vue'
 
 export default defineComponent({
-  components: { AuthenticationGuard }
+  components: { AuthenticationGuard },
+  setup() {
+    let containerPa = ref('12px')
+    provide('containerPa', containerPa)
+
+    const containerStyle = computed(() => ({
+      padding: containerPa.value
+    }))
+
+    return {
+      containerStyle
+    }
+  }
 })
 </script>
 

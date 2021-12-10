@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { DB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
 import { DB_NAME } from '@/const/db'
+import { Dark } from '@/plugins/quasar/dark'
 
 /** 用来储存设置的DB */
 const settingDB = new DB(DB_NAME.USER_SETTING, '设置缓存')
@@ -9,7 +10,7 @@ const settingDB = new DB(DB_NAME.USER_SETTING, '设置缓存')
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({
     isInit: true,
-    dark: 'auto' as boolean | 'auto',
+    dark: Dark.get(), // dark 设置不保存到服务器
     readSetting: {
       fontSize: 16,
       bgType: 'none' as 'none' | 'paper' | 'custom',
@@ -24,14 +25,12 @@ export const useSettingStore = defineStore('app.setting', {
           this.readSetting[key] = readSetting[key]
         })
       }
-      const dark = await settingDB.get('dark')
-      if (dark === 'auto' || typeof dark === 'boolean') this.dark = dark
       this.isInit = false
     },
     async save() {
-      const p1 = settingDB.set('dark', this.dark)
-      const p2 = settingDB.set('readSetting', toRaw(this.readSetting))
-      await Promise.all([p1, p2])
+      const p1 = settingDB.set('readSetting', toRaw(this.readSetting))
+      await Promise.all([p1])
+      Dark.set(this.dark)
     }
   }
 })
