@@ -9,7 +9,13 @@
       <q-skeleton type="text" height="50px" />
       <q-skeleton type="text" height="100px" />
     </div>
-    <div class="read" v-else v-html="chapterContent" :style="'position:relative;z-index=1;' + fontcolor + fontsize" />
+    <div
+      class="read"
+      ref="chapterRef"
+      v-else
+      v-html="chapterContent"
+      :style="'position:relative;z-index=1;' + fontcolor + fontsize"
+    />
   </div>
 </template>
 
@@ -20,6 +26,8 @@ import Setting from './Setting.vue'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import localforage from 'localforage'
+import { syncReading } from '@/utils/read'
+import { useLayout } from '@/components/app/useLayout'
 
 export default defineComponent({
   name: 'Read',
@@ -30,6 +38,8 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar()
     const chapter = ref({})
+    const chapterRef = ref(null)
+    const { headerHeight } = useLayout()
     const getContent = async () => {
       chapter.value = await getChapterContent({ Bid: ~~props.bid, SortNum: ~~props.sortNum })
       $q.notify({
@@ -37,6 +47,9 @@ export default defineComponent({
         color: 'purple',
         timeout: 1500
       })
+      setTimeout(() => {
+        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, headerHeight.value)
+      }, 150)
     }
 
     if (!CSS.supports('line-break', 'anywhere')) {
@@ -101,6 +114,7 @@ export default defineComponent({
 
     return {
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
+      chapterRef,
       chapter,
       bgsrc,
       bgclass,
