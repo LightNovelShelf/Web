@@ -76,6 +76,12 @@ const menuOptions: Array<Record<string, any>> = [
     icon: icon.mdiHistory
   },
   {
+    label: '我的书架',
+    key: 'MyShelf',
+    route: 'MyShelf',
+    icon: icon.mdiFolderHeartOutline
+  },
+  {
     label: 'separator',
     key: 'separator 1'
   },

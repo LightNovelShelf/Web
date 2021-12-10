@@ -32,5 +32,8 @@ export {
   mdiFormatSize,
   mdiTune,
   mdiPalette,
-  mdiGradientVertical
+  mdiGradientVertical,
+  mdiFolderHeartOutline,
+  mdiHeartOutline,
+  mdiHeartRemoveOutline
 } from '@mdi/js'

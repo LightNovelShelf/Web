@@ -1,7 +1,6 @@
-import { NOOP } from '@/utils/const'
+import { NOOP } from '@/const/empty'
 import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from '@/types/utils'
 import { onDeactivated, onUnmounted, Ref, ref } from 'vue'
-import { onBeforeRouteUpdate, RouteParams } from 'vue-router'
 
 /** 延时执行 */
 export interface UseTimeoutAction<P extends any[] = any[], R = any> extends AnyAsyncFunc<P, Promise<R>> {

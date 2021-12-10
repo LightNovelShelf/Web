@@ -9,7 +9,7 @@ declare module 'minimasonry' {
   export default foo
 }
 
-/** 开发模式 */
+/** 是否位于开发模式 */
 declare const __DEV__: boolean
 
 /** 源站地址 */
@@ -23,6 +23,6 @@ declare const VUE_APP_TOKEN_EXP_TIME: string
 /** APP标识，方便多实例共享localhost等域名时，区分cache前缀 */
 declare const VUE_APP_NAME: string
 /** 版本号VER */
-declare const VUE_APP_VER: string
+// declare const VUE_APP_VER: string
 /** 是否打印ws的返回信息 */
 declare const VUE_TRACE_SERVER: string
