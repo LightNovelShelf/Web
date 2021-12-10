@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
 import { DB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
+import { DB_NAME } from '@/const/db'
 
 /** 用来储存设置的DB */
-const settingDB = new DB('Setting', '设置缓存')
+const settingDB = new DB(DB_NAME.USER_SETTING, '设置缓存')
 
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({
@@ -17,7 +18,7 @@ export const useSettingStore = defineStore('app.setting', {
   }),
   actions: {
     async init() {
-      const readSetting = await settingDB.get('readSetting')
+      const readSetting = (await settingDB.get('readSetting')) as Record<string, unknown>
       if (readSetting) {
         Object.keys(readSetting).forEach((key) => {
           this.readSetting[key] = readSetting[key]

@@ -50,7 +50,7 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar()
     const cols = computed(() => {
-      let col = null
+      let col: string | number | undefined
       if ($q.screen.xs) col = props.xs
       else if ($q.screen.sm) col = props.sm
       else if ($q.screen.md) col = props.md

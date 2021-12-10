@@ -29,6 +29,8 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-empty-interface': 0,
+    // 因为jetbrains不支持 export * from './some' 这种语法的依赖解析，所以就用namespace来组织了
+    '@typescript-eslint/no-namespace': 0,
     quotes: [1, 'single'],
     semi: [1, 'never']
   },

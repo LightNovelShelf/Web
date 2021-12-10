@@ -79,13 +79,13 @@ export default defineComponent({
   setup(props) {
     let book = ref<any>({})
     const getInfo = async () => {
-      book.value = await getBookInfo(~~props.bid)
+      book.value = await getBookInfo(~~(props.bid || '1'))
     }
 
     onActivated(getInfo)
 
     return {
-      isActive: computed(() => book.value.Id === ~~props.bid),
+      isActive: computed(() => book.value.Id === ~~(props.bid || '1')),
       book,
       getInfo,
       LastUpdateTimeDesc: useToNow(computed(() => book.value.LastUpdateTime))
