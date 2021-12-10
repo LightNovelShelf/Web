@@ -14,21 +14,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, provide, ref } from 'vue'
+import { computed, defineComponent } from 'vue'
 import AuthenticationGuard from './AuthenticationGuard.vue'
+import { useLayoutStore } from '@/components/app/useLayout'
 
 export default defineComponent({
   components: { AuthenticationGuard },
   setup() {
-    let containerPa = ref('12px')
-    provide('containerPa', containerPa)
-
-    const containerStyle = computed(() => ({
-      padding: containerPa.value
-    }))
+    let layoutStore = useLayoutStore()
 
     return {
-      containerStyle
+      containerStyle: computed(() => layoutStore.containerStyle)
     }
   }
 })

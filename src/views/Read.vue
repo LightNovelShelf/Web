@@ -9,7 +9,13 @@
   </div>
   <div v-else>
     <div class="read-bg absolute-top-left fit" :style="bgStyle" />
-    <div ref="chapterRef" class="read" v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
+    <div
+      ref="chapterRef"
+      class="read"
+      v-html="chapterContent"
+      style="position: relative; z-index: 1"
+      :style="readStyle"
+    />
   </div>
 </template>
 
@@ -19,7 +25,7 @@ import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading } from '@/utils/read'
-import { useLayout } from '@/components/app/useLayout'
+import { useLayoutStore } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({
@@ -32,7 +38,7 @@ export default defineComponent({
     const $q = useQuasar()
     const chapter = ref<any>({})
     const chapterRef = ref(null)
-    const { headerHeight } = useLayout()
+    const layoutStore = useLayoutStore()
     const getContent = async () => {
       chapter.value = await getChapterContent({ Bid: ~~(props.bid || '1'), SortNum: ~~(props.sortNum || '1') })
       $q.notify({
@@ -40,8 +46,9 @@ export default defineComponent({
         color: 'purple',
         timeout: 1500
       })
+      // TODO 这里为了让文档加载后才运行，加了个延时，得看有没有办法优雅点
       setTimeout(() => {
-        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, headerHeight.value)
+        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
       }, 150)
     }
 
