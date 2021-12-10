@@ -51,13 +51,16 @@ import { icon } from '@/plugins/icon'
 import { ref } from 'vue'
 import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
 import app from '@/main'
-import { login, refreshToken } from '@/services/user'
-import { sha256 } from 'js-sha256'
+import { login } from '@/services/user'
+import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
-import { LoginRes } from '@/services/user/type'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { useRoute, useRouter, RouteLocationRaw } from 'vue-router'
 
 app.use(VueReCaptcha, {
-  siteKey: '6LfxUnwdAAAAAKx-1uwDXCb1F9zFo80KwBA614cZ',
+  // Volar 的缺陷，调用eslint时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
+  // eslint-disable-next-line no-undef
+  siteKey: VUE_CAPTCHA_SITE_KEY,
   loaderOptions: {
     useRecaptchaNet: true,
     autoHideBadge: true
@@ -70,27 +73,42 @@ const name = ref('test@acgdmzy.com')
 const password = ref('test_user')
 const isPwd = ref(true)
 const loading = ref(false)
+const route = useRoute()
+const router = useRouter()
 
-const { executeRecaptcha, recaptchaLoaded } = useReCaptcha()
+const { executeRecaptcha, recaptchaLoaded } = useReCaptcha() || {}
 
 const _login = async () => {
   loading.value = true
 
   try {
-    await recaptchaLoaded()
-    const token = await executeRecaptcha('login')
+    // 获取人机校验结果
+    await recaptchaLoaded!() // 忽略为空的情况，出错了由catch兜住
+    const token = await executeRecaptcha!('login')
 
-    const loginResult = (await login(name.value, sha256(password.value), token)) as LoginRes
-    console.log(loginResult)
+    // 登录
+    await login(name.value, await sha256(password.value), token)
+
     $q.notify({
       message: '登录成功'
     })
-    const jwtToken = await refreshToken(loginResult.RefreshToken)
-    console.log(jwtToken)
+
+    // 跳转首页或者来源路由
+
+    let to: RouteLocationRaw = { name: 'Home' }
+
+    try {
+      const from = route.query.from as string | undefined
+      from && (to = decodeURIComponent(from))
+    } catch (e) {
+      // ignore
+    }
+
+    router.replace(to)
   } catch (e) {
     $q.notify({
       type: 'negative',
-      message: e.message
+      message: getErrMsg(e)
     })
   }
 

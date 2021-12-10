@@ -9,10 +9,9 @@
 <script lang="tsx">
 import { defineComponent } from 'vue'
 import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
-import { useQuasar, Dark } from 'quasar'
+import { useQuasar } from 'quasar'
 import { useServerNotify } from '@/services/utils/useServerNotify'
 import sanitizerHtml from '@/utils/sanitizeHtml'
-import localforage from 'localforage'
 import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({

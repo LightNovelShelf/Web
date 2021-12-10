@@ -1,13 +1,16 @@
+/** 用到的http method */
+export enum RequestMethod {
+  GET = 'GET',
+  POST = 'POST'
+}
 /** 请求选项 */
-export interface RequestConfig<Param, Data> {
+export interface RequestConfig<Data> {
   /** 中断信号，可用来立即中断某个请求的返回（并抛错） */
   signal?: AbortSignal
-  /** 拼接在url上的参数 */
-  param?: Param
-  /** 放在url body上的参数 */
-  data?: Data
-  /** 请求方法 */
-  method?: 'GET' | 'POST'
+  /** 请求数据；get请求会放在url上，post则json序列化放在body上 */
+  payload?: Data
+  /** 请求方法 @default 'POST' */
+  method?: RequestMethod
 }
 
 /** 列表请求 */

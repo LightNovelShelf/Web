@@ -20,17 +20,14 @@ export function useMedia(query: Ref<string>, defaultVal = false): Ref<boolean> {
   }
 
   // query里变化了就重新监听
-  watch(
-    () => query,
-    (nextQuery) => {
-      /** 先清理 */
-      mql.removeEventListener('change', matchChangeHandle)
-      /** 重建 */
-      mql = window.matchMedia(nextQuery.value)
-      /** 重新监听 */
-      mql.addEventListener('change', matchChangeHandle)
-    }
-  )
+  watch(query, (nextQuery) => {
+    /** 先清理 */
+    mql.removeEventListener('change', matchChangeHandle)
+    /** 重建 */
+    mql = window.matchMedia(nextQuery)
+    /** 重新监听 */
+    mql.addEventListener('change', matchChangeHandle)
+  })
 
   onUnmounted(() => {
     mql.removeEventListener('change', matchChangeHandle)
