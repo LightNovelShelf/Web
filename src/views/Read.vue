@@ -9,7 +9,14 @@
       <q-skeleton type="text" height="50px" />
       <q-skeleton type="text" height="100px" />
     </div>
-    <div class="read" v-else v-html="chapterContent" style="position: relative; z-index: 1" :style="readStyle" />
+    <div
+      class="read"
+      ref="chapterRef"
+      v-else
+      v-html="chapterContent"
+      style="position: relative; z-index: 1"
+      :style="readStyle"
+    />
   </div>
 </template>
 
@@ -18,7 +25,6 @@ import { computed, defineComponent, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
-import localforage from 'localforage'
 import { syncReading } from '@/utils/read'
 import { useLayout } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
