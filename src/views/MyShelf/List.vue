@@ -1,9 +1,10 @@
 <template>
-  <div v-for="item in books" :key="item.value.Id">
-    <div>{{ item.value.Title }}</div>
-    <template v-if="item.type === 'book'">
-      <img style="width: 100px; height: auto; display: block" :src="item.value.Cover" alt="cover" />
-      <add-to-shelf :book="item.value" />
+  <div class="wrap">
+    <template v-for="item in books" :key="item.value.Id">
+      <div class="item">
+        {{ item.value.Id }}
+        <img v-if="item.value.Cover" :src="item.value.Cover" alt="cover" />
+      </div>
     </template>
   </div>
 </template>
@@ -27,3 +28,21 @@ onMounted(() => {
   })
 })
 </script>
+
+<style lang="scss" scoped>
+.wrap {
+  display: grid;
+  grid: auto-flow / 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 20px;
+}
+.item {
+  background-color: red;
+  color: white;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+</style>
