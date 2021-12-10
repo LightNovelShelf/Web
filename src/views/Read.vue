@@ -20,15 +20,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onActivated, ref, nextTick } from 'vue'
+import { computed, defineComponent, inject, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading } from '@/utils/read'
 import { useLayoutStore } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
-
-const { brightness } = colors
 
 export default defineComponent({
   name: 'Read',
@@ -48,9 +46,10 @@ export default defineComponent({
         color: 'purple',
         timeout: 1500
       })
-      nextTick(() => {
-        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: chapter.value.Id }, layoutStore.headerHeight)
-      })
+      // TODO 这里为了让文档加载后才运行，加了个延时，得看有没有办法优雅点
+      setTimeout(() => {
+        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
+      }, 150)
     }
 
     if (!CSS.supports('line-break', 'anywhere')) {
@@ -76,7 +75,12 @@ export default defineComponent({
     }))
     const readStyle = computed(() => ({
       fontSize: readSetting.fontSize + 'px',
-      color: readSetting.bgType === 'custom' ? (brightness(readSetting.customColor) < 128 ? '#fff' : '#000') : 'inherit'
+      color:
+        readSetting.bgType === 'custom'
+          ? colors.brightness(readSetting.customColor) < 128
+            ? '#fff'
+            : '#000'
+          : 'inherit'
     }))
 
     onActivated(getContent)
