@@ -106,4 +106,26 @@ export class DB {
   public keys = (): Promise<string[]> => {
     return this.db.keys()
   }
+  /** 迭代DB中的所有项目 @private 因为这个API没想到能直接用的场景，同时也跟 localforage 有绑定，所以暂不导出 */
+  private iterate: <Value>(cb: (value: Value, key: string, idx: number) => void) => Promise<void> = (cb) => {
+    return this.db.iterate((value: any, key: string, idx: number) => {
+      // localforage.iterate的cb会接受返回值并据此决定是否提早结束迭代
+      // 因为这个规则不太容易记住且容易误用，故这里强制吃掉cb的任何返回
+      cb(value, key, idx)
+    })
+  }
+
+  /** 获取DB中所有的项目 */
+  public length = (): Promise<number> => {
+    return this.db.length()
+  }
+
+  /** 获取DB中所有的项目 */
+  public getItems: <Value = unknown>() => Promise<Value[]> = async () => {
+    const list: any[] = []
+
+    await this.iterate((item) => list.push(item))
+
+    return list
+  }
 }
