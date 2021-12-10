@@ -42,7 +42,6 @@ const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 
 .book-cover {
   position: relative;
-  border: 1px solid rgb(239, 239, 245);
   box-sizing: border-box;
 }
 

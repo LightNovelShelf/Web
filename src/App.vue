@@ -9,10 +9,10 @@
 <script lang="tsx">
 import { defineComponent } from 'vue'
 import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
-import { useQuasar, Dark } from 'quasar'
+import { useQuasar } from 'quasar'
 import { useServerNotify } from '@/services/utils/useServerNotify'
 import sanitizerHtml from '@/utils/sanitizeHtml'
-import localforage from 'localforage'
+import { useSettingStore } from '@/store/setting'
 
 export default defineComponent({
   components: {
@@ -28,15 +28,8 @@ export default defineComponent({
       position: 'top'
     })
 
-    // 载入背景色等缓存
-    localforage
-      .getItem('bgColor')
-      .then(function (value: { dark: string; bg: string; color: string }) {
-        Dark.set(value.dark != 'auto' ? value.dark === 'true' : value.dark)
-      })
-      .catch(function (err) {
-        //
-      })
+    const settingStore = useSettingStore()
+    settingStore.init()
 
     useServerNotify('OnMessage', (message: string) => {
       $q.notify({
