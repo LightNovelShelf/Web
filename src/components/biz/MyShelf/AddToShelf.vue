@@ -1,5 +1,13 @@
 <template>
-  <q-btn :outline="outline" :color="color" :loading="loading" :icon="icon" :label="label" @click="clickHandle" />
+  <q-btn
+    v-if="id"
+    :outline="outline"
+    :color="color"
+    :loading="loading"
+    :icon="icon"
+    :label="label"
+    @click="clickHandle"
+  />
 </template>
 
 <script lang="ts">
@@ -9,8 +17,12 @@ import { useQuasar } from 'quasar'
 import { delay } from '@/utils/delay'
 import { AnyVoidFunc } from '@/types/utils'
 
+// 加入书架按钮
 export default defineComponent({
-  setup() {
+  props: {
+    id: String
+  },
+  setup(props) {
     const $ = useQuasar()
     const liked = ref(false)
     const loading = ref(false)

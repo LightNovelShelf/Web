@@ -9,7 +9,7 @@ declare module 'minimasonry' {
   export default foo
 }
 
-/** 开发模式 */
+/** 是否位于开发模式 */
 declare const __DEV__: boolean
 
 /** 源站地址 */
