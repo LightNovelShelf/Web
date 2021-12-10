@@ -1,11 +1,12 @@
-import { ref } from 'vue'
+import { defineStore } from 'pinia'
 
-const siderShow = ref(false)
-const headerHeight = ref(58)
-
-export function useLayout() {
-  return {
-    siderShow,
-    headerHeight
-  }
-}
+export const useLayoutStore = defineStore('app.layout', {
+  state: () => ({
+    siderShow: false,
+    headerHeight: 58,
+    containerStyle: {
+      padding: '12px'
+    }
+  }),
+  actions: {}
+})

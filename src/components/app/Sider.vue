@@ -32,11 +32,11 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent, ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, toRef } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
-import { useLayout } from './useLayout'
+import { useLayoutStore } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [
   {
@@ -127,11 +127,9 @@ export default defineComponent({
       }
     })
 
-    const { siderShow } = useLayout()
-
     return {
       icon,
-      siderShow,
+      siderShow: toRef(useLayoutStore(), 'siderShow'),
       activeKey,
       search: ref(null),
       menuOptions,
