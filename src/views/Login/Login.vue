@@ -90,7 +90,8 @@ const _login = async () => {
     await login(name.value, await sha256(password.value), token)
 
     $q.notify({
-      message: '登录成功'
+      message: '登录成功',
+      timeout: 3000
     })
 
     // 跳转首页或者来源路由
