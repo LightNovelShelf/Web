@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onActivated, ref } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, ref } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -46,10 +46,10 @@ export default defineComponent({
         color: 'purple',
         timeout: 1500
       })
-      // TODO 这里为了让文档加载后才运行，加了个延时，得看有没有办法优雅点
-      setTimeout(() => {
+      // TODO 这里在每次getContent时执行，会反复调用，之后得尝试改进一下
+      nextTick(() => {
         syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
-      }, 150)
+      })
     }
 
     if (!CSS.supports('line-break', 'anywhere')) {
