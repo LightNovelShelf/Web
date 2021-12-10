@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia'
-import { DB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
-import { DB_NAME } from '@/const/db'
-
-/** 用来储存设置的DB */
-const settingDB = new DB(DB_NAME.USER_SETTING, '设置缓存')
+import { userSettingDB } from '@/utils/storage/db'
 
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({
@@ -18,19 +14,19 @@ export const useSettingStore = defineStore('app.setting', {
   }),
   actions: {
     async init() {
-      const readSetting = (await settingDB.get('readSetting')) as Record<string, unknown>
+      const readSetting = (await userSettingDB.get('readSetting')) as Record<string, unknown>
       if (readSetting) {
         Object.keys(readSetting).forEach((key) => {
           this.readSetting[key] = readSetting[key]
         })
       }
-      const dark = await settingDB.get('dark')
+      const dark = await userSettingDB.get('dark')
       if (dark === 'auto' || typeof dark === 'boolean') this.dark = dark
       this.isInit = false
     },
     async save() {
-      const p1 = settingDB.set('dark', this.dark)
-      const p2 = settingDB.set('readSetting', toRaw(this.readSetting))
+      const p1 = userSettingDB.set('dark', this.dark)
+      const p2 = userSettingDB.set('readSetting', toRaw(this.readSetting))
       await Promise.all([p1, p2])
     }
   }
