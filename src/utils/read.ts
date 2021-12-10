@@ -1,8 +1,10 @@
 import localforage from 'localforage'
 import { debounce } from 'quasar'
+
 function findElementNode(node: Node) {
   return node.nodeType === Node.ELEMENT_NODE ? node : findElementNode(node.parentNode)
 }
+
 function readXPath(element: Element) {
   /* eslint-disable */
   if (element.id !== '') {
