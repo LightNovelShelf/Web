@@ -16,7 +16,7 @@ import { computed, onMounted, ref } from 'vue'
 import { mdiHeartOutline, mdiHeartRemoveOutline } from '@/plugins/icon/export'
 import { useQuasar } from 'quasar'
 import { AnyVoidFunc } from '@/types/utils'
-import { shelfDB } from '@/const/db'
+import { shelfDB } from '@/utils/storage/db'
 
 const props = defineProps<{ book: { id: string } | null }>()
 

@@ -32,7 +32,7 @@ import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import { useTimeout } from '@/composition/useTimeout'
-import { NOOP } from '@/utils/const'
+import { NOOP } from '@/const/empty'
 
 const options = [
   {
