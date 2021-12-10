@@ -12,3 +12,5 @@ const app = createApp(App)
 app.component('q-grid', QGrid)
 app.component('q-grid-item', QGridItem)
 app.use(createPinia()).use(router).use(Quasar, quasarUserOptions).mount('#app')
+
+export default app

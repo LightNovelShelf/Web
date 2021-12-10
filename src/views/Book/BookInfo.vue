@@ -82,7 +82,7 @@ export default defineComponent({
     const router = useRouter()
     let book = ref<any>({})
     const getInfo = async () => {
-      book.value = await getBookInfo(~~props.bid)
+      book.value = await getBookInfo(~~(props.bid || '1'))
     }
     const startRead = async () => {
       let history = await loadHistory(0, ~~props.bid)
@@ -91,7 +91,7 @@ export default defineComponent({
     onActivated(getInfo)
 
     return {
-      isActive: computed(() => book.value.Id === ~~props.bid),
+      isActive: computed(() => book.value.Id === ~~(props.bid || '1')),
       book,
       getInfo,
       startRead,

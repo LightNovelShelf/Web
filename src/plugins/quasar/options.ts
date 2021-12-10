@@ -1,5 +1,7 @@
 import '@/styles/quasar.scss'
 import lang from 'quasar/lang/zh-CN.js'
+import mdiIconSet from './iconSet'
+import '@quasar/extras/roboto-font/roboto-font.css'
 import { Notify, LoadingBar } from 'quasar'
 
 export default {
@@ -13,6 +15,7 @@ export default {
       skipHijack: true
     }
   },
+  iconSet: mdiIconSet,
   plugins: {
     Notify,
     LoadingBar

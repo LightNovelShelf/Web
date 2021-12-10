@@ -11,6 +11,9 @@ export function thresholdInFrame<T extends (...args: any[]) => void>(cb: T): T {
 
     if (!scheduled) {
       requestAnimationFrame(() => {
+        if (!context.func) {
+          return
+        }
         context.func()
         context.func = null
       })

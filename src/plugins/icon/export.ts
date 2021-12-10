@@ -21,5 +21,16 @@ export {
   mdiChevronLeft,
   mdiSkipNext,
   mdiSkipPrevious,
-  mdiFormatSize
+  mdiAccountCircle,
+  mdiEmail,
+  mdiLock,
+  mdiSend,
+  mdiEye,
+  mdiAlertCircle,
+  mdiAlert,
+  mdiExclamation,
+  mdiFormatSize,
+  mdiTune,
+  mdiPalette,
+  mdiGradientVertical
 } from '@mdi/js'
