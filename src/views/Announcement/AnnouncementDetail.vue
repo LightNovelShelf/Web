@@ -11,26 +11,21 @@
     </q-card-section>
   </q-card>
 
-  <div class="title mx-auto" style="padding-top: 24px">
+  <div class="title mx-auto" style="padding-top: 12px">
     <comment />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { defineComponent, onMounted } from 'vue'
 import Comment from '@/components/Comment.vue'
+import { getAnnouncementDetail } from '@/services/context'
 
-export default defineComponent({
-  name: 'AnnouncementDetail',
-  components: {
-    Comment
-  },
-  props: {
-    id: [String, Number]
-  },
-  setup(props) {
-    return {}
-  }
+defineComponent({ Comment })
+const props = defineProps<{ id: string | number }>()
+
+onMounted(() => {
+  getAnnouncementDetail({ Id: 1 })
 })
 </script>
 
