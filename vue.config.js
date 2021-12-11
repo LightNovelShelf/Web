@@ -50,10 +50,21 @@ module.exports = {
       ]
     }
   },
+  /** @param { import('webpack-chain') } config */
   chainWebpack: (config) => {
     config.plugin('html').tap((args) => {
       args[0].title = '轻书架'
       return args
+    })
+
+    /** https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-typescript */
+    config.when(__DEV__, (config) => {
+      // 启用了严格模式的情况下移除ts-checker, 靠编辑器报错就够了；不然其它文件的报错也会跑出来
+      const { readFileSync } = require('fs')
+      const { parse } = require('json5')
+      config.when(parse(readFileSync('./tsconfig.json')).compilerOptions.strict, (config) => {
+        config.plugins.delete('fork-ts-checker')
+      })
     })
   },
   configureWebpack: {
