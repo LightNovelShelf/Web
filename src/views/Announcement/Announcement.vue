@@ -22,15 +22,12 @@
   </q-list>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
-import Comment from '@/components/Comment'
+<script lang="ts" setup>
+import { onMounted } from 'vue'
+import { getAnnouncementList } from '@/services/context'
 
-export default defineComponent({
-  name: 'Announcement',
-  setup() {
-    return {}
-  }
+onMounted(() => {
+  getAnnouncementList({ Page: 1, Size: 12 })
 })
 </script>
 
