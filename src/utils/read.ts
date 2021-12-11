@@ -1,5 +1,6 @@
 import localforage from 'localforage'
 import { debounce } from 'quasar'
+import { saveReadPosition } from '@/services/book'
 
 function findElementNode(node: Node) {
   return node.nodeType === Node.ELEMENT_NODE ? node : findElementNode(node.parentNode)
@@ -44,6 +45,7 @@ export async function saveHistory(
     ...history,
     [BookId]: bookParam
   }
+  await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath }).catch((err) => console.log(err))
   return await localforage.setItem(`ReadHistory_${uid}`, history).catch((err) => console.log(err))
 }
 

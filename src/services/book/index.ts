@@ -1,6 +1,7 @@
 import { requestWithSignalr } from '../internal/request'
 
 import * as Types from './types'
+import { SaveReadPositionRequest } from './types'
 export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */
@@ -10,4 +11,8 @@ export function getBookList(param: Types.GetBookListRequest) {
 /** 获取书籍信息 */
 export function getBookInfo(bid: number) {
   return requestWithSignalr<Types.GetBookInfoRes>('GetBookInfo', bid)
+}
+/** 保存阅读位置 */
+export function saveReadPosition(param: SaveReadPositionRequest) {
+  return requestWithSignalr('SaveReadPosition', param)
 }
