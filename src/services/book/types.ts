@@ -17,3 +17,9 @@ export interface GetBookInfoRes {}
 export interface GetBookListRequest {
   Page: number
 }
+
+export interface SaveReadPositionRequest {
+  Bid: number
+  Cid: number
+  XPath: string
+}
