@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, watchEffect, ref, watch, onMounted } from 'vue'
+import { computed, defineComponent, ref, watch, onMounted } from 'vue'
 import Comment from '@/components/Comment.vue'
 import { getAnnouncementDetail } from '@/services/context'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -39,15 +39,14 @@ const props = defineProps<{ id: string | number }>()
 const id = computed(() => ~~(props.id || '1'))
 const announcement = ref<Announcement>()
 
-const requestData = useTimeoutFn(async () => {
+const request = useTimeoutFn(async () => {
   const res = await getAnnouncementDetail({ Id: id.value })
   announcement.value = announcementFormat(res)
 })
 const ready = computed(() => announcement.value && id.value === announcement.value.Id)
-let first = true
 
-watch(() => props.id, requestData)
-onMounted(requestData.syncCall)
+watch(() => props.id, request)
+onMounted(request.syncCall)
 </script>
 
 <style scoped lang="scss">

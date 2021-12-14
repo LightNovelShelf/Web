@@ -82,24 +82,16 @@ const currentPage = computed({
   }
 })
 
-const requesting = ref(false)
-
 const request = useTimeoutFn(function (page: number = currentPage.value) {
-  requesting.value = true
-
-  return getBookList({ Page: page })
-    .then((serverData) => {
-      bookData.value = serverData.Data
-      pageData.value.totalPage = serverData.TotalPages
-    })
-    .finally(() => {
-      requesting.value = false
-    })
+  return getBookList({ Page: page }).then((serverData) => {
+    bookData.value = serverData.Data
+    pageData.value.totalPage = serverData.TotalPages
+  })
 })
 
-const loading = computed(() => requesting.value || request.scheduled.value)
+const loading = request.loading
 
-watch(loading, (nextLoading) => {
+watch(request.loading, (nextLoading) => {
   $q.loadingBar.stop()
   if (nextLoading) {
     $q.loadingBar.start()
