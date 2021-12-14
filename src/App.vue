@@ -13,6 +13,9 @@ import { useQuasar } from 'quasar'
 import { useServerNotify } from '@/services/utils/useServerNotify'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { useSettingStore } from '@/store/setting'
+import { useAppStore } from '@/store'
+import { longTermToken } from '@/utils/session'
+import { getMyInfo } from '@/services/user'
 
 export default defineComponent({
   components: {
@@ -30,6 +33,15 @@ export default defineComponent({
 
     const settingStore = useSettingStore()
     settingStore.init()
+
+    const getUser = async () => {
+      const token = await longTermToken.get()
+      if (token) {
+        const appStore = useAppStore()
+        appStore.user = getMyInfo()
+      }
+    }
+    getUser()
 
     useServerNotify('OnMessage', (message: string) => {
       $q.notify({

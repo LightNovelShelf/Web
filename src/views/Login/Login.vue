@@ -56,6 +56,7 @@ import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router'
+import { useAppStore } from '@/store'
 
 app.use(VueReCaptcha, {
   // Volar 的缺陷，调用eslint时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
@@ -68,6 +69,7 @@ app.use(VueReCaptcha, {
 })
 
 const $q = useQuasar()
+const appStore = useAppStore()
 
 const name = ref('test@acgdmzy.com')
 const password = ref('test_user')
@@ -87,7 +89,8 @@ const _login = async () => {
     const token = await executeRecaptcha!('login')
 
     // 登录
-    await login(name.value, await sha256(password.value), token)
+    const [, user] = await login(name.value, await sha256(password.value), token)
+    appStore.user = user
 
     $q.notify({
       message: '登录成功',

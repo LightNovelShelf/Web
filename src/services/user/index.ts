@@ -22,9 +22,9 @@ export async function login(email: string, password: string, token: string) {
   // 触发一次请求, 连接ws服务
   // 登录就是为了连接ws服务, 连接失败的话等于没有登录
   // 所以这里await
-  await getMyInfo()
+  const myInfo = await getMyInfo()
 
-  return res
+  return [res, myInfo]
 }
 
 /** 换取会话密钥 */

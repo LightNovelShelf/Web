@@ -9,6 +9,15 @@ declare module 'minimasonry' {
   export default foo
 }
 
+// 资源文件
+declare module '*.svg'
+declare module '*.png'
+declare module '*.jpg'
+declare module '*.jpeg'
+declare module '*.gif'
+declare module '*.bmp'
+declare module '*.tiff'
+
 /** 是否位于开发模式 */
 declare const __DEV__: boolean
 
