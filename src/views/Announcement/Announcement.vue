@@ -15,7 +15,7 @@
         <q-item-section>
           <q-item-label class="text-subtitle1">[{{ announcement.Create }}] {{ announcement.Title }}</q-item-label>
           <q-item-label caption>
-            {{ announcement.Content.length > 50 ? announcement.Content.substr(0, 50) + '...' : announcement.Content }}
+            {{ announcement.Content }}
           </q-item-label>
         </q-item-section>
         <q-item-section side top>
@@ -32,17 +32,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, Ref } from 'vue'
+import { computed, onMounted, ref, Ref } from 'vue'
 import { getAnnouncementList } from '@/services/context'
-import { QInfiniteScroll } from 'quasar'
-
-// interface Announcement {
-//   Title: string
-//   CreateTime: DateConstructor
-//   Create: string
-//   Before: string
-//   Content: string
-// }
+import { useToNow } from '@/composition/useToNow'
 
 let announcementList = ref<any[]>([])
 let page = 1
@@ -54,28 +46,25 @@ function matchReg(str: string): string {
   return str.replace(reg, '')
 }
 
-// 发布时间差格式化
-function getBeforeTime(before: number): string {
-  return before < 1
-    ? '少于1分钟前'
-    : before < 60
-    ? Math.round(before) + ' 分钟前'
-    : (before /= 60) < 24
-    ? Math.round(before) + ' 小时前'
-    : Math.round((before /= 24)) + ' 日前'
-}
-
 // 滚动拉取数据
 function onLoad(index, done) {
   const response = Promise.resolve(getAnnouncementList({ Page: page, Size: size }))
   response
     .then((res) => {
-      announcementList.value.push(...res.Data)
-      announcementList.value.forEach((element: any) => {
-        const date = new Date(element.CreateTime)
-        element.Create = date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate()
-        element.Before = getBeforeTime((Date.now() - date.getTime()) / 1000 / 60)
-        element.Content = matchReg(element.Content)
+      res.Data.forEach((element) => {
+        let ele: any = {}
+        ele.Create =
+          element.CreateTime.getFullYear() +
+          '.' +
+          (element.CreateTime.getMonth() + 1) +
+          '.' +
+          element.CreateTime.getDate()
+        ele.Before = useToNow(computed(() => element.CreateTime)).value
+        ele.Content = matchReg(element.Content)
+        ele.Content = ele.Content.length > 50 ? ele.Content.substr(0, 50) + '...' : ele.Content
+        ele.Title = element.Title
+        ele.Id = element.Id
+        announcementList.value.push(ele)
       })
       if (res.Data.length < size) {
         // 无法再拉取
