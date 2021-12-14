@@ -32,9 +32,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, Ref } from 'vue'
+import { onMounted, ref, Ref } from 'vue'
 import { getAnnouncementList } from '@/services/context'
-import { useToNow } from '@/composition/useToNow'
+import { announcementListFormat } from '@/utils/announcementFormat'
 
 let announcementList = ref<any[]>([])
 let page = 1
@@ -51,21 +51,7 @@ function onLoad(index, done) {
   const response = Promise.resolve(getAnnouncementList({ Page: page, Size: size }))
   response
     .then((res) => {
-      res.Data.forEach((element) => {
-        let ele: any = {}
-        ele.Create =
-          element.CreateTime.getFullYear() +
-          '.' +
-          (element.CreateTime.getMonth() + 1) +
-          '.' +
-          element.CreateTime.getDate()
-        ele.Before = useToNow(computed(() => element.CreateTime)).value
-        ele.Content = matchReg(element.Content)
-        ele.Content = ele.Content.length > 50 ? ele.Content.substr(0, 50) + '...' : ele.Content
-        ele.Title = element.Title
-        ele.Id = element.Id
-        announcementList.value.push(ele)
-      })
+      announcementList.value.push(...announcementListFormat(res.Data))
       if (res.Data.length < size) {
         // 无法再拉取
         done(true)
