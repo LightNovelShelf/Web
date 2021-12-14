@@ -10,9 +10,9 @@ export function announcementFormat(element): any {
   const ele: any = {}
   ele.Create =
     element.CreateTime.getFullYear() + '.' + (element.CreateTime.getMonth() + 1) + '.' + element.CreateTime.getDate()
-  ele.Before = useToNow(computed(() => element.CreateTime)).value
+  ele.Before = useToNow(computed(() => element.CreateTime))
   ele.Content = matchReg(element.Content)
-  ele.Content = ele.Content.length > 50 ? ele.Content.substr(0, 50) + '...' : ele.Content
+  ele.Content = ele.Content.length > 50 ? ele.Content.substring(0, 50) + '...' : ele.Content
   ele.Title = element.Title
   ele.Id = element.Id
   return ele

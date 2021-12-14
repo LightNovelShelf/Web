@@ -63,7 +63,7 @@
 
               <q-separator />
 
-              <q-list separator>
+              <q-list v-if="announcementList" separator>
                 <q-item
                   v-for="(announcement, index) in announcementList"
                   :key="index"
@@ -74,6 +74,9 @@
                   <q-item-section>[{{ announcement.Create }}] {{ announcement.Title }}</q-item-section>
                 </q-item>
               </q-list>
+              <div v-else class="row flex-center" style="height: 250px">
+                <q-spinner color="primary" size="40px" />
+              </div>
             </q-card>
           </q-grid-item>
 
@@ -138,7 +141,7 @@ import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
 import { getOnlineInfo, getAnnouncementList } from '@/services/context'
-import { announcementListFormat } from '@/utils/announcementFormat'
+import { announcementListFormat } from './Announcement/announcementFormat'
 
 export default defineComponent({
   components: {
