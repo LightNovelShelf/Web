@@ -3,7 +3,7 @@ import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from '@/types/utils'
 import { onDeactivated, onUnmounted, Ref, ref } from 'vue'
 
 /** 延时执行 */
-export interface UseTimeoutAction<P extends any[] = any[], R = any> extends AnyAsyncFunc<P, Promise<R>> {
+export interface UseTimeoutFnAction<P extends any[] = any[], R = any> extends AnyAsyncFunc<P, Promise<R>> {
   /** 同步执行cb，不走延时 */
   syncCall: AnyFunc<P, R>
   /** 手动取消 */
@@ -13,7 +13,7 @@ export interface UseTimeoutAction<P extends any[] = any[], R = any> extends AnyA
 }
 
 /** 延时执行配置项 */
-export interface UseTimeoutConfig {
+export interface UseTimeoutFnConfig {
   /** 自动取消，设置为 false 可以阻止自动取消行为 */
   cancelOnUnMount?: boolean
 }
@@ -23,7 +23,7 @@ export interface UseTimeoutConfig {
  *
  * @example
  * ```js
- * const fn = useTimeout(function () { throw new Error('test') })
+ * const fn = useTimeoutFn(function () { throw new Error('test') })
  * fn().catch(e => e === CANCEL_ERR ? ( console.log('取消执行'); ) : ( console.log('执行错误'); ) )
  * ```
  */
@@ -50,7 +50,7 @@ const DELAY_MS = 200
  *
  * @example
  * ```js
- * const fn = useTimeout(function () { fetch('baidu.com') });
+ * const fn = useTimeoutFn(function () { fetch('baidu.com') });
  *
  * fn().catch(
  *    e => e === CANCEL_ERR
@@ -59,11 +59,11 @@ const DELAY_MS = 200
  * )
  * ```
  */
-export function useTimeout<P extends any[] = any[], R = any>(
+export function useTimeoutFn<P extends any[] = any[], R = any>(
   cb: AnyFunc<P, R>,
   delay: number = DELAY_MS,
-  config?: UseTimeoutConfig
-): UseTimeoutAction<P, R> {
+  config?: UseTimeoutFnConfig
+): UseTimeoutFnAction<P, R> {
   let timeoutContext: NodeJS.Timeout | undefined
   let rejector: ((err?: unknown) => void) | undefined
   /** 是否有执行计划 */
