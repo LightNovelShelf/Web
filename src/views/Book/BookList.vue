@@ -91,7 +91,6 @@ const request = useTimeout(function (page: number = currentPage.value) {
     .then((serverData) => {
       bookData.value = serverData.Data
       pageData.value.totalPage = serverData.TotalPages
-      console.log('serverData: ', serverData)
     })
     .finally(() => {
       requesting.value = false
