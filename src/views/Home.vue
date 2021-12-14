@@ -63,7 +63,7 @@
 
               <q-separator />
 
-              <q-list v-if="announcementList" separator>
+              <q-list v-if="!loading" separator>
                 <q-item
                   v-for="(announcement, index) in announcementList"
                   :key="index"
@@ -142,6 +142,8 @@ import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
 import { getOnlineInfo, getAnnouncementList } from '@/services/context'
 import { announcementListFormat } from './Announcement/announcementFormat'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 export default defineComponent({
   components: {
@@ -152,13 +154,15 @@ export default defineComponent({
   setup() {
     const onlineInfo = ref<OnlineInfo>()
     const announcementList = ref<any[]>()
-    const getInfo = async () => {
+    const getInfo = useTimeoutFn(async () => {
       onlineInfo.value = await getOnlineInfo()
       announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
-    }
-    onActivated(getInfo)
+    })
+    const loading = getInfo.loading
+    useInitRequest(getInfo)
 
     return {
+      loading,
       onlineInfo,
       announcementList,
       icon,
