@@ -34,17 +34,11 @@
 <script lang="ts" setup>
 import { onMounted, ref, Ref } from 'vue'
 import { getAnnouncementList } from '@/services/context'
-import { announcementListFormat } from '@/utils/announcementFormat'
+import { announcementListFormat } from './announcementFormat'
 
 let announcementList = ref<any[]>([])
 let page = 1
-let size = 12
-
-// 去除HTML标签
-function matchReg(str: string): string {
-  let reg = /<\/?.+?\/?>/g
-  return str.replace(reg, '')
-}
+let size = 24
 
 // 滚动拉取数据
 function onLoad(index, done) {
