@@ -15,7 +15,7 @@
         <q-item-section>
           <q-item-label class="text-subtitle1">[{{ announcement.Create }}] {{ announcement.Title }}</q-item-label>
           <q-item-label caption>
-            {{ announcement.Content }}
+            {{ announcement.PreviewContent }}
           </q-item-label>
         </q-item-section>
         <q-item-section side top>

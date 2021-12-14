@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, onActivated } from 'vue'
+import { computed, defineComponent, ref, onActivated, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
@@ -88,7 +88,7 @@ export default defineComponent({
       let history = await loadHistory(0, ~~props.bid)
       router.push({ name: 'Read', params: { bid: ~~props.bid, sortNum: history?.Id ?? 1 } })
     }
-    onActivated(getInfo)
+    watchEffect(getInfo)
 
     return {
       isActive: computed(() => book.value.Id === ~~(props.bid || '1')),

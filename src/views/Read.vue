@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onActivated, ref } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, ref, watchEffect } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -83,7 +83,7 @@ export default defineComponent({
           : 'inherit'
     }))
 
-    onActivated(getContent)
+    watchEffect(getContent)
 
     return {
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),

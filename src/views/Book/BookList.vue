@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, watch } from 'vue'
+import { ref, computed, onActivated, watch, onMounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
@@ -112,7 +112,7 @@ onBeforeRouteUpdate((to, from, next) => {
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */
-onActivated(() => {
+onMounted(() => {
   bookData.value.length ? request() : request.syncCall()
 })
 </script>
