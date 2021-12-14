@@ -6,16 +6,24 @@ export interface OnlineInfo {
   DayCount: number
 }
 
+export interface Announcement {
+  Id: number
+  Title: string
+  CreateTime: Date
+  Content: string
+}
+
 export namespace GetAnnouncementList {
   export interface Request {
     Page: number
     Size: number
   }
-  export type Response = ListResult<unknown>
+  export type Response = ListResult<Announcement>
 }
 
 export namespace GetAnnouncementDetail {
   export interface Request {
     Id: number
   }
+  export type Response = Announcement
 }

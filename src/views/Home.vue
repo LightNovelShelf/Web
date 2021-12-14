@@ -63,17 +63,20 @@
 
               <q-separator />
 
-              <q-list separator>
+              <q-list v-if="announcementList" separator>
                 <q-item
-                  v-for="index in 5"
+                  v-for="(announcement, index) in announcementList"
                   :key="index"
-                  :to="{ name: 'AnnouncementDetail', params: { id: index } }"
+                  :to="{ name: 'AnnouncementDetail', params: { id: announcement.Id } }"
                   clickable
                   v-ripple
                 >
-                  <q-item-section>公告{{ index }}</q-item-section>
+                  <q-item-section>[{{ announcement.Create }}] {{ announcement.Title }}</q-item-section>
                 </q-item>
               </q-list>
+              <div v-else class="row flex-center" style="height: 250px">
+                <q-spinner color="primary" size="40px" />
+              </div>
             </q-card>
           </q-grid-item>
 
@@ -137,7 +140,8 @@ import BookCard from '@/components/BookCard.vue'
 import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
-import { getOnlineInfo } from '@/services/context'
+import { getOnlineInfo, getAnnouncementList } from '@/services/context'
+import { announcementListFormat } from './Announcement/announcementFormat'
 
 export default defineComponent({
   components: {
@@ -147,13 +151,16 @@ export default defineComponent({
   },
   setup() {
     const onlineInfo = ref<OnlineInfo>()
+    const announcementList = ref<any[]>()
     const getInfo = async () => {
       onlineInfo.value = await getOnlineInfo()
+      announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
     }
     onActivated(getInfo)
 
     return {
       onlineInfo,
+      announcementList,
       icon,
       bookData: [
         {
