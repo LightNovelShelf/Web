@@ -164,7 +164,7 @@ export default defineComponent({
       icon,
       bookData: [
         {
-          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
+          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/3c1312386f33.jpg',
           Title: '我是书名，我很短',
           UserName: '无语',
           Category: {
@@ -174,7 +174,7 @@ export default defineComponent({
           Id: 381
         },
         {
-          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
+          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/e5e2fca834ff.jpg',
           Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长长长很长很长长很长很长',
           UserName: '无语',
           Category: {
@@ -184,7 +184,7 @@ export default defineComponent({
           Id: 381
         },
         {
-          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
+          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/3c1312386f33.jpg',
           Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长长长很长很长长很长很长',
           UserName: '无语',
           Category: {
@@ -194,7 +194,7 @@ export default defineComponent({
           Id: 381
         },
         {
-          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
+          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/e5e2fca834ff.jpg',
           Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长很长很长长很长很长长很长长很长很长长很长很长',
           UserName: '无语',
           Category: {
@@ -204,7 +204,7 @@ export default defineComponent({
           Id: 381
         },
         {
-          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/3c1312386f33.jpg',
+          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/3c1312386f33.jpg',
           Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长长很长很长长很长很长很长长很长很长长很长很长',
           UserName: '无语',
           Category: {
@@ -214,7 +214,7 @@ export default defineComponent({
           Id: 381
         },
         {
-          Cover: 'https://img.acgdmzy.com:45112/images/2020/04/22/e5e2fca834ff.jpg',
+          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/e5e2fca834ff.jpg',
           Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长长很长很长长很长很长很长长很长很长长很长很长',
           UserName: '无语',
           Category: {
