@@ -16,5 +16,5 @@ export function getAnnouncementList(request: GetAnnouncementList.Request) {
 }
 
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
-  return requestWithSignalr('GetAnnouncementDetail', request)
+  return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request)
 }
