@@ -47,9 +47,9 @@ export default defineComponent({
         timeout: 1500
       })
       // TODO 这里在每次getContent时执行，会反复调用，之后得尝试改进一下
-      nextTick(() => {
-        syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
-      })
+      // nextTick(() => {
+      //   syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
+      // })
     }
 
     if (!CSS.supports('line-break', 'anywhere')) {
