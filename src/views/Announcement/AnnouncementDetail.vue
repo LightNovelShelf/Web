@@ -1,13 +1,21 @@
 <template>
   <q-card class="title mx-auto">
     <q-card-section>
-      <div class="text-h6">{{ announcement.Title }} {{ announcement.Id }}</div>
+      <div v-if="announcement" class="text-h6">{{ announcement.Creat }} {{ announcement.Title }}</div>
     </q-card-section>
 
     <q-separator />
 
     <q-card-section>
-      <div v-for="index in 8" :key="index" v-html="sanitizerHtml(announcement.Content)"></div>
+      <div v-if="announcement" v-html="sanitizerHtml(announcement.Content)"></div>
+      <div v-else>
+        <q-skeleton type="text" height="50px" width="50%" />
+        <q-skeleton type="text" />
+        <q-skeleton type="text" />
+        <q-skeleton type="text" />
+        <q-skeleton type="text" height="50px" />
+        <q-skeleton type="text" height="100px" />
+      </div>
     </q-card-section>
   </q-card>
 
@@ -24,7 +32,7 @@ import sanitizerHtml from '@/utils/sanitizeHtml'
 
 defineComponent({ Comment })
 const props = defineProps<{ id: string | number }>()
-let announcement = ref<any>({})
+let announcement = ref(null)
 
 onMounted(() => {
   const response = Promise.resolve(getAnnouncementDetail({ Id: ~~(props.id || '1') }))

@@ -1,12 +1,21 @@
 import { useToNow } from '@/composition/useToNow'
 import { computed, Ref } from 'vue'
 
+export interface Announcement {
+  Id: number
+  Title: string
+  CreateTime: DateConstructor
+  Create: string
+  Before: Ref<string>
+  Content: string
+}
+
 function matchReg(str: string): string {
   const reg = /<\/?.+?\/?>/g
   return str.replace(reg, '')
 }
 
-export function announcementFormat(element): any {
+export function announcementFormat(element): Announcement {
   const ele: any = {}
   ele.Create =
     element.CreateTime.getFullYear() + '.' + (element.CreateTime.getMonth() + 1) + '.' + element.CreateTime.getDate()
@@ -18,8 +27,8 @@ export function announcementFormat(element): any {
   return ele
 }
 
-export function announcementListFormat(announcementList): any {
-  const re: any[] = []
+export function announcementListFormat(announcementList): Announcement[] {
+  const re: Announcement[] = []
   announcementList.forEach((element) => {
     re.push(announcementFormat(element))
   })
