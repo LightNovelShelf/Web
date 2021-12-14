@@ -32,11 +32,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, Ref } from 'vue'
+import { reactive } from 'vue'
 import { getAnnouncementList } from '@/services/context'
-import { announcementListFormat } from './announcementFormat'
+import { announcementListFormat, Announcement } from './announcementFormat'
 
-let announcementList = ref<any[]>([])
+let announcementList = reactive<Announcement[]>([])
 let page = 1
 let size = 24
 
@@ -45,7 +45,8 @@ function onLoad(index, done) {
   const response = Promise.resolve(getAnnouncementList({ Page: page, Size: size }))
   response
     .then((res) => {
-      announcementList.value.push(...announcementListFormat(res.Data))
+      // @ts-expect-error 不知道谁的问题
+      announcementList.push(...announcementListFormat(res.Data))
       if (res.Data.length < size) {
         // 无法再拉取
         done(true)
@@ -58,10 +59,6 @@ function onLoad(index, done) {
       console.log(error)
     })
 }
-
-onMounted(() => {
-  //
-})
 </script>
 
 <style scoped lang="scss">
