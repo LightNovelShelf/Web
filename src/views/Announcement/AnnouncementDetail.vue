@@ -30,7 +30,7 @@ import Comment from '@/components/Comment.vue'
 import { getAnnouncementDetail } from '@/services/context'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { Announcement, announcementFormat } from '@/views/Announcement/announcementFormat'
-import { useTimeout } from '@/composition/useTimeout'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 defineComponent({ Comment })
 
@@ -39,7 +39,7 @@ const props = defineProps<{ id: string | number }>()
 const id = computed(() => ~~(props.id || '1'))
 const announcement = ref<Announcement>()
 
-const requestData = useTimeout(async () => {
+const requestData = useTimeoutFn(async () => {
   const res = await getAnnouncementDetail({ Id: id.value })
   announcement.value = announcementFormat(res)
 })

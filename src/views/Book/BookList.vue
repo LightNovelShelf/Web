@@ -31,7 +31,7 @@ import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { useTimeout } from '@/composition/useTimeout'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { NOOP } from '@/const/empty'
 
 const options = [
@@ -84,7 +84,7 @@ const currentPage = computed({
 
 const requesting = ref(false)
 
-const request = useTimeout(function (page: number = currentPage.value) {
+const request = useTimeoutFn(function (page: number = currentPage.value) {
   requesting.value = true
 
   return getBookList({ Page: page })
