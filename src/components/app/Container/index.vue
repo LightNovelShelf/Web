@@ -8,11 +8,6 @@
             <component :is="Component"></component>
           </keep-alive>
         </template>
-        <template v-else>
-          <div class="absolute-full column flex-center">
-            <div>404</div>
-          </div>
-        </template>
       </router-view>
     </div>
   </q-page-container>

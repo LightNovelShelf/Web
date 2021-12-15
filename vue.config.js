@@ -20,6 +20,19 @@ const __DEV__ = process.env.NODE_ENV === 'development'
 
 module.exports = {
   productionSourceMap: false,
+  pwa: {
+    name: '轻书架',
+    themeColor: '#1976d2',
+    msTileColor: '#1976d2',
+    manifestOptions: {
+      background_color: '#ffffff'
+    },
+    // TODO 后续换成InjectManifest
+    workboxPluginMode: 'GenerateSW'
+    // workboxOptions: {
+    //   swSrc: 'src/service-worker.ts'
+    // }
+  },
   chainWebpack: (config) => {
     config.plugin('html').tap((args) => {
       args[0].title = '轻书架'
