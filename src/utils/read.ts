@@ -1,5 +1,6 @@
 import localforage from 'localforage'
 import { debounce } from 'quasar'
+import { saveReadPosition } from '@/services/book'
 
 function findElementNode(node: Node) {
   return node.nodeType === Node.ELEMENT_NODE ? node : findElementNode(node.parentNode)
@@ -44,6 +45,7 @@ export async function saveHistory(
     ...history,
     [BookId]: bookParam
   }
+  await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath }).catch((err) => console.log(err))
   return await localforage.setItem(`ReadHistory_${uid}`, history).catch((err) => console.log(err))
 }
 
@@ -116,7 +118,7 @@ export async function syncReading(
     }
   }
   let history = await loadHistory(uid, bookParam?.BookId)
-  setTimeout(() => {
+  if (history) {
     if (`${history.Id}` === `${bookParam?.Id}` && history?.xpath) {
       try {
         let rst = document.evaluate(history?.xpath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
@@ -130,7 +132,8 @@ export async function syncReading(
         console.log(e)
       }
     }
-  }, 150)
+  }
+
   // 忘了这里为啥要清空一次，老版笨代码里面抄过来
   saveHistory(uid, bookParam?.BookId, {
     Id: bookParam?.Id,

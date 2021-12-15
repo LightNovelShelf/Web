@@ -6,7 +6,8 @@ module.exports = {
   },
   globals: {
     Sanitizer: true,
-    __DEV__: true
+    __DEV__: true,
+    VUE_APP_API_SERVER: true
   },
   extends: [
     'plugin:vue/vue3-essential',

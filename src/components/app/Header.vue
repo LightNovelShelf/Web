@@ -37,50 +37,42 @@
         <div style="width: 10px" />
 
         <q-avatar size="36px" ref="avatar">
-          <img src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" alt="" />
-        </q-avatar>
+          <img v-if="user" src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" alt="" />
+          <q-icon size="36px" v-else :name="icon.mdiAccountCircle"></q-icon>
 
-        <q-menu :offset="[-40, 10]" :target="$refs.avatar">
-          <q-list separator>
-            <q-item clickable v-ripple>
-              <q-item-section>放点按钮</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section>放点按钮</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
+          <q-menu :offset="[10, 5]" anchor="bottom left" self="top middle">
+            <q-list separator>
+              <q-item clickable v-ripple>
+                <q-item-section>放点按钮</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple>
+                <q-item-section>放点按钮</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-avatar>
       </div>
     </q-toolbar>
   </q-header>
 </template>
 
-<script lang="tsx">
+<script lang="tsx" setup>
 import { computed, defineComponent, ref } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
 import { useLayoutStore } from './useLayout'
 import { storeToRefs } from 'pinia'
 
-export default defineComponent({
-  name: 'Header',
-  setup() {
-    const appStore = useAppStore()
-    const { siderShow, headerHeight } = storeToRefs(useLayoutStore())
+defineComponent({ name: 'Header' })
 
-    return {
-      icon,
-      search: ref(''),
-      siderShow,
-      headerHeight,
+const appStore = useAppStore()
+const { appName, user } = storeToRefs(appStore)
+const { siderShow, headerHeight } = storeToRefs(useLayoutStore())
+const search = ref('')
 
-      appName: computed(() => appStore.appName),
-      changAppName() {
-        appStore.asyncReverse()
-      }
-    }
-  }
-})
+function changAppName() {
+  appStore.asyncReverse()
+}
 </script>
 
 <style lang="scss" scoped>
