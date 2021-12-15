@@ -34,6 +34,8 @@ const hub: HubConnection = new HubConnectionBuilder()
         // 如果有, 用它来换取会话token
         if (_token) {
           token = await refreshToken('' + _token)
+          // 目前token只有一次性用途，这里用完就删，以后可能有反复请求的用途
+          sessionToken.set('')
         }
       }
       return token
