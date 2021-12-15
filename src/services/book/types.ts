@@ -13,20 +13,27 @@ export interface BookInList {
 }
 
 export interface GetBookListRes extends ListResult<BookInList> {}
-export interface GetBookInfoRes {
-  Arthur: string
-  Category: any
-  Chapter: string[]
-  Id: number
-  Cover: string
-  ExtraInfo: any
-  Introduction: string
-  LastUpdate: string
-  LastUpdateTime: Date | DateTime
-  Subscription: number
+interface ChapterInfo {
   Title: string
-  UserName: string
-  Views: number
+  Id: number
+}
+export interface GetBookInfoRes {
+  Book: {
+    Arthur: string
+    Category: any
+    Chapter: ChapterInfo[]
+    Id: number
+    Cover: string
+    ExtraInfo: any
+    Introduction: string
+    LastUpdate: string
+    LastUpdateTime: Date | DateTime
+    Subscription: number
+    Title: string
+    UserName: string
+    Views: number
+  }
+  ReadPosition: any
 }
 
 export interface GetBookListRequest {

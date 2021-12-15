@@ -7,7 +7,7 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent } from 'vue'
+import { defineComponent, watch } from 'vue'
 import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
 import { useQuasar } from 'quasar'
 import { useServerNotify } from '@/services/utils/useServerNotify'
@@ -31,23 +31,33 @@ export default defineComponent({
       position: 'top'
     })
 
+    const appStore = useAppStore()
     const settingStore = useSettingStore()
     settingStore.init()
 
     const getUser = async () => {
       const token = await longTermToken.get()
       if (token) {
-        const appStore = useAppStore()
         appStore.user = await getMyInfo()
-        let fontUrl = appStore.user.Font
-        if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
-        let style = document.createElement('style')
-        style.type = 'text/css'
-        style.innerHTML = `@font-face{font-family:read;src:url(${fontUrl});}`
-        document.head.append(style)
       }
     }
     getUser()
+
+    // 字体设置
+    const style = document.createElement('style')
+    style.type = 'text/css'
+    style.id = 'read_style'
+    document.head.append(style)
+    watch(
+      () => appStore.user?.Font,
+      () => {
+        let fontUrl = appStore.user?.Font
+        if (fontUrl) {
+          if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
+          style.innerHTML = `@font-face{font-family:read;src:url(${fontUrl});}`
+        }
+      }
+    )
 
     useServerNotify('OnMessage', (message: string) => {
       $q.notify({
