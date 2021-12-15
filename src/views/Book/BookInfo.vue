@@ -42,15 +42,15 @@
           </q-grid-item>
         </q-grid>
 
-        <q-list separator style="margin-top: 12px">
+        <q-list v-if="isActive" separator style="margin-top: 12px">
           <q-item
-            v-for="(item, index) in book['Chapter']"
-            :key="index"
+            v-for="(item, index) in book?.Chapter"
+            :key="item.Id"
             :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
             clickable
             v-ripple
           >
-            <q-item-section>{{ item }}</q-item-section>
+            <q-item-section>{{ item.Title }}</q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
@@ -60,13 +60,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, onActivated } from 'vue'
+import { computed, defineComponent, ref, onActivated, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import { loadHistory } from '@/utils/read'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import type { BookServicesTypes } from '@/services/book'
+import { useAppStore } from '@/store'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -80,22 +84,31 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter()
-    let book = ref<any>({})
-    const getInfo = async () => {
-      book.value = await getBookInfo(~~(props.bid || '1'))
-    }
+    const appStore = useAppStore()
+    let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
+    let bid = computed(() => ~~(props.bid || '1'))
+    const getInfo = useTimeoutFn(async () => {
+      bookInfo.value = await getBookInfo(bid.value)
+    })
     const startRead = async () => {
-      let history = await loadHistory(0, ~~props.bid)
-      router.push({ name: 'Read', params: { bid: ~~props.bid, sortNum: history?.Id ?? 1 } })
+      let history = await loadHistory(appStore.user.Id, bid.value)
+      let sortNum = 1
+      // 将章节id转换为sortNum
+      if (history) {
+        sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === history.Id) + 1
+      }
+      await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
     }
-    onActivated(getInfo)
+
+    useInitRequest(getInfo)
 
     return {
-      isActive: computed(() => book.value.Id === ~~(props.bid || '1')),
-      book,
+      // 只要数据中的id和props不同，就当在加载
+      isActive: computed(() => bookInfo.value?.Book?.Id === bid.value),
+      book: computed(() => bookInfo.value?.Book),
       getInfo,
       startRead,
-      LastUpdateTimeDesc: useToNow(computed(() => book.value.LastUpdateTime))
+      LastUpdateTimeDesc: useToNow(computed(() => bookInfo.value?.Book?.LastUpdateTime))
     }
   }
 })

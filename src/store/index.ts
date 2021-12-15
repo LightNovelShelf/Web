@@ -19,7 +19,8 @@ import { defineStore } from 'pinia'
 /** 全局store，命名导出的好处是可以有代码提示 */
 export const useAppStore = defineStore('app', {
   state: () => ({
-    appName: '轻书架'
+    appName: '轻书架',
+    user: null
   }),
   getters: {
     doubleRepeat: (state) => state.appName.repeat(2),

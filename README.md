@@ -1,5 +1,4 @@
-# Web
-
+# The next version for [LightNovelShelf](https://www.acgdmzy.com/)
 ## Project setup
 ```
 npm install

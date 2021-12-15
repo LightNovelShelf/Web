@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, watch } from 'vue'
+import { ref, computed, onActivated, watch, onMounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
@@ -31,7 +31,7 @@ import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { useTimeout } from '@/composition/useTimeout'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { NOOP } from '@/const/empty'
 
 const options = [
@@ -82,25 +82,16 @@ const currentPage = computed({
   }
 })
 
-const requesting = ref(false)
-
-const request = useTimeout(function (page: number = currentPage.value) {
-  requesting.value = true
-
-  return getBookList({ Page: page })
-    .then((serverData) => {
-      bookData.value = serverData.Data
-      pageData.value.totalPage = serverData.TotalPages
-      console.log('serverData: ', serverData)
-    })
-    .finally(() => {
-      requesting.value = false
-    })
+const request = useTimeoutFn(function (page: number = currentPage.value) {
+  return getBookList({ Page: page }).then((serverData) => {
+    bookData.value = serverData.Data
+    pageData.value.totalPage = serverData.TotalPages
+  })
 })
 
-const loading = computed(() => requesting.value || request.scheduled.value)
+const loading = request.loading
 
-watch(loading, (nextLoading) => {
+watch(request.loading, (nextLoading) => {
   $q.loadingBar.stop()
   if (nextLoading) {
     $q.loadingBar.start()
@@ -112,7 +103,7 @@ onBeforeRouteUpdate((to, from, next) => {
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */
-onActivated(() => {
+onMounted(() => {
   bookData.value.length ? request() : request.syncCall()
 })
 </script>

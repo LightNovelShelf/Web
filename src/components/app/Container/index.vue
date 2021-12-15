@@ -2,10 +2,12 @@
   <q-page-container>
     <div :style="containerStyle">
       <router-view v-slot="{ Component }">
-        <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
-        <keep-alive :exclude="['CollaboratorList']">
-          <component :is="Component" />
-        </keep-alive>
+        <template v-if="Component">
+          <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
+          <keep-alive :exclude="['CollaboratorList']">
+            <component :is="Component"></component>
+          </keep-alive>
+        </template>
       </router-view>
     </div>
   </q-page-container>
