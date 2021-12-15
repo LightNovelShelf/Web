@@ -42,15 +42,15 @@
           </q-grid-item>
         </q-grid>
 
-        <q-list separator style="margin-top: 12px">
+        <q-list v-if="isActive" separator style="margin-top: 12px">
           <q-item
             v-for="(item, index) in book?.Chapter"
-            :key="index"
+            :key="item.Id"
             :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
             clickable
             v-ripple
           >
-            <q-item-section>{{ item }}</q-item-section>
+            <q-item-section>{{ item.Title }}</q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
@@ -70,6 +70,7 @@ import { loadHistory } from '@/utils/read'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import type { BookServicesTypes } from '@/services/book'
+import { useAppStore } from '@/store'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -83,24 +84,31 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter()
-    let book = ref<BookServicesTypes.GetBookInfoRes>()
+    const appStore = useAppStore()
+    let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
     let bid = computed(() => ~~(props.bid || '1'))
     const getInfo = useTimeoutFn(async () => {
-      book.value = await getBookInfo(bid.value)
+      bookInfo.value = await getBookInfo(bid.value)
     })
     const startRead = async () => {
-      let history = await loadHistory(0, bid.value)
-      router.push({ name: 'Read', params: { bid: bid.value, sortNum: history?.Id ?? 1 } })
+      let history = await loadHistory(appStore.user.Id, bid.value)
+      let sortNum = 1
+      // 将章节id转换为sortNum
+      if (history) {
+        sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === history.Id) + 1
+      }
+      await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
     }
+
     useInitRequest(getInfo)
 
     return {
       // 只要数据中的id和props不同，就当在加载
-      isActive: computed(() => book.value?.Id === bid.value),
-      book,
+      isActive: computed(() => bookInfo.value?.Book?.Id === bid.value),
+      book: computed(() => bookInfo.value?.Book),
       getInfo,
       startRead,
-      LastUpdateTimeDesc: useToNow(computed(() => book.value.LastUpdateTime))
+      LastUpdateTimeDesc: useToNow(computed(() => bookInfo.value?.Book?.LastUpdateTime))
     }
   }
 })

@@ -29,6 +29,7 @@ import { useLayoutStore } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useAppStore } from '@/store'
 
 export default defineComponent({
   name: 'Read',
@@ -44,6 +45,7 @@ export default defineComponent({
     const chapter = ref<any>()
     const chapterRef = ref<HTMLElement>()
     const layoutStore = useLayoutStore()
+    const appStore = useAppStore()
     const getContent = useTimeoutFn(async () => {
       chapter.value = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
       $q.notify({
@@ -53,7 +55,12 @@ export default defineComponent({
       })
       // TODO 这里在每次getContent时执行，会反复调用，之后得尝试改进一下
       // nextTick(() => {
-      //   syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
+      //   syncReading(
+      //     chapterRef.value,
+      //     appStore.user.Id,
+      //     { BookId: ~~props.bid, Id: chapter.value.Id },
+      //     layoutStore.headerHeight
+      //   )
       // })
     })
 
