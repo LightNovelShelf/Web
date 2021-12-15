@@ -44,7 +44,7 @@
 
         <q-list separator style="margin-top: 12px">
           <q-item
-            v-for="(item, index) in book['Chapter']"
+            v-for="(item, index) in book?.Chapter"
             :key="index"
             :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
             clickable
@@ -67,6 +67,9 @@ import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import { loadHistory } from '@/utils/read'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import type { BookServicesTypes } from '@/services/book'
 
 export default defineComponent({
   name: 'BookInfo',
@@ -80,18 +83,20 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter()
-    let book = ref<any>({})
-    const getInfo = async () => {
-      book.value = await getBookInfo(~~(props.bid || '1'))
-    }
+    let book = ref<BookServicesTypes.GetBookInfoRes>()
+    let bid = computed(() => ~~(props.bid || '1'))
+    const getInfo = useTimeoutFn(async () => {
+      book.value = await getBookInfo(bid.value)
+    })
     const startRead = async () => {
-      let history = await loadHistory(0, ~~props.bid)
-      router.push({ name: 'Read', params: { bid: ~~props.bid, sortNum: history?.Id ?? 1 } })
+      let history = await loadHistory(0, bid.value)
+      router.push({ name: 'Read', params: { bid: bid.value, sortNum: history?.Id ?? 1 } })
     }
-    watchEffect(getInfo)
+    useInitRequest(getInfo)
 
     return {
-      isActive: computed(() => book.value.Id === ~~(props.bid || '1')),
+      // 只要数据中的id和props不同，就当在加载
+      isActive: computed(() => book.value?.Id === bid.value),
       book,
       getInfo,
       startRead,
