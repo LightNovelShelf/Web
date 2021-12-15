@@ -24,14 +24,58 @@ module.exports = {
     name: '轻书架',
     themeColor: '#1976d2',
     msTileColor: '#1976d2',
+    appleMobileWebAppCapable: 'yes', // 是否开启apple的pwa
+    appleMobileWebAppStatusBarStyle: 'black', // 苹果移动网络应用状态栏样式
     manifestOptions: {
       background_color: '#ffffff'
     },
-    // TODO 后续换成InjectManifest
-    workboxPluginMode: 'GenerateSW'
-    // workboxOptions: {
-    //   swSrc: 'src/service-worker.ts'
-    // }
+    // TODO 后续可能换成InjectManifest
+    workboxPluginMode: 'GenerateSW',
+    workboxOptions: {
+      // swSrc: 'src/service-worker.ts'
+      skipWaiting: true, // 跳过等待
+      clientsClaim: true, // 让sw立即接管网页,
+      runtimeCaching: [
+        {
+          urlPattern: /((home)|(login)|(test)|(announcement)|(book)|(read)|(collaborator)|(setting))/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            // Use a custom cache name for this route.
+            cacheName: 'html-cache',
+            plugins: [
+              {
+                // 缓存即将更新
+                cacheWillUpdate: () => {
+                  console.log('%c js cacheWillUpdate', 'color:#006DCB;')
+                },
+                // 缓存更新
+                cacheDidUpdate: () => {
+                  console.log('%c js cache update', 'color:#006DCB;')
+                },
+                // 将使用缓存的响应
+                cachedResponseWillBeUsed: () => {
+                  console.log('%c js cachedResponseWillBeUsed', 'color:#006DCB;')
+                },
+                // 请求正在获取。。。
+                requestWillFetch: () => {
+                  console.log('%c js cache requestWillFetch', 'color:#006DCB;')
+                },
+                // 请求获取失败
+                fetchDidFail: () => {
+                  console.log('%c js cache fetchDidFail', 'color:red;')
+                }
+              }
+            ],
+            matchOptions: {
+              ignoreSearch: true
+            },
+            cacheableResponse: {
+              statuses: [200]
+            }
+          }
+        }
+      ]
+    }
   },
   chainWebpack: (config) => {
     config.plugin('html').tap((args) => {
