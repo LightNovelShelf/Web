@@ -1,5 +1,5 @@
 <template>
-  <div v-if="chapter['BookId'] !== ~~(bid || '1') || chapter['SortNum'] !== ~~(sortNum || '1')">
+  <div v-if="loading">
     <q-skeleton type="text" height="50px" width="50%" />
     <q-skeleton type="text" />
     <q-skeleton type="text" />
@@ -27,6 +27,8 @@ import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading } from '@/utils/read'
 import { useLayoutStore } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 export default defineComponent({
   name: 'Read',
@@ -35,12 +37,15 @@ export default defineComponent({
     sortNum: [String, Number]
   },
   setup(props) {
+    const bid = computed(() => ~~(props.bid || '1'))
+    const sortNum = computed(() => ~~(props.sortNum || '1'))
+
     const $q = useQuasar()
-    const chapter = ref<any>({})
-    const chapterRef = ref(null)
+    const chapter = ref<any>()
+    const chapterRef = ref<HTMLElement>()
     const layoutStore = useLayoutStore()
-    const getContent = async () => {
-      chapter.value = await getChapterContent({ Bid: ~~(props.bid || '1'), SortNum: ~~(props.sortNum || '1') })
+    const getContent = useTimeoutFn(async () => {
+      chapter.value = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
       $q.notify({
         message: chapter.value['Title'],
         color: 'purple',
@@ -50,7 +55,7 @@ export default defineComponent({
       // nextTick(() => {
       //   syncReading(chapterRef.value, 0, { BookId: ~~props.bid, Id: ~~props.sortNum }, layoutStore.headerHeight)
       // })
-    }
+    })
 
     if (!CSS.supports('line-break', 'anywhere')) {
       let message = '对不起，您的浏览器似乎无法完美使用本网站，请使用Chrome(80以上)或FireFox浏览器'
@@ -83,9 +88,10 @@ export default defineComponent({
           : 'inherit'
     }))
 
-    watchEffect(getContent)
+    useInitRequest(getContent)
 
     return {
+      loading: computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value),
       chapterContent: computed(() => sanitizerHtml(chapter.value['Content'])),
       chapterRef,
       chapter,

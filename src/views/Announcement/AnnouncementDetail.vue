@@ -31,6 +31,7 @@ import { getAnnouncementDetail } from '@/services/context'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { Announcement, announcementFormat } from '@/views/Announcement/announcementFormat'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
 
 defineComponent({ Comment })
 
@@ -43,10 +44,9 @@ const request = useTimeoutFn(async () => {
   const res = await getAnnouncementDetail({ Id: id.value })
   announcement.value = announcementFormat(res)
 })
-const ready = computed(() => announcement.value && id.value === announcement.value.Id)
+const ready = computed(() => id.value === announcement.value?.Id)
 
-watch(() => props.id, request)
-onMounted(request.syncCall)
+useInitRequest(request)
 </script>
 
 <style scoped lang="scss">

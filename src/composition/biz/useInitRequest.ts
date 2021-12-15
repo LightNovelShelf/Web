@@ -1,14 +1,14 @@
 import { onActivated, ref } from 'vue'
-import { onBeforeRouteUpdate, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { safeCall } from '@/utils/safeCall'
-import { NOOP } from '@/const/empty'
-import { useTimeoutFn, UseTimeoutFnAction } from '../useTimeoutFn'
+import { UseTimeoutFnAction } from '../useTimeoutFn'
 
 /** 请求初始化流程 */
 export function useInitRequest(cb: UseTimeoutFnAction<[], Promise<void>>) {
   const first = ref<boolean>(true)
 
   const router = useRoute()
+  // 在每次判断路由为前进或第一次进入时加载数据
   onActivated(() => {
     console.log('是否需要请求数据:', router.meta.reload)
     if (router.meta.reload) {
@@ -19,9 +19,5 @@ export function useInitRequest(cb: UseTimeoutFnAction<[], Promise<void>>) {
         safeCall(cb)()
       }
     }
-  })
-
-  onBeforeRouteUpdate((to, from, next) => {
-    cb().then(() => next(), NOOP)
   })
 }
