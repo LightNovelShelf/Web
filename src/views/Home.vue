@@ -24,11 +24,14 @@
           </q-card-section>
         </q-card>
 
-        <q-card v-if="onlineInfo" class="online" style="margin-top: 12px">
+        <q-card class="online" style="margin-top: 12px">
           <q-card-section>
             <div class="title text-h6">网站统计</div>
           </q-card-section>
-          <q-card-section style="padding-top: 0">
+          <div v-if="loading" class="row flex-center" style="height: 70px; padding-top: 0">
+            <q-spinner-dots color="primary" size="40px" />
+          </div>
+          <q-card-section v-else style="padding-top: 0">
             <div class="content row full-width">
               <div class="col-4">
                 <div class="text-grey-7">当前在线</div>
@@ -135,7 +138,7 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent, ref, onActivated } from 'vue'
+import { defineComponent, ref, onActivated, computed } from 'vue'
 import BookCard from '@/components/BookCard.vue'
 import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
@@ -158,11 +161,11 @@ export default defineComponent({
       onlineInfo.value = await getOnlineInfo()
       announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
     })
-    const loading = getInfo.loading
     useInitRequest(getInfo)
 
     return {
-      loading,
+      // 数据为空 或者正在请求
+      loading: computed(() => getInfo.loading.value || !(onlineInfo.value || announcementList.value)),
       onlineInfo,
       announcementList,
       icon,
