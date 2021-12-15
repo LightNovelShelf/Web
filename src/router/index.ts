@@ -111,8 +111,6 @@ const router = createRouter({
   }
 })
 
-let first = true
-
 router.beforeEach(async function (to) {
   if (to.params.authRedirect) {
     Notify.create({
@@ -147,26 +145,27 @@ router.beforeEach(async function (to) {
   return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
 })
 
+const readyRoute = []
 router.afterEach((to) => {
   const key = history.state['key']
   console.log(key)
-  if (key) {
-    if (keys.findIndex((item) => item === key) === keys.length - 1) {
-      console.log('前进')
-      to.meta.reload = true
+  if (readyRoute.includes(to.name)) {
+    if (key) {
+      if (keys.findIndex((item) => item === key) === keys.length - 1) {
+        console.log('前进')
+        to.meta.reload = true
+      } else {
+        console.log('后退')
+        to.meta.reload = false
+      }
     } else {
       console.log('后退')
       to.meta.reload = false
     }
   } else {
-    if (first) {
-      console.log('第一次进页面')
-      to.meta.reload = true
-      first = false
-    } else {
-      console.log('后退')
-      to.meta.reload = false
-    }
+    console.log('第一次进入这个路由')
+    readyRoute.push(to.name)
+    to.meta.reload = true
   }
 })
 
