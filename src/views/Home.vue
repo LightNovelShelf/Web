@@ -77,7 +77,7 @@
                   <q-item-section>[{{ announcement.Create }}] {{ announcement.Title }}</q-item-section>
                 </q-item>
               </q-list>
-              <div v-else class="row flex-center" style="height: 250px">
+              <div v-else class="row flex-center" style="height: 240px">
                 <q-spinner color="primary" size="40px" />
               </div>
             </q-card>
@@ -138,7 +138,7 @@
 </template>
 
 <script lang="tsx">
-import { defineComponent, ref, onActivated, computed } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
 import BookCard from '@/components/BookCard.vue'
 import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'

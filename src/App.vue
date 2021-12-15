@@ -38,7 +38,13 @@ export default defineComponent({
       const token = await longTermToken.get()
       if (token) {
         const appStore = useAppStore()
-        appStore.user = getMyInfo()
+        appStore.user = await getMyInfo()
+        let fontUrl = appStore.user.Font
+        if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
+        let style = document.createElement('style')
+        style.type = 'text/css'
+        style.innerHTML = `@font-face{font-family:read;src:url(${fontUrl});}`
+        document.head.append(style)
       }
     }
     getUser()
