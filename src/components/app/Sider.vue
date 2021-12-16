@@ -5,6 +5,7 @@
     bordered
     :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'"
     :width="240"
+    :breakpoint="siderBreakpoint"
   >
     <q-scroll-area class="fit">
       <q-list padding>
@@ -136,6 +137,7 @@ export default defineComponent({
     return {
       icon,
       siderShow: toRef(useLayoutStore(), 'siderShow'),
+      siderBreakpoint: toRef(useLayoutStore(), 'siderBreakpoint'),
       activeKey,
       search: ref(null),
       menuOptions,

@@ -1,5 +1,6 @@
 <template>
   <q-header
+    :reveal="reveal"
     elevated
     :class="($q.dark.isActive ? 'bg-blue-grey-10 text-secondary ' : 'bg-white text-grey-8') + ' q-py-xs'"
     :height-hint="headerHeight"
@@ -62,13 +63,19 @@ import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
 import { useLayoutStore } from './useLayout'
 import { storeToRefs } from 'pinia'
+import { useMedia } from '@/composition/useMedia'
 
 defineComponent({ name: 'Header' })
 
 const appStore = useAppStore()
+const layoutStore = useLayoutStore()
 const { appName, user } = storeToRefs(appStore)
-const { siderShow, headerHeight } = storeToRefs(useLayoutStore())
+const { siderShow, headerHeight, siderBreakpoint } = storeToRefs(layoutStore)
 const search = ref('')
+const reveal = useMedia(
+  computed(() => `(max-width: ${siderBreakpoint.value}px)`),
+  window.innerWidth <= siderBreakpoint.value
+)
 
 function changAppName() {
   appStore.asyncReverse()
