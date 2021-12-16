@@ -25,14 +25,19 @@ module.exports = {
     name: '轻书架',
     themeColor: '#1976d2',
     msTileColor: '#1976d2',
+    appleMobileWebAppCapable: 'yes', // 是否开启apple的pwa
+    // appleMobileWebAppStatusBarStyle: 'black', // 苹果移动网络应用状态栏样式
     manifestOptions: {
       background_color: '#ffffff'
     },
-    // TODO 后续换成InjectManifest
-    workboxPluginMode: 'GenerateSW'
-    // workboxOptions: {
-    //   swSrc: 'src/service-worker.ts'
-    // }
+    // TODO 后续可能换成InjectManifest
+    workboxPluginMode: 'GenerateSW',
+    workboxOptions: {
+      // swSrc: 'src/service-worker.ts',
+      navigateFallback: 'index.html',
+      skipWaiting: true, // 跳过等待
+      clientsClaim: true // 让sw立即接管网页,
+    }
   },
   /** @param { import('webpack-chain') } config */
   chainWebpack: (config) => {
