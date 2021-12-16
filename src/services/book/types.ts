@@ -30,7 +30,7 @@ export interface GetBookInfoRes {
     LastUpdateTime: Date | DateTime
     Subscription: number
     Title: string
-    UserName: string
+    User: any
     Views: number
   }
   ReadPosition: any
