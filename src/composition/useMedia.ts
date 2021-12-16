@@ -16,7 +16,6 @@ export function useMedia(query: Ref<string>, defaultVal = false): Ref<boolean> {
 
   /** 因为 MediaQueryList change的时候不会触发vue的渲染，所以这里用一个callback来单独触发一次 */
   const matchChangeHandle = () => {
-    console.log('matchChange')
     isMatch.value = mql.matches
   }
   mql.addEventListener('change', matchChangeHandle)
