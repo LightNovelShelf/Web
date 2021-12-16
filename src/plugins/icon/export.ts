@@ -36,5 +36,6 @@ export {
   mdiFolderHeartOutline,
   mdiHeartOutline,
   mdiHeartRemoveOutline,
-  mdiLogoutVariant
+  mdiLogoutVariant,
+  mdiRefresh
 } from '@mdi/js'

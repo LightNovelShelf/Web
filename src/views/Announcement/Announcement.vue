@@ -1,9 +1,17 @@
 <template>
   <!-- TODO 弄成下拉刷新 -->
-  <q-infinite-scroll @load="onLoad" :offset="100">
+  <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
     <q-list bordered separator class="rounded-borders title mx-auto">
       <q-item>
-        <q-item-section class="text-h6">公告列表</q-item-section>
+        <q-item-section class="text-h6">
+          <div class="row flex-center">
+            <div class="text-h6">公告列表</div>
+            <q-space />
+            <div class="text-subtitle2">
+              <q-btn @click="updateAnnouncement" round flat :icon="icon.mdiRefresh" />
+            </div>
+          </div>
+        </q-item-section>
       </q-item>
       <q-item
         v-for="(announcement, index) in announcementList"
@@ -32,13 +40,16 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { getAnnouncementList } from '@/services/context'
 import { announcementListFormat, Announcement } from './announcementFormat'
+import { icon } from '@/plugins/icon'
 
 let announcementList = reactive<Announcement[]>([])
 let page = 1
 let size = 24
+
+const scroll = ref(null)
 
 // 滚动拉取数据
 function onLoad(index, done) {
@@ -49,7 +60,7 @@ function onLoad(index, done) {
       announcementList.push(...announcementListFormat(res.Data))
       if (res.Data.length < size) {
         // 无法再拉取
-        done(true)
+        scroll.value.stop()
       } else {
         page++
         done()
@@ -58,6 +69,13 @@ function onLoad(index, done) {
     .catch((error) => {
       console.log(error)
     })
+}
+
+const updateAnnouncement = () => {
+  announcementList.splice(0)
+  page = 1
+  scroll.value.resume()
+  scroll.value.trigger()
 }
 </script>
 
