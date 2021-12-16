@@ -38,18 +38,46 @@
         <div style="width: 10px" />
 
         <q-avatar size="36px" ref="avatar">
-          <img v-if="user" src="https://q.qlogo.cn/headimg_dl?spec=100&dst_uin=1789263779" alt="" />
+          <img v-if="user" :src="user.Avatar" alt="avatar" />
           <q-icon size="36px" v-else :name="icon.mdiAccountCircle"></q-icon>
 
-          <q-menu :offset="[10, 5]" anchor="bottom left" self="top middle">
-            <q-list separator>
+          <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
+            <q-list v-if="user">
               <q-item clickable v-ripple>
-                <q-item-section>放点按钮</q-item-section>
+                <q-item-section avatar>
+                  <q-avatar>
+                    <img :src="user.Avatar" alt="avatar" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>{{ user.UserName }}</q-item-section>
+              </q-item>
+
+              <q-separator />
+
+              <q-item clickable v-ripple>
+                <q-item-section>个人中心</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
-                <q-item-section>放点按钮</q-item-section>
+                <q-item-section>网站设置</q-item-section>
+              </q-item>
+              <q-item>
+                <q-btn @click="logout" color="red" class="full-width flex-center row">
+                  <q-icon size="18px" left :name="icon.mdiLogoutVariant" />
+                  <span>退出登录</span>
+                </q-btn>
               </q-item>
             </q-list>
+
+            <div v-else class="q-pa-sm">
+              <div class="row q-col-gutter-sm">
+                <div>
+                  <router-link :to="{ name: 'Login' }">
+                    <q-btn color="primary">登录</q-btn>
+                  </router-link>
+                </div>
+                <div><q-btn color="primary">注册</q-btn></div>
+              </div>
+            </div>
           </q-menu>
         </q-avatar>
       </div>
@@ -64,9 +92,13 @@ import { useAppStore } from '@/store'
 import { useLayoutStore } from './useLayout'
 import { storeToRefs } from 'pinia'
 import { useMedia } from '@/composition/useMedia'
+import { longTermToken, sessionToken } from '@/utils/session'
+import { useQuasar } from 'quasar'
+import { rebootSignalr } from '@/services/internal/request'
 
 defineComponent({ name: 'Header' })
 
+const $q = useQuasar()
 const appStore = useAppStore()
 const layoutStore = useLayoutStore()
 const { appName, user } = storeToRefs(appStore)
@@ -79,6 +111,19 @@ const reveal = useMedia(
 
 function changAppName() {
   appStore.asyncReverse()
+}
+function logout() {
+  $q.dialog({
+    title: '提示',
+    message: '你确定要退出登录吗？',
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    appStore.$reset()
+    await longTermToken.set('')
+    sessionToken.set('')
+    await rebootSignalr()
+  })
 }
 </script>
 
@@ -103,5 +148,9 @@ function changAppName() {
   .action:nth-child(n) {
     cursor: pointer;
   }
+}
+
+:deep(.q-item) {
+  min-height: unset !important;
 }
 </style>
