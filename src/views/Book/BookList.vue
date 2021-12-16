@@ -1,10 +1,10 @@
 <template>
   <div style="max-width: 1920px" class="mx-auto">
-    <QGrid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
-      <QGridItem v-for="book in bookData" :key="book['Id']">
+    <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
+      <q-grid-item v-for="book in bookData" :key="book['Id']">
         <book-card :book="book"></book-card>
-      </QGridItem>
-    </QGrid>
+      </q-grid-item>
+    </q-grid>
 
     <div style="display: flex; justify-content: center; padding-top: 24px">
       <q-pagination
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, watch, onMounted } from 'vue'
+import { ref, computed, onActivated, watch, onMounted, defineComponent } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
@@ -33,6 +33,9 @@ import { BookInList } from '@/services/book/types'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { NOOP } from '@/const/empty'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+
+defineComponent({ QGrid, QGridItem })
 
 const options = [
   {
@@ -103,9 +106,7 @@ onBeforeRouteUpdate((to, from, next) => {
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */
-onMounted(() => {
-  bookData.value.length ? request() : request.syncCall()
-})
+useInitRequest(request)
 </script>
 
 <style lang="scss" scoped></style>
