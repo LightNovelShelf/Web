@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO 弄成下拉刷新 -->
   <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
     <q-list bordered separator class="rounded-borders title mx-auto">
       <q-item>
@@ -40,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import { getAnnouncementList } from '@/services/context'
 import { announcementListFormat, Announcement } from './announcementFormat'
 import { icon } from '@/plugins/icon'
