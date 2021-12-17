@@ -8,7 +8,11 @@
     <q-toolbar>
       <q-btn flat dense round aria-label="Menu" :icon="icon.mdiMenu" @click="siderShow = !siderShow" />
 
-      <div class="row q-ml-xs cursor-pointer flex-center non-selectable" v-if="$q.screen.gt.xs" style="padding: 0 12px">
+      <div
+        class="row q-ml-xs cursor-pointer flex-center non-selectable"
+        v-if="$q.screen.gt.xs"
+        style="padding: 0 0 0 12px"
+      >
         <div class="row flex-center">
           <q-icon size="24px" :name="icon.mdiInformation" />
           <q-tooltip anchor="bottom right" self="top right"> 欢迎来稿一个新的网站图标 </q-tooltip>
@@ -18,7 +22,7 @@
         </q-toolbar-title>
       </div>
 
-      <q-input dense outlined square v-model="search" placeholder="搜索" />
+      <q-input style="padding-left: 12px" dense outlined square v-model="search" placeholder="搜索" />
 
       <q-space />
 
@@ -57,7 +61,7 @@
               <q-item clickable v-ripple>
                 <q-item-section>个人中心</q-item-section>
               </q-item>
-              <q-item clickable v-ripple>
+              <q-item clickable v-ripple :to="{ name: 'Setting' }">
                 <q-item-section>网站设置</q-item-section>
               </q-item>
               <q-item>
