@@ -236,8 +236,4 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
-:deep(ul:first-child) {
-  margin-top: 0;
-}
-</style>
+<style lang="scss" scoped></style>

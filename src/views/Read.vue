@@ -117,6 +117,7 @@ export default defineComponent({
 :deep(.read) {
   @import 'src/assets/style/read';
 
+  line-break: anywhere;
   font-family: read, sans-serif !important;
 }
 </style>
