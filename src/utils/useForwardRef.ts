@@ -29,10 +29,10 @@ import { ref } from 'vue'
  */
 export function useForwardRef<Element = HTMLElement>() {
   const elRef = ref<Element | null>(null)
-  function getEl(el: Element) {
+  function setElRef(el: Element) {
     // @ts-expect-error 这里无法理解为什么会报错，只能当作是 UnWrap 泛型没写好
     elRef.value = el
   }
 
-  return [getEl, elRef] as const
+  return [elRef, setElRef] as const
 }
