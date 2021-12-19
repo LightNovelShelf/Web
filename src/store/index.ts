@@ -30,6 +30,9 @@ export const useAppStore = defineStore('app', {
     // 要取值getters，需要写成非箭头函数且标注返回值类型
     sum(): string {
       return `${this.appName} ${new Date().getFullYear()} ${this.doubleRepeat}`
+    },
+    userId(): number {
+      return this.user?.Id
     }
   },
   actions: {

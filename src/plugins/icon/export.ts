@@ -35,5 +35,8 @@ export {
   mdiGradientVertical,
   mdiFolderHeartOutline,
   mdiHeartOutline,
-  mdiHeartRemoveOutline
+  mdiHeartRemoveOutline,
+  mdiLogoutVariant,
+  mdiRefresh,
+  mdiHeart
 } from '@mdi/js'

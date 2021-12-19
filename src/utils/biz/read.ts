@@ -1,8 +1,11 @@
 import localforage from 'localforage'
 import { debounce } from 'quasar'
 import { saveReadPosition } from '@/services/book'
+import { Ref } from 'vue'
+import { userReadPositionDB } from '@/utils/storage/db'
 
-function findElementNode(node: Node) {
+function findElementNode(node: Node): Element {
+  // @ts-ignore
   return node.nodeType === Node.ELEMENT_NODE ? node : findElementNode(node.parentNode)
 }
 
@@ -28,8 +31,7 @@ function readXPath(element: Element) {
 }
 
 export async function loadHistory(uid: number, BookId: number) {
-  let history = await localforage.getItem<{ [key: number]: { Id: number; xpath: string } }>(`ReadHistory_${uid}`)
-  return history?.[BookId]
+  return await userReadPositionDB.get<{ cid: number; xPath: string }>(`${uid}_${BookId}`)
 }
 
 export async function saveHistory(
@@ -40,31 +42,40 @@ export async function saveHistory(
     xpath: string
   }
 ) {
-  let history = await localforage.getItem<{ [key: number]: { Id: number; xpath: string } }>(`ReadHistory_${uid}`)
-  history = {
-    ...history,
-    [BookId]: bookParam
+  await userReadPositionDB.set(`${uid}_${BookId}`, {
+    cid: bookParam.Id,
+    xPath: bookParam.xpath
+  })
+  await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
+}
+
+export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>) {
+  try {
+    let rst = document.evaluate(xPath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+    let target = rst.iterateNext() as HTMLElement
+    if (target) {
+      document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset.value
+    }
+  } catch (e) {
+    console.log(e)
   }
-  await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath }).catch((err) => console.log(err))
-  return await localforage.setItem(`ReadHistory_${uid}`, history).catch((err) => console.log(err))
 }
 
 export async function syncReading(
   dom: Element,
-  uid: number,
+  uid: Ref<number>,
   bookParam: {
-    BookId: number
-    Id: number
+    BookId: Ref<number>
+    CId: Ref<number>
   },
-  offset: number = 0
+  offset: Ref<number>
 ) {
   let visibleDom: HTMLElement[] = []
-  let doSync = debounce(() => {
+  let doSync = debounce(async () => {
     let topTarget = visibleDom.reduce((res: { target: HTMLElement; rect: DOMRect }, target: HTMLElement) => {
       // target.style.background = null
       let rect = target.getBoundingClientRect()
-      // 这里top>0 有疑问，是否要一个元素完全可见
-      if (rect.top >= offset) {
+      if (rect.top >= offset.value) {
         if (res) {
           if (rect.top < res.rect.top) {
             res = {
@@ -85,8 +96,8 @@ export async function syncReading(
       // topTarget.target.style.background = 'red'
       // console.log(topTarget.target, readXPath(topTarget.target))
       let xpath = readXPath(topTarget.target)
-      saveHistory(uid, bookParam?.BookId, {
-        Id: bookParam?.Id,
+      await saveHistory(uid.value, bookParam?.BookId.value, {
+        Id: bookParam?.CId.value,
         xpath
       })
     }
@@ -95,7 +106,7 @@ export async function syncReading(
     entities.forEach((entity) => {
       if (entity.target instanceof HTMLElement) {
         let domTarget = entity.target as HTMLElement
-        // domTarget.style.background = null
+        domTarget.style.background = null
         if (entity.isIntersecting) {
           visibleDom.push(domTarget)
         } else {
@@ -117,26 +128,4 @@ export async function syncReading(
       console.log(e)
     }
   }
-  let history = await loadHistory(uid, bookParam?.BookId)
-  if (history) {
-    if (`${history.Id}` === `${bookParam?.Id}` && history?.xpath) {
-      try {
-        let rst = document.evaluate(history?.xpath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
-        let target = rst.iterateNext() as HTMLElement
-        if (target) {
-          // 手机兼容性问题
-          // target.scrollIntoView()
-          document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset
-        }
-      } catch (e) {
-        console.log(e)
-      }
-    }
-  }
-
-  // 忘了这里为啥要清空一次，老版笨代码里面抄过来
-  saveHistory(uid, bookParam?.BookId, {
-    Id: bookParam?.Id,
-    xpath: ''
-  })
 }

@@ -20,12 +20,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onActivated, ref, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onMounted, ref, watch, watchEffect } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
-import { syncReading } from '@/utils/read'
-import { useLayoutStore } from '@/components/app/useLayout'
+import { syncReading, scrollToHistory, loadHistory } from '@/utils/biz/read'
+import { useLayout } from '@/components/app/useLayout'
 import { useSettingStore } from '@/store/setting'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -44,24 +44,25 @@ export default defineComponent({
     const $q = useQuasar()
     const chapter = ref<any>()
     const chapterRef = ref<HTMLElement>()
-    const layoutStore = useLayoutStore()
+    const layout = useLayout()
+    const { headerOffset } = layout
     const appStore = useAppStore()
+    const cid = computed(() => chapter.value?.Id || 1)
+    const userId = computed(() => appStore.userId)
+
     const getContent = useTimeoutFn(async () => {
-      chapter.value = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
+      let res: any = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
+      chapter.value = res.Chapter
       $q.notify({
         message: chapter.value['Title'],
         color: 'purple',
         timeout: 1500
       })
-      // TODO 这里在每次getContent时执行，会反复调用，之后得尝试改进一下
-      // nextTick(() => {
-      //   syncReading(
-      //     chapterRef.value,
-      //     appStore.user.Id,
-      //     { BookId: ~~props.bid, Id: chapter.value.Id },
-      //     layoutStore.headerHeight
-      //   )
-      // })
+      if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
+        nextTick(() => {
+          scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+        })
+      }
     })
 
     if (!CSS.supports('line-break', 'anywhere')) {
@@ -95,7 +96,23 @@ export default defineComponent({
           : 'inherit'
     }))
 
-    useInitRequest(getContent)
+    onMounted(getContent.syncCall)
+    watch(() => [bid.value, sortNum.value], getContent)
+    // 如果章节变了，重新观察dom记录阅读记录
+    watch(
+      () => chapter.value?.Id,
+      () => {
+        nextTick(async () => {
+          await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
+        })
+      }
+    )
+    onActivated(async () => {
+      if (cid.value === chapter.value?.Id) {
+        let position = await loadHistory(userId.value, bid.value)
+        if (position) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
+      }
+    })
 
     return {
       loading: computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value),
@@ -117,6 +134,7 @@ export default defineComponent({
 :deep(.read) {
   @import 'src/assets/style/read';
 
+  line-break: anywhere;
   font-family: read, sans-serif !important;
 }
 </style>

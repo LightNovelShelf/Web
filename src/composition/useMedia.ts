@@ -18,6 +18,7 @@ export function useMedia(query: Ref<string>, defaultVal = false): Ref<boolean> {
   const matchChangeHandle = () => {
     isMatch.value = mql.matches
   }
+  mql.addEventListener('change', matchChangeHandle)
 
   // query里变化了就重新监听
   watch(query, (nextQuery) => {
