@@ -92,13 +92,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, defineProps } from 'vue'
+import { computed, defineComponent, ref, defineProps, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { loadHistory } from '@/utils/read'
+import { loadHistory } from '@/utils/biz/read'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import type { BookServicesTypes } from '@/services/book'
@@ -112,25 +112,34 @@ const router = useRouter()
 const appStore = useAppStore()
 let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 let bid = computed(() => ~~(props.bid || '1'))
+// 每次从服务器获取数据时，更新此字段，每次进入页面时，从缓存读取本数据
+let position = null
 const getInfo = useTimeoutFn(async () => {
   bookInfo.value = await getBookInfo(bid.value)
+  let temp = bookInfo.value.ReadPosition
+  position = {
+    cid: temp.Cid,
+    xPath: temp.XPath
+  }
 })
 const startRead = async () => {
-  let history = await loadHistory(appStore.user.Id, bid.value)
   let sortNum = 1
   // 将章节id转换为sortNum
-  if (history) {
-    sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === history.Id) + 1
+  if (position?.xPath) {
+    sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.cid) + 1
   }
   await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
 }
 
 useInitRequest(getInfo)
+onActivated(async () => {
+  position = await loadHistory(appStore.userId, bid.value)
+})
 
 // 只要数据中的id和props不同，就当在加载
-const isActive = computed(() => bookInfo.value?.Book?.Id === bid.value)
 const book = computed(() => bookInfo.value?.Book)
-const LastUpdateTimeDesc = useToNow(computed(() => bookInfo.value?.Book?.LastUpdateTime))
+const isActive = computed(() => book.value?.Id === bid.value)
+const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 </script>
 
 <style scoped lang="scss">

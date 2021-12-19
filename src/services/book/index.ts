@@ -16,3 +16,7 @@ export function getBookInfo(bid: number) {
 export function saveReadPosition(param: SaveReadPositionRequest) {
   return requestWithSignalr('SaveReadPosition', param)
 }
+/** 获取阅读位置 */
+export function getReadPosition(bid: number) {
+  return requestWithSignalr('GetReadPosition', bid)
+}

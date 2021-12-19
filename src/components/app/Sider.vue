@@ -37,7 +37,7 @@ import { defineComponent, ref, computed, toRef } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
-import { useLayoutStore } from './useLayout'
+import { useLayout } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [
   {
@@ -134,10 +134,13 @@ export default defineComponent({
       }
     })
 
+    const layout = useLayout()
+    const { siderShow, siderBreakpoint } = layout
+
     return {
       icon,
-      siderShow: toRef(useLayoutStore(), 'siderShow'),
-      siderBreakpoint: toRef(useLayoutStore(), 'siderBreakpoint'),
+      siderShow,
+      siderBreakpoint,
       activeKey,
       search: ref(null),
       menuOptions,

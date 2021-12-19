@@ -27,7 +27,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { midPic } from '@/utils/book'
+import { midPic } from '@/utils/biz/book'
 import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
 

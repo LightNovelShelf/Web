@@ -93,7 +93,7 @@
 import { computed, defineComponent, ref } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
-import { useLayoutStore } from './useLayout'
+import { useLayout } from './useLayout'
 import { storeToRefs } from 'pinia'
 import { useMedia } from '@/composition/useMedia'
 import { longTermToken, sessionToken } from '@/utils/session'
@@ -104,9 +104,9 @@ defineComponent({ name: 'Header' })
 
 const $q = useQuasar()
 const appStore = useAppStore()
-const layoutStore = useLayoutStore()
+const layout = useLayout()
 const { appName, user } = storeToRefs(appStore)
-const { siderShow, headerHeight, siderBreakpoint } = storeToRefs(layoutStore)
+const { siderShow, headerHeight, siderBreakpoint } = layout
 const search = ref('')
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),

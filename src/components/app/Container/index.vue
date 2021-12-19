@@ -18,15 +18,15 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue'
 import AuthenticationGuard from './AuthenticationGuard.vue'
-import { useLayoutStore } from '@/components/app/useLayout'
+import { useLayout } from '@/components/app/useLayout'
 
 export default defineComponent({
   components: { AuthenticationGuard },
   setup() {
-    let layoutStore = useLayoutStore()
+    let layout = useLayout()
 
     return {
-      containerStyle: computed(() => layoutStore.containerStyle)
+      containerStyle: layout.containerStyle
     }
   }
 })
