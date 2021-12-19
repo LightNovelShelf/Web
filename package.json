@@ -26,7 +26,8 @@
     "sortablejs": "^1.14.0",
     "vue": "^3.2.22",
     "vue-recaptcha-v3": "^2.0.1",
-    "vue-router": "^4.0.12"
+    "vue-router": "^4.0.12",
+    "vue3-menus": "^1.1.2"
   },
   "devDependencies": {
     "@types/dompurify": "^2.3.1",
