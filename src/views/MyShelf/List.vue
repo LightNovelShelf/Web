@@ -15,7 +15,7 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { defineComponent, onBeforeUnmount, onMounted, ref, watch, nextTick } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -84,9 +84,7 @@ const { isOpen, mousrEvent, menus, actions } = useContextMenu([
 
 /** 右键事件 */
 function rightClick(evt: MouseEvent) {
-  // actions.open(evt)
-  // evt.preventDefault()
-  actions.open(evt, [{ label: '返回(B)', tip: 'Alt+向左箭头' }])
+  actions.open(evt)
 }
 
 /** 把更改排序后的数组写入DB */
@@ -103,7 +101,7 @@ const syncSortInfo = (sortInfo: { oldIndex?: number; newIndex?: number }) => {
 
   // 不在范围内的书就不用动了
   // 老的index换成新的index
-  // 剩下的依次左移/右移动
+  // 剩下的依次左移/右移
   books.value.forEach((item) => {
     if (item.index < minIndex || item.index > maxIndex) {
       return
@@ -133,7 +131,6 @@ const createSSortable = (el: HTMLElement) => {
     animation: 200,
     onEnd(evt) {
       const { oldIndex, newIndex } = evt
-      console.log('end', { oldIndex, newIndex })
       syncSortInfo({ oldIndex, newIndex })
     }
   })
@@ -149,7 +146,7 @@ watch(listWrapRef, (el) => {
 
 /** 按照index排序书籍数组，因为indexedDB读出来的书籍是按照DB key排序的，没法更改 */
 const sortBooksToAsc = () => {
-  books.value.sort((a, b) => a.index - b.index)
+  books.value.sort((a, b) => (a.index > b.index ? 1 : -1))
 }
 
 // 初始化
