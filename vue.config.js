@@ -36,7 +36,19 @@ module.exports = {
       // swSrc: 'src/service-worker.ts',
       navigateFallback: 'index.html',
       skipWaiting: true, // 跳过等待
-      clientsClaim: true // 让sw立即接管网页,
+      clientsClaim: true, // 让sw立即接管网页,
+      runtimeCaching: [
+        {
+          urlPattern: /.*\.(woff2|woff|ttf)/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'font-cache',
+            cacheableResponse: {
+              statuses: [200]
+            }
+          }
+        }
+      ]
     }
   },
   /** @param { import('webpack-chain') } config */

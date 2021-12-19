@@ -5,6 +5,7 @@
     bordered
     :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'"
     :width="240"
+    :breakpoint="siderBreakpoint"
   >
     <q-scroll-area class="fit">
       <q-list padding>
@@ -36,7 +37,7 @@ import { defineComponent, ref, computed, toRef } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useRoute } from 'vue-router'
 import { isConnected } from '@/services/utils'
-import { useLayoutStore } from './useLayout'
+import { useLayout } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [
   {
@@ -133,9 +134,13 @@ export default defineComponent({
       }
     })
 
+    const layout = useLayout()
+    const { siderShow, siderBreakpoint } = layout
+
     return {
       icon,
-      siderShow: toRef(useLayoutStore(), 'siderShow'),
+      siderShow,
+      siderBreakpoint,
       activeKey,
       search: ref(null),
       menuOptions,

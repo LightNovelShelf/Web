@@ -4,13 +4,45 @@
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
-            <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3"></q-img>
-            <q-responsive v-else :ratio="2 / 3">
-              <q-skeleton class="fit" square />
-            </q-responsive>
+            <q-card>
+              <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3">
+                <div class="absolute-bottom bottom-shadow">
+                  <div class="row">
+                    <div class="row flex-align-center q-gutter-xs">
+                      <q-icon size="24px" :name="icon.mdiHeart" />
+                      <span>{{ book.Subscription }}</span>
+                    </div>
+                    <q-space />
+                    <div class="row flex-align-center q-gutter-xs">
+                      <q-icon size="24px" :name="icon.mdiEye" />
+                      <span>{{ book.Views }}</span>
+                    </div>
+                  </div>
+                </div>
+              </q-img>
+              <q-responsive v-else :ratio="2 / 3">
+                <q-skeleton class="fit" square />
+              </q-responsive>
+            </q-card>
           </q-grid-item>
-          <q-grid-item span="2" xs="1" sm="1" md="1">
+          <q-grid-item span="2" xs="1" sm="1" md="1" style="position: relative">
             <div v-if="isActive">
+              <div class="absolute-top-right">
+                <div style="padding: 12px 0 0 0">
+                  <q-btn :ripple="false" round>
+                    <q-avatar>
+                      <img :src="book.User.Avatar" alt="book_user" />
+                    </q-avatar>
+
+                    <!-- TODO 这个组件点击的行为非常奇怪 -->
+                    <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
+                      <q-card>
+                        <q-card-section> 这里放上传者的信息 </q-card-section>
+                      </q-card>
+                    </q-menu>
+                  </q-btn>
+                </div>
+              </div>
               <div class="introduction" style="margin: 24px 0">书籍信息</div>
               <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
               <div>作者：{{ book['Author'] }}</div>
@@ -59,59 +91,55 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref, onActivated, watchEffect } from 'vue'
+<script lang="ts" setup>
+import { computed, defineComponent, ref, defineProps, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { loadHistory } from '@/utils/read'
+import { loadHistory } from '@/utils/biz/read'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import type { BookServicesTypes } from '@/services/book'
 import { useAppStore } from '@/store'
+import { icon } from '@/plugins/icon'
 
-export default defineComponent({
-  name: 'BookInfo',
-  components: {
-    QGrid,
-    QGridItem,
-    Comment
-  },
-  props: {
-    bid: String
-  },
-  setup(props) {
-    const router = useRouter()
-    const appStore = useAppStore()
-    let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
-    let bid = computed(() => ~~(props.bid || '1'))
-    const getInfo = useTimeoutFn(async () => {
-      bookInfo.value = await getBookInfo(bid.value)
-    })
-    const startRead = async () => {
-      let history = await loadHistory(appStore.user.Id, bid.value)
-      let sortNum = 1
-      // 将章节id转换为sortNum
-      if (history) {
-        sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === history.Id) + 1
-      }
-      await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
-    }
+defineComponent({ QGrid, QGridItem, Comment })
+const props = defineProps<{ bid: string }>()
 
-    useInitRequest(getInfo)
-
-    return {
-      // 只要数据中的id和props不同，就当在加载
-      isActive: computed(() => bookInfo.value?.Book?.Id === bid.value),
-      book: computed(() => bookInfo.value?.Book),
-      getInfo,
-      startRead,
-      LastUpdateTimeDesc: useToNow(computed(() => bookInfo.value?.Book?.LastUpdateTime))
-    }
+const router = useRouter()
+const appStore = useAppStore()
+let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
+let bid = computed(() => ~~(props.bid || '1'))
+// 每次从服务器获取数据时，更新此字段，每次进入页面时，从缓存读取本数据
+let position = null
+const getInfo = useTimeoutFn(async () => {
+  bookInfo.value = await getBookInfo(bid.value)
+  let temp = bookInfo.value.ReadPosition
+  position = {
+    cid: temp.Cid,
+    xPath: temp.XPath
   }
 })
+const startRead = async () => {
+  let sortNum = 1
+  // 将章节id转换为sortNum
+  if (position?.xPath) {
+    sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.cid) + 1
+  }
+  await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
+}
+
+useInitRequest(getInfo)
+onActivated(async () => {
+  position = await loadHistory(appStore.userId, bid.value)
+})
+
+// 只要数据中的id和props不同，就当在加载
+const book = computed(() => bookInfo.value?.Book)
+const isActive = computed(() => book.value?.Id === bid.value)
+const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 </script>
 
 <style scoped lang="scss">
@@ -122,6 +150,11 @@ export default defineComponent({
   :deep(p) {
     margin: 0;
   }
+}
+
+.bottom-shadow {
+  background-color: unset;
+  background-image: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
 }
 
 a {
