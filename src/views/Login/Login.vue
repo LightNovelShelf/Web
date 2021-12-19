@@ -50,7 +50,7 @@
 import { icon } from '@/plugins/icon'
 import { ref } from 'vue'
 import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
-import app from '@/main'
+import { app } from '@/app'
 import { login } from '@/services/user'
 import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
