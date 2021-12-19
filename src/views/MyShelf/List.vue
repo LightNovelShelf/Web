@@ -157,14 +157,6 @@ onMounted(() => {
   // 全量读取列表
   shelfDB.getItems().then((res) => {
     books.value = res
-    // @debug 调试环境里书架的图片地址都是旧的，懒得重新造数据，这里替换一下域名算了
-    books.value = books.value.map((item) => {
-      if (item.type === ShelfTypes.SheldItemType.book) {
-        item.value.Cover = item.value.Cover.replace('img.acgdmzy.com:45112', 'img.lightnovel.app:45220')
-      }
-      return item
-    })
-    // @debug end
     sortBooksToAsc()
     loading.value = false
   })
