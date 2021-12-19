@@ -1,11 +1,26 @@
 <template>
-  <q-grid cols="8" x-gap="20" y-gap="20" :forward-ref="setListWrapRef" @contextmenu="rightClick">
-    <template v-for="item in books" :key="item.value.Id">
-      <q-grid-item class="js-drag-item" draggable="true" :data-id="item.value.Id">
+  <!-- 编辑模式下的确认按钮等 -->
+  <q-slide-transition>
+    <div v-show="editMode">
+      <div class="actions-wrap">
+        <q-btn color="primary" outline @click="quiteEditMode">取消</q-btn>
+        <q-btn color="primary" @click="saveListChange">保存</q-btn>
+      </div>
+
+      <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
+      <div style="height: 20px" />
+    </div>
+  </q-slide-transition>
+
+  <!-- 书籍列表 -->
+  <q-grid cols="8" x-gap="20" y-gap="20" :forward-ref="setListWrapRef" @contextmenu="rightClickHandle">
+    <template v-for="item in listData" :key="item.value.Id">
+      <q-grid-item>
         <book-card :book="item.value" :title="item.index" />
       </q-grid-item>
     </template>
   </q-grid>
+
   <!-- 右键菜单 -->
   <vue3-menus :open="isOpen" :event="mousrEvent" :menus="menus" />
 </template>
@@ -15,12 +30,13 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
+import { createDraft, finishDraft, freeze } from 'immer'
 import { Vue3Menus, useContextMenu } from '@/composition/useContextMenu'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, Vue3Menus })
@@ -28,8 +44,19 @@ defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, Vue3Menus })
 const $ = useQuasar()
 /** 加载标记 */
 const loading = ref(true)
+/** 编辑状态 */
+const editMode = ref(false)
 /** 所有书籍 */
 const books = ref<ShelfTypes.SheldItem[]>([])
+/** 编辑期间的书籍列表对象 */
+const draftBooks = ref<ShelfTypes.SheldItem[]>([])
+const listData = computed(() => {
+  if (editMode.value) {
+    return draftBooks.value
+  }
+
+  return books.value
+})
 /** 排序列表容器 */
 const [listWrapRef, setListWrapRef] = useForwardRef()
 /** 排序操作句柄 */
@@ -38,57 +65,37 @@ const sortableRef = ref<Sortable | null>(null)
 const destorySortable = () => {
   safeCall(() => sortableRef.value?.destroy())
 }
+const enterEditMode = () => {
+  draftBooks.value = createDraft(toRaw(books.value))
+  editMode.value = true
+}
+const quiteEditMode = () => {
+  draftBooks.value = []
+  editMode.value = false
+}
 
 const { isOpen, mousrEvent, menus, actions } = useContextMenu([
   {
-    label: '返回(B)',
-    tip: 'Alt+向左箭头'
-  },
-  {
-    label: '点击不关闭菜单',
-    tip: '不关闭菜单',
-    click: () => {
-      return false
+    label: '编辑列表',
+    click() {
+      enterEditMode()
     }
-  },
-  {
-    label: '前进(F)',
-    tip: 'Alt+向右箭头',
-    disabled: true
-  },
-  {
-    label: '为此页面创建二维码',
-    divided: true
-  },
-  {
-    label: '使用网页翻译(F)',
-    divided: true,
-    children: [
-      { label: '翻译成繁体中文' },
-      { label: '翻译成繁体中文' },
-      {
-        label: '百度翻译',
-        children: [{ label: '翻译成繁体中文' }, { label: '翻译成繁体中文' }]
-      },
-      {
-        label: '搜狗翻译',
-        children: [{ label: '翻译成繁体中文' }, { label: '翻译成繁体中文' }]
-      },
-      {
-        label: '有道翻译',
-        children: [{ label: '翻译成繁体中文' }, { label: '翻译成繁体中文' }]
-      }
-    ]
   }
 ])
 
-/** 右键事件 */
-function rightClick(evt: MouseEvent) {
+/** 列表右键事件 */
+function rightClickHandle(evt: MouseEvent) {
+  evt.preventDefault()
+
+  if (editMode.value) {
+    return
+  }
+
   actions.open(evt)
 }
 
-/** 把更改排序后的数组写入DB */
-const syncSortInfo = (sortInfo: { oldIndex?: number; newIndex?: number }) => {
+/** 同步排序结果到临时对象 */
+const syncSortInfoToDraft = (sortInfo: { oldIndex?: number; newIndex?: number }) => {
   if (sortInfo.newIndex === undefined || sortInfo.oldIndex === undefined) {
     // 虽然不知道什么情况没这个index，但既然人家标注了这个可能，那就过滤一次
     $.notify({ type: 'warning', message: '排序字段缺失，本次排序操作无效' })
@@ -117,30 +124,41 @@ const syncSortInfo = (sortInfo: { oldIndex?: number; newIndex?: number }) => {
       item.index += 1
     }
 
-    // books变动时就把新的books写入DB
-    shelfDB.set(item.value.Id + '', item)
+    // // books变动时就把新的books写入DB
+    // shelfDB.set(item.value.Id + '', item)
   })
 
   // 保证数组是按顺序的，虽然现在没什么用，但保持这个一致性可以降低debug压力
   sortBooksToAsc()
 }
 
+/** 确认列表修改结果 */
+const saveListChange = () => {
+  /** 保存修改 */
+  books.value = finishDraft(toRaw(draftBooks.value))
+  /** 写入本地缓存 */
+  books.value.forEach((item) => {
+    shelfDB.set(item.value.Id + '', item)
+  })
+}
+
 /** 创建排序句柄 */
-const createSSortable = (el: HTMLElement) => {
+const createSortable = (el: HTMLElement) => {
   sortableRef.value = new Sortable(el, {
     animation: 200,
     onEnd(evt) {
       const { oldIndex, newIndex } = evt
-      syncSortInfo({ oldIndex, newIndex })
+      syncSortInfoToDraft({ oldIndex, newIndex })
     }
   })
 }
 
 // 监控组件挂载情况，挂载了就初始化拖动排序
-watch(listWrapRef, (el) => {
+watch([listWrapRef, editMode], ([el, mode]) => {
   destorySortable()
-  if (el) {
-    createSSortable(el)
+
+  if (el && mode) {
+    createSortable(el)
   }
 })
 
@@ -165,9 +183,15 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-:deep {
-  .gu-transit {
-    opacity: 0.6;
+.actions-wrap {
+  display: flex;
+
+  :deep(button) {
+    margin-left: 10px;
+  }
+
+  :deep(button:first-of-type) {
+    margin-left: auto;
   }
 }
 </style>
