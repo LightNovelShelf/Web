@@ -9,12 +9,6 @@
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="Read">
           <div class="q-pa-md">
-            <div class="q-gutter-sm light-radio">
-              <div>阅读模式</div>
-              <q-radio v-model="dark" :val="false" label="明亮" />
-              <q-radio v-model="dark" :val="true" label="夜间" />
-              <q-radio v-model="dark" val="auto" label="自动" />
-            </div>
             <div class="q-gutter-sm bg-radio">
               <div>阅读背景</div>
               <q-radio v-model="readSetting.bgType" val="none" label="无" />
@@ -35,8 +29,14 @@
         </q-tab-panel>
 
         <q-tab-panel name="Setting">
-          <div class="text-h6">Alarms</div>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.2
+          <div class="q-pa-md">
+            <div class="q-gutter-sm light-radio">
+              <div>网站模式</div>
+              <q-radio v-model="dark" :val="false" label="明亮" />
+              <q-radio v-model="dark" :val="true" label="夜间" />
+              <q-radio v-model="dark" val="auto" label="自动" />
+            </div>
+          </div>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -52,16 +52,16 @@ import { storeToRefs } from 'pinia'
 
 const tabOptions: Array<Record<string, any>> = [
   {
-    name: 'Read',
-    key: 'Read',
-    label: '阅读',
-    icon: icon.mdiFormatSize
-  },
-  {
     name: 'Setting',
     key: 'Setting',
     label: '设置',
     icon: icon.mdiCog
+  },
+  {
+    name: 'Read',
+    key: 'Read',
+    label: '阅读',
+    icon: icon.mdiFormatSize
   }
 ]
 

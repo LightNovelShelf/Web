@@ -1,4 +1,3 @@
-import localforage from 'localforage'
 import { debounce } from 'quasar'
 import { saveReadPosition } from '@/services/book'
 import { Ref } from 'vue'
