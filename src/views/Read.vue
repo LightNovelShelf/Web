@@ -110,7 +110,6 @@ export default defineComponent({
     onActivated(async () => {
       if (cid.value === chapter.value?.Id) {
         let position = await loadHistory(userId.value, bid.value)
-        console.log(position)
         if (position) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
       }
     })
