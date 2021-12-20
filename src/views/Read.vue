@@ -32,8 +32,16 @@
         :disable="draggingFab"
         v-touch-pan.prevent.mouse="moveFab"
       >
-        <q-fab-action @click="prev" color="primary" :icon="icon.mdiArrowRight" :disable="draggingFab" />
-        <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowLeft" :disable="draggingFab" />
+        <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowRight" :disable="draggingFab">
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            下一章
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action @click="prev" color="primary" :icon="icon.mdiArrowLeft" :disable="draggingFab">
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            上一章
+          </q-tooltip>
+        </q-fab-action>
       </q-fab>
     </q-page-sticky>
   </div>
@@ -51,6 +59,7 @@ import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useAppStore } from '@/store'
 import { useRouter } from 'vue-router'
 import { icon } from '@/plugins/icon'
+import { getErrMsg } from '@/utils/getErrMsg'
 
 const props = defineProps<{
   bid: string
@@ -78,16 +87,24 @@ function moveFab(ev) {
 }
 
 const getContent = useTimeoutFn(async () => {
-  let res: any = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
-  chapter.value = res.Chapter
-  $q.notify({
-    message: chapter.value['Title'],
-    color: 'purple',
-    timeout: 1500
-  })
-  if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
-    nextTick(() => {
-      scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+  try {
+    let res: any = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
+    chapter.value = res.Chapter
+    $q.notify({
+      message: chapter.value['Title'],
+      color: 'purple',
+      timeout: 1500
+    })
+    if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
+      nextTick(() => {
+        scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+      })
+    }
+  } catch (error) {
+    $q.notify({
+      message: getErrMsg(error),
+      color: 'negative',
+      timeout: 1500
     })
   }
 })
