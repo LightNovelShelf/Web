@@ -146,7 +146,7 @@ const next = debounce(() => {
       message: '已经是最后一页了'
     })
   } else {
-    router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value + 1 } })
+    router.replace({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value + 1 } })
   }
 }, 300)
 const prev = debounce(() => {
@@ -158,7 +158,7 @@ const prev = debounce(() => {
       message: '已经是第一页了'
     })
   } else {
-    router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value - 1 } })
+    router.replace({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value - 1 } })
   }
 }, 300)
 function back() {
