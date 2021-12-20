@@ -29,7 +29,7 @@
   </q-grid>
 
   <!-- 右键菜单 -->
-  <vue3-menus :open="isOpen" :event="mousrEvent" :menus="menus" />
+  <vue3-menus :open="isOpen" :event="mouseEvent" :menus="menus" />
 </template>
 
 <script lang="ts" setup>
@@ -79,7 +79,7 @@ const quiteEditMode = () => {
   editMode.value = false
 }
 
-const { isOpen, mousrEvent, menus, actions } = useContextMenu([
+const { isOpen, mouseEvent, menus, actions } = useContextMenu([
   {
     label: '编辑列表',
     click() {
