@@ -29,18 +29,16 @@
             <div v-if="isActive">
               <div class="absolute-top-right">
                 <div style="padding: 12px 0 0 0">
-                  <q-btn :ripple="false" round>
-                    <q-avatar>
-                      <img :src="book.User.Avatar" alt="book_user" />
-                    </q-avatar>
+                  <q-avatar>
+                    <img :src="book.User.Avatar" alt="book_user" />
+                  </q-avatar>
 
-                    <!-- TODO 这个组件点击的行为非常奇怪 -->
-                    <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
-                      <q-card>
-                        <q-card-section> 这里放上传者的信息 </q-card-section>
-                      </q-card>
-                    </q-menu>
-                  </q-btn>
+                  <!-- TODO 这个组件点击的行为非常奇怪 -->
+                  <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
+                    <q-card>
+                      <q-card-section> 这里放上传者的信息 </q-card-section>
+                    </q-card>
+                  </q-menu>
                 </div>
               </div>
               <div class="introduction" style="margin: 24px 0">书籍信息</div>
