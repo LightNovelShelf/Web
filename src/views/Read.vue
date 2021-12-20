@@ -195,7 +195,10 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 :deep(.read) {
   @import 'src/assets/style/read';
 
-  line-break: anywhere;
   font-family: read, sans-serif !important;
+
+  * {
+    line-break: anywhere;
+  }
 }
 </style>
