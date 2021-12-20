@@ -91,7 +91,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, defineProps, onActivated } from 'vue'
+import { computed, defineComponent, ref, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
