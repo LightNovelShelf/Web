@@ -29,24 +29,23 @@
             <div v-if="isActive">
               <div class="absolute-top-right">
                 <div style="padding: 12px 0 0 0">
-                  <q-btn :ripple="false" round>
-                    <q-avatar>
-                      <img :src="book.User.Avatar" alt="book_user" />
-                    </q-avatar>
+                  <q-avatar>
+                    <img :src="book.User.Avatar" alt="book_user" />
+                  </q-avatar>
 
-                    <!-- TODO 这个组件点击的行为非常奇怪 -->
-                    <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
-                      <q-card>
-                        <q-card-section> 这里放上传者的信息 </q-card-section>
-                      </q-card>
-                    </q-menu>
-                  </q-btn>
+                  <!-- TODO 这个组件点击的行为非常奇怪 -->
+                  <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
+                    <q-card>
+                      <q-card-section> 这里放上传者的信息 </q-card-section>
+                    </q-card>
+                  </q-menu>
                 </div>
               </div>
               <div class="introduction" style="margin: 24px 0">书籍信息</div>
               <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
               <div>作者：{{ book['Author'] }}</div>
               <div>最后更新：{{ book['LastUpdate'] }} ({{ LastUpdateTimeDesc }})</div>
+              <div>上次阅读：{{ lastReadTitle }}</div>
               <div style="margin-top: 24px">
                 <div>简介</div>
                 <div class="introduction" v-html="book['Introduction']"></div>
@@ -104,42 +103,62 @@ import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import type { BookServicesTypes } from '@/services/book'
 import { useAppStore } from '@/store'
 import { icon } from '@/plugins/icon'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { useQuasar } from 'quasar'
 
 defineComponent({ QGrid, QGridItem, Comment })
 const props = defineProps<{ bid: string }>()
 
+const $q = useQuasar()
 const router = useRouter()
 const appStore = useAppStore()
 let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 let bid = computed(() => ~~(props.bid || '1'))
 // 每次从服务器获取数据时，更新此字段，每次进入页面时，从缓存读取本数据
-let position = null
+let position = ref(null)
 const getInfo = useTimeoutFn(async () => {
-  bookInfo.value = await getBookInfo(bid.value)
-  let temp = bookInfo.value.ReadPosition
-  position = {
-    cid: temp.Cid,
-    xPath: temp.XPath
+  try {
+    bookInfo.value = await getBookInfo(bid.value)
+    let temp = bookInfo.value.ReadPosition
+    if (temp) {
+      position.value = {
+        cid: temp.Cid,
+        xPath: temp.XPath
+      }
+    }
+  } catch (error) {
+    $q.notify({
+      message: getErrMsg(error),
+      color: 'negative',
+      timeout: 1500
+    })
   }
 })
 const startRead = async () => {
   let sortNum = 1
   // 将章节id转换为sortNum
-  if (position?.xPath) {
-    sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.cid) + 1
+  if (position.value?.xPath) {
+    sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.value.cid) + 1
   }
   await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
 }
 
 useInitRequest(getInfo)
 onActivated(async () => {
-  position = await loadHistory(appStore.userId, bid.value)
+  position.value = await loadHistory(appStore.userId, bid.value)
 })
 
 // 只要数据中的id和props不同，就当在加载
 const book = computed(() => bookInfo.value?.Book)
 const isActive = computed(() => book.value?.Id === bid.value)
 const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
+const lastReadTitle = computed(() => {
+  if (position && position.value?.cid) {
+    let chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)
+    return chap.Title
+  }
+  return '暂无'
+})
 </script>
 
 <style scoped lang="scss">

@@ -38,5 +38,7 @@ export {
   mdiHeartRemoveOutline,
   mdiLogoutVariant,
   mdiRefresh,
-  mdiHeart
+  mdiHeart,
+  mdiPlus,
+  mdiClose
 } from '@mdi/js'
