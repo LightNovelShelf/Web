@@ -13,12 +13,19 @@
   </q-slide-transition>
 
   <!-- 书籍列表 -->
-  <q-grid cols="8" x-gap="20" y-gap="20" :forward-ref="setListWrapRef" @contextmenu="rightClickHandle">
-    <template v-for="item in listData" :key="item.value.Id">
-      <q-grid-item>
-        <book-card :book="item.value" :title="item.index" />
-      </q-grid-item>
-    </template>
+  <!-- key要写个1和2是告诉vue不能复用这个div，复用了就会导致sortjs清理有问题 -->
+  <!-- @todo 缺点是会导致整个列表闪一下，这个看有没有办法处理（看起来是loading的原因） -->
+  <q-grid
+    :key="editMode ? 1 : 2"
+    cols="8"
+    x-gap="20"
+    y-gap="20"
+    :forward-ref="setListWrapRef"
+    @contextmenu="rightClickHandle"
+  >
+    <q-grid-item v-for="item in books" :key="item.value.Id">
+      <book-card :book="item.value" :title="item.index" />
+    </q-grid-item>
   </q-grid>
 
   <!-- 右键菜单 -->
@@ -30,16 +37,19 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { computed, defineComponent, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
+import { defineComponent, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
-import { createDraft, finishDraft, freeze } from 'immer'
+import produce, { setAutoFreeze } from 'immer'
 import { Vue3Menus, useContextMenu } from '@/composition/useContextMenu'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, Vue3Menus })
+
+/** auto freeze的话会导致vue绑定报错 */
+setAutoFreeze(false)
 
 const $ = useQuasar()
 /** 加载标记 */
@@ -48,15 +58,9 @@ const loading = ref(true)
 const editMode = ref(false)
 /** 所有书籍 */
 const books = ref<ShelfTypes.SheldItem[]>([])
-/** 编辑期间的书籍列表对象 */
-const draftBooks = ref<ShelfTypes.SheldItem[]>([])
-const listData = computed(() => {
-  if (editMode.value) {
-    return draftBooks.value
-  }
+/** 编辑期间的书籍列表 @immutable */
+let draftBooks: ShelfTypes.SheldItem[] = []
 
-  return books.value
-})
 /** 排序列表容器 */
 const [listWrapRef, setListWrapRef] = useForwardRef()
 /** 排序操作句柄 */
@@ -66,11 +70,12 @@ const destorySortable = () => {
   safeCall(() => sortableRef.value?.destroy())
 }
 const enterEditMode = () => {
-  draftBooks.value = createDraft(toRaw(books.value))
+  // 避免 draftBooks 数组里对象有 reactive hook
+  draftBooks = toRaw(books.value)
   editMode.value = true
 }
 const quiteEditMode = () => {
-  draftBooks.value = []
+  draftBooks = []
   editMode.value = false
 }
 
@@ -106,40 +111,46 @@ const syncSortInfoToDraft = (sortInfo: { oldIndex?: number; newIndex?: number })
   const maxIndex = Math.max(oldIndex, newIndex)
   const minIndex = Math.min(oldIndex, newIndex)
 
-  // 不在范围内的书就不用动了
-  // 老的index换成新的index
-  // 剩下的依次左移/右移
-  books.value.forEach((item) => {
-    if (item.index < minIndex || item.index > maxIndex) {
-      return
-    }
+  // 因为对象是同一个，这里需要用immer隔离这个改动；不然改动会反馈到books里
+  draftBooks = produce(draftBooks, (draft) => {
+    // 不在范围内的书就不用动了
+    // 老的index换成新的index
+    // 剩下的依次左移/右移
+    draft.forEach((item) => {
+      if (item.index < minIndex || item.index > maxIndex) {
+        return
+      }
 
-    if (item.index === oldIndex) {
-      item.index = newIndex
-    } else if (oldIndex === minIndex) {
-      // 从小拖到大，左移填充老的那个位置
-      item.index -= 1
-    } else {
-      // 从大拖到小，右移填充老的那个位置
-      item.index += 1
-    }
+      if (item.index === oldIndex) {
+        item.index = newIndex
+      } else if (oldIndex === minIndex) {
+        // 从小拖到大，左移填充老的那个位置
+        item.index -= 1
+      } else {
+        // 从大拖到小，右移填充老的那个位置
+        item.index += 1
+      }
 
-    // // books变动时就把新的books写入DB
-    // shelfDB.set(item.value.Id + '', item)
+      // // books变动时就把新的books写入DB
+      // shelfDB.set(item.value.Id + '', item)
+    })
   })
-
-  // 保证数组是按顺序的，虽然现在没什么用，但保持这个一致性可以降低debug压力
-  sortBooksToAsc()
 }
 
 /** 确认列表修改结果 */
-const saveListChange = () => {
+const saveListChange = async () => {
   /** 保存修改 */
-  books.value = finishDraft(toRaw(draftBooks.value))
+  books.value = draftBooks
+
+  /** 交换后的书籍数组并不是按照index从小到大排好的，需要手动排一次 */
+  sortBooksToAsc()
+
   /** 写入本地缓存 */
-  books.value.forEach((item) => {
-    shelfDB.set(item.value.Id + '', item)
-  })
+  for (const item of books.value) {
+    await shelfDB.set(item.value.Id + '', item)
+  }
+  /** 退出编辑模式 */
+  quiteEditMode()
 }
 
 /** 创建排序句柄 */
