@@ -94,8 +94,8 @@ export default {
     denseIcon: 'mdi-menu-down'
   },
   fab: {
-    icon: 'mdi-plus',
-    activeIcon: 'mdi-close'
+    icon: icon.mdiPlus,
+    activeIcon: icon.mdiClose
   },
   field: {
     clear: 'mdi-close-circle',

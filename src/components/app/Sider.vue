@@ -29,10 +29,21 @@
         </template>
       </q-list>
     </q-scroll-area>
+
+    <div class="absolute-bottom row flex-center" style="bottom: 24px">
+      <div>
+        <q-icon v-if="isConnected" color="positive" size="24px" :name="icon.mdiBroadcast" />
+        <q-icon v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
+        <q-tooltip transition-show="scale" transition-hide="scale">
+          <span v-if="isConnected">当前在线</span>
+          <span v-else>当前离线</span>
+        </q-tooltip>
+      </div>
+    </div>
   </q-drawer>
 </template>
 
-<script lang="tsx">
+<script lang="tsx" setup>
 import { defineComponent, ref, computed, toRef } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useRoute } from 'vue-router'
@@ -123,37 +134,16 @@ const menuOptions: Array<Record<string, any>> = [
   }
 ]
 
-export default defineComponent({
-  name: 'Sider',
-  setup() {
-    const route = useRoute()
-    let activeKey = computed({
-      get: () => route.name,
-      set: (val) => {
-        console.log(val)
-      }
-    })
-
-    const layout = useLayout()
-    const { siderShow, siderBreakpoint } = layout
-
-    return {
-      icon,
-      siderShow,
-      siderBreakpoint,
-      activeKey,
-      search: ref(null),
-      menuOptions,
-      isOnline: isConnected,
-      renderMenuLabel(option: any) {
-        if (!option.disabled && !option.children) {
-          return <router-link to={{ name: option.route }}>{option.label}</router-link>
-        }
-        return option.label
-      }
-    }
+const route = useRoute()
+let activeKey = computed({
+  get: () => route.name,
+  set: (val) => {
+    console.log(val)
   }
 })
+
+const layout = useLayout()
+const { siderShow, siderBreakpoint } = layout
 </script>
 
 <style scoped></style>

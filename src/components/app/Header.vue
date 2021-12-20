@@ -2,7 +2,7 @@
   <q-header
     :reveal="reveal"
     elevated
-    :class="($q.dark.isActive ? 'bg-blue-grey-10 text-secondary ' : 'bg-white text-grey-8') + ' q-py-xs'"
+    :class="($q.dark.isActive ? 'bg-blue-grey-10' : '') + ' q-py-xs'"
     :height-hint="headerHeight"
   >
     <q-toolbar>
@@ -17,24 +17,29 @@
           <q-icon size="24px" :name="icon.mdiInformation" />
           <q-tooltip anchor="bottom right" self="top right"> 欢迎来稿一个新的网站图标 </q-tooltip>
         </div>
-        <q-toolbar-title shrink class="text-weight-bold" @click="changAppName">
+        <q-toolbar-title shrink @click="changAppName">
           {{ appName }}
         </q-toolbar-title>
       </div>
 
-      <q-input style="padding-left: 12px" dense outlined square v-model="search" placeholder="搜索" />
+      <q-input placeholder="搜索" dark dense standout v-model="search" class="q-ml-md">
+        <template v-slot:prepend>
+          <q-icon v-if="search === ''" :name="icon.mdiMagnify" />
+          <q-icon v-else :name="icon.mdiClose" class="cursor-pointer" @click="search = ''" />
+        </template>
+      </q-input>
 
       <q-space />
 
       <div class="q-gutter-sm row items-center no-wrap">
         <q-btn round dense flat>
-          <q-badge color="red" text-color="white" floating> 22 </q-badge>
+          <q-badge color="red" floating> 22 </q-badge>
           <q-tooltip>通知</q-tooltip>
           <q-icon :name="icon.mdiBell"></q-icon>
         </q-btn>
 
         <q-btn round dense flat>
-          <q-badge color="red" text-color="white" floating> 99+ </q-badge>
+          <q-badge color="red" floating> 99+ </q-badge>
           <q-tooltip>通知</q-tooltip>
           <q-icon :name="icon.mdiMessageText"></q-icon>
         </q-btn>

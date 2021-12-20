@@ -1,3 +1,4 @@
+import { NOOP } from '@/const/empty'
 import { userAuthenticationDB } from '@/utils/storage/db'
 
 /** @private 会话密钥 */
@@ -19,6 +20,6 @@ export const longTermToken = {
     return userAuthenticationDB.get('RefreshToken')
   },
   set(token: string): Promise<void> {
-    return userAuthenticationDB.set('RefreshToken', token)
+    return userAuthenticationDB.set('RefreshToken', token).then(NOOP)
   }
 }
