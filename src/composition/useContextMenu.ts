@@ -26,7 +26,7 @@ import { Vue3Menus, menusItemType } from 'vue3-menus'
  */
 export const useContextMenu = (menus: menusItemType[] = []) => {
   const isOpen = ref(false)
-  const mousrEvent = ref<MouseEvent>({} as MouseEvent)
+  const mouseEvent = ref<MouseEvent>({} as MouseEvent)
   const _menus = ref(menus)
 
   const open = (evt: MouseEvent, m = menus) => {
@@ -34,20 +34,20 @@ export const useContextMenu = (menus: menusItemType[] = []) => {
     evt.preventDefault()
     nextTick(() => {
       isOpen.value = true
-      mousrEvent.value = evt
+      mouseEvent.value = evt
       _menus.value = m
     })
   }
   const close = () => {
     isOpen.value = false
-    mousrEvent.value = {} as MouseEvent
+    mouseEvent.value = {} as MouseEvent
   }
 
   return {
     /** 是否展示菜单 */
     isOpen,
     /** 菜单对应的事件（用来定位等） */
-    mousrEvent,
+    mouseEvent,
     menus: _menus,
     /** 菜单操作 */
     actions: { open, close }
