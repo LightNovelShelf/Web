@@ -40,5 +40,6 @@ export {
   mdiRefresh,
   mdiHeart,
   mdiPlus,
-  mdiClose
+  mdiClose,
+  mdiCheckCircle
 } from '@mdi/js'
