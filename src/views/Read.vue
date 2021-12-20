@@ -44,11 +44,15 @@
         </q-fab-action>
       </q-fab>
     </q-page-sticky>
+
+    <div class="v-viewer" ref="viewerRef" v-viewer>
+      <img :src="showImage.src" :alt="showImage.alt" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, nextTick, onActivated, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -73,11 +77,16 @@ const sortNum = computed(() => ~~(props.sortNum || '1'))
 const $q = useQuasar()
 const chapter = ref<any>()
 const chapterRef = ref<HTMLElement>()
+const viewerRef = ref<HTMLElement>()
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
 const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
+const showImage = reactive({
+  src: null,
+  alt: ''
+})
 
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
@@ -165,6 +174,13 @@ function back() {
   router.push({ name: 'BookInfo', params: { id: bid.value } })
 }
 
+function previewImg(event) {
+  showImage.src = event.target.src
+  showImage.alt = event.target.alt
+  // @ts-ignore
+  viewerRef.value.$viewer.show()
+}
+
 onMounted(getContent.syncCall)
 watch(() => [bid.value, sortNum.value], getContent)
 // 如果章节变了，重新观察dom记录阅读记录
@@ -172,6 +188,9 @@ watch(
   () => chapter.value?.Id,
   () => {
     nextTick(async () => {
+      chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
+        element.onclick = previewImg
+      })
       await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
     })
   }
@@ -190,6 +209,10 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 <style scoped lang="scss">
 .read-bg {
   z-index: 0;
+}
+
+.v-viewer {
+  display: none;
 }
 
 :deep(.read) {
