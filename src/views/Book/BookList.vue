@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onActivated, watch, onMounted, defineComponent } from 'vue'
+import { ref, computed, watch, defineComponent } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
@@ -36,6 +36,7 @@ import { NOOP } from '@/const/empty'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
 defineComponent({ QGrid, QGridItem })
+const props = defineProps<{ page: string; order: string }>()
 
 const options = [
   {
@@ -78,15 +79,15 @@ const pageData = ref({ totalPage: 1 })
 
 const currentPage = computed({
   get() {
-    return ~~route.params.page || 1
+    return ~~props.page || 1
   },
   set(val: number) {
     router.push({ name: 'BookList', params: { page: val } })
   }
 })
 
-const request = useTimeoutFn(function (page: number = currentPage.value) {
-  return getBookList({ Page: page }).then((serverData) => {
+const request = useTimeoutFn(function (page: number = currentPage.value, order: string = props.order) {
+  return getBookList({ Page: page, Order: order }).then((serverData) => {
     bookData.value = serverData.Data
     pageData.value.totalPage = serverData.TotalPages
   })
@@ -102,7 +103,7 @@ watch(request.loading, (nextLoading) => {
 })
 
 onBeforeRouteUpdate((to, from, next) => {
-  request(~~to.params.page || 1).then(() => next(), NOOP)
+  request(~~to.params.page || 1, `${to.params.order}`).then(() => next(), NOOP)
 })
 
 /** 已经有数据（不是mounted场景）时延时请求 */

@@ -3,9 +3,9 @@ import { icon } from '@/plugins/icon'
 export default {
   name: 'mdi-js',
   type: {
-    positive: 'mdi-check-circle',
+    positive: icon.mdiCheckCircle,
     negative: icon.mdiAlert,
-    info: 'mdi-information',
+    info: icon.mdiInformation,
     warning: icon.mdiExclamation
   },
   arrow: {

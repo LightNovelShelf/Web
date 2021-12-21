@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos">
+    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
       <q-fab
         :icon="icon.mdiPlus"
         direction="up"
