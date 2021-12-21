@@ -24,7 +24,7 @@
     @contextmenu="rightClickHandle"
   >
     <q-grid-item v-for="item in books" :key="item.value.Id">
-      <book-card :book="item.value" :title="item.index" />
+      <book-card :book="item.value" :title="item.index" @click.capture="booksItemClickHandle" />
     </q-grid-item>
   </q-grid>
 
@@ -79,6 +79,7 @@ const quiteEditMode = () => {
   editMode.value = false
 }
 
+/** 右键菜单封装 */
 const { isOpen, mouseEvent, menus, actions } = useContextMenu([
   {
     label: '编辑列表',
@@ -97,6 +98,14 @@ function rightClickHandle(evt: MouseEvent) {
   }
 
   actions.open(evt)
+}
+
+/** 书籍左键点击事件 */
+function booksItemClickHandle(evt: MouseEvent) {
+  /** 编辑模式下不允许点击进入详情 */
+  if (editMode.value) {
+    evt.preventDefault()
+  }
 }
 
 /** 同步排序结果到临时对象 */
