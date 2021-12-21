@@ -21,24 +21,25 @@
     x-gap="20"
     y-gap="20"
     :forward-ref="setListWrapRef"
-    @contextmenu="rightClickHandle"
+    @contextmenu="muteInEditMode"
   >
     <q-grid-item v-for="item in books" :key="item.value.Id">
       <!-- 书籍 -->
-      <book-card
-        v-if="item.type === 'book'"
-        :book="item.value"
-        :title="item.index"
-        @click.capture="booksItemClickHandle"
-      />
+      <book-card v-if="item.type === 'book'" :book="item.value" :title="item.index" @click.capture="muteInEditMode" />
       <!-- 文件夹 -->
       <div v-else-if="item.type === 'folder'">{{ JSON.stringify(item) }}</div>
       <template v-else />
     </q-grid-item>
-  </q-grid>
 
-  <!-- 右键菜单 -->
-  <vue3-menus :open="isOpen" :event="mouseEvent" :menus="menus" />
+    <!-- 右键菜单 -->
+    <q-menu touch-position :context-menu="!editMode">
+      <q-list dense style="min-width: 100px">
+        <q-item clickable v-close-popup @click="enterEditMode">
+          <q-item-section>编辑列表</q-item-section>
+        </q-item>
+      </q-list>
+    </q-menu>
+  </q-grid>
 </template>
 
 <script lang="ts" setup>
@@ -53,9 +54,8 @@ import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
 import produce, { setAutoFreeze } from 'immer'
-import { Vue3Menus, useContextMenu } from '@/composition/useContextMenu'
 
-defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, Vue3Menus })
+defineComponent({ AddToShelf, QGrid, QGridItem, BookCard })
 
 /** auto freeze的话会导致vue绑定报错 */
 setAutoFreeze(false)
@@ -89,31 +89,11 @@ const quiteEditMode = () => {
 }
 
 /** 右键菜单封装 */
-const { isOpen, mouseEvent, menus, actions } = useContextMenu([
-  {
-    label: '编辑列表',
-    click() {
-      enterEditMode()
-    }
-  }
-])
-
-/** 列表右键事件 */
-function rightClickHandle(evt: MouseEvent) {
-  evt.preventDefault()
-
-  if (editMode.value) {
-    return
-  }
-
-  actions.open(evt)
-}
-
-/** 书籍左键点击事件 */
-function booksItemClickHandle(evt: MouseEvent) {
-  /** 编辑模式下不允许点击进入详情 */
+function muteInEditMode(evt: MouseEvent) {
   if (editMode.value) {
     evt.preventDefault()
+    // 不stop的话无法阻止menu组件弹出
+    evt.stopPropagation()
   }
 }
 
