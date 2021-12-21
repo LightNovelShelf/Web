@@ -24,7 +24,16 @@
     @contextmenu="rightClickHandle"
   >
     <q-grid-item v-for="item in books" :key="item.value.Id">
-      <book-card :book="item.value" :title="item.index" @click.capture="booksItemClickHandle" />
+      <!-- 书籍 -->
+      <book-card
+        v-if="item.type === 'book'"
+        :book="item.value"
+        :title="item.index"
+        @click.capture="booksItemClickHandle"
+      />
+      <!-- 文件夹 -->
+      <div v-else-if="item.type === 'folder'">{{ JSON.stringify(item) }}</div>
+      <template v-else />
     </q-grid-item>
   </q-grid>
 
