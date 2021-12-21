@@ -13,7 +13,7 @@
           <q-separator class="q-my-md" v-if="option.label === 'separator'" />
 
           <q-item
-            :to="(option.disabled ?? true) && option.route ? { name: option.route } : null"
+            :to="(option.disabled ?? true) && option.route ? { name: option.route, params: option.params } : null"
             :disable="option.disabled"
             v-ripple="option.disabled ? !option.disabled : true"
             clickable
@@ -71,7 +71,8 @@ const menuOptions: Array<Record<string, any>> = [
     label: '全部小说',
     key: 'BookList',
     icon: icon.mdiBook,
-    route: 'BookList'
+    route: 'BookList',
+    params: { order: 'new', page: '1' }
   },
   {
     label: '订阅内容',
