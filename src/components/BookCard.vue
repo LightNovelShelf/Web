@@ -2,9 +2,11 @@
   <div>
     <router-link :to="{ name: 'BookInfo', params: { bid: props.book.Id } }">
       <div class="book-cover">
-        <q-img :src="cover" :ratio="2 / 3" @error="error = true" />
-        <div class="book-tag bg-primary">
-          <span style="font-size: 12px">{{ book.Category?.ShortName }}</span>
+        <q-card>
+          <q-img :src="cover" :ratio="2 / 3" />
+        </q-card>
+        <div class="book-tag" :style="{ backgroundColor: book.Category?.Color }">
+          <span style="font-size: 12px">{{ $q.screen.gt.md ? book.Category?.Name : book.Category?.ShortName }}</span>
         </div>
       </div>
     </router-link>
@@ -26,14 +28,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { midPic } from '@/utils/biz/book'
+import { computed } from 'vue'
 import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
+import { useQuasar } from 'quasar'
 
-const error = ref(false)
+const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
-const cover = computed(() => (error.value ? props.book.Cover : midPic(props.book.Cover)))
+const cover = computed(() => props.book.Cover)
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 </script>
 

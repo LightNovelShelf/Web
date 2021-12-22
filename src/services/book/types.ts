@@ -9,6 +9,8 @@ export interface BookInList {
   Title: string
   Category?: {
     ShortName: string
+    Name: string
+    Color: string
   }
 }
 

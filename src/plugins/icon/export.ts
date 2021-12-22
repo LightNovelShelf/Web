@@ -41,5 +41,10 @@ export {
   mdiHeart,
   mdiPlus,
   mdiClose,
-  mdiCheckCircle
+  mdiCheckCircle,
+  mdiMenuDown,
+  mdiChevronUp,
+  mdiChevronDown,
+  mdiArrowUp,
+  mdiArrowDown
 } from '@mdi/js'

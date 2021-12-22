@@ -9,11 +9,11 @@ export default {
     warning: icon.mdiExclamation
   },
   arrow: {
-    up: 'mdi-arrow-up',
+    up: icon.mdiArrowUp,
     right: icon.mdiArrowRight,
-    down: 'mdi-arrow-down',
+    down: icon.mdiArrowDown,
     left: icon.mdiArrowLeft,
-    dropdown: 'mdi-menu-down'
+    dropdown: icon.mdiMenuDown
   },
   chevron: {
     left: icon.mdiArrowLeft,
@@ -25,13 +25,13 @@ export default {
     palette: icon.mdiPalette
   },
   pullToRefresh: {
-    icon: 'mdi-refresh'
+    icon: icon.mdiRefresh
   },
   carousel: {
     left: icon.mdiArrowLeft,
     right: icon.mdiArrowRight,
-    up: 'mdi-chevron-up',
-    down: 'mdi-chevron-down',
+    up: icon.mdiChevronUp,
+    down: icon.mdiChevronDown,
     navigationIcon: 'mdi-circle'
   },
   chip: {
@@ -90,8 +90,8 @@ export default {
     viewSource: 'mdi-code-tags'
   },
   expansionItem: {
-    icon: 'mdi-chevron-down',
-    denseIcon: 'mdi-menu-down'
+    icon: icon.mdiChevronDown,
+    denseIcon: icon.mdiMenuDown
   },
   fab: {
     icon: icon.mdiPlus,
