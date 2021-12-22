@@ -106,7 +106,7 @@ const order = computed({
 })
 
 const request = useTimeoutFn(function (page: number = currentPage.value, order: string = props.order) {
-  return getBookList({ Page: page, Order: order }).then((serverData) => {
+  return getBookList({ Page: page, Order: order, Size: 24 }).then((serverData) => {
     bookData.value = serverData.Data
     pageData.value.totalPage = serverData.TotalPages
   })

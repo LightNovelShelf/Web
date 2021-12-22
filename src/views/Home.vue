@@ -16,7 +16,10 @@
           <q-separator />
 
           <q-card-section>
-            <q-grid cols="3" x-gap="8" y-gap="8">
+            <div v-if="loading" style="height: 572px" class="row flex-center">
+              <q-spinner color="primary" size="40px" />
+            </div>
+            <q-grid v-else cols="3" x-gap="8" y-gap="8">
               <q-grid-item v-for="(book, index) in bookData" :key="index">
                 <book-card :book="book" />
               </q-grid-item>
@@ -137,103 +140,31 @@
   </div>
 </template>
 
-<script lang="tsx">
+<script lang="tsx" setup>
 import { defineComponent, ref, computed } from 'vue'
 import BookCard from '@/components/BookCard.vue'
-import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
 import { getOnlineInfo, getAnnouncementList } from '@/services/context'
 import { announcementListFormat } from './Announcement/announcementFormat'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { getBookList } from '@/services/book'
+import { BookInList } from '@/services/book/types'
 
-export default defineComponent({
-  components: {
-    QGridItem,
-    QGrid,
-    BookCard
-  },
-  setup() {
-    const onlineInfo = ref<OnlineInfo>()
-    const announcementList = ref<any[]>()
-    const getInfo = useTimeoutFn(async () => {
-      onlineInfo.value = await getOnlineInfo()
-      announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
-    })
-    useInitRequest(getInfo)
+defineComponent({ QGridItem, QGrid, BookCard })
 
-    return {
-      // 数据为空 或者正在请求
-      loading: computed(() => getInfo.loading.value || !(onlineInfo.value || announcementList.value)),
-      onlineInfo,
-      announcementList,
-      icon,
-      bookData: [
-        {
-          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/3c1312386f33.jpg',
-          Title: '我是书名，我很短',
-          UserName: '无语',
-          Category: {
-            ShortName: '录入'
-          },
-          LastUpdateTime: new Date(),
-          Id: 381
-        },
-        {
-          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/e5e2fca834ff.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长长长很长很长长很长很长',
-          UserName: '无语',
-          Category: {
-            ShortName: '录入'
-          },
-          LastUpdateTime: new Date(),
-          Id: 381
-        },
-        {
-          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/3c1312386f33.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长很长长很长很长长很长很长长长很长很长长很长很长',
-          UserName: '无语',
-          Category: {
-            ShortName: '录入'
-          },
-          LastUpdateTime: new Date(),
-          Id: 381
-        },
-        {
-          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/e5e2fca834ff.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长很长很长长很长很长长很长长很长很长长很长很长',
-          UserName: '无语',
-          Category: {
-            ShortName: '录入'
-          },
-          LastUpdateTime: new Date(),
-          Id: 381
-        },
-        {
-          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/3c1312386f33.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长长很长很长长很长很长很长长很长很长长很长很长',
-          UserName: '无语',
-          Category: {
-            ShortName: '录入'
-          },
-          LastUpdateTime: new Date(),
-          Id: 381
-        },
-        {
-          Cover: 'https://img.lightnovel.app:45220/images/2020/04/22/e5e2fca834ff.jpg',
-          Title: '我是书名，我很长很长很长很长很长很长长很长很长长很长长长很长很长长很长很长很长长很长很长长很长很长',
-          UserName: '无语',
-          Category: {
-            ShortName: '录入'
-          },
-          LastUpdateTime: new Date(),
-          Id: 381
-        }
-      ]
-    }
-  }
+const onlineInfo = ref<OnlineInfo>()
+const announcementList = ref<any[]>()
+const bookData = ref<BookInList[]>()
+const getInfo = useTimeoutFn(async () => {
+  onlineInfo.value = await getOnlineInfo()
+  announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
+  bookData.value = (await getBookList({ Page: 1, Order: 'latest', Size: 6 })).Data
 })
+const loading = computed(() => getInfo.loading.value || !(onlineInfo.value || announcementList.value))
+
+useInitRequest(getInfo)
 </script>
 
 <style lang="scss" scoped></style>

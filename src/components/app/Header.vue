@@ -32,13 +32,13 @@
       <q-space />
 
       <div class="q-gutter-sm row items-center no-wrap">
-        <q-btn round dense flat>
+        <q-btn v-if="$q.screen.gt.xs" round dense flat>
           <q-badge color="red" floating> 22 </q-badge>
           <q-tooltip>通知</q-tooltip>
           <q-icon :name="icon.mdiBell"></q-icon>
         </q-btn>
 
-        <q-btn round dense flat>
+        <q-btn v-if="$q.screen.gt.xs" round dense flat>
           <q-badge color="red" floating> 99+ </q-badge>
           <q-tooltip>通知</q-tooltip>
           <q-icon :name="icon.mdiMessageText"></q-icon>
