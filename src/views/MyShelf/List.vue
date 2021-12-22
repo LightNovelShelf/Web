@@ -48,7 +48,7 @@
     </q-grid-item>
 
     <!-- 右键菜单 -->
-    <q-menu :touch-position="!editMode" :context-menu="!editMode">
+    <q-menu v-if="!editMode" touch-position context-menu>
       <q-list dense style="min-width: 100px">
         <q-item clickable v-close-popup @click="enterEditMode">
           <q-item-section>编辑列表</q-item-section>
