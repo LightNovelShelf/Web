@@ -39,6 +39,7 @@
 
         <!-- 选中态icon -->
         <div v-if="editMode" class="shelf-item-check-icon">
+          <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
           <q-icon v-if="item.checked" size="20" color="primary" :name="mdiCheckCircle" />
           <q-icon v-else size="20" color="grey" :name="mdiCheckboxBlankCircleOutline" />
         </div>
