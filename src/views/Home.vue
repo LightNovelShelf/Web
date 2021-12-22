@@ -8,7 +8,7 @@
               <div class="text-h6">最近更新</div>
               <q-space />
               <div class="text-subtitle2">
-                <router-link :to="{ name: 'BookList', params: { page: 1, order: 'new' } }">更多</router-link>
+                <router-link :to="{ name: 'BookList', params: { page: 1, order: 'latest' } }">更多</router-link>
               </div>
             </div>
           </q-card-section>

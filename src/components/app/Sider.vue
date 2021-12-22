@@ -72,7 +72,7 @@ const menuOptions: Array<Record<string, any>> = [
     key: 'BookList',
     icon: icon.mdiBook,
     route: 'BookList',
-    params: { order: 'new', page: '1' }
+    params: { order: 'latest', page: '1' }
   },
   {
     label: '订阅内容',
