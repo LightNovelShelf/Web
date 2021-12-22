@@ -82,13 +82,6 @@ const menuOptions: Array<Record<string, any>> = [
     icon: icon.mdiBullhorn
   },
   {
-    label: '阅读历史',
-    key: 'History',
-    route: 'History',
-    disabled: true,
-    icon: icon.mdiHistory
-  },
-  {
     label: '我的书架',
     key: 'MyShelf',
     route: 'MyShelf',
@@ -104,6 +97,12 @@ const menuOptions: Array<Record<string, any>> = [
     route: 'Community',
     disabled: true,
     icon: icon.mdiForum
+  },
+  {
+    label: '阅读历史',
+    key: 'History',
+    route: 'History',
+    icon: icon.mdiHistory
   },
   {
     label: 'separator',

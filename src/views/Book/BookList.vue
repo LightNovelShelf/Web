@@ -9,8 +9,6 @@
       :options="options"
       label="排序"
       style="max-width: 200px; margin-left: auto"
-      input-class="self-end"
-      class="self-end"
     />
 
     <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
@@ -55,7 +53,7 @@ const props = defineProps<{ page: string; order: string }>()
 const options = [
   {
     label: '上架时间',
-    value: 'last'
+    value: 'latest'
   },
   {
     label: '最近更新',
