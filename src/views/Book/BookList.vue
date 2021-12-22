@@ -52,11 +52,11 @@ const props = defineProps<{ page: string; order: string }>()
 
 const options = [
   {
-    label: '上架时间',
+    label: '最近更新',
     value: 'latest'
   },
   {
-    label: '最近更新',
+    label: '上架时间',
     value: 'new'
   },
   {
