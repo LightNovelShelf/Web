@@ -9,7 +9,7 @@ export interface ShelfFolder {
   /** 文件夹名称，尽量跟Book同名方便模板书写 */
   Title: string
   /** 文件夹内书籍 */
-  BooksID: ShelfBook[]
+  BooksID: SheldItem[]
 }
 
 export enum SheldItemType {
@@ -22,9 +22,13 @@ export type SheldItem =
       type: SheldItemType.book
       index: number
       value: ShelfBook
+      /** 选中态 */
+      checked?: boolean
     }
   | {
       type: SheldItemType.folder
       index: number
       value: ShelfFolder
+      /** 选中态 */
+      checked?: boolean
     }
