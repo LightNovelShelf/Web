@@ -149,7 +149,7 @@ import { getOnlineInfo, getAnnouncementList } from '@/services/context'
 import { announcementListFormat } from './Announcement/announcementFormat'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { getBookList, getLatestBookList } from '@/services/book'
+import { getLatestBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 
 defineComponent({ QGridItem, QGrid, BookCard })
