@@ -72,7 +72,7 @@ export default defineComponent({
     const { dark } = storeToRefs(settingStore)
     const readSetting = settingStore.readSetting
 
-    let tab = ref('Read')
+    let tab = ref('Setting')
 
     watch(dark, (newDark) => {
       Dark.set(newDark)

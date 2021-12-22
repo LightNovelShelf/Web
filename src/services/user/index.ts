@@ -45,3 +45,8 @@ export async function refreshToken(longTermToken: string) {
 export async function getMyInfo() {
   return requestWithSignalr('GetMyInfo')
 }
+
+/** 获取用户阅读历史 */
+export async function getReadHistory() {
+  return requestWithSignalr('GetReadHistory')
+}

@@ -20,3 +20,7 @@ export function saveReadPosition(param: SaveReadPositionRequest) {
 export function getReadPosition(bid: number) {
   return requestWithSignalr('GetReadPosition', bid)
 }
+/** 从一批id获取书籍列表 */
+export async function getBookListByIds(ids: number[]) {
+  return requestWithSignalr('GetBookListByIds', ids)
+}
