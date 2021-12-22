@@ -23,16 +23,31 @@
     :forward-ref="setListWrapRef"
     @contextmenu="muteInEditMode"
   >
-    <q-grid-item v-for="item in books" :key="item.value.Id">
-      <!-- 书籍 -->
-      <book-card v-if="item.type === 'book'" :book="item.value" :title="item.index" @click.capture="muteInEditMode" />
-      <!-- 文件夹 -->
-      <div v-else-if="item.type === 'folder'">{{ JSON.stringify(item) }}</div>
-      <template v-else />
+    <q-grid-item
+      v-for="(item, index) in books"
+      :key="item.value.Id"
+      :data-idx="index"
+      :data-item-id="item.value.Id"
+      @click.capture="listItemClickHandle"
+    >
+      <div class="shelf-item-wrap">
+        <!-- 书籍 -->
+        <book-card v-if="item.type === 'book'" :book="item.value" :title="item.index" />
+        <!-- 文件夹 -->
+        <div v-else-if="item.type === 'folder'">{{ JSON.stringify(item) }}</div>
+        <template v-else />
+
+        <!-- 选中态icon -->
+        <div v-if="editMode" class="shelf-item-check-icon">
+          <q-icon v-if="item.checked" size="20" color="primary" :name="mdiCheckCircle" />
+          <q-icon v-else size="20" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+        </div>
+        <template v-else />
+      </div>
     </q-grid-item>
 
     <!-- 右键菜单 -->
-    <q-menu touch-position :context-menu="!editMode">
+    <q-menu :touch-position="!editMode" :context-menu="!editMode">
       <q-list dense style="min-width: 100px">
         <q-item clickable v-close-popup @click="enterEditMode">
           <q-item-section>编辑列表</q-item-section>
@@ -54,6 +69,7 @@ import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
 import produce, { setAutoFreeze } from 'immer'
+import { mdiCheckCircle, mdiCheckboxBlankCircleOutline } from '@/plugins/icon/export'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard })
 
@@ -94,6 +110,18 @@ function muteInEditMode(evt: MouseEvent) {
     evt.preventDefault()
     // 不stop的话无法阻止menu组件弹出
     evt.stopPropagation()
+  }
+}
+
+/** 列表项目点击 */
+function listItemClickHandle(evt: MouseEvent) {
+  if (editMode.value) {
+    evt.preventDefault()
+    evt.stopPropagation()
+
+    const idx = (evt.currentTarget as HTMLElement).dataset.idx as string
+
+    books.value[+idx].checked = !books.value[+idx].checked
   }
 }
 
@@ -192,6 +220,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+// 顶部操作栏
 .actions-wrap {
   display: flex;
 
@@ -201,6 +230,39 @@ onBeforeUnmount(() => {
 
   :deep(button:first-of-type) {
     margin-left: auto;
+  }
+}
+
+// 列表项
+.shelf-item-wrap {
+  position: relative;
+}
+// 列表项选中icon
+.shelf-item-check-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  font-size: 0;
+  line-height: 0;
+
+  transform: translate(50%, -50%);
+  background-color: #fff;
+  border-radius: 100%;
+
+  // 这里解释一下这个18、20、2、24、4、1怎么来
+  // 因为圆圈的icon是空心的，所以这里的需要套一个div做背景色
+  // 因为icon不是顶格绘制的，所以这里按照svg的viewBox和path的直径来做比例缩放
+  // icon的viewBox是24，绘制的直径是20（M12 20）
+  // 18则是icon的整体大小
+  // 2的来源是圆的border-width是1，border有2
+  width: 20px * ((20 - 2) / 24);
+  height: 20px * ((20 - 2) / 24);
+
+  :deep(svg) {
+    // 4的来源就很简单了，24减去直径
+    // 因为位移只需要关心一个方向的边，所以减1就够了
+    transform: translate(-20px * ((4 - 1) / 24), -20px * ((4 - 1) / 24));
   }
 }
 </style>
