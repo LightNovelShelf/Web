@@ -149,7 +149,7 @@ import { getOnlineInfo, getAnnouncementList } from '@/services/context'
 import { announcementListFormat } from './Announcement/announcementFormat'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { getBookList } from '@/services/book'
+import { getBookList, getLatestBookList } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 
 defineComponent({ QGridItem, QGrid, BookCard })
@@ -160,7 +160,7 @@ const bookData = ref<BookInList[]>()
 const getInfo = useTimeoutFn(async () => {
   onlineInfo.value = await getOnlineInfo()
   announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
-  bookData.value = (await getBookList({ Page: 1, Order: 'latest', Size: 6 })).Data
+  bookData.value = (await getLatestBookList()).Data
 })
 const loading = computed(() => getInfo.loading.value || !(onlineInfo.value || announcementList.value))
 
