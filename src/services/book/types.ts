@@ -42,7 +42,7 @@ export interface GetBookListRequest {
   Page: number
   Size: number
   KeyWords?: string
-  Order?: string
+  Order?: 'new' | 'view' | 'latest'
 }
 
 export interface SaveReadPositionRequest {
