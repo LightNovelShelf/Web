@@ -9,6 +9,8 @@ export interface BookInList {
   Title: string
   Category?: {
     ShortName: string
+    Name: string
+    Color: string
   }
 }
 
@@ -38,7 +40,9 @@ export interface GetBookInfoRes {
 
 export interface GetBookListRequest {
   Page: number
-  Order: string
+  Size: number
+  KeyWords?: string
+  Order?: 'new' | 'view' | 'latest'
 }
 
 export interface SaveReadPositionRequest {

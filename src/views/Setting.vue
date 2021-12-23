@@ -21,6 +21,12 @@
               v-model="readSetting.customColor"
               class="my-picker"
             />
+            <div class="q-gutter-sm">
+              <div>文字转换</div>
+              <q-radio v-model="readSetting.convert" :val="null" label="无" />
+              <q-radio v-model="readSetting.convert" val="t2s" label="简化" />
+              <q-radio v-model="readSetting.convert" val="s2t" label="繁化" />
+            </div>
             <div>
               <div>字体大小</div>
               <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
@@ -72,7 +78,7 @@ export default defineComponent({
     const { dark } = storeToRefs(settingStore)
     const readSetting = settingStore.readSetting
 
-    let tab = ref('Read')
+    let tab = ref('Setting')
 
     watch(dark, (newDark) => {
       Dark.set(newDark)
