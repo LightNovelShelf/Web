@@ -1,11 +1,11 @@
 <template>
   <div class="fit row flex-center column absolute-full">
-    <div style="width: 304px">
+    <div style="width: 300px" class="q-gutter-sm">
       <div class="text-grey-7 text-center">
         <q-icon size="60px" :name="icon.mdiAccountCircle"></q-icon>
         <div class="text-grey-7 text-h5">登录到 轻书架</div>
       </div>
-      <div style="margin: 12px 0">
+      <div>
         <q-input
           no-error-icon
           :rules="[(val) => /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/i.test(val) || '必须是有效的邮箱']"
@@ -31,17 +31,15 @@
           </template>
         </q-input>
       </div>
+      <div class="row">
+        <q-btn rounded flat disable>注册</q-btn>
+        <q-space />
+        <q-btn rounded flat>忘记密码</q-btn>
+      </div>
       <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" @click="_login">
         登录
         <q-icon right size="24px" :name="icon.mdiSend" />
       </q-btn>
-
-      <div class="absolute-bottom-right">
-        本网站受reCAPTCHA和Google的保护
-        <a target="_blank" href="https://policies.google.com/privacy">隐私政策</a>
-        &
-        <a target="_blank" href="https://policies.google.com/terms">服务条款</a>
-      </div>
     </div>
   </div>
 </template>
@@ -49,24 +47,13 @@
 <script setup lang="ts">
 import { icon } from '@/plugins/icon'
 import { ref } from 'vue'
-import { useReCaptcha, VueReCaptcha } from 'vue-recaptcha-v3'
-import app from '@/main'
+import { useReCaptcha } from 'vue-recaptcha-v3'
 import { login } from '@/services/user'
 import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router'
 import { useAppStore } from '@/store'
-
-app.use(VueReCaptcha, {
-  // Volar 的缺陷，调用eslint时没有共享ts的全局变量声明过去；在纯ts文件就不需要这种
-  // eslint-disable-next-line no-undef
-  siteKey: VUE_CAPTCHA_SITE_KEY,
-  loaderOptions: {
-    useRecaptchaNet: true,
-    autoHideBadge: true
-  }
-})
 
 const $q = useQuasar()
 const appStore = useAppStore()
@@ -108,7 +95,7 @@ const _login = async () => {
       // ignore
     }
 
-    router.replace(to)
+    await router.replace(to)
   } catch (e) {
     $q.notify({
       type: 'negative',
