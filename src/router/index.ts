@@ -65,10 +65,17 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Test.vue')
   },
   {
-    path: '/login',
-    name: 'Login',
+    path: '/',
     meta: { requiresAuth: false },
-    component: () => import('../views/Login/Login.vue')
+    component: () => import('../views/Login/Index.vue'),
+    children: [
+      {
+        path: 'login',
+        name: 'Login',
+        meta: { requiresAuth: false },
+        component: () => import('../views/Login/Login.vue')
+      }
+    ]
   },
   {
     path: '/my-shelf',
