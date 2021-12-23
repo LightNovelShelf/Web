@@ -1,8 +1,9 @@
-import { requestWithFetch, requestWithSignalr, rebootSignalr } from '@/services/internal/request'
+import { rebootSignalr, requestWithFetch, requestWithSignalr } from '@/services/internal/request'
 import { PATH } from '@/services/path'
-import { sessionToken, longTermToken } from '@/utils/session'
+import { longTermToken, sessionToken } from '@/utils/session'
 
 import * as Types from './type'
+import { RequestMethod } from '@/services/types'
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
@@ -49,4 +50,17 @@ export async function getMyInfo() {
 /** 获取用户阅读历史 */
 export async function getReadHistory() {
   return requestWithSignalr('GetReadHistory')
+}
+
+export async function sendResetEmail(email: string, token: string) {
+  await requestWithFetch<void, { email: string; token: string }>(PATH.USER_SEND_RESET_EMAIL, {
+    payload: { email, token },
+    method: RequestMethod.GET
+  })
+}
+
+export async function resetPassword(email: string, newPassword: string, code: string) {
+  await requestWithFetch<void, { email: string; code: string; newPassword: string }>(PATH.USER_RESET_PASSWORD, {
+    payload: { email, code, newPassword }
+  })
 }

@@ -46,5 +46,6 @@ export {
   mdiChevronUp,
   mdiChevronDown,
   mdiArrowUp,
-  mdiArrowDown
+  mdiArrowDown,
+  mdiShieldCheck
 } from '@mdi/js'
