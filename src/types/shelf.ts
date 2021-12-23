@@ -23,12 +23,12 @@ export type SheldItem =
       index: number
       value: ShelfBook
       /** 选中态 */
-      checked?: boolean
+      selected?: boolean
     }
   | {
       type: SheldItemType.folder
       index: number
       value: ShelfFolder
       /** 选中态 */
-      checked?: boolean
+      selected?: boolean
     }
