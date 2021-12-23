@@ -42,5 +42,10 @@ export {
   mdiPlus,
   mdiClose,
   mdiCheckCircle,
-  mdiCheckboxBlankCircleOutline
+  mdiCheckboxBlankCircleOutline,
+  mdiMenuDown,
+  mdiChevronUp,
+  mdiChevronDown,
+  mdiArrowUp,
+  mdiArrowDown
 } from '@mdi/js'

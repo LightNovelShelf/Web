@@ -81,6 +81,7 @@ const viewerRef = ref<HTMLElement>()
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
+const settingStore = useSettingStore()
 const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
 const showImage = reactive({
@@ -97,7 +98,11 @@ function moveFab(ev) {
 
 const getContent = useTimeoutFn(async () => {
   try {
-    let res: any = await getChapterContent({ Bid: bid.value, SortNum: sortNum.value })
+    let res: any = await getChapterContent({
+      Bid: bid.value,
+      SortNum: sortNum.value,
+      Convert: settingStore.readSetting.convert
+    })
     chapter.value = res.Chapter
     $q.notify({
       message: chapter.value['Title'],
@@ -128,7 +133,6 @@ if (!CSS.supports('line-break', 'anywhere')) {
   })
 }
 
-const settingStore = useSettingStore()
 const { readSetting } = settingStore
 const bgStyle = computed(() => ({
   backgroundImage:

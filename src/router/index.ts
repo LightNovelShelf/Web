@@ -65,10 +65,17 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Test.vue')
   },
   {
-    path: '/login',
-    name: 'Login',
+    path: '/',
     meta: { requiresAuth: false },
-    component: () => import('../views/Login/Login.vue')
+    component: () => import('../views/Login/Index.vue'),
+    children: [
+      {
+        path: 'login',
+        name: 'Login',
+        meta: { requiresAuth: false },
+        component: () => import('../views/Login/Login.vue')
+      }
+    ]
   },
   {
     path: '/my-shelf',
@@ -76,6 +83,11 @@ const routes: Array<RouteRecordRaw> = [
     // 书架需要获取书本信息，书本信息接口是一个授权接口
     // meta: { requiresAuth: false },
     component: () => import('../views/MyShelf/List.vue')
+  },
+  {
+    path: '/history',
+    name: 'History',
+    component: () => import('../views/History.vue')
   }
 ]
 

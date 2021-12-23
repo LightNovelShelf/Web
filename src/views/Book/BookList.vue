@@ -1,6 +1,17 @@
 <template>
   <div style="max-width: 1920px" class="mx-auto">
-    <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
+    <q-select
+      :disable="loading"
+      emit-value
+      map-options
+      filled
+      v-model="order"
+      :options="options"
+      label="排序"
+      style="max-width: 200px; margin-left: auto"
+    />
+
+    <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
       <q-grid-item v-for="book in bookData" :key="book['Id']">
         <book-card :book="book"></book-card>
       </q-grid-item>
@@ -17,6 +28,7 @@
         :icon-last="icon.mdiSkipNext"
         :icon-prev="icon.mdiChevronLeft"
         :icon-next="icon.mdiChevronRight"
+        :max-pages="6"
       />
     </div>
   </div>
@@ -24,7 +36,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch, defineComponent } from 'vue'
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
@@ -40,16 +52,16 @@ const props = defineProps<{ page: string; order: string }>()
 
 const options = [
   {
-    label: '上架时间',
-    value: 'last'
+    label: '最近更新',
+    value: 'latest'
   },
   {
-    label: '最近更新',
+    label: '上架时间',
     value: 'new'
   },
   {
-    label: '人气值',
-    value: 'rank',
+    label: '总点击量',
+    value: 'view',
     children: [
       {
         label: '日榜',
@@ -71,7 +83,6 @@ const options = [
   }
 ]
 
-const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
@@ -85,9 +96,17 @@ const currentPage = computed({
     router.push({ name: 'BookList', params: { page: val } })
   }
 })
+const order = computed({
+  get() {
+    return props.order
+  },
+  set(val: string) {
+    router.push({ name: 'BookList', params: { page: 1, order: val } })
+  }
+})
 
 const request = useTimeoutFn(function (page: number = currentPage.value, order: string = props.order) {
-  return getBookList({ Page: page, Order: order }).then((serverData) => {
+  return getBookList({ Page: page, Order: order, Size: 24 }).then((serverData) => {
     bookData.value = serverData.Data
     pageData.value.totalPage = serverData.TotalPages
   })
