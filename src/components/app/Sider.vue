@@ -31,23 +31,22 @@
     </q-scroll-area>
 
     <div class="absolute-bottom row flex-center" style="bottom: 24px">
-      <div>
-        <q-icon v-if="isConnected" color="positive" size="24px" :name="icon.mdiBroadcast" />
-        <q-icon v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
-        <q-tooltip transition-show="scale" transition-hide="scale">
-          <span v-if="isConnected">当前在线</span>
-          <span v-else>当前离线</span>
-        </q-tooltip>
+      <div class="row flex-align-center">
+        <q-icon left v-if="isConnected" color="positive" size="24px" :name="icon.mdiBroadcast" />
+        <q-icon left v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
+
+        <span v-if="isConnected">当前在线</span>
+        <span v-else-if="isConnecting">正在尝试连接</span>
+        <!-- todo 添加重连倒计时 -->
+        <span v-else>当前离线，等待重连</span>
       </div>
     </div>
   </q-drawer>
 </template>
 
 <script lang="tsx" setup>
-import { defineComponent, ref, computed, toRef } from 'vue'
 import { icon } from '@/plugins/icon'
-import { useRoute } from 'vue-router'
-import { isConnected } from '@/services/utils'
+import { isConnected, isConnecting } from '@/services/utils'
 import { useLayout } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [
@@ -133,14 +132,6 @@ const menuOptions: Array<Record<string, any>> = [
     icon: icon.mdiAccountMultiple
   }
 ]
-
-const route = useRoute()
-let activeKey = computed({
-  get: () => route.name,
-  set: (val) => {
-    console.log(val)
-  }
-})
 
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
