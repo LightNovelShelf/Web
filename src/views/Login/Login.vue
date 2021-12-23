@@ -9,7 +9,7 @@
         <q-input
           no-error-icon
           :rules="[(val) => /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/i.test(val) || '必须是有效的邮箱']"
-          v-model="name"
+          v-model="email"
           label="邮箱"
         >
           <template v-slot:prepend>
@@ -34,7 +34,7 @@
       <div class="row">
         <q-btn rounded flat disable>注册</q-btn>
         <q-space />
-        <q-btn rounded flat>忘记密码</q-btn>
+        <q-btn rounded flat :to="{ name: 'Reset' }">忘记密码</q-btn>
       </div>
       <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" @click="_login">
         登录
@@ -58,8 +58,8 @@ import { useAppStore } from '@/store'
 const $q = useQuasar()
 const appStore = useAppStore()
 
-const name = ref('test@acgdmzy.com')
-const password = ref('test_user')
+const email = ref('')
+const password = ref('')
 const isPwd = ref(true)
 const loading = ref(false)
 const route = useRoute()
@@ -76,7 +76,7 @@ const _login = async () => {
     const token = await executeRecaptcha!('login')
 
     // 登录
-    const [, user] = await login(name.value, await sha256(password.value), token)
+    const [, user] = await login(email.value, await sha256(password.value), token)
     appStore.user = user
 
     $q.notify({
