@@ -41,7 +41,8 @@ export interface GetBookInfoRes {
 export interface GetBookListRequest {
   Page: number
   Size: number
-  Order: string
+  KeyWords?: string
+  Order?: string
 }
 
 export interface SaveReadPositionRequest {
