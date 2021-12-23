@@ -3,8 +3,22 @@
   <q-slide-transition>
     <div v-show="editMode">
       <div class="actions-wrap">
-        <q-btn color="primary" outline @click="quiteEditMode">取消</q-btn>
-        <q-btn color="primary" @click="saveListChange">保存</q-btn>
+        <q-btn
+          class="action"
+          color="primary"
+          @click="toggleShelfFolderSelector"
+          :outline="selectedCount === 0"
+          :disable="selectedCount === 0"
+          >加入文件夹</q-btn
+        >
+        <q-btn class="action" color="primary" outline @click="selectAllHandle">{{
+          isSelectedAll ? '取消全选' : '全选'
+        }}</q-btn>
+
+        <div style="flex-grow: 1" />
+
+        <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
+        <q-btn class="action" color="primary" @click="saveListChange">保存</q-btn>
       </div>
 
       <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
@@ -40,7 +54,7 @@
         <!-- 选中态icon -->
         <div v-if="editMode" class="shelf-item-check-icon">
           <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
-          <q-icon v-if="item.checked" size="20" color="primary" :name="mdiCheckCircle" />
+          <q-icon v-if="item.selected" size="20" color="primary" :name="mdiCheckCircle" />
           <q-icon v-else size="20" color="grey" :name="mdiCheckboxBlankCircleOutline" />
         </div>
         <template v-else />
@@ -56,6 +70,8 @@
       </q-list>
     </q-menu>
   </q-grid>
+
+  <!-- @todo 书架文件夹选择弹层 -->
 </template>
 
 <script lang="ts" setup>
@@ -63,7 +79,7 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { defineComponent, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, Ref, ref, toRaw, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -87,6 +103,9 @@ const books = ref<ShelfTypes.SheldItem[]>([])
 /** 编辑期间的书籍列表 @immutable */
 let draftBooks: ShelfTypes.SheldItem[] = []
 
+/** 选中计数 */
+const selectedCount: Ref<number> = computed(() => books.value.filter((_) => _.selected).length)
+const isSelectedAll: Ref<boolean> = computed(() => selectedCount.value === books.value.length)
 /** 排序列表容器 */
 const [listWrapRef, setListWrapRef] = useForwardRef()
 /** 排序操作句柄 */
@@ -122,8 +141,24 @@ function listItemClickHandle(evt: MouseEvent) {
 
     const idx = (evt.currentTarget as HTMLElement).dataset.idx as string
 
-    books.value[+idx].checked = !books.value[+idx].checked
+    const curSelected = books.value[+idx].selected
+    books.value[+idx].selected = !curSelected
+    if (curSelected) {
+      selectedCount.value -= 1
+    } else {
+      selectedCount.value += 1
+    }
   }
+}
+
+/** 全选/取消全选 */
+function selectAllHandle() {
+  const nextSelected = !isSelectedAll.value
+  books.value.forEach((_) => (_.selected = nextSelected))
+}
+/** 弹出书架文件夹选择弹层 */
+function toggleShelfFolderSelector() {
+  /** @todo */
 }
 
 /** 同步排序结果到临时对象 */
@@ -225,12 +260,8 @@ onBeforeUnmount(() => {
 .actions-wrap {
   display: flex;
 
-  :deep(button) {
+  .action {
     margin-left: 10px;
-  }
-
-  :deep(button:first-of-type) {
-    margin-left: auto;
   }
 }
 
