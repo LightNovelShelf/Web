@@ -64,6 +64,8 @@ import { useAppStore } from '@/store'
 import { useRouter } from 'vue-router'
 import { icon } from '@/plugins/icon'
 import { getErrMsg } from '@/utils/getErrMsg'
+import { delay } from '@/utils/delay'
+import { NOOP } from '@/const/empty'
 
 const props = defineProps<{
   bid: string
@@ -109,11 +111,14 @@ const getContent = useTimeoutFn(async () => {
       color: 'purple',
       timeout: 1500
     })
-    if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
-      nextTick(() => {
-        scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
-      })
-    }
+    ;(async () => {
+      if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
+        await delay(100)
+        await nextTick(() => {
+          scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+        })
+      }
+    })().then(NOOP)
   } catch (error) {
     $q.notify({
       message: getErrMsg(error),
