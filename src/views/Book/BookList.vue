@@ -48,7 +48,7 @@ import { NOOP } from '@/const/empty'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
 defineComponent({ QGrid, QGridItem })
-const props = defineProps<{ page: string; order: string }>()
+const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
 
 const options = [
   {
@@ -105,7 +105,7 @@ const order = computed({
   }
 })
 
-const request = useTimeoutFn(function (page: number = currentPage.value, order: string = props.order) {
+const request = useTimeoutFn(function (page = currentPage.value, order = props.order) {
   return getBookList({ Page: page, Order: order, Size: 24 }).then((serverData) => {
     bookData.value = serverData.Data
     pageData.value.totalPage = serverData.TotalPages
