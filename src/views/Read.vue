@@ -200,9 +200,10 @@ watch(
   }
 )
 onActivated(async () => {
-  if (cid.value === chapter.value?.Id) {
+  if (sortNum.value === chapter.value?.SortNum) {
     let position = await loadHistory(userId.value, bid.value)
-    if (position) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
+    // todo 这里有bug，浏览器前进按钮行为很奇怪
+    if (position && position.cid === cid.value) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
   }
 })
 

@@ -19,7 +19,7 @@
           </q-input>
           <q-input
             no-error-icon
-            :rules="[(val) => (val.length >= 8 && val.length <= 16) || '密码必须是8-16长度']"
+            :rules="[(val) => val.length >= 8 || '密码长度必须大于8位']"
             :type="isPwd ? 'password' : 'text'"
             v-model="password"
             label="新密码"
@@ -28,7 +28,7 @@
               <q-icon :name="icon.mdiLock" />
             </template>
             <template v-slot:append>
-              <q-icon :name="isPwd ? icon.mdiEye : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
+              <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
             </template>
           </q-input>
           <q-input
@@ -42,7 +42,7 @@
               <q-icon :name="icon.mdiLock" />
             </template>
             <template v-slot:append>
-              <q-icon :name="isPwd ? icon.mdiEye : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
+              <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
             </template>
           </q-input>
           <q-input no-error-icon :rules="[(val) => !!val || '无效的验证码']" v-model="code" label="验证码">
@@ -53,17 +53,17 @@
               <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
             </template>
           </q-input>
+          <div class="row">
+            <q-btn rounded flat disable>注册</q-btn>
+            <q-space />
+            <q-btn rounded flat :to="{ name: 'Login' }">登录</q-btn>
+          </div>
+          <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" type="submit">
+            重置
+            <q-icon right size="24px" :name="icon.mdiSend" />
+          </q-btn>
         </q-form>
       </div>
-      <div class="row">
-        <q-btn rounded flat disable>注册</q-btn>
-        <q-space />
-        <q-btn rounded flat :to="{ name: 'Login' }">登录</q-btn>
-      </div>
-      <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" @click="_reset">
-        重置
-        <q-icon right size="24px" :name="icon.mdiSend" />
-      </q-btn>
     </div>
   </div>
 </template>
