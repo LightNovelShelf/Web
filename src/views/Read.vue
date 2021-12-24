@@ -64,6 +64,8 @@ import { useAppStore } from '@/store'
 import { useRouter } from 'vue-router'
 import { icon } from '@/plugins/icon'
 import { getErrMsg } from '@/utils/getErrMsg'
+import { delay } from '@/utils/delay'
+import { NOOP } from '@/const/empty'
 
 const props = defineProps<{
   bid: string
@@ -109,11 +111,14 @@ const getContent = useTimeoutFn(async () => {
       color: 'purple',
       timeout: 1500
     })
-    if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
-      nextTick(() => {
-        scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
-      })
-    }
+    ;(async () => {
+      if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
+        await delay(200)
+        await nextTick(() => {
+          scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+        })
+      }
+    })().then(NOOP)
   } catch (error) {
     $q.notify({
       message: getErrMsg(error),
@@ -200,9 +205,10 @@ watch(
   }
 )
 onActivated(async () => {
-  if (cid.value === chapter.value?.Id) {
+  if (sortNum.value === chapter.value?.SortNum) {
     let position = await loadHistory(userId.value, bid.value)
-    if (position) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
+    // todo 这里有bug，浏览器前进按钮行为很奇怪
+    if (position && position.cid === cid.value) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
   }
 })
 

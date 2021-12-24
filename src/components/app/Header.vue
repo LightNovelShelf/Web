@@ -22,10 +22,10 @@
         </q-toolbar-title>
       </div>
 
-      <q-input placeholder="搜索" dark dense standout v-model="search" class="q-ml-md">
+      <q-input placeholder="搜索" dark dense standout v-model="searchKey" class="q-ml-md" @keyup.enter="search">
         <template v-slot:prepend>
-          <q-icon v-if="search === ''" :name="icon.mdiMagnify" />
-          <q-icon v-else :name="icon.mdiClose" class="cursor-pointer" @click="search = ''" />
+          <q-icon v-if="searchKey === ''" :name="icon.mdiMagnify" />
+          <q-icon v-else :name="icon.mdiClose" class="cursor-pointer" @click="searchKey = ''" />
         </template>
       </q-input>
 
@@ -84,7 +84,7 @@
                     <q-btn color="primary">登录</q-btn>
                   </router-link>
                 </div>
-                <div><q-btn color="primary">注册</q-btn></div>
+                <div><q-btn color="primary" disable>注册</q-btn></div>
               </div>
             </div>
           </q-menu>
@@ -104,6 +104,7 @@ import { useMedia } from '@/composition/useMedia'
 import { longTermToken, sessionToken } from '@/utils/session'
 import { useQuasar } from 'quasar'
 import { rebootSignalr } from '@/services/internal/request'
+import { useRouter } from 'vue-router'
 
 defineComponent({ name: 'Header' })
 
@@ -112,12 +113,16 @@ const appStore = useAppStore()
 const layout = useLayout()
 const { appName, user } = storeToRefs(appStore)
 const { siderShow, headerHeight, siderBreakpoint } = layout
-const search = ref('')
+const searchKey = ref('')
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),
   window.innerWidth <= siderBreakpoint.value
 )
-
+const router = useRouter()
+function search() {
+  router.push({ name: 'Search', params: { keyWords: searchKey.value } })
+  searchKey.value = ''
+}
 function changAppName() {
   appStore.asyncReverse()
 }

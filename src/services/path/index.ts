@@ -29,7 +29,9 @@ const HOST = VUE_APP_API_SERVER
 export const PATH = {
   /** ----- user ----- */
   USER_LOGIN: `${HOST}/api/user/login`,
-  USER_REFRESH_TOKEN: `${HOST}/api/user/refresh_token`
+  USER_REFRESH_TOKEN: `${HOST}/api/user/refresh_token`,
+  USER_SEND_RESET_EMAIL: `${HOST}/api/user/send_reset_email`,
+  USER_RESET_PASSWORD: `${HOST}/api/user/reset_password`
   /** ----- end user ----- */
 
   /** ----- book ----- */
