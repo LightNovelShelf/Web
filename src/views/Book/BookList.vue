@@ -23,7 +23,6 @@
         v-model="currentPage"
         :max="pageData.totalPage"
         direction-links
-        boundary-links
         :icon-first="icon.mdiSkipPrevious"
         :icon-last="icon.mdiSkipNext"
         :icon-prev="icon.mdiChevronLeft"
