@@ -33,7 +33,13 @@ const hub: HubConnection = new HubConnectionBuilder()
         const _token = await longTermToken.get()
         // 如果有, 用它来换取会话token
         if (_token) {
-          token = await refreshToken('' + _token)
+          try {
+            token = await refreshToken('' + _token)
+          } catch (error) {
+            if (error instanceof ServerError) {
+              await longTermToken.set('')
+            }
+          }
           // 目前token只有一次性用途，这里用完就删，以后可能有反复请求的用途
           sessionToken.set('')
         }
