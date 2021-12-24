@@ -113,7 +113,7 @@ const getContent = useTimeoutFn(async () => {
     })
     ;(async () => {
       if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
-        await delay(100)
+        await delay(200)
         await nextTick(() => {
           scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
         })
