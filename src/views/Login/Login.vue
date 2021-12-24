@@ -6,40 +6,42 @@
         <div class="text-grey-7 text-h5">登录到 轻书架</div>
       </div>
       <div>
-        <q-input
-          no-error-icon
-          :rules="[(val) => /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/i.test(val) || '必须是有效的邮箱']"
-          v-model="email"
-          label="邮箱"
-        >
-          <template v-slot:prepend>
-            <q-icon :name="icon.mdiEmail" />
-          </template>
-        </q-input>
-        <q-input
-          no-error-icon
-          :rules="[(val) => (val.length >= 8 && val.length <= 16) || '密码必须是8-16长度']"
-          :type="isPwd ? 'password' : 'text'"
-          v-model="password"
-          label="密码"
-        >
-          <template v-slot:prepend>
-            <q-icon :name="icon.mdiLock" />
-          </template>
-          <template v-slot:append>
-            <q-icon :name="isPwd ? icon.mdiEye : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
-          </template>
-        </q-input>
+        <q-form @submit="_login">
+          <q-input
+            no-error-icon
+            :rules="[(val) => /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/i.test(val) || '必须是有效的邮箱']"
+            v-model="email"
+            label="邮箱"
+          >
+            <template v-slot:prepend>
+              <q-icon :name="icon.mdiEmail" />
+            </template>
+          </q-input>
+          <q-input
+            no-error-icon
+            :rules="[(val) => val.length >= 8 || '密码长度必须大于8位']"
+            :type="isPwd ? 'password' : 'text'"
+            v-model="password"
+            label="密码"
+          >
+            <template v-slot:prepend>
+              <q-icon :name="icon.mdiLock" />
+            </template>
+            <template v-slot:append>
+              <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
+            </template>
+          </q-input>
+          <div class="row">
+            <q-btn rounded flat disable>注册</q-btn>
+            <q-space />
+            <q-btn rounded flat :to="{ name: 'Reset' }">忘记密码</q-btn>
+          </div>
+          <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" type="submit">
+            登录
+            <q-icon right size="24px" :name="icon.mdiSend" />
+          </q-btn>
+        </q-form>
       </div>
-      <div class="row">
-        <q-btn rounded flat disable>注册</q-btn>
-        <q-space />
-        <q-btn rounded flat :to="{ name: 'Reset' }">忘记密码</q-btn>
-      </div>
-      <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" @click="_login">
-        登录
-        <q-icon right size="24px" :name="icon.mdiSend" />
-      </q-btn>
     </div>
   </div>
 </template>

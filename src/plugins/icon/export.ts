@@ -47,5 +47,6 @@ export {
   mdiChevronDown,
   mdiArrowUp,
   mdiArrowDown,
-  mdiShieldCheck
+  mdiShieldCheck,
+  mdiEyeOff
 } from '@mdi/js'
