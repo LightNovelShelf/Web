@@ -74,6 +74,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Login',
         meta: { requiresAuth: false },
         component: () => import('../views/Login/Login.vue')
+      },
+      {
+        path: 'reset',
+        name: 'Reset',
+        meta: { requiresAuth: false },
+        component: () => import('../views/Login/Reset.vue')
       }
     ]
   },
@@ -88,6 +94,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/history',
     name: 'History',
     component: () => import('../views/History.vue')
+  },
+  {
+    path: '/search/:keyWords?',
+    name: 'Search',
+    props: true,
+    component: () => import('../views/Search.vue')
   }
 ]
 

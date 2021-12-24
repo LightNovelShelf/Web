@@ -45,7 +45,7 @@ export async function requestWithFetch<Res = unknown, Data = any>(
       break
     }
     default: {
-      throw new Error(`unknown retuest method: ${options.method}`)
+      throw new Error(`unknown request method: ${options.method}`)
     }
   }
 
@@ -58,7 +58,7 @@ export async function requestWithFetch<Res = unknown, Data = any>(
   const token = sessionToken.get()
   if (token) {
     /** @todo 目前的fetch都是无授权的, 稍后才知道真的token header是什么 */
-    fetchOpt.headers.append('token', token)
+    fetchOpt.headers.append('Authentication', `Bearer ${token}`)
   }
 
   const res = await fetch(url, fetchOpt)

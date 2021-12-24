@@ -8,21 +8,24 @@ function findElementNode(node: Node): Element {
   return node.nodeType === Node.ELEMENT_NODE ? node : findElementNode(node.parentNode)
 }
 
-function readXPath(element: Element) {
-  /* eslint-disable */
-  if (element.id !== '') {
-    return '//*[@id="' + element.id + '"]'
+function readXPath(element: Element, context: Element = document.body) {
+  if (context === document.body) {
+    /* eslint-disable */
+    if (element.id !== '') {
+      return '//*[@id="' + element.id + '"]'
+    }
   }
-  if (element.tagName.toLowerCase() === 'body') {
-    return '/html/' + element.tagName.toLowerCase()
+  if (context && element === context) {
+    return '//*'
   }
+
   let ix = 1,
     siblings = element.parentNode.childNodes
 
   for (let i = 0, l = siblings.length; i < l; i++) {
     let sibling = siblings[i]
     if (sibling === element) {
-      return readXPath(element.parentNode as Element) + '/' + element.tagName.toLowerCase() + '[' + ix + ']'
+      return readXPath(element.parentNode as Element, context) + '/' + element.tagName.toLowerCase() + '[' + ix + ']'
     } else if (sibling.nodeType === 1 && (sibling as Element).tagName === element.tagName) {
       ix++
     }
@@ -50,7 +53,7 @@ export async function saveHistory(
 
 export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>) {
   try {
-    let rst = document.evaluate(xPath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+    let rst = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
     let target = rst.iterateNext() as HTMLElement
     if (target) {
       document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset.value
@@ -94,7 +97,7 @@ export async function syncReading(
     if (topTarget) {
       // topTarget.target.style.background = 'red'
       // console.log(topTarget.target, readXPath(topTarget.target))
-      let xpath = readXPath(topTarget.target)
+      let xpath = readXPath(topTarget.target, dom)
       await saveHistory(uid.value, bookParam?.BookId.value, {
         Id: bookParam?.CId.value,
         xpath
