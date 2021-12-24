@@ -74,14 +74,21 @@ const tabOptions: Array<Record<string, any>> = [
     name: 'Book',
     key: 'Book',
     label: '小说',
-    icon: icon.mdiCog,
+    icon: icon.mdiBook,
     disable: false
   },
   {
     name: 'Form',
     key: 'Form',
     label: '社区',
-    icon: icon.mdiFormatSize,
+    icon: icon.mdiForum,
+    disable: true
+  },
+  {
+    name: 'User',
+    key: 'User',
+    label: '用户',
+    icon: icon.mdiAccount,
     disable: true
   }
 ]
