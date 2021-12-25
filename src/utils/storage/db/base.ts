@@ -100,9 +100,13 @@ export class DB<Value = unknown> {
     // 因为同步的时候经常是vue对象来的，所以这里加点便捷操作，包了toRaw操作免得忘了之后debug
     return this.db.setItem(key, toRaw(val))
   }
-  /** 移除DB储存 */
+  /** 移除DB中某一项目 */
   public remove = (key: string) => {
     return this.db.removeItem(key)
+  }
+  /** 清空DB */
+  public clear = () => {
+    return this.db.clear()
   }
   /** 列出DB中所有的储存项名称 */
   public keys = (): Promise<string[]> => {
