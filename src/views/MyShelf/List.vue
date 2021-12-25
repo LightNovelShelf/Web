@@ -31,7 +31,12 @@
   <!-- @todo 缺点是会导致整个列表闪一下，这个看有没有办法处理（看起来是loading的原因） -->
   <q-grid
     :key="editMode ? 1 : 2"
-    cols="8"
+    cols="2"
+    xs="2"
+    sm="4"
+    md="6"
+    lg="8"
+    xl="10"
     x-gap="20"
     y-gap="20"
     :forward-ref="setListWrapRef"
