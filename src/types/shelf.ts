@@ -5,30 +5,42 @@ export interface ShelfBook extends BookServicesTypes.BookInList {}
 /** 书架文件夹 */
 export interface ShelfFolder {
   /** 文件夹Id，尽量跟Book同名方便模板书写 */
-  Id: number
+  Id: string
   /** 文件夹名称，尽量跟Book同名方便模板书写 */
   Title: string
   /** 文件夹内书籍 */
-  BooksID: ShelfItem[]
+  children: ShelfItem[]
+  /** 创建时间，时间戳 */
+  createAt: number
 }
 
+/** 书架条目类型枚举 */
 export enum SheldItemType {
-  book = 'book',
-  folder = 'folder'
+  /** 书籍 */
+  BOOK = 'BOOK',
+  /** 文件夹 */
+  FOLDER = 'FOLDER'
 }
 
-export type ShelfItem =
-  | {
-      type: SheldItemType.book
-      index: number
-      value: ShelfBook
-      /** 选中态 */
-      selected?: boolean
-    }
-  | {
-      type: SheldItemType.folder
-      index: number
-      value: ShelfFolder
-      /** 选中态 */
-      selected?: boolean
-    }
+/** 书架条目共享字段 */
+export interface ShelfCommonItem {
+  /** 类型 */
+  type: SheldItemType
+  /** 次序 */
+  index: number
+  /** 选中态 */
+  selected?: boolean
+}
+
+/** 书架 - 书籍 */
+export interface ShelfBookItem extends ShelfCommonItem {
+  type: SheldItemType.BOOK
+  value: ShelfBook
+}
+/** 书架 - 文件夹 */
+export interface ShelfFolderItem extends ShelfCommonItem {
+  type: SheldItemType.FOLDER
+  value: ShelfFolder
+}
+
+export type ShelfItem = ShelfBookItem | ShelfFolderItem
