@@ -51,7 +51,7 @@ const clickHandle = async () => {
     await shelfDB.remove(bookIdInStr.value)
   } else {
     const shelfItem: ShelfTypes.ShelfItem = {
-      type: ShelfTypes.SheldItemType.book,
+      type: ShelfTypes.SheldItemType.BOOK,
       index: await shelfDB.length(),
       value: toRaw(props.book)
     }
