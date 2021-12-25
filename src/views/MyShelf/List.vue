@@ -401,8 +401,10 @@ const submitListChange = async () => {
   sortBooksToAsc(_stableShelf)
 
   /** 写入本地缓存 */
+  // 1. 先清空缓存，因为书籍有可能被移入文件夹从而不在外部目录了，这部分需要删除掉
+  shelfDB.clear()
+  // 2. 逐个写入
   for (const item of _stableShelf.value) {
-    console.log('item', toRaw(item))
     await shelfDB.set(item.value.Id + '', item)
   }
 
