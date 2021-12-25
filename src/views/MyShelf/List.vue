@@ -220,12 +220,14 @@ function folderSelectorSubmitHandle() {
   /** 需要创建文件夹：值是字符串而不是option */
   const shouldCreateFolder = typeof selectorValue.value === 'string'
   /** 要更改的书籍 */
-  const readonlyBooks = shelf.value
+  const readonlyBooks: ShelfTypes.ShelfBookItem[] = shelf.value
     .filter((i): i is ShelfTypes.ShelfBookItem => !!(i.selected && i.type === ShelfTypes.SheldItemType.BOOK))
     // 这里需要注意 toRaw 一次，vue的 toRaw 是返回原始对象的意思
     // 如果这里不 toRaw , 那么 folder 就需要被迫 递归进行 toRaw 了
     // 同时因为这里toRaw了所以需要注意readonly，不要做什么修改操作避免数据不同步
     .map((i) => toRaw(i))
+    // 清掉 selected 状态
+    .map((i) => ({ ...i, selected: false }))
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
   if (!readonlyBooks.length) {
