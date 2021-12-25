@@ -3,9 +3,9 @@
     <router-link :to="{ name: 'BookInfo', params: { bid: props.folder.Id } }">
       <div class="book-cover">
         <q-card>
-          <div class="books-group">
+          <transition-group name="shelf-item" tag="div" class="books-group">
             <q-img v-for="item in limitedBooks" :key="item.value.Id" :src="item.value.Cover" :ratio="2 / 3" />
-          </div>
+          </transition-group>
         </q-card>
       </div>
     </router-link>
@@ -34,7 +34,7 @@ import { ShelfFolder } from '@/types/shelf'
 
 const $q = useQuasar()
 const props = defineProps<{ folder: ShelfFolder }>()
-const updateTime = useToNow(computed(() => new Date(props.folder.createAt)))
+const updateTime = useToNow(computed(() => new Date(props.folder.updateAt)))
 // 限制最多四本书
 const limitedBooks = computed(() => props.folder.children.slice(0, 4))
 </script>
@@ -67,5 +67,20 @@ const limitedBooks = computed(() => props.folder.children.slice(0, 4))
   .book-name-text {
     @include ellipsis(2);
   }
+}
+
+// 列表项动画
+.shelf-item-enter-active,
+.shelf-item-enter-move,
+.shelf-item-leave-active {
+  // 移动的动画需要换成flex才能做
+  transition: all var(--q-transition-duration);
+  // transition: all 5s;
+}
+
+.shelf-item-enter-from,
+.shelf-item-leave-to {
+  opacity: 0;
+  transform: scale(0);
 }
 </style>

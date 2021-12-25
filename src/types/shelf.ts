@@ -10,8 +10,8 @@ export interface ShelfFolder {
   Title: string
   /** 文件夹内书籍 */
   children: ShelfBookItem[]
-  /** 创建时间，时间戳 */
-  createAt: number
+  /** 更改时间，iso格式 */
+  updateAt: string
 }
 
 /** 书架条目类型枚举 */
