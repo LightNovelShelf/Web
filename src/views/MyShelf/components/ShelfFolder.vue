@@ -36,7 +36,7 @@ const $q = useQuasar()
 const props = defineProps<{ folder: ShelfFolder }>()
 const updateTime = useToNow(computed(() => new Date(props.folder.createAt)))
 // 限制最多四本书
-const limitedBooks = computed(() => props.folder.children.slice(0, 3))
+const limitedBooks = computed(() => props.folder.children.slice(0, 4))
 </script>
 
 <style lang="scss" scoped>
