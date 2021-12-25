@@ -1,5 +1,6 @@
 const path = require('path')
 const { ProvidePlugin, DefinePlugin } = require('webpack')
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -20,7 +21,7 @@ const __DEV__ = process.env.NODE_ENV === 'development'
 
 module.exports = {
   productionSourceMap: false,
-  
+
   pwa: {
     name: '轻书架',
     themeColor: '#1976d2',
@@ -66,6 +67,12 @@ module.exports = {
       config.when(parse(readFileSync('./tsconfig.json')).compilerOptions.strict, (config) => {
         config.plugins.delete('fork-ts-checker')
       })
+    })
+
+    // 加入打包分析
+    const ANALYZE = !!process.env.ANALYZE
+    config.when(ANALYZE, (config) => {
+      config.plugin('ANALYZE').use(BundleAnalyzerPlugin, [{ analyzerMode: 'static' }])
     })
   },
   configureWebpack: {

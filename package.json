@@ -35,6 +35,7 @@
     "@types/lodash-es": "^4.17.5",
     "@types/luxon": "^2.0.7",
     "@types/sortablejs": "^1.10.7",
+    "@types/webpack-bundle-analyzer": "^4.4.1",
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
     "@vue/cli-plugin-babel": "~5.0.0-rc.1",
@@ -59,7 +60,8 @@
     "sass-loader": "12.3.0",
     "typescript": "4.5.2",
     "util": "^0.12.4",
-    "vue-cli-plugin-quasar": "~4.0.4"
+    "vue-cli-plugin-quasar": "~4.0.4",
+    "webpack-bundle-analyzer": "^4.5.0"
   },
   "browserslist": [
     "> 1%",
