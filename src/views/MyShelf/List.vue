@@ -102,13 +102,13 @@
           fill-input
           hide-selected
           input-debounce="0"
-          label="选择文件夹"
+          label="输入文件夹名称"
           @input-value="selectorValue = $event"
           @update:model-value="selectorValue = $event"
         >
           <template v-slot:no-option>
             <q-item>
-              <q-item-section class="text-grey"> 没有找到文件夹 </q-item-section>
+              <q-item-section class="text-grey"> 没有找到，将新建文件夹 </q-item-section>
             </q-item>
           </template></q-select
         >
