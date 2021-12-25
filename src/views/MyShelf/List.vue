@@ -99,9 +99,9 @@ const loading = ref(true)
 /** 编辑状态 */
 const editMode = ref(false)
 /** 所有书籍 */
-const books = ref<ShelfTypes.SheldItem[]>([])
+const books = ref<ShelfTypes.ShelfItem[]>([])
 /** 编辑期间的书籍列表 @immutable */
-let draftBooks: ShelfTypes.SheldItem[] = []
+let draftBooks: ShelfTypes.ShelfItem[] = []
 
 /** 选中计数 */
 const selectedCount: Ref<number> = computed(() => books.value.filter((_) => _.selected).length)
