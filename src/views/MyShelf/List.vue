@@ -54,8 +54,8 @@
         <!-- 选中态icon -->
         <div v-if="editMode" class="shelf-item-check-icon">
           <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
-          <q-icon v-if="item.selected" size="20" color="primary" :name="mdiCheckCircle" />
-          <q-icon v-else size="20" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+          <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
+          <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
         </div>
         <template v-else />
       </div>
@@ -271,6 +271,9 @@ onBeforeUnmount(() => {
 }
 // 列表项选中icon
 .shelf-item-check-icon {
+  // icon大小， 跟q-icon组件的size值同步
+  $icon-size: 24px;
+
   position: absolute;
   top: 0;
   right: 0;
@@ -278,7 +281,8 @@ onBeforeUnmount(() => {
   font-size: 0;
   line-height: 0;
 
-  transform: translate(50%, -50%);
+  // 50/50 的话有点太偏离了
+  transform: translate(40%, -50%);
   background-color: #fff;
   border-radius: 100%;
 
@@ -288,13 +292,13 @@ onBeforeUnmount(() => {
   // icon的viewBox是24，绘制的直径是20（M12 20）
   // 18则是icon的整体大小
   // 2的来源是圆的border-width是1，border有2
-  width: 20px * ((20 - 2) / 24);
-  height: 20px * ((20 - 2) / 24);
+  width: $icon-size * ((20 - 2) / 24);
+  height: $icon-size * ((20 - 2) / 24);
 
   :deep(svg) {
     // 4的来源就很简单了，24减去直径
     // 因为位移只需要关心一个方向的边，所以减1就够了
-    transform: translate(-20px * ((4 - 1) / 24), -20px * ((4 - 1) / 24));
+    transform: translate(-$icon-size * ((4 - 1) / 24), -$icon-size * ((4 - 1) / 24));
   }
 }
 </style>
