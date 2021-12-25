@@ -318,31 +318,33 @@ function listItemClickHandle(evt: MouseEvent) {
       return
     }
 
-    const curSelected = shelf.value[+idx].selected
-    shelf.value[+idx].selected = !curSelected
+    const nextSelected = !shelf.value[+idx].selected
+
+    shelf.value = produce(toRaw(shelf.value), (draft) => {
+      draft[+idx].selected = nextSelected
+    })
   }
 }
 
 /** 全选/取消全选 */
 function selectAllHandle() {
   const nextSelected = !isSelectedAll.value
-  shelf.value.forEach((_) => {
-    // 文件夹不允许选择
-    if (_.type === ShelfTypes.SheldItemType.FOLDER) {
-      return
-    }
+  shelf.value = produce(toRaw(shelf.value), (draft) => {
+    draft.forEach((_) => {
+      // 文件夹不允许选择
+      if (_.type === ShelfTypes.SheldItemType.FOLDER) {
+        return
+      }
 
-    _.selected = nextSelected
+      _.selected = nextSelected
+    })
   })
 }
 /** 弹出书架文件夹选择弹层 */
 function toggleShelfFolderSelector() {
   folderSelectorVisible.value = !folderSelectorVisible.value
-  // 隐藏弹层时
-  if (!folderSelectorVisible.value) {
-    // 清空selector
-    selectorValue.value = ''
-  }
+  // 弹层状态改变时重置 selector 状态
+  selectorValue.value = ''
 }
 
 /** 同步排序结果到draft */
