@@ -53,7 +53,7 @@
               <div style="margin-top: 24px"></div>
 
               <div class="row q-gutter-md" v-if="isActive">
-                <q-btn>加入书架</q-btn>
+                <add-to-shelf :book="book || null" />
                 <q-btn @click="startRead">继续阅读</q-btn>
               </div>
             </div>
@@ -105,8 +105,9 @@ import { useAppStore } from '@/store'
 import { icon } from '@/plugins/icon'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
+import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 
-defineComponent({ QGrid, QGridItem, Comment })
+defineComponent({ QGrid, QGridItem, Comment, AddToShelf })
 const props = defineProps<{ bid: string }>()
 
 const $q = useQuasar()

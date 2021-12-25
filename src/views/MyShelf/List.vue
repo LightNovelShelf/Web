@@ -3,6 +3,11 @@
   <q-slide-transition>
     <div v-show="editMode">
       <div class="actions-wrap">
+        <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
+        <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
+
+        <div style="flex-grow: 1" />
+
         <q-btn
           class="action"
           color="primary"
@@ -14,11 +19,6 @@
         <q-btn class="action" color="primary" outline @click="selectAllHandle">{{
           isSelectedAll ? '取消全选' : '全选'
         }}</q-btn>
-
-        <div style="flex-grow: 1" />
-
-        <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
-        <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
       </div>
 
       <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
@@ -143,6 +143,8 @@ import produce, { setAutoFreeze } from 'immer'
 import { mdiCheckCircle, mdiCheckboxBlankCircleOutline } from '@/plugins/icon/export'
 import { nanoid } from 'nanoid'
 import ShelfFolder from './components/ShelfFolder.vue'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -399,7 +401,7 @@ const syncSortInfoToDraft = (sortInfo: { oldIndex?: number; newIndex?: number })
 const submitListChange = async () => {
   // 保存修改，把draft的苏剧写入stable
   // 浅复制一次，避免接下来的sort操作 reactive 到 _draftShelf
-  _stableShelf.value = [..._draftShelf.value]
+  _stableShelf.value = [..._draftShelf.value].map((i) => ({ ...toRaw(i), selected: false }))
 
   // _draft来的数据并不是有序的，这里需要排序一次
   sortBooksToAsc(_stableShelf)
@@ -442,20 +444,22 @@ const sortBooksToAsc = (listRef: Ref<ShelfTypes.ShelfItem[]>) => {
 }
 
 // 初始化
-onMounted(() => {
-  // 全量读取列表
-  shelfDB.getItems().then((res) => {
-    shelf.value = res.map((i) => {
-      if (i.type === ShelfTypes.SheldItemType.BOOK) {
-        // indexedDB读出来的时间有可能是iso字符串而不是Date对象，这里需要包装一下
-        i.value.LastUpdateTime = new Date(`${i.value.LastUpdateTime}`)
-      }
-      return i
+useInitRequest(
+  useTimeoutFn(async () => {
+    // 全量读取列表
+    shelfDB.getItems().then((res) => {
+      shelf.value = res.map((i) => {
+        if (i.type === ShelfTypes.SheldItemType.BOOK) {
+          // indexedDB读出来的时间有可能是iso字符串而不是Date对象，这里需要包装一下
+          i.value.LastUpdateTime = new Date(`${i.value.LastUpdateTime}`)
+        }
+        return i
+      })
+      sortBooksToAsc(shelf)
+      loading.value = false
     })
-    sortBooksToAsc(shelf)
-    loading.value = false
   })
-})
+)
 
 onBeforeUnmount(() => {
   destorySortable()
