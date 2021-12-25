@@ -215,10 +215,15 @@ function folderSelectorSubmitHandle() {
 
   const shouldCreateFolder = typeof selectorValue.value === 'string'
   /** 要更改的书籍 */
-  const books = shelf.value.filter((i) => i.selected)
+  const readonlyBooks = shelf.value
+    .filter((i) => i.selected)
+    // 这里需要注意 toRaw 一次，vue的 toRaw 是返回原始对象的意思
+    // 如果这里不 toRaw , 那么 folder 就需要被迫 递归进行 toRaw 了
+    // 同时因为这里toRaw了所以需要注意readonly，不要做什么修改操作避免数据不同步
+    .map((i) => toRaw(i))
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
-  if (!books.length) {
+  if (!readonlyBooks.length) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
     return
@@ -234,7 +239,7 @@ function folderSelectorSubmitHandle() {
       value: {
         Id: nanoid(),
         Title: selectorValue.value as string,
-        children: books,
+        children: readonlyBooks,
         createAt: Date.now()
       }
     }
@@ -263,7 +268,7 @@ function folderSelectorSubmitHandle() {
   // 2. 把children合并到目标文件夹中
   shelf.value.forEach((shelfItem) => {
     if (shelfItem.value.Id === folderID) {
-      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.children.push(...books)
+      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.children.push(...readonlyBooks)
     }
   })
 
@@ -389,7 +394,7 @@ const syncSortInfoToDraft = (sortInfo: { oldIndex?: number; newIndex?: number })
 /** 确认列表修改结果 */
 const submitListChange = async () => {
   // 保存修改，把draft的苏剧写入stable
-  // 浅复制一次，避免接下来的sort操作reactive 到 _draftShelf
+  // 浅复制一次，避免接下来的sort操作 reactive 到 _draftShelf
   _stableShelf.value = [..._draftShelf.value]
 
   // _draft来的数据并不是有序的，这里需要排序一次
@@ -397,6 +402,7 @@ const submitListChange = async () => {
 
   /** 写入本地缓存 */
   for (const item of _stableShelf.value) {
+    console.log('item', toRaw(item))
     await shelfDB.set(item.value.Id + '', item)
   }
 
