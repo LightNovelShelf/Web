@@ -3,7 +3,9 @@
     <router-link :to="{ name: 'BookInfo', params: { bid: props.folder.Id } }">
       <div class="book-cover">
         <q-card>
-          <q-img :src="cover" :ratio="2 / 3" />
+          <div class="books-group">
+            <q-img v-for="item in limitedBooks" :key="item.value.Id" :src="item.value.Cover" :ratio="2 / 3" />
+          </div>
         </q-card>
       </div>
     </router-link>
@@ -17,8 +19,7 @@
     </div>
 
     <div class="text-grey-7" style="display: flex; padding: 0 4px">
-      <!-- @todo debug -->
-      <div>{{ folder.children.length }}</div>
+      <div> </div>
       <div class="flex-space"></div>
       <div>{{ updateTime }}</div>
     </div>
@@ -33,8 +34,9 @@ import { ShelfFolder } from '@/types/shelf'
 
 const $q = useQuasar()
 const props = defineProps<{ folder: ShelfFolder }>()
-const cover = computed(() => '')
 const updateTime = useToNow(computed(() => new Date(props.folder.createAt)))
+// 限制最多四本书
+const limitedBooks = computed(() => props.folder.children.slice(0, 3))
 </script>
 
 <style lang="scss" scoped>
@@ -45,13 +47,12 @@ const updateTime = useToNow(computed(() => new Date(props.folder.createAt)))
   box-sizing: border-box;
 }
 
-.book-tag {
-  position: absolute;
-  top: 8px;
-  right: 0;
-  color: white;
-  padding: 0 3px 0 6px;
-  border-radius: 1em 0 0 1em;
+.books-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
 }
 
 .book-name {
