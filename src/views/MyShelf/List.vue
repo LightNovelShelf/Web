@@ -37,33 +37,34 @@
     :forward-ref="setListWrapRef"
     @contextmenu="muteInEditMode"
   >
-    <q-grid-item
-      v-for="(item, index) in shelf"
-      :key="item.value.Id"
-      :data-idx="index"
-      :data-item-id="item.value.Id"
-      @click.capture="listItemClickHandle"
-    >
-      <div class="shelf-item-wrap" :data-type-a="ShelfTypes.SheldItemType.BOOK">
-        <!-- 书籍 -->
-        <book-card v-if="item.type === ShelfTypes.SheldItemType.BOOK" :book="item.value" :title="item.index" />
-        <!-- 文件夹 -->
-        <shelf-folder
-          v-else-if="item.type === ShelfTypes.SheldItemType.FOLDER"
-          :folder="item.value"
-          :title="item.index"
-        />
-        <template v-else />
+    <transition-group name="shelf-item">
+      <q-grid-item
+        v-for="(item, index) in shelf"
+        :key="item.value.Id"
+        :data-idx="index"
+        @click.capture="listItemClickHandle"
+      >
+        <div class="shelf-item-wrap">
+          <!-- 书籍 -->
+          <book-card v-if="item.type === ShelfTypes.SheldItemType.BOOK" :book="item.value" :title="item.index" />
+          <!-- 文件夹 -->
+          <shelf-folder
+            v-else-if="item.type === ShelfTypes.SheldItemType.FOLDER"
+            :folder="item.value"
+            :title="item.index"
+          />
+          <template v-else />
 
-        <!-- 选中态icon; 暂时不允许folder加入folder（需要处理选中后出现的自身加入自身的场景） -->
-        <div v-if="editMode && item.type !== ShelfTypes.SheldItemType.FOLDER" class="shelf-item-check-icon">
-          <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
-          <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
-          <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+          <!-- 选中态icon; 暂时不允许folder加入folder（需要处理选中后出现的自身加入自身的场景） -->
+          <div v-if="editMode && item.type !== ShelfTypes.SheldItemType.FOLDER" class="shelf-item-check-icon">
+            <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
+            <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
+            <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+          </div>
+          <template v-else />
         </div>
-        <template v-else />
-      </div>
-    </q-grid-item>
+      </q-grid-item>
+    </transition-group>
 
     <!-- 右键菜单 -->
     <q-menu v-if="!editMode" touch-position context-menu>
@@ -188,8 +189,6 @@ const folders = computed<ShelfTypes.ShelfFolderItem[]>(() =>
 const folderSelectorVisible = ref(false)
 /** 文件夹选择器model值 */
 const selectorValue = ref<string | QSelectorOption | null>(null)
-/** 文件夹选择器model值是否指代一个选项 */
-// const selectorValueIsOption = computed(() => typeof selectorValue.value === 'object')
 /** 文件夹选项 */
 const folderOptions = computed<QSelectorOption[]>(() =>
   folders.value
@@ -212,7 +211,6 @@ function folderSelectorSubmitHandle() {
   }
 
   /** 需要创建文件夹：值是字符串而不是option */
-
   const shouldCreateFolder = typeof selectorValue.value === 'string'
   /** 要更改的书籍 */
   const readonlyBooks = shelf.value
@@ -240,7 +238,7 @@ function folderSelectorSubmitHandle() {
         Id: nanoid(),
         Title: selectorValue.value as string,
         children: readonlyBooks,
-        createAt: Date.now()
+        updateAt: new Date().toISOString()
       }
     }
 
@@ -265,10 +263,11 @@ function folderSelectorSubmitHandle() {
 
   const folderID = (selectorValue.value as QSelectorOption).value
 
-  // 2. 把children合并到目标文件夹中
+  // 2. 把children合并到目标文件夹中并更新时间
   shelf.value.forEach((shelfItem) => {
     if (shelfItem.value.Id === folderID) {
       ;(shelfItem as ShelfTypes.ShelfFolderItem).value.children.push(...readonlyBooks)
+      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.updateAt = new Date().toISOString()
     }
   })
 
@@ -415,7 +414,7 @@ const submitListChange = async () => {
 /** 创建排序句柄 */
 const createSortable = (el: HTMLElement) => {
   sortableRef.value = new Sortable(el, {
-    animation: 200,
+    // animation: 400,
     onEnd(evt) {
       const { oldIndex, newIndex } = evt
       syncSortInfoToDraft({ oldIndex, newIndex })
@@ -441,7 +440,13 @@ const sortBooksToAsc = (listRef: Ref<ShelfTypes.ShelfItem[]>) => {
 onMounted(() => {
   // 全量读取列表
   shelfDB.getItems().then((res) => {
-    shelf.value = res
+    shelf.value = res.map((i) => {
+      if (i.type === ShelfTypes.SheldItemType.BOOK) {
+        // indexedDB读出来的时间有可能是iso字符串而不是Date对象，这里需要包装一下
+        i.value.LastUpdateTime = new Date(`${i.value.LastUpdateTime}`)
+      }
+      return i
+    })
     sortBooksToAsc(shelf)
     loading.value = false
   })
@@ -465,6 +470,21 @@ onBeforeUnmount(() => {
 // 列表项
 .shelf-item-wrap {
   position: relative;
+}
+
+// 列表项动画
+.shelf-item-enter-active,
+.shelf-item-enter-move,
+.shelf-item-leave-active {
+  // 移动的动画需要换成flex才能做
+  transition: all var(--q-transition-duration);
+  // transition: all 5s;
+}
+
+.shelf-item-enter-from,
+.shelf-item-leave-to {
+  opacity: 0;
+  transform: scale(0);
 }
 
 // 列表项选中icon
@@ -497,6 +517,9 @@ onBeforeUnmount(() => {
     // 4的来源就很简单了，24减去直径
     // 因为位移只需要关心一个方向的边，所以减1就够了
     transform: translate(-$icon-size * ((4 - 1) / 24), -$icon-size * ((4 - 1) / 24));
+    // ff下需要设置这个才有体积
+    width: 100%;
+    height: 100%;
   }
 }
 
