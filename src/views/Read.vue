@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 66.6%" class="q-mx-auto container">
+  <div class="q-mx-auto container read-page">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -232,6 +232,15 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
   * {
     line-break: anywhere;
+  }
+}
+
+/*添加居中功能*/
+.read-page {
+  @import 'src/assets/style/quasar.variables.sass';
+
+  @media screen and (min-width: $breakpoint-md-min) {
+    width: 66.6%;
   }
 }
 </style>
