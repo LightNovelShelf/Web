@@ -31,6 +31,14 @@
               <div>字体大小</div>
               <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
             </div>
+            <div>
+              <div>阅读页宽度（设为 0 时为全屏）</div>
+              <q-input v-model.number="readSetting.readPageWidth" type="number" filled>
+                <template v-slot:append>
+                  <div>px</div>
+                </template>
+              </q-input>
+            </div>
           </div>
         </q-tab-panel>
 
