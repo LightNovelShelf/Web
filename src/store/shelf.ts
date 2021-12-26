@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ShelfBookItem, ShelfFolderItem, ShelfItem, ShelfItemType } from '@/types/shelf'
+import { ShelfBook, ShelfBookItem, ShelfFolderItem, ShelfItem, ShelfItemType } from '@/types/shelf'
 import { shelfDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
 import produce from 'immer'
@@ -134,9 +134,24 @@ const shelfStore = defineStore('app.shelf', {
         // 写到DB
         this.writeDB()
       }
-    }
+    },
     /** 添加到收藏 */
-    /** 移出收藏 */
+    async addToShelf(book: ShelfBook) {
+      const item: ShelfBookItem = {
+        id: book.Id + '',
+        type: ShelfItemType.BOOK,
+        value: toRaw(book),
+        parents: [],
+        index: this.curMaxShelfIndex + 1
+      }
+      this.shelf.push(item)
+      await this.writeDB()
+    },
+    /** 移出收藏 @param bookId 书籍的id */
+    async removeFromShelf(bookId: number | string) {
+      this.shelf = this.shelf.filter((i) => i.id !== bookId + '')
+      await this.writeDB()
+    }
   }
 })
 
