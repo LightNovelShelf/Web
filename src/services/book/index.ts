@@ -22,7 +22,7 @@ export function getReadPosition(bid: number) {
 }
 /** 从一批id获取书籍列表 */
 export async function getBookListByIds(ids: number[]) {
-  return requestWithSignalr('GetBookListByIds', ids)
+  return requestWithSignalr<Types.BookInList[]>('GetBookListByIds', ids)
 }
 /** 取最新的6本书，无需登录 */
 export async function getLatestBookList() {
