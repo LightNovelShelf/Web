@@ -5,7 +5,7 @@
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
             <q-card>
-              <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3" loading="lazy">
+              <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3">
                 <div class="absolute-bottom bottom-shadow">
                   <div class="row">
                     <div class="row flex-align-center q-gutter-xs">
@@ -41,43 +41,22 @@
                   </q-menu>
                 </div>
               </div>
-              <div>
-                <div class="introduction" style="margin: 24px 0">书籍信息</div>
-                <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
-                <div>作者：{{ book['Author'] }}</div>
-                <div>最后更新：{{ book['LastUpdate'] }} ({{ LastUpdateTimeDesc }})</div>
-                <div>上次阅读：{{ lastReadTitle }}</div>
-                <div style="margin-top: 24px">
-                  <div>简介</div>
-                  <div class="introduction" v-html="book['Introduction']"></div>
-                </div>
-                <div style="margin-top: 24px"></div>
-
-                <div class="row q-gutter-md" v-if="isActive">
-                  <q-btn-group push>
-                    <q-btn>加入书架</q-btn>
-                    <q-btn @click="startRead">继续阅读</q-btn>
-                  </q-btn-group>
-                </div>
+              <div class="introduction" style="margin: 24px 0">书籍信息</div>
+              <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
+              <div>作者：{{ book['Author'] }}</div>
+              <div>最后更新：{{ book['LastUpdate'] }} ({{ LastUpdateTimeDesc }})</div>
+              <div>上次阅读：{{ lastReadTitle }}</div>
+              <div style="margin-top: 24px">
+                <div>简介</div>
+                <div class="introduction" v-html="book['Introduction']"></div>
               </div>
+              <div style="margin-top: 24px"></div>
 
-              <div class="scroll">
-                <q-scroll-area style="height: 100%">
-                  <q-list v-if="isActive" separator>
-                    <q-item
-                      v-for="(item, index) in book?.Chapter"
-                      :key="item.Id"
-                      :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
-                      clickable
-                      v-ripple
-                    >
-                      <q-item-section>{{ item.Title }}</q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-scroll-area>
+              <div class="row q-gutter-md" v-if="isActive">
+                <q-btn>加入书架</q-btn>
+                <q-btn @click="startRead">继续阅读</q-btn>
               </div>
             </div>
-
             <div v-else class="q-gutter-md">
               <q-skeleton />
               <q-skeleton width="50%" />
@@ -93,6 +72,18 @@
             </div>
           </q-grid-item>
         </q-grid>
+
+        <q-list v-if="isActive" separator style="margin-top: 12px">
+          <q-item
+            v-for="(item, index) in book?.Chapter"
+            :key="item.Id"
+            :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
+            clickable
+            v-ripple
+          >
+            <q-item-section>{{ item.Title }}</q-item-section>
+          </q-item>
+        </q-list>
       </q-card-section>
     </q-card>
     <comment style="margin-top: 12px" />
@@ -188,10 +179,5 @@ const lastReadTitle = computed(() => {
 a {
   color: unset;
   text-decoration: unset;
-}
-
-.scroll {
-  margin-top: 12px;
-  height: 350px;
 }
 </style>
