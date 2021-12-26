@@ -53,7 +53,7 @@
               <div style="margin-top: 24px"></div>
 
               <div class="row q-gutter-md" v-if="isActive">
-                <add-to-shelf :book="book || null" />
+                <add-to-shelf :book="bookInList" />
                 <q-btn @click="startRead">继续阅读</q-btn>
               </div>
             </div>
@@ -91,7 +91,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, onActivated } from 'vue'
+import { computed, defineComponent, ref, onActivated, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import Comment from '@/components/Comment.vue'
 import { getBookInfo } from '@/services/book'
@@ -106,8 +106,8 @@ import { icon } from '@/plugins/icon'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
+import { BookInList } from '@/services/book/types'
 
-defineComponent({ QGrid, QGridItem, Comment, AddToShelf })
 const props = defineProps<{ bid: string }>()
 
 const $q = useQuasar()
@@ -151,6 +151,14 @@ onActivated(async () => {
 
 // 只要数据中的id和props不同，就当在加载
 const book = computed(() => bookInfo.value?.Book)
+const bookInList = computed<BookInList | null>(() =>
+  book.value
+    ? ({
+        ...toRaw(book.value),
+        UserName: book.value?.User.UserName
+      } as BookInList)
+    : null
+)
 const isActive = computed(() => book.value?.Id === bid.value)
 const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 const lastReadTitle = computed(() => {

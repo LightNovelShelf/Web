@@ -51,13 +51,15 @@ const clickHandle = async () => {
 
   loading.value = true
 
+  const nextLike = !liked.value
+
   try {
-    if (liked.value) {
-      await shelfStore.removeFromShelf(bookId.value)
-    } else {
+    if (nextLike) {
       await shelfStore.addToShelf(props.book)
+    } else {
+      await shelfStore.removeFromShelf(bookId.value)
     }
-    disMiss = $.notify({ message: liked.value ? '移除成功' : '加入成功' })
+    disMiss = $.notify({ message: nextLike ? '加入成功' : '移除成功' })
   } catch (e) {
     disMiss = $.notify({ type: 'waring', message: getErrMsg(e) })
   }
