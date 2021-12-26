@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent } from 'vue'
+import { ref, defineComponent, computed } from 'vue'
 import { getReadHistory } from '@/services/user'
 import BookCard from '@/components/BookCard.vue'
 import { getBookListByIds } from '@/services/book'
@@ -60,18 +60,14 @@ const tab = ref('Novel')
 const bookData = ref<BookInList[]>([])
 const history = ref<number[]>([])
 let size = 24
-const totalPages = ref(1)
+const totalPages = computed(() => Math.ceil(history.value.length / size) || 1)
 const scroll = ref(null)
 
 const requestHistory = useTimeoutFn(async () => {
-  bookData.value = []
-  history.value = []
-  scroll.value.reset()
   await getReadHistory()
     .then((res) => {
       if (res) {
         history.value = res
-        totalPages.value = Math.ceil(history.value.length / size)
         scroll.value.resume()
         scroll.value.poll()
       }
@@ -80,10 +76,15 @@ const requestHistory = useTimeoutFn(async () => {
       console.log(error)
     })
 })
-useInitRequest(requestHistory)
+useInitRequest(requestHistory, () => {
+  bookData.value = []
+  history.value = []
+  scroll.value.reset()
+})
 
 // 滚动拉取数据
 const onLoad = async (index, done) => {
+  console.log(index)
   await getBookListByIds(history.value.slice((index - 1) * size, index * size))
     .then((res) => {
       bookData.value.push(...res)
