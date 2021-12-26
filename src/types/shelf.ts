@@ -15,7 +15,7 @@ export interface ShelfFolder {
 }
 
 /** 书架条目类型枚举 */
-export enum SheldItemType {
+export enum ShelfItemType {
   /** 书籍 */
   BOOK = 'BOOK',
   /** 文件夹 */
@@ -25,7 +25,7 @@ export enum SheldItemType {
 /** 书架条目共享字段 */
 export interface ShelfCommonItem {
   /** 类型 */
-  type: SheldItemType
+  type: ShelfItemType
   /** 次序 */
   index: number
   /** 选中态 */
@@ -34,12 +34,12 @@ export interface ShelfCommonItem {
 
 /** 书架 - 书籍 */
 export interface ShelfBookItem extends ShelfCommonItem {
-  type: SheldItemType.BOOK
+  type: ShelfItemType.BOOK
   value: ShelfBook
 }
 /** 书架 - 文件夹 */
 export interface ShelfFolderItem extends ShelfCommonItem {
-  type: SheldItemType.FOLDER
+  type: ShelfItemType.FOLDER
   value: ShelfFolder
 }
 
