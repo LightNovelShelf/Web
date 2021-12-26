@@ -1,5 +1,8 @@
 <template>
-  <div class="q-mx-auto container read-page">
+  <div
+    class="q-mx-auto container read-page"
+    :style="{ '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px' }"
+  >
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -240,7 +243,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
   @import 'src/assets/style/quasar.variables.sass';
 
   @media screen and (min-width: $breakpoint-md-min) {
-    width: 66.6%;
+    width: var(--width);
   }
 }
 </style>
