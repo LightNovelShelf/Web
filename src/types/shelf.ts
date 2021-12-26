@@ -26,8 +26,12 @@ export enum ShelfItemType {
 export interface ShelfCommonItem {
   /** 类型 */
   type: ShelfItemType
+  /** Id */
+  Id: string
   /** 次序 */
   index: number
+  /** 父级文件夹ID，不在文件夹的话就空数组 */
+  parent: string[]
   /** 选中态 */
   selected?: boolean
 }
