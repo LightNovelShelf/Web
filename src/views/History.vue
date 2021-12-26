@@ -1,24 +1,22 @@
 <template>
   <!-- 滚动加载 -->
   <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
-    <div class="q-pa-md">
-      <div class="q-gutter-y-md">
-        <q-tabs dense v-model="tab" class="text-teal">
-          <template v-for="option in tabOptions" :key="option.key">
-            <q-tab :name="option.name" :icon="option.icon" :label="option.label" :disable="option.disable" />
-          </template>
-        </q-tabs>
-        <q-tab-panels v-model="tab" animated>
-          <q-tab-panel name="Novel">
-            <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-              <q-grid-item v-for="book in bookData" :key="book['Id']">
-                <book-card :book="book"></book-card>
-              </q-grid-item>
-            </q-grid>
-          </q-tab-panel>
-          <q-tab-panel name="Thread"></q-tab-panel>
-        </q-tab-panels>
-      </div>
+    <div class="q-gutter-y-md">
+      <q-tabs dense v-model="tab" class="text-teal">
+        <template v-for="option in tabOptions" :key="option.key">
+          <q-tab :name="option.name" :icon="option.icon" :label="option.label" :disable="option.disable" />
+        </template>
+      </q-tabs>
+      <q-tab-panels v-model="tab" animated>
+        <q-tab-panel name="Novel">
+          <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
+            <q-grid-item v-for="book in bookData" :key="book['Id']">
+              <book-card :book="book"></book-card>
+            </q-grid-item>
+          </q-grid>
+        </q-tab-panel>
+        <q-tab-panel name="Thread"></q-tab-panel>
+      </q-tab-panels>
     </div>
     <template v-slot:loading>
       <div class="row justify-center q-my-md">
@@ -35,6 +33,9 @@ import BookCard from '@/components/BookCard.vue'
 import { getBookListByIds } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { icon } from '@/plugins/icon'
+import { QGrid, QGridItem } from '@/plugins/quasar/components'
+
+defineComponent({ QGrid, QGridItem })
 
 const tabOptions: Array<Record<string, any>> = [
   {
@@ -73,8 +74,8 @@ onMounted(async () => {
 })
 
 // 滚动拉取数据
-function onLoad(index, done) {
-  getBookListByIds(history.slice(iter * size, (iter + 1) * size))
+const onLoad = async (index, done) => {
+  await getBookListByIds(history.slice(iter * size, (iter + 1) * size))
     .then((res) => {
       bookData.value.push(...res)
       if (res.length < size) {
