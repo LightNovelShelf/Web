@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="width: 66.6%" class="q-mx-auto container">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
