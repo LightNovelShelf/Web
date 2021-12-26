@@ -51,17 +51,17 @@
       >
         <div class="shelf-item-wrap">
           <!-- 书籍 -->
-          <book-card v-if="item.type === ShelfTypes.SheldItemType.BOOK" :book="item.value" :title="item.index" />
+          <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" :title="item.index" />
           <!-- 文件夹 -->
           <shelf-folder
-            v-else-if="item.type === ShelfTypes.SheldItemType.FOLDER"
+            v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER"
             :folder="item.value"
             :title="item.index"
           />
           <template v-else />
 
           <!-- 选中态icon; 暂时不允许folder加入folder（需要处理选中后出现的自身加入自身的场景） -->
-          <div v-if="editMode && item.type !== ShelfTypes.SheldItemType.FOLDER" class="shelf-item-check-icon">
+          <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
             <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
@@ -145,6 +145,7 @@ import { nanoid } from 'nanoid'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useShelfStore } from '@/store/shelf'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -155,6 +156,8 @@ interface QSelectorOption {
 
 /** auto freeze的话会导致vue绑定报错 */
 setAutoFreeze(false)
+
+useShelfStore()
 
 const $ = useQuasar()
 /** 加载标记 */
@@ -189,7 +192,7 @@ const shelf = computed<ShelfTypes.ShelfItem[]>({
 
 /** 书架文件夹列表 */
 const folders = computed<ShelfTypes.ShelfFolderItem[]>(() =>
-  shelf.value.filter((i): i is ShelfTypes.ShelfFolderItem => i.type === ShelfTypes.SheldItemType.FOLDER)
+  shelf.value.filter((i): i is ShelfTypes.ShelfFolderItem => i.type === ShelfTypes.ShelfItemType.FOLDER)
 )
 
 /** 文件夹选择弹层 */
@@ -221,7 +224,7 @@ function folderSelectorSubmitHandle() {
   const shouldCreateFolder = typeof selectorValue.value === 'string'
   /** 要更改的书籍 */
   const readonlyBooks: ShelfTypes.ShelfBookItem[] = shelf.value
-    .filter((i): i is ShelfTypes.ShelfBookItem => !!(i.selected && i.type === ShelfTypes.SheldItemType.BOOK))
+    .filter((i): i is ShelfTypes.ShelfBookItem => !!(i.selected && i.type === ShelfTypes.ShelfItemType.BOOK))
     // 这里需要注意 toRaw 一次，vue的 toRaw 是返回原始对象的意思
     // 如果这里不 toRaw , 那么 folder 就需要被迫 递归进行 toRaw 了
     // 同时因为这里toRaw了所以需要注意readonly，不要做什么修改操作避免数据不同步
@@ -242,7 +245,7 @@ function folderSelectorSubmitHandle() {
     const folder: ShelfTypes.ShelfFolderItem = {
       // 固定在第一
       index: 0,
-      type: ShelfTypes.SheldItemType.FOLDER,
+      type: ShelfTypes.ShelfItemType.FOLDER,
       value: {
         Id: nanoid(),
         Title: selectorValue.value as string,
@@ -327,7 +330,7 @@ function listItemClickHandle(evt: MouseEvent) {
     const type = shelf.value[+idx].type
 
     // 暂时不允许选中文件夹
-    if (type === ShelfTypes.SheldItemType.FOLDER) {
+    if (type === ShelfTypes.ShelfItemType.FOLDER) {
       return
     }
 
@@ -345,7 +348,7 @@ function selectAllHandle() {
   shelf.value = produce(toRaw(shelf.value), (draft) => {
     draft.forEach((_) => {
       // 文件夹不允许选择
-      if (_.type === ShelfTypes.SheldItemType.FOLDER) {
+      if (_.type === ShelfTypes.ShelfItemType.FOLDER) {
         return
       }
 
@@ -451,7 +454,7 @@ useInitRequest(
     // 全量读取列表
     shelfDB.getItems().then((res) => {
       shelf.value = res.map((i) => {
-        if (i.type === ShelfTypes.SheldItemType.BOOK) {
+        if (i.type === ShelfTypes.ShelfItemType.BOOK) {
           // indexedDB读出来的时间有可能是iso字符串而不是Date对象，这里需要包装一下
           i.value.LastUpdateTime = new Date(`${i.value.LastUpdateTime}`)
         }
