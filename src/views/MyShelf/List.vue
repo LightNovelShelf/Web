@@ -133,7 +133,7 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { computed, defineComponent, onBeforeUnmount, onMounted, Ref, ref, toRaw, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, Ref, ref, toRaw, toRef, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -164,11 +164,12 @@ const $ = useQuasar()
 const loading = ref(true)
 /** 编辑状态 */
 const editMode = ref(false)
+const shelfStore = useShelfStore()
 /**
  * 所有书籍
  * @private 考虑使用shelf代替
  **/
-const _stableShelf = ref<ShelfTypes.ShelfItem[]>([])
+const _stableShelf = toRef(shelfStore, 'shelf')
 /**
  * 编辑期间的书籍列表
  * @private 考虑使用shelf代替
@@ -447,24 +448,6 @@ watch([listWrapRef, editMode], ([el, mode]) => {
 const sortBooksToAsc = (listRef: Ref<ShelfTypes.ShelfItem[]>) => {
   listRef.value.sort((a, b) => (a.index > b.index ? 1 : -1))
 }
-
-// 初始化
-useInitRequest(
-  useTimeoutFn(async () => {
-    // 全量读取列表
-    shelfDB.getItems().then((res) => {
-      shelf.value = res.map((i) => {
-        if (i.type === ShelfTypes.ShelfItemType.BOOK) {
-          // indexedDB读出来的时间有可能是iso字符串而不是Date对象，这里需要包装一下
-          i.value.LastUpdateTime = new Date(`${i.value.LastUpdateTime}`)
-        }
-        return i
-      })
-      sortBooksToAsc(shelf)
-      loading.value = false
-    })
-  })
-)
 
 onBeforeUnmount(() => {
   destorySortable()
