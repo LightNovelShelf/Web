@@ -7,6 +7,7 @@ import router from './router'
 import { Quasar, Dark } from 'quasar'
 import quasarUserOptions from '@/plugins/quasar/options'
 import { QGridItem, QGrid } from '@/plugins/quasar/components'
+import { changeThemeColor } from '@/plugins/quasar/utils'
 
 const app = createApp(App)
 app.component('q-grid', QGrid)
@@ -20,6 +21,8 @@ app.use(Viewer, {
   }
 })
 
-app.use(createPinia()).use(router).use(Quasar, quasarUserOptions).mount('#app')
+app.use(createPinia()).use(router).use(Quasar, quasarUserOptions)
+changeThemeColor(Dark.isActive)
+app.mount('#app')
 
 export default app

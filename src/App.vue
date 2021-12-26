@@ -7,7 +7,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, defineComponent, watch, watchEffect } from 'vue'
+import { defineComponent, watch } from 'vue'
 import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
 import { useQuasar } from 'quasar'
 import { useServerNotify } from '@/services/utils/useServerNotify'
@@ -16,6 +16,7 @@ import { useSettingStore } from '@/store/setting'
 import { useAppStore } from '@/store'
 import { longTermToken } from '@/utils/session'
 import { getMyInfo } from '@/services/user'
+import { changeThemeColor } from '@/plugins/quasar/utils'
 
 defineComponent({ AppSider, AppHeader, AppContainer })
 
@@ -63,12 +64,10 @@ useServerNotify('OnMessage', (message: string) => {
   })
 })
 
-let color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
-
-watchEffect(() => {
-  let metaThemeColor = document.querySelector('meta[name=theme-color]')
-  metaThemeColor.setAttribute('content', color.value)
-})
+watch(
+  () => $q.dark.isActive,
+  () => changeThemeColor($q.dark.isActive)
+)
 </script>
 
 <style lang="scss" scoped></style>
