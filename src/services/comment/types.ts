@@ -1,4 +1,4 @@
-export namespace PostAnnouncementComment {
+export namespace PostComment {
   export interface Request {
     Id: number
     Content: string
@@ -9,7 +9,7 @@ export namespace PostAnnouncementComment {
   export interface Response {}
 }
 
-export namespace GetAnnouncementComment {
+export namespace GetComment {
   export interface Request {
     Id: number
     Page: number
