@@ -15,7 +15,6 @@ export function useInitRequest(
   const router = useRoute()
   // 在每次判断路由为前进或第一次进入时加载数据
   onActivated(async () => {
-    console.log('是否需要请求数据:', router.meta.reload)
     if (router.meta.reload) {
       if (before) before()
       if (first.value) {

@@ -45,14 +45,14 @@ const tabOptions: Array<Record<string, any>> = [
     key: 'Novel',
     label: '小说',
     disable: false,
-    icon: icon.mdiCog
+    icon: icon.mdiBook
   },
   {
     name: 'Thread',
     key: 'Thread',
     label: '帖子',
     disable: true,
-    icon: icon.mdiFormatSize
+    icon: icon.mdiForum
   }
 ]
 
@@ -84,7 +84,6 @@ useInitRequest(requestHistory, () => {
 
 // 滚动拉取数据
 const onLoad = async (index, done) => {
-  console.log(index)
   await getBookListByIds(history.value.slice((index - 1) * size, index * size))
     .then((res) => {
       bookData.value.push(...res)
