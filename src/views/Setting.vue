@@ -38,9 +38,9 @@
                   <div>px</div>
                 </template>
               </q-input>
-              <div>预览</div>
+              <div class="q-ma-md">预览</div>
               <div
-                class="q-ma-md preview"
+                class="preview"
                 :style="{ '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px' }"
               >
                 <q-scroll-area style="height: 200px; width: 100%">
