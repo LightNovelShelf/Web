@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "u": "ncu"
+    "u": "ncu",
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@mdi/js": "^6.5.95",
@@ -25,6 +26,7 @@
     "register-service-worker": "^1.7.2",
     "sortablejs": "^1.14.0",
     "v-viewer": "^3.0.10",
+    "viewerjs": "^1.10.2",
     "vue": "^3.2.22",
     "vue-recaptcha-v3": "^2.0.1",
     "vue-router": "^4.0.12"

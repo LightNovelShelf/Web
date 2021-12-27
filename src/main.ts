@@ -13,7 +13,7 @@ app.component('q-grid', QGrid)
 app.component('q-grid-item', QGridItem)
 
 import Viewer from 'v-viewer'
-import 'viewerjs/dist/viewer.css'
+import 'viewerjs/dist/viewer.min.css'
 app.use(Viewer, {
   defaultOptions: {
     navbar: false
