@@ -483,7 +483,7 @@ onBeforeUnmount(() => {
 .shelf-item-enter-from,
 .shelf-item-leave-to {
   opacity: 0;
-  transform: scale(0);
+  transform: scale(0.9) translateY(20%);
 }
 
 // 列表项选中icon
