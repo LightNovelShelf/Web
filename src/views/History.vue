@@ -1,6 +1,6 @@
 <template>
   <!-- 滚动加载 -->
-  <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
+  <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll" :disable="history.length === 0">
     <div class="q-gutter-y-md">
       <q-tabs dense v-model="tab" class="text-teal">
         <template v-for="option in tabOptions" :key="option.key">
@@ -27,13 +27,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent, onMounted } from 'vue'
+import { ref, defineComponent, computed } from 'vue'
 import { getReadHistory } from '@/services/user'
 import BookCard from '@/components/BookCard.vue'
 import { getBookListByIds } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -43,46 +45,52 @@ const tabOptions: Array<Record<string, any>> = [
     key: 'Novel',
     label: '小说',
     disable: false,
-    icon: icon.mdiCog
+    icon: icon.mdiBook
   },
   {
     name: 'Thread',
     key: 'Thread',
     label: '帖子',
     disable: true,
-    icon: icon.mdiFormatSize
+    icon: icon.mdiForum
   }
 ]
 
 const tab = ref('Novel')
 const bookData = ref<BookInList[]>([])
-let history = []
-let iter = 0
+const history = ref<number[]>([])
 let size = 24
+const totalPages = computed(() => Math.ceil(history.value.length / size) || 1)
 const scroll = ref(null)
 
-onMounted(async () => {
-  scroll.value.stop()
-  getReadHistory()
+const requestHistory = useTimeoutFn(async () => {
+  await getReadHistory()
     .then((res) => {
-      history = res
-      scroll.value.resume()
+      if (res) {
+        history.value = res
+        scroll.value.resume()
+        scroll.value.poll()
+      }
     })
     .catch((error) => {
       console.log(error)
     })
 })
+useInitRequest(requestHistory, () => {
+  bookData.value = []
+  history.value = []
+  scroll.value.reset()
+})
 
 // 滚动拉取数据
 const onLoad = async (index, done) => {
-  await getBookListByIds(history.slice(iter * size, (iter + 1) * size))
+  await getBookListByIds(history.value.slice((index - 1) * size, index * size))
     .then((res) => {
       bookData.value.push(...res)
-      if (res.length < size) {
+      if (index === totalPages.value) {
         // 无法再拉取
         scroll.value.stop()
       } else {
-        iter++
         done()
       }
     })

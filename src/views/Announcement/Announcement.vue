@@ -45,23 +45,21 @@ import { announcementListFormat, Announcement } from './announcementFormat'
 import { icon } from '@/plugins/icon'
 
 let announcementList = reactive<Announcement[]>([])
-let page = 1
 let size = 24
 
 const scroll = ref(null)
 
 // 滚动拉取数据
 function onLoad(index, done) {
-  const response = Promise.resolve(getAnnouncementList({ Page: page, Size: size }))
+  const response = Promise.resolve(getAnnouncementList({ Page: index, Size: size }))
   response
     .then((res) => {
       // @ts-expect-error 不知道谁的问题
       announcementList.push(...announcementListFormat(res.Data))
-      if (res.Data.length < size) {
+      if (res.TotalPages == index) {
         // 无法再拉取
         scroll.value.stop()
       } else {
-        page++
         done()
       }
     })
@@ -72,9 +70,9 @@ function onLoad(index, done) {
 
 const updateAnnouncement = () => {
   announcementList.splice(0)
-  page = 1
+  scroll.value.reset()
   scroll.value.resume()
-  scroll.value.trigger()
+  scroll.value.poll()
 }
 </script>
 
