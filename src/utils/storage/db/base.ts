@@ -92,20 +92,20 @@ export class DB<Value = unknown> {
   }
 
   /** 获取DB储存 */
-  public get(key: string) {
-    return this.db.getItem<Value>(key)
+  public get = <T = Value>(key: string): Promise<T> => {
+    return this.db.getItem<T>(key)
   }
   /** 更新DB储存 */
-  public set = (key: string, val: Value) => {
+  public set = async <T = Value>(key: string, val: T): Promise<void> => {
     // 因为同步的时候经常是vue对象来的，所以这里加点便捷操作，包了toRaw操作免得忘了之后debug
-    return this.db.setItem(key, toRaw(val))
+    await this.db.setItem(key, toRaw(val))
   }
   /** 移除DB中某一项目 */
-  public remove = (key: string) => {
+  public remove = (key: string): Promise<void> => {
     return this.db.removeItem(key)
   }
   /** 清空DB */
-  public clear = () => {
+  public clear = (): Promise<void> => {
     return this.db.clear()
   }
   /** 列出DB中所有的储存项名称 */
@@ -127,7 +127,7 @@ export class DB<Value = unknown> {
   }
 
   /** 获取DB中所有的项目 */
-  public getItems: () => Promise<Value[]> = async () => {
+  public getItems = async <T = Value>(): Promise<T[]> => {
     const list: any[] = []
 
     await this.iterate((item) => list.push(item))
