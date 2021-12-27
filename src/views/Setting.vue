@@ -38,6 +38,23 @@
                   <div>px</div>
                 </template>
               </q-input>
+              <div>预览</div>
+              <div
+                class="q-ma-md preview"
+                :style="{ '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px' }"
+              >
+                <q-scroll-area style="height: 200px; width: 100%">
+                  <div v-for="n in 100" :key="n" class="q-py-xs">
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                    tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur
+                    adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum
+                    dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                    magna aliqua.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                    incididunt ut labore et dolore magna aliqua.
+                  </div>
+                </q-scroll-area>
+              </div>
             </div>
           </div>
         </q-tab-panel>
@@ -107,3 +124,13 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.preview {
+  @import 'src/assets/style/quasar.variables.sass';
+
+  @media screen and (min-width: $breakpoint-md-min) {
+    width: var(--width);
+  }
+}
+</style>
