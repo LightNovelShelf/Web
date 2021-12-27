@@ -4,7 +4,7 @@
       <div class="book-cover">
         <q-card>
           <transition-group name="shelf-item" tag="div" class="books-group">
-            <q-img v-for="item in limitedBooks" :key="item.value.Id" :src="item.value.Cover" :ratio="2 / 3" />
+            <q-img v-for="item in limitedBooks" :key="item.id" :src="item.value.Cover" :ratio="2 / 3" />
           </transition-group>
         </q-card>
       </div>
@@ -81,6 +81,6 @@ const limitedBooks = computed(() => props.folder.children.slice(0, 4))
 .shelf-item-enter-from,
 .shelf-item-leave-to {
   opacity: 0;
-  transform: scale(0);
+  transform: scale(0.9) translateY(20%);
 }
 </style>
