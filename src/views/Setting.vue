@@ -127,7 +127,7 @@ export default defineComponent({
 
 <style lang="scss">
 .preview {
-  @import 'src/assets/style/quasar.variables.sass';
+  @import 'quasar/dist/quasar.sass';
 
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
