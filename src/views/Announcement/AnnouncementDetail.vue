@@ -32,6 +32,7 @@ import sanitizerHtml from '@/utils/sanitizeHtml'
 import { Announcement, announcementFormat } from '@/views/Announcement/announcementFormat'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { getAnnouncementComment, postAnnouncementComment } from '@/services/comment'
 
 defineComponent({ Comment })
 
@@ -47,6 +48,9 @@ const request = useTimeoutFn(async () => {
 const ready = computed(() => id.value === announcement.value?.Id)
 
 useInitRequest(request)
+
+// postAnnouncementComment({ Id: 1, Content: '我是评论' })
+// getAnnouncementComment({ Id: 1, Page: 1 }).then(console.log)
 </script>
 
 <style scoped lang="scss">
