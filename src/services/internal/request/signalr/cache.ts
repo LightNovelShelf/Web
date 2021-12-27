@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { signalrCacheDB as cacheDB } from '@/utils/storage/db'
+import { signalrCacheDB } from '@/utils/storage/db'
 
 /** 最后一次返回的响应，目前用于监听cache使用情况 */
 export const lastResponseCache = ref<Promise<unknown> | null>(null)
@@ -10,7 +10,7 @@ export async function tryResponseFromCache<Res = unknown, Data extends unknown[]
   ...data: Data
 ): Promise<Res> {
   const key = JSON.stringify({ url, data })
-  const val = await cacheDB.get(key)
+  const val = await signalrCacheDB.get(key)
   if (val) {
     // 每次DB.get拿到的数据都是引用不相等的
     // await cacheDB.get('test') !== await cacheDB.get('test')
@@ -29,5 +29,5 @@ export function updateResponseCache<Res = unknown, Data extends unknown[] = unkn
   ...data: Data
 ): void {
   const key = JSON.stringify({ url, data })
-  cacheDB.set(key, res)
+  signalrCacheDB.set(key, res)
 }
