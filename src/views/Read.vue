@@ -238,9 +238,9 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
   }
 }
 
-/*添加居中功能*/
+/*居中功能*/
 .read-page {
-  @import 'src/assets/style/quasar.variables.sass';
+  @import 'quasar/dist/quasar.sass';
 
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
