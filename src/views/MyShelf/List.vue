@@ -133,7 +133,7 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { computed, defineComponent, onBeforeUnmount, onMounted, Ref, ref, toRaw, toRef, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, Ref, ref, toRaw, toRef, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -143,8 +143,6 @@ import produce, { setAutoFreeze } from 'immer'
 import { mdiCheckCircle, mdiCheckboxBlankCircleOutline } from '@/plugins/icon/export'
 import { nanoid } from 'nanoid'
 import ShelfFolder from './components/ShelfFolder.vue'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useShelfStore } from '@/store/shelf'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
@@ -170,6 +168,7 @@ const shelfStore = useShelfStore()
  * @private 考虑使用shelf代替
  **/
 const _stableShelf = toRef(shelfStore, 'shelf')
+
 /**
  * 编辑期间的书籍列表
  * @private 考虑使用shelf代替
@@ -242,13 +241,16 @@ function folderSelectorSubmitHandle() {
 
   // 1. 创建文件夹场景
   if (shouldCreateFolder) {
+    const folderID = nanoid()
     /** 新的文件夹 */
     const folder: ShelfTypes.ShelfFolderItem = {
       // 固定在第一
       index: 0,
       type: ShelfTypes.ShelfItemType.FOLDER,
+      parents: [],
+      id: folderID,
       value: {
-        Id: nanoid(),
+        Id: folderID,
         Title: selectorValue.value as string,
         children: readonlyBooks,
         updateAt: new Date().toISOString()
@@ -427,7 +429,7 @@ const submitListChange = async () => {
 /** 创建排序句柄 */
 const createSortable = (el: HTMLElement) => {
   sortableRef.value = new Sortable(el, {
-    // animation: 400,
+    animation: 400,
     onEnd(evt) {
       const { oldIndex, newIndex } = evt
       syncSortInfoToDraft({ oldIndex, newIndex })
