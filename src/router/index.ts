@@ -108,7 +108,6 @@ const history = createWebHistory(process.env.BASE_URL)
 const _push = history.push
 const _replace = history.replace
 const setKey = (to, data) => {
-  console.log('push')
   if (!data) data = {}
   data['key'] = `[${to}] ${nanoid()}`
   keys.push(data['key'])
@@ -172,22 +171,13 @@ router.beforeEach(async function (to) {
 const readyRoute = []
 router.afterEach((to) => {
   const key = history.state['key']
-  console.log(key)
   if (readyRoute.includes(to.name)) {
     if (key) {
-      if (keys.findIndex((item) => item === key) === keys.length - 1) {
-        console.log('前进')
-        to.meta.reload = true
-      } else {
-        console.log('后退')
-        to.meta.reload = false
-      }
+      to.meta.reload = keys.findIndex((item) => item === key) === keys.length - 1
     } else {
-      console.log('后退')
       to.meta.reload = false
     }
   } else {
-    console.log('第一次进入这个路由')
     readyRoute.push(to.name)
     to.meta.reload = true
   }
