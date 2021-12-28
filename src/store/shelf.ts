@@ -29,9 +29,27 @@ const shelfStore = defineStore('app.shelf', {
       return state.shelf.filter((i): i is ShelfFolderItem => i.type === ShelfItemType.FOLDER)
     },
     /** 获取指定层级的内容 */
-    getShelfByID(state): (parents: string[]) => ShelfItem[] {
+    getShelfByParents(state): (parents: string[]) => ShelfItem[] {
       return (parents: string[]) => {
         return state.shelf.filter((i) => isEqual(i.parents, parents))
+      }
+    },
+    /** 获取指定层级的内容 */
+    getBooksByIDs(state): (parents: string[]) => ShelfItem[] {
+      return (itemID: string[]) => {
+        return itemID.map((id: string) => this.booksMap.get(id)!).filter((o) => !!o)
+      }
+    },
+    /** 获取指定层级的内容 */
+    getFolderByIDs(state): (parents: string[]) => ShelfItem[] {
+      return (itemID: string[]) => {
+        return itemID.map((id: string) => this.foldersMap.get(id)!).filter((o) => !!o)
+      }
+    },
+    /** 获取指定层级的内容 */
+    getItemByIDs(state): (parents: string[]) => ShelfItem[] {
+      return (itemID: string[]) => {
+        return itemID.map((id: string) => this.shelfsMap.get(id)!).filter((o) => !!o)
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
@@ -71,7 +89,7 @@ const shelfStore = defineStore('app.shelf', {
   },
   actions: {
     async readDB() {
-      this.shelf = await shelfDB.getItems()
+      this.shelf = (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
     },
     async writeDB() {
       await shelfDB.clear()

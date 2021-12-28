@@ -60,8 +60,8 @@
           />
           <template v-else />
 
-          <!-- 选中态icon; 暂时不允许folder加入folder（需要处理选中后出现的自身加入自身的场景） -->
-          <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
+          <!-- 选中态icon -->
+          <div v-if="editMode" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
             <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
@@ -167,7 +167,7 @@ const shelfStore = useShelfStore()
  * 所有书籍
  * @private 考虑使用shelf代替
  **/
-const _stableShelf = toRef(shelfStore, 'shelf')
+const _stableShelf = computed(() => shelfStore.getShelfByParents([]))
 
 /**
  * 编辑期间的书籍列表
@@ -185,7 +185,7 @@ const shelf = computed<ShelfTypes.ShelfItem[]>({
     if (editMode.value) {
       _draftShelf.value = val
     } else {
-      _stableShelf.value = val
+      shelfStore.$patch({ shelf: val })
     }
   }
 })
@@ -223,17 +223,12 @@ function folderSelectorSubmitHandle() {
   /** 需要创建文件夹：值是字符串而不是option */
   const shouldCreateFolder = typeof selectorValue.value === 'string'
   /** 要更改的书籍 */
-  const readonlyBooks: ShelfTypes.ShelfBookItem[] = shelf.value
-    .filter((i): i is ShelfTypes.ShelfBookItem => !!(i.selected && i.type === ShelfTypes.ShelfItemType.BOOK))
-    // 这里需要注意 toRaw 一次，vue的 toRaw 是返回原始对象的意思
-    // 如果这里不 toRaw , 那么 folder 就需要被迫 递归进行 toRaw 了
-    // 同时因为这里toRaw了所以需要注意readonly，不要做什么修改操作避免数据不同步
-    .map((i) => toRaw(i))
-    // 清掉 selected 状态
-    .map((i) => ({ ...i, selected: false }))
+  const children: ShelfTypes.ShelfFolderChild[] = shelf.value
+    .filter((i) => !!i.selected)
+    .map((i) => ({ type: i.type, id: i.id }))
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
-  if (!readonlyBooks.length) {
+  if (!children.length) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
     return
@@ -252,14 +247,17 @@ function folderSelectorSubmitHandle() {
       value: {
         Id: folderID,
         Title: selectorValue.value as string,
-        children: readonlyBooks,
+        children: children,
         updateAt: new Date().toISOString()
       }
     }
 
-    // 1. 把选中的项目从shelf中移除，只留下没选的
-
-    shelf.value = shelf.value.filter((i) => !i.selected)
+    // 1. 把选中的项目标记有文件夹
+    shelf.value.forEach((i) => {
+      if (i.selected) {
+        i.parents.unshift(folderID)
+      }
+    })
 
     // 2. 剩余项目往后挪一位，腾出第一个位置给新增的文件夹
     shelf.value.forEach((i) => (i.index += 1))
@@ -274,14 +272,18 @@ function folderSelectorSubmitHandle() {
   // 2. 加入文件夹场景
 
   // 1. 把选中的项目从shelf中移除，只留下没选的
-  shelf.value = shelf.value.filter((i) => !i.selected)
+  shelf.value.forEach((i) => {
+    if (i.selected) {
+      i.parents.unshift(folderID)
+    }
+  })
 
   const folderID = (selectorValue.value as QSelectorOption).value
 
   // 2. 把children合并到目标文件夹中并更新时间
   shelf.value.forEach((shelfItem) => {
     if (shelfItem.value.Id === folderID) {
-      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.children.push(...readonlyBooks)
+      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.children.push(...children)
       ;(shelfItem as ShelfTypes.ShelfFolderItem).value.updateAt = new Date().toISOString()
     }
   })
@@ -332,11 +334,6 @@ function listItemClickHandle(evt: MouseEvent) {
     const idx = (evt.currentTarget as HTMLElement).dataset.idx as string
     const type = shelf.value[+idx].type
 
-    // 暂时不允许选中文件夹
-    if (type === ShelfTypes.ShelfItemType.FOLDER) {
-      return
-    }
-
     const nextSelected = !shelf.value[+idx].selected
 
     shelf.value = produce(toRaw(shelf.value), (draft) => {
@@ -350,11 +347,6 @@ function selectAllHandle() {
   const nextSelected = !isSelectedAll.value
   shelf.value = produce(toRaw(shelf.value), (draft) => {
     draft.forEach((_) => {
-      // 文件夹不允许选择
-      if (_.type === ShelfTypes.ShelfItemType.FOLDER) {
-        return
-      }
-
       _.selected = nextSelected
     })
   })
@@ -409,10 +401,12 @@ const syncSortInfoToDraft = (sortInfo: { oldIndex?: number; newIndex?: number })
 const submitListChange = async () => {
   // 保存修改，把draft的苏剧写入stable
   // 浅复制一次，避免接下来的sort操作 reactive 到 _draftShelf
-  _stableShelf.value = [..._draftShelf.value].map((i) => ({ ...toRaw(i), selected: false }))
+  const nextShelf = [..._draftShelf.value].map((i) => ({ ...toRaw(i), selected: false }))
 
   // _draft来的数据并不是有序的，这里需要排序一次
-  sortBooksToAsc(_stableShelf)
+  sortBooksToAsc(nextShelf)
+
+  shelfStore.$patch({ shelf: nextShelf })
 
   /** 写入本地缓存 */
   // 1. 先清空缓存，因为书籍有可能被移入文件夹从而不在外部目录了，这部分需要删除掉
@@ -447,8 +441,8 @@ watch([listWrapRef, editMode], ([el, mode]) => {
 })
 
 /** 按照index排序书籍数组，因为indexedDB读出来的书籍是按照DB key排序的，没法更改 */
-const sortBooksToAsc = (listRef: Ref<ShelfTypes.ShelfItem[]>) => {
-  listRef.value.sort((a, b) => (a.index > b.index ? 1 : -1))
+const sortBooksToAsc = (list: ShelfTypes.ShelfItem[]) => {
+  list.sort((a, b) => (a.index > b.index ? 1 : -1))
 }
 
 onBeforeUnmount(() => {
