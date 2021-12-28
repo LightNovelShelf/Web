@@ -17,8 +17,9 @@
       </q-grid-item>
     </q-grid>
 
-    <div style="display: flex; justify-content: center; padding-top: 24px">
+    <div class="pagination" style="display: flex; justify-content: center; padding-top: 24px">
       <q-pagination
+        padding="4px"
         :disable="loading"
         v-model="currentPage"
         :max="pageData.totalPage"
@@ -27,7 +28,8 @@
         :icon-last="icon.mdiSkipNext"
         :icon-prev="icon.mdiChevronLeft"
         :icon-next="icon.mdiChevronRight"
-        :max-pages="6"
+        :max-pages="8"
+        :input="!$q.screen.gt.sm"
       />
     </div>
   </div>
@@ -124,8 +126,13 @@ onBeforeRouteUpdate((to, from, next) => {
   request(~~to.params.page || 1, `${to.params.order}`).then(() => next(), NOOP)
 })
 
-/** 已经有数据（不是mounted场景）时延时请求 */
 useInitRequest(request)
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.pagination {
+  :deep(.q-btn) {
+    min-width: 34px !important;
+  }
+}
+</style>
