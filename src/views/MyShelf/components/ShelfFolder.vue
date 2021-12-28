@@ -4,7 +4,7 @@
       <div class="book-cover">
         <q-card>
           <transition-group name="shelf-item" tag="div" class="books-group">
-            <q-img v-for="item in limitedBooks" :key="item.id" :src="item.value.Cover" :ratio="2 / 3" />
+            <shelf-item-thumb v-for="item in limitedBooks" :key="item.id" :item="item" />
           </transition-group>
         </q-card>
       </div>
@@ -27,16 +27,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useToNow } from '@/composition/useToNow'
-import { useQuasar } from 'quasar'
 import { ShelfFolder } from '@/types/shelf'
+import { useShelfStore } from '@/store/shelf'
+import ShelfItemThumb from './ShelfItemThumb.vue'
 
-const $q = useQuasar()
 const props = defineProps<{ folder: ShelfFolder }>()
+const store = useShelfStore()
 const updateTime = useToNow(computed(() => new Date(props.folder.updateAt)))
 // 限制最多四本书
-const limitedBooks = computed(() => props.folder.children.slice(0, 4))
+const limitedBooks = computed(() => store.getItemByIDs(props.folder.children.map((i) => i.id)))
+console.log('limitedBooks', limitedBooks)
+watch(limitedBooks, (next) => {
+  console.log('limitedBooks', next)
+})
 </script>
 
 <style lang="scss" scoped>
