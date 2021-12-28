@@ -31,6 +31,32 @@
               <div>字体大小</div>
               <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
             </div>
+            <div class="q-gutter-sm">
+              <div>阅读页宽度（设为 0 时为全屏，只在大屏幕下生效）</div>
+              <div style="max-width: 150px">
+                <q-input v-model.number="readSetting.readPageWidth" type="number" dense outlined>
+                  <template v-slot:append>
+                    <div>px</div>
+                  </template>
+                </q-input>
+              </div>
+              <!-- <div class="q-ma-md">预览</div>
+              <div
+                class="preview"
+                :style="{
+                  '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px'
+                }"
+              >
+                <q-scroll-area style="height: 200px; width: 100%">
+                  <div v-for="n in 100" :key="n" class="q-py-xs">
+                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
+                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
+                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
+                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
+                  </div>
+                </q-scroll-area>
+              </div> -->
+            </div>
           </div>
         </q-tab-panel>
 
@@ -99,3 +125,15 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.preview {
+  @import 'src/styles/quasar.variables';
+
+  @media screen and (min-width: $breakpoint-md-min) {
+    width: var(--width);
+    max-width: 100%;
+    min-width: 300px;
+  }
+}
+</style>
