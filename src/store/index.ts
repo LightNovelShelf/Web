@@ -20,7 +20,7 @@ import { defineStore } from 'pinia'
 export const useAppStore = defineStore('app', {
   state: () => ({
     appName: '轻书架',
-    user: null
+    user: null as Record<string, unknown>
   }),
   getters: {
     doubleRepeat: (state) => state.appName.repeat(2),
