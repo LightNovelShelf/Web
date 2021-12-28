@@ -49,5 +49,6 @@ export {
   mdiArrowDown,
   mdiShieldCheck,
   mdiEyeOff,
-  mdiAccount
+  mdiAccount,
+  mdiCloseCircle
 } from '@mdi/js'
