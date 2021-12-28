@@ -244,6 +244,8 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
+    max-width: 100%;
+    min-width: 300px;
   }
 }
 </style>
