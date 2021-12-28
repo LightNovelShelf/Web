@@ -46,7 +46,7 @@ function onIntersection(entry) {
 </script>
 
 <style lang="scss" scoped>
-@import '../assets/style/mixin';
+@import '~@/assets/style/mixin';
 
 .book-cover {
   position: relative;

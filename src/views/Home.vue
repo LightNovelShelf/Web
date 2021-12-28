@@ -142,7 +142,7 @@
 
 <script lang="tsx" setup>
 import { defineComponent, ref, computed } from 'vue'
-import BookCard from '@/components/BookCard.vue'
+import BookCard from '@/components/BookCard'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
 import { getOnlineInfo, getAnnouncementList } from '@/services/context'

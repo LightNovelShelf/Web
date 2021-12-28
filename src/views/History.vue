@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { ref, defineComponent, computed } from 'vue'
 import { getReadHistory } from '@/services/user'
-import BookCard from '@/components/BookCard.vue'
+import BookCard from '@/components/BookCard'
 import { getBookListByIds } from '@/services/book'
 import { BookInList } from '@/services/book/types'
 import { icon } from '@/plugins/icon'

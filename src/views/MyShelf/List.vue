@@ -132,7 +132,7 @@
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import BookCard from '@/components/BookCard.vue'
+import BookCard from '@/components/BookCard'
 import { computed, defineComponent, onBeforeUnmount, Ref, ref, toRaw, toRef, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
