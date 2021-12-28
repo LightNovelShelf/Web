@@ -2,9 +2,11 @@
   <div>
     <router-link :to="{ name: 'BookInfo', params: { bid: props.book.Id } }">
       <div class="book-cover">
-        <q-card>
-          <q-img :src="cover" :ratio="2 / 3" />
+        <q-card v-intersection.once="onIntersection">
+          <q-img v-if="visible" :src="cover" :ratio="2 / 3" />
+          <q-responsive v-else :ratio="2 / 3" />
         </q-card>
+
         <div class="book-tag" :style="{ backgroundColor: book.Category?.Color }">
           <span style="font-size: 12px">{{ $q.screen.gt.md ? book.Category?.Name : book.Category?.ShortName }}</span>
         </div>
@@ -28,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
 import { useQuasar } from 'quasar'
@@ -37,6 +39,10 @@ const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const cover = computed(() => props.book.Cover)
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
+const visible = ref(false)
+function onIntersection(entry) {
+  visible.value = entry.isIntersecting
+}
 </script>
 
 <style lang="scss" scoped>

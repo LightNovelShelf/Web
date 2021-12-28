@@ -25,10 +25,14 @@
               </q-responsive>
             </q-card>
           </q-grid-item>
-          <q-grid-item span="2" xs="1" sm="1" md="1" style="position: relative">
+          <q-grid-item span="2" xs="1" sm="1" md="1">
             <div v-if="isActive">
-              <div class="absolute-top-right">
-                <div style="padding: 12px 0 0 0">
+              <div class="row flex-align-center">
+                <div class="introduction" style="margin: 24px 0">书籍信息</div>
+
+                <q-space />
+
+                <div>
                   <q-avatar>
                     <img :src="book.User.Avatar" alt="book_user" />
                   </q-avatar>
@@ -41,10 +45,11 @@
                   </q-menu>
                 </div>
               </div>
-              <div class="introduction" style="margin: 24px 0">书籍信息</div>
+
               <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
               <div>作者：{{ book['Author'] }}</div>
-              <div>最后更新：{{ book['LastUpdate'] }} ({{ LastUpdateTimeDesc }})</div>
+              <div>最后更新：{{ book['LastUpdate'] }}</div>
+              <div>更新时间：{{ dateFormat(book['LastUpdateTime']) }} ({{ LastUpdateTimeDesc }})</div>
               <div>上次阅读：{{ lastReadTitle }}</div>
               <div style="margin-top: 24px">
                 <div>简介</div>
@@ -65,9 +70,11 @@
               <q-skeleton />
               <q-skeleton height="150px" />
               <div></div>
-              <div class="row q-gutter-md">
-                <q-skeleton type="QBtn" />
-                <q-skeleton type="QBtn" />
+              <div>
+                <div class="row q-gutter-x-md">
+                  <q-skeleton type="QBtn" />
+                  <q-skeleton type="QBtn" />
+                </div>
               </div>
             </div>
           </q-grid-item>
@@ -107,6 +114,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { BookInList } from '@/services/book/types'
+import { DateTime } from 'luxon'
 
 const props = defineProps<{ bid: string }>()
 
@@ -168,6 +176,9 @@ const lastReadTitle = computed(() => {
   }
   return '暂无'
 })
+function dateFormat(time: Date) {
+  return DateTime.fromJSDate(time).toFormat('yyyy-MM-dd hh:mm')
+}
 </script>
 
 <style scoped lang="scss">
