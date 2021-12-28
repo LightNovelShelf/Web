@@ -1,13 +1,17 @@
 import { requestWithSignalr } from '@/services/internal/request'
-import { Card } from '@/types/collaborator'
-import { GetAnnouncementComment, PostAnnouncementComment } from './types'
+import { CommentType, GetComment, PostComment } from './types'
 
-/** 评论公告 */
-export function postAnnouncementComment(req: PostAnnouncementComment.Request) {
-  return requestWithSignalr<PostAnnouncementComment.Response>('PostAnnouncementComment', req)
+/** 公告评论 */
+export function postComment(req: PostComment.Request) {
+  return requestWithSignalr<PostComment.Response>('PostComment', req)
+}
+
+/** 公告评论回复 */
+export function replyComment(req: PostComment.Request) {
+  return requestWithSignalr<PostComment.Response>('ReplyComment', req)
 }
 
 /** 获取公告评论 */
-export function getAnnouncementComment(req: GetAnnouncementComment.Request) {
-  return requestWithSignalr<GetAnnouncementComment.Response>('GetAnnouncementComment', req)
+export function getComment(req: GetComment.Request) {
+  return requestWithSignalr<GetComment.Response>('GetComment', req)
 }

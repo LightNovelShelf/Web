@@ -3,9 +3,9 @@ import { computed, ComputedRef, ref, Ref } from 'vue'
 import { parseTime, toNow } from '@/utils/time'
 import { useTickSource } from '@/composition/useTickSource'
 
-const base = ref(DateTime.now())
+const baseTime = ref(DateTime.now())
 useTickSource(() => {
-  base.value = DateTime.now()
+  baseTime.value = DateTime.now()
 })
 
 /**
@@ -32,7 +32,9 @@ useTickSource(() => {
 export function useToNow(date: ComputedRef<Date | DateTime>, notNegative = true, locale?: string): Ref<string> {
   const dateObj = computed(() => parseTime(date.value))
   return computed(() => {
-    const str = toNow(dateObj.value, base.value, locale)
+    const str = toNow(dateObj.value, baseTime.value, locale)
     return notNegative && str.includes('后') ? '刚刚' : str
   })
 }
+
+export { baseTime }

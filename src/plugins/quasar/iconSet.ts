@@ -98,7 +98,7 @@ export default {
     activeIcon: icon.mdiClose
   },
   field: {
-    clear: 'mdi-close-circle',
+    clear: icon.mdiCloseCircle,
     error: 'mdi-alert-circle'
   },
   pagination: {
