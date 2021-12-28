@@ -95,7 +95,8 @@
                         </q-item-label>
                       </q-item-section>
                     </q-item>
-                    <q-separator v-if="replyIndex + 1 !== item.Reply.length" spaced inset="item" />
+
+                    <q-separator v-if="replyIndex + 1 !== item.Reply.length" style="margin-left: 48px" spaced />
                   </template>
                 </q-list>
               </q-item-section>
