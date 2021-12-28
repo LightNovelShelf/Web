@@ -41,7 +41,7 @@ import { defineComponent, onMounted, ref, reactive, watch } from 'vue'
 import { getBookList } from '@/services/book'
 import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import BookCard from '@/components/BookCard.vue'
+import BookCard from '@/components/BookCard'
 import { BookInList } from '@/services/book/types'
 import { useRouter } from 'vue-router'
 
