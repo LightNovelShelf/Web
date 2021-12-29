@@ -51,5 +51,6 @@ export {
   mdiShieldCheck,
   mdiEyeOff,
   mdiAccount,
-  mdiCloseCircle
+  mdiCloseCircle,
+  mdiFolderOpen
 } from '@mdi/js'

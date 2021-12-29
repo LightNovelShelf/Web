@@ -31,6 +31,7 @@
   <!-- @todo 缺点是会导致整个列表闪一下，这个看有没有办法处理（看起来是loading的原因） -->
   <q-grid
     :key="editMode ? 1 : 2"
+    v-if="shelf.length"
     cols="2"
     xs="2"
     sm="4"
@@ -80,6 +81,14 @@
       </q-list>
     </q-menu>
   </q-grid>
+
+  <!-- 空态 -->
+  <div class="empty-placeholder">
+    <div>
+      <q-icon class="empty-placeholder-icon" size="160" color="grey" :name="mdiFolderOpen" />
+      <div class="empty-placeholder-label">{{ loading ? '读取中...' : '空空如也' }}</div>
+    </div>
+  </div>
 
   <!-- 书架文件夹选择弹层 -->
   <q-dialog :model-value="folderSelectorVisible" @update:model-value="toggleShelfFolderSelector">
@@ -144,6 +153,7 @@ import { mdiCheckCircle, mdiCheckboxBlankCircleOutline } from '@/plugins/icon/ex
 import { nanoid } from 'nanoid'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { useShelfStore } from '@/store/shelf'
+import { mdiFolderOpen } from '@/plugins/icon/export'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -159,7 +169,7 @@ useShelfStore()
 
 const $ = useQuasar()
 /** 加载标记 */
-const loading = ref(true)
+const loading = ref(false)
 /** 编辑状态 */
 const editMode = ref(false)
 const shelfStore = useShelfStore()
@@ -458,6 +468,22 @@ onBeforeUnmount(() => {
   .action {
     margin-left: 10px;
   }
+}
+
+// 列表空态
+.empty-placeholder {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+}
+.empty-placeholder-icon {
+  display: block;
+}
+.empty-placeholder-label {
+  margin-top: 4px;
 }
 
 // 列表项
