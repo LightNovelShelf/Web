@@ -179,7 +179,7 @@ const replyShow = ref(false)
 const inputReplyComment = ref()
 const replying = ref(false)
 const parentId = ref<number>()
-const replyId = ref<number>(2)
+const replyId = ref<number>()
 
 const request = useTimeoutFn(async () => {
   comment.value = await getComment({ Type: props.type, Id: props.id, Page: 1 })
