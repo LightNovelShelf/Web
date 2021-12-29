@@ -26,7 +26,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/announcement/detail/:id',
     name: 'AnnouncementDetail',
     props: true,
-    meta: { requiresAuth: false },
     component: () => import('../views/Announcement/AnnouncementDetail.vue')
   },
   {

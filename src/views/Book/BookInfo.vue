@@ -93,14 +93,14 @@
         </q-list>
       </q-card-section>
     </q-card>
-    <comment style="margin-top: 12px" />
+    <comment style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, defineComponent, ref, onActivated, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
-import Comment from '@/components/Comment.vue'
+import { Comment } from '@/components/'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
@@ -115,6 +115,7 @@ import { useQuasar } from 'quasar'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { BookInList } from '@/services/book/types'
 import { DateTime } from 'luxon'
+import { CommentType } from '@/services/comment/types'
 
 const props = defineProps<{ bid: string }>()
 
@@ -122,12 +123,12 @@ const $q = useQuasar()
 const router = useRouter()
 const appStore = useAppStore()
 let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
-let bid = computed(() => ~~(props.bid || '1'))
+let _bid = computed(() => ~~(props.bid || '1'))
 // 每次从服务器获取数据时，更新此字段，每次进入页面时，从缓存读取本数据
 let position = ref(null)
 const getInfo = useTimeoutFn(async () => {
   try {
-    bookInfo.value = await getBookInfo(bid.value)
+    bookInfo.value = await getBookInfo(_bid.value)
     let temp = bookInfo.value.ReadPosition
     if (temp) {
       position.value = {
@@ -149,12 +150,12 @@ const startRead = async () => {
   if (position.value?.xPath) {
     sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.value.cid) + 1
   }
-  await router.push({ name: 'Read', params: { bid: bid.value, sortNum: sortNum } })
+  await router.push({ name: 'Read', params: { bid: _bid.value, sortNum: sortNum } })
 }
 
 useInitRequest(getInfo)
 onActivated(async () => {
-  position.value = await loadHistory(appStore.userId, bid.value)
+  position.value = await loadHistory(appStore.userId, _bid.value)
 })
 
 // 只要数据中的id和props不同，就当在加载
@@ -167,7 +168,7 @@ const bookInList = computed<BookInList | null>(() =>
       } as BookInList)
     : null
 )
-const isActive = computed(() => book.value?.Id === bid.value)
+const isActive = computed(() => book.value?.Id === _bid.value)
 const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 const lastReadTitle = computed(() => {
   if (position && position.value?.cid) {
