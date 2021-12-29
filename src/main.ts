@@ -4,7 +4,7 @@ import App from './App.vue'
 import './assets/style/main.scss'
 import './registerServiceWorker'
 import router from './router'
-import { Quasar, Dark } from 'quasar'
+import { Quasar } from 'quasar'
 import quasarUserOptions from '@/plugins/quasar/options'
 import { QGridItem, QGrid } from '@/plugins/quasar/components'
 
