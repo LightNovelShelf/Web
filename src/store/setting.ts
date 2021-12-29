@@ -31,9 +31,9 @@ export const useSettingStore = defineStore('app.setting', {
     }
   },
   getters: {
-    buildReaderWidth: (state) => {
-      if (state.readSetting.readPageWidth === 0) return '100%'
-      return state.readSetting.readPageWidth + 'px'
+    buildReaderWidth(): string {
+      if (this.readSetting.readPageWidth === 0) return '100%'
+      return this.readSetting.readPageWidth + 'px'
     }
   }
 })
