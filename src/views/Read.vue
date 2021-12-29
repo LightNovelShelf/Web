@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="q-mx-auto container read-page"
-    :style="{ '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px' }"
-  >
+  <div class="q-mx-auto container read-page" :style="{ '--width': settingStore.buildReaderWidth }">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
