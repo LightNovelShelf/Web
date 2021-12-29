@@ -43,16 +43,16 @@
             </q-item-section>
 
             <q-item-section>
-              <q-item-label>
-                <b>{{ comment.Users[`${comment.Commentaries[`${item.Id}`].UserId}`].UserName }}</b>
+              <q-item-label class="text-bold">
+                {{ comment.Users[`${comment.Commentaries[`${item.Id}`].UserId}`].UserName }}
               </q-item-label>
-              <q-item-label>
+              <q-item-label class="pre">
                 {{ comment.Commentaries[`${item.Id}`].Content }}
               </q-item-label>
               <q-item-label caption>
                 <div class="row flex-align-center q-gutter-x-md">
                   <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime, baseTime) }}</div>
-                  <q-btn flat dense>回复</q-btn>
+                  <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
                 </div>
               </q-item-label>
             </q-item-section>
@@ -76,27 +76,29 @@
                         </q-avatar>
                       </q-item-section>
                       <q-item-section>
-                        <q-item-label v-if="comment.Commentaries[`${replyId}`].ReplyId === 0">
-                          <b>{{ comment.Users[`${comment.Commentaries[`${replyId}`].UserId}`].UserName }}</b>
-                        </q-item-label>
-                        <q-item-label v-else>
-                          <b>{{ comment.Users[`${comment.Commentaries[`${replyId}`].UserId}`].UserName }}</b>
+                        <q-item-label v-if="comment.Commentaries[`${replyId}`].ReplyId">
+                          <span class="text-bold">
+                            {{ comment.Users[`${comment.Commentaries[`${replyId}`].UserId}`].UserName }}
+                          </span>
                           回复
-                          <b>
+                          <span class="text-bold">
                             {{
                               comment.Users[
                                 `${comment.Commentaries[`${comment.Commentaries[`${replyId}`].ReplyId}`].UserId}`
                               ].UserName
                             }}
-                          </b>
+                          </span>
                         </q-item-label>
-                        <q-item-label>
+                        <q-item-label v-else>
+                          <b>{{ comment.Users[`${comment.Commentaries[`${replyId}`].UserId}`].UserName }}</b>
+                        </q-item-label>
+                        <q-item-label class="pre">
                           {{ comment.Commentaries[`${replyId}`].Content }}
                         </q-item-label>
                         <q-item-label caption>
                           <div class="row flex-align-center q-gutter-x-md">
                             <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime, baseTime) }}</div>
-                            <q-btn flat dense>回复</q-btn>
+                            <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
                           </div>
                         </q-item-label>
                       </q-item-section>
@@ -120,6 +122,35 @@
         </div>
       </template>
     </q-list>
+
+    <q-dialog v-model="replyShow">
+      <q-card style="min-width: 300px">
+        <q-card-section>
+          <div class="text-h6">
+            回复
+            <span class="text-bold">
+              {{ comment.Users[`${comment.Commentaries[`${parentId}`].UserId}`].UserName }}
+            </span>
+            的评论
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-input
+            placeholder="请输入评论"
+            outlined
+            type="textarea"
+            clearable
+            :input-style="{ height: '100px' }"
+            v-model="inputReplyComment"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="回复" color="primary" @click="reply" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-card>
 </template>
 
@@ -139,9 +170,16 @@ const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
-const inputComment = ref()
 const comment = ref<GetComment.Response>()
+
+const inputComment = ref()
 const posting = ref(false)
+
+const replyShow = ref(false)
+const inputReplyComment = ref()
+const replying = ref(false)
+const parentId = ref<number>()
+const replyId = ref<number>(2)
 
 const request = useTimeoutFn(async () => {
   comment.value = await getComment({ Type: props.type, Id: props.id, Page: 1 })
@@ -163,10 +201,38 @@ const post = async () => {
   }
 }
 
+const showReply = async (_parentId: number, _replyId?: number) => {
+  parentId.value = _parentId
+  replyId.value = _replyId
+  replyShow.value = true
+}
+
+const reply = async () => {
+  if (inputReplyComment.value) {
+    await replyComment({
+      Type: props.type,
+      Id: props.id,
+      Content: inputReplyComment.value,
+      ReplyId: replyId.value || null,
+      ParentId: parentId.value
+    })
+    $q.notify({
+      message: '评论成功',
+      timeout: 2000,
+      type: 'positive'
+    })
+    inputReplyComment.value = null
+    await request.syncCall()
+  }
+}
+
 useInitRequest(request)
 </script>
 
 <style scoped lang="scss">
+.pre {
+  white-space: pre;
+}
 .reply {
   :deep(.q-item__section--avatar) {
     min-width: unset;
