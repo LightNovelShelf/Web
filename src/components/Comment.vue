@@ -21,13 +21,19 @@
         </q-item-section>
 
         <q-item-section side>
-          <q-btn class="fit">发表评论</q-btn>
+          <q-btn class="fit" @click="post">发表评论</q-btn>
         </q-item-section>
       </q-item>
 
       <q-separator spaced />
 
-      <template v-if="comment">
+      <template v-if="comment?.Data?.length === 0">
+        <div class="row flex-center" style="height: 40px">
+          <div>暂无评论</div>
+        </div>
+      </template>
+
+      <template v-else-if="comment">
         <template v-for="(item, index) in comment.Data" :key="item.Id">
           <q-item>
             <q-item-section top avatar>
@@ -107,6 +113,12 @@
           <q-separator v-else spaced />
         </template>
       </template>
+
+      <template v-else>
+        <div class="row flex-center">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
     </q-list>
   </q-card>
 </template>
@@ -121,15 +133,31 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useQuasar } from 'quasar'
 
+const props = defineProps<{ type: CommentType; id: number }>()
+const $q = useQuasar()
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const inputComment = ref()
 const comment = ref<GetComment.Response>()
 
 const request = useTimeoutFn(async () => {
-  comment.value = await getComment({ Type: CommentType.Announcement, Id: 1, Page: 1 })
+  comment.value = await getComment({ Type: props.type, Id: props.id, Page: 1 })
 })
+
+const post = async () => {
+  if (inputComment.value) {
+    await postComment({ Type: props.type, Id: props.id, Content: inputComment.value })
+    $q.notify({
+      message: '评论成功',
+      timeout: 2000,
+      type: 'positive'
+    })
+    inputComment.value = null
+    await request.syncCall()
+  }
+}
 
 useInitRequest(request)
 </script>
