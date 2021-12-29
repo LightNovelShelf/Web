@@ -106,11 +106,10 @@ const shelfStore = defineStore('app.shelf', {
   actions: {
     async readDB() {
       const db = (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
-      this.source[ShelfBranch.main] = db
+      // 设定当前分支；可以理解为 git pull
+      this.source[this.branch] = db
 
-      for (const key in this.source) {
-        this.source[key as keyof typeof this.source] = this.source[ShelfBranch.main]
-      }
+      // 其它branch在checkout的时候才维护
     },
     async writeDB() {
       await shelfDB.clear()
