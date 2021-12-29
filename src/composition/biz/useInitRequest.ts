@@ -1,4 +1,4 @@
-import { onActivated, ref } from 'vue'
+import { onActivated, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { safeCall } from '@/utils/safeCall'
 import { UseTimeoutFnAction } from '../useTimeoutFn'
@@ -10,20 +10,24 @@ export function useInitRequest(
   before: AnyFunc = null,
   after: AnyFunc = null
 ) {
-  const first = ref<boolean>(true)
+  let first = true
+
+  // 在每次判断路由为前进或第一次进入时加载数据
+  onMounted(async () => {
+    first = false
+    if (before) before()
+    await safeCall(cb.syncCall)()
+    if (after) after()
+  })
 
   const router = useRoute()
-  // 在每次判断路由为前进或第一次进入时加载数据
   onActivated(async () => {
-    if (router.meta.reload) {
+    if (first && router.meta.reload) {
       if (before) before()
-      if (first.value) {
-        first.value = false
-        await safeCall(cb.syncCall)()
-      } else {
-        await safeCall(cb)()
-      }
+      await safeCall(cb)()
       if (after) after()
+    } else {
+      first = true
     }
   })
 }
