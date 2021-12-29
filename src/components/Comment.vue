@@ -27,14 +27,20 @@
 
       <q-separator spaced />
 
-      <template v-if="comment?.Data?.length === 0">
+      <template v-if="loading">
+        <div class="row flex-center">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+
+      <template v-else-if="comment?.Data?.length === 0">
         <div class="row flex-center" style="height: 40px">
           <div>暂无评论</div>
         </div>
       </template>
 
       <template v-else-if="comment">
-        <template v-for="(item, index) in comment.Data" :key="item.Id">
+        <template v-for="item in comment.Data" :key="item.Id">
           <q-item>
             <q-item-section top avatar>
               <q-avatar size="48px">
@@ -111,16 +117,28 @@
             </q-item>
           </template>
 
-          <q-separator v-if="index + 1 !== comment.Data.length" spaced inset="item" />
-          <q-separator v-else spaced />
+          <q-separator spaced inset="item" />
         </template>
       </template>
 
-      <template v-else>
-        <div class="row flex-center">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-      </template>
+      <q-item v-if="comment?.TotalPages">
+        <q-item-section class="row flex-center pagination">
+          <q-pagination
+            style="margin-bottom: 12px"
+            padding="4px"
+            :disable="loading"
+            v-model="currentPage"
+            :max="comment?.TotalPages"
+            direction-links
+            :icon-first="icon.mdiSkipPrevious"
+            :icon-last="icon.mdiSkipNext"
+            :icon-prev="icon.mdiChevronLeft"
+            :icon-next="icon.mdiChevronRight"
+            :max-pages="8"
+            :input="!$q.screen.gt.sm"
+          />
+        </q-item-section>
+      </q-item>
     </q-list>
 
     <q-dialog v-model="replyShow">
@@ -160,11 +178,12 @@ import { CommentType, GetComment } from '@/services/comment/types'
 import { baseTime } from '@/composition/useToNow'
 import { toNow } from '@/utils/time'
 import { useAppStore } from '@/store'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useQuasar } from 'quasar'
+import { icon } from '@/plugins/icon'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
@@ -172,19 +191,27 @@ const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const comment = ref<GetComment.Response>()
 
+const loading = computed(
+  () =>
+    !(comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page)
+)
+
+const currentPage = ref(1)
 const inputComment = ref()
 const posting = ref(false)
 
 const replyShow = ref(false)
 const inputReplyComment = ref()
-const replying = ref(false)
+// const replying = ref(false)
 const parentId = ref<number>()
 const replyId = ref<number>()
 
 const request = useTimeoutFn(async () => {
-  comment.value = await getComment({ Type: props.type, Id: props.id, Page: 1 })
+  comment.value = await getComment({ Type: props.type, Id: props.id, Page: currentPage.value })
   posting.value = false
 })
+
+watch(() => currentPage.value, request)
 
 const post = async () => {
   if (inputComment.value) {
@@ -236,6 +263,11 @@ useInitRequest(request)
 .reply {
   :deep(.q-item__section--avatar) {
     min-width: unset;
+  }
+}
+.pagination {
+  :deep(.q-btn) {
+    min-width: 34px !important;
   }
 }
 :deep(.q-item) {

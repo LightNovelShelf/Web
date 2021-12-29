@@ -24,6 +24,8 @@ export namespace GetComment {
 
   export interface Response {
     Id: number
+    Type: CommentType
+    Page: number
     TotalPages: number
     Users: Record<string, any>[]
     Commentaries: Record<string, any>[]
