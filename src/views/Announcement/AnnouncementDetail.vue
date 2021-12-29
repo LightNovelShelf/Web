@@ -26,7 +26,7 @@
 
 <script lang="ts" setup>
 import { computed, defineComponent, ref } from 'vue'
-import Comment from '@/components/Comment.vue'
+import { Comment } from '@/components/'
 import { getAnnouncementDetail } from '@/services/context'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { Announcement, announcementFormat } from '@/views/Announcement/announcementFormat'

@@ -100,7 +100,7 @@
 <script lang="ts" setup>
 import { computed, defineComponent, ref, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
-import Comment from '@/components/Comment.vue'
+import { Comment } from '@/components/'
 import { getBookInfo } from '@/services/book'
 import { useToNow } from '@/composition/useToNow'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
