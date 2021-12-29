@@ -83,7 +83,7 @@
   </q-grid>
 
   <!-- 空态 -->
-  <div class="empty-placeholder">
+  <div v-else class="empty-placeholder">
     <div>
       <q-icon class="empty-placeholder-icon" size="160" color="grey" :name="mdiFolderOpen" />
       <div class="empty-placeholder-label">{{ loading ? '读取中...' : '空空如也' }}</div>
