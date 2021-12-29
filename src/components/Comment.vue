@@ -21,7 +21,7 @@
         </q-item-section>
 
         <q-item-section side>
-          <q-btn class="fit" @click="post">发表评论</q-btn>
+          <q-btn :loading="posting" class="fit" @click="post">发表评论</q-btn>
         </q-item-section>
       </q-item>
 
@@ -141,19 +141,23 @@ const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const inputComment = ref()
 const comment = ref<GetComment.Response>()
+const posting = ref(false)
 
 const request = useTimeoutFn(async () => {
   comment.value = await getComment({ Type: props.type, Id: props.id, Page: 1 })
+  posting.value = false
 })
 
 const post = async () => {
   if (inputComment.value) {
+    posting.value = true
     await postComment({ Type: props.type, Id: props.id, Content: inputComment.value })
     $q.notify({
       message: '评论成功',
       timeout: 2000,
       type: 'positive'
     })
+    posting.value = false
     inputComment.value = null
     await request.syncCall()
   }
