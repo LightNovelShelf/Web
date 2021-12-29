@@ -5,91 +5,112 @@ import { toRaw } from 'vue'
 import produce from 'immer'
 import { isEqual } from 'lodash-es'
 
+export enum ShelfBranch {
+  main = 'main',
+  draft = 'draft'
+}
+type ShelfSourceStruct = {
+  [key in ShelfBranch]: ShelfItem[]
+}
+
 export interface ShelfStore {
   _first: boolean
-  shelf: ShelfItem[]
+  source: ShelfSourceStruct
+  branch: ShelfBranch
 }
 
 /** 初始state */
 const INIT: ShelfStore = {
   _first: true,
-  shelf: []
+  source: {
+    [ShelfBranch.main]: [],
+    [ShelfBranch.draft]: []
+  },
+  branch: ShelfBranch.main
 }
 
 /** @private 书架store */
 const shelfStore = defineStore('app.shelf', {
   state: () => INIT,
   getters: {
+    shelf(): ShelfItem[] {
+      return this.source[this.branch]
+    },
     /** 所有书籍（包括已经被放入文件夹的） */
-    books(state): ShelfBookItem[] {
-      return state.shelf.filter((i): i is ShelfBookItem => i.type === ShelfItemType.BOOK)
+    books(): ShelfBookItem[] {
+      return this.shelf.filter((i): i is ShelfBookItem => i.type === ShelfItemType.BOOK)
     },
     /** 所有文件夹 */
-    folders(state): ShelfFolderItem[] {
-      return state.shelf.filter((i): i is ShelfFolderItem => i.type === ShelfItemType.FOLDER)
+    folders(): ShelfFolderItem[] {
+      return this.shelf.filter((i): i is ShelfFolderItem => i.type === ShelfItemType.FOLDER)
     },
     /** 获取指定层级的内容 */
-    getShelfByParents(state): (parents: string[]) => ShelfItem[] {
+    getShelfByParents(): (parents: string[]) => ShelfItem[] {
       return (parents: string[]) => {
-        return state.shelf.filter((i) => isEqual(i.parents, parents))
+        return this.shelf.filter((i) => isEqual(i.parents, parents))
       }
     },
     /** 获取指定层级的内容 */
-    getBooksByIDs(state): (parents: string[]) => ShelfItem[] {
+    getBooksByIDs(): (parents: string[]) => ShelfItem[] {
       return (itemID: string[]) => {
         return itemID.map((id: string) => this.booksMap.get(id)!).filter((o) => !!o)
       }
     },
     /** 获取指定层级的内容 */
-    getFolderByIDs(state): (parents: string[]) => ShelfItem[] {
+    getFolderByIDs(): (parents: string[]) => ShelfItem[] {
       return (itemID: string[]) => {
         return itemID.map((id: string) => this.foldersMap.get(id)!).filter((o) => !!o)
       }
     },
     /** 获取指定层级的内容 */
-    getItemByIDs(state): (parents: string[]) => ShelfItem[] {
+    getItemByIDs(): (parents: string[]) => ShelfItem[] {
       return (itemID: string[]) => {
         return itemID.map((id: string) => this.shelfsMap.get(id)!).filter((o) => !!o)
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
-    curMaxShelfIndex(state): number {
+    curMaxShelfIndex(): number {
       let max = -1
 
-      state.shelf.forEach(({ index }) => {
+      this.shelf.forEach(({ index }) => {
         max = Math.max(index, max)
       })
 
       return max
     },
     /** map格式的书籍数据，方便查找 */
-    booksMap(state): Map<string, ShelfBookItem> {
+    booksMap(): Map<string, ShelfBookItem> {
       const map = new Map<string, ShelfBookItem>()
       this.books.forEach((item) => {
-        map.set(item.id, item)
+        map.set(item.id, toRaw(item))
       })
       return map
     },
     /** map格式的文件夹数据，方便查找 */
-    foldersMap(state): Map<string, ShelfFolderItem> {
+    foldersMap(): Map<string, ShelfFolderItem> {
       const map = new Map<string, ShelfFolderItem>()
       this.folders.forEach((item) => {
-        map.set(item.id, item)
+        map.set(item.id, toRaw(item))
       })
       return map
     },
     /** map格式的shelf数据，方便查找 */
-    shelfsMap(state): Map<string, ShelfItem> {
+    shelfsMap(): Map<string, ShelfItem> {
       const map = new Map<string, ShelfItem>()
-      state.shelf.forEach((item) => {
-        map.set(item.id, item)
+      this.shelf.forEach((item) => {
+        map.set(item.id, toRaw(item))
       })
       return map
     }
   },
   actions: {
     async readDB() {
-      this.shelf = (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
+      const db = (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
+      this.source[ShelfBranch.main] = db
+
+      for (const key in this.source) {
+        this.source[key as keyof typeof this.source] = this.source[ShelfBranch.main]
+      }
     },
     async writeDB() {
       await shelfDB.clear()
@@ -148,7 +169,7 @@ const shelfStore = defineStore('app.shelf', {
       // 如果有更改
       if (nextShelf !== toRaw(this.folders)) {
         // 更新记录
-        this.shelf = nextShelf
+        this.source[this.branch] = nextShelf
         // 写到DB
         this.writeDB()
       }
@@ -162,12 +183,12 @@ const shelfStore = defineStore('app.shelf', {
         parents: [],
         index: this.curMaxShelfIndex + 1
       }
-      this.shelf.push(item)
+      this.source[this.branch].push(item)
       await this.writeDB()
     },
     /** 移出收藏 @param bookId 书籍的id */
     async removeFromShelf(bookId: number | string) {
-      this.shelf = this.shelf.filter((i) => i.id !== bookId + '')
+      this.source[this.branch] = this.source[this.branch].filter((i) => i.id !== bookId + '')
       await this.writeDB()
     }
   }
