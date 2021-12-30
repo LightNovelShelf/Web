@@ -17,6 +17,12 @@
         style="position: relative; z-index: 1"
         :style="readStyle"
       />
+      <q-tooltip
+        :target="commentTarget"
+        v-html="commentHTML"
+        class="tooltip-style"
+        v-model="commentShowing"
+      ></q-tooltip>
       <div class="row justify-between q-gutter-md" style="margin-top: 24px">
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
         <q-btn @click="back" class="flex-space">目录</q-btn>
@@ -51,10 +57,10 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch } from 'vue'
+<script lang="tsx" setup>
+import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch, createApp } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import { useQuasar, Dark, colors, debounce } from 'quasar'
+import { useQuasar, Dark, colors, debounce, QTooltip } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading, scrollToHistory, loadHistory } from '@/utils/biz/read'
 import { useLayout } from '@/components/app/useLayout'
@@ -80,6 +86,9 @@ const $q = useQuasar()
 const chapter = ref<any>()
 const chapterRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
+const commentTarget = ref('')
+const commentHTML = ref('')
+const commentShowing = ref(false)
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
@@ -90,7 +99,6 @@ const showImage = reactive({
   src: null,
   alt: ''
 })
-
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
 function moveFab(ev) {
@@ -190,6 +198,12 @@ function previewImg(event) {
   viewerRef.value.$viewer.show()
 }
 
+function showComment(html: string, id: string) {
+  commentTarget.value = `#${id}`
+  commentHTML.value = html
+  commentShowing.value = true
+}
+
 onMounted(getContent.syncCall)
 watch(() => [bid.value, sortNum.value], getContent)
 // 如果章节变了，重新观察dom记录阅读记录
@@ -199,6 +213,21 @@ watch(
     nextTick(async () => {
       chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
         element.onclick = previewImg
+      })
+      let comments = chapterRef.value.querySelectorAll('aside')
+      let getBindComment = (id: string): HTMLElement => {
+        let bind: HTMLElement = undefined
+        comments.forEach((elem: HTMLElement) => {
+          if (elem.id === id) bind = elem
+        })
+        return bind
+      }
+
+      chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
+        let id = element.getAttribute('href').replace('#', '')
+        let comment = getBindComment(id).innerHTML
+        element.id = `v-${id}`
+        element.onmouseenter = () => showComment(comment, `v-${id}`)
       })
       await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
     })
@@ -223,6 +252,12 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 .v-viewer {
   display: none;
+}
+
+:deep(.tooltip-style) {
+  @import 'src/assets/style/read';
+
+  font-family: read, sans-serif !important;
 }
 
 :deep(.read) {
