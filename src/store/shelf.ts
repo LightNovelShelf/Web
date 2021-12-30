@@ -249,14 +249,14 @@ const shelfStore = defineStore('app.shelf', {
       })
     },
     /** 点击记录 */
-    selectItem({ index }: { index: number }) {
+    selectItem(payload: { index: number }) {
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           // 不在范围内的书就不用动了
           // 老的index换成新的index
           // 剩下的依次左移/右移
           draft.forEach((item, index) => {
-            if (index === index) {
+            if (index === payload.index) {
               item.selected = !item.selected
             }
           })
