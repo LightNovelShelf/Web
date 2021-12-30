@@ -44,10 +44,6 @@ function onIntersection(entry) {
 }
 </script>
 
-<script lang="ts">
-export default {}
-</script>
-
 <style lang="scss" scoped>
 @import '../assets/style/mixin';
 
