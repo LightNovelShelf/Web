@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, onActivated } from 'vue'
+import { computed, defineComponent, ref, onActivated, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import { Comment } from '@/components/'
 import { getBookInfo } from '@/services/book'
@@ -114,6 +114,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
 import { DateTime } from 'luxon'
 import { CommentType } from '@/services/comment/types'
+import { userReadPositionDB } from '@/utils/storage/db'
 
 defineComponent({ QGrid, QGridItem, Comment })
 const props = defineProps<{ bid: string }>()
@@ -134,6 +135,7 @@ const getInfo = useTimeoutFn(async () => {
         cid: temp.Cid,
         xPath: temp.XPath
       }
+      await userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
     }
   } catch (error) {
     $q.notify({
