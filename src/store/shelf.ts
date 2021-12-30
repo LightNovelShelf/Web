@@ -104,19 +104,44 @@ const shelfStore = defineStore('app.shelf', {
     }
   },
   actions: {
-    async readDB() {
+    /** git ------------ */
+    /** 从db中拉数据 */
+    async pull() {
       const db = (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
       // 设定当前分支；可以理解为 git pull
       this.source[this.branch] = db
 
       // 其它branch在checkout的时候才维护
     },
-    async writeDB() {
+
+    /** push到db */
+    async push() {
       await shelfDB.clear()
       for (const i of this.shelf) {
         await shelfDB.set(i.id, i)
       }
     },
+
+    /** 切换分支 */
+    async checkout({ branch, reset }: { branch: ShelfBranch; reset: boolean }) {
+      if (reset) {
+        this.source[branch] = this.source[this.branch]
+      }
+      this.branch = branch
+    },
+
+    /** 把当前分支的数据覆盖到指定分支 */
+    async merge({ to }: { to: ShelfBranch }) {
+      this.source[to] = this.source[this.branch]
+    },
+
+    /** 提交更改 */
+    async commit({ shelf }: { shelf: ShelfItem[] }) {
+      this.source[this.branch] = shelf
+    },
+
+    /** git end -------- */
+
     /** 校验书架文件夹ID是否有失效 */
     async verifyFolderData() {
       let nextShelf: ShelfItem[] = toRaw(this.shelf)
@@ -170,7 +195,7 @@ const shelfStore = defineStore('app.shelf', {
         // 更新记录
         this.source[this.branch] = nextShelf
         // 写到DB
-        this.writeDB()
+        this.push()
       }
     },
     /** 添加到收藏 */
@@ -183,12 +208,12 @@ const shelfStore = defineStore('app.shelf', {
         index: this.curMaxShelfIndex + 1
       }
       this.source[this.branch].push(item)
-      await this.writeDB()
+      await this.push()
     },
     /** 移出收藏 @param bookId 书籍的id */
     async removeFromShelf(bookId: number | string) {
       this.source[this.branch] = this.source[this.branch].filter((i) => i.id !== bookId + '')
-      await this.writeDB()
+      await this.push()
     }
   }
 })
@@ -200,7 +225,7 @@ export function useShelfStore() {
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (store._first) {
     store.$patch({ _first: false })
-    store.readDB().then(() => store.verifyFolderData())
+    store.pull().then(() => store.verifyFolderData())
   }
 
   return store
