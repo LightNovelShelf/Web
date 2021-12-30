@@ -216,6 +216,7 @@ watch(
         let comment = commentElement.innerHTML
         // 隐藏内容
         commentElement.style.display = 'none'
+        element.removeAttribute('href')
         element.id = `v-${id}`
         element.onmouseenter = () => showComment(comment, `v-${id}`)
       })
