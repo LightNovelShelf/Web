@@ -20,7 +20,7 @@
       </q-card-section>
     </q-card>
 
-    <comment style="margin-top: 12px" :type="CommentType.Announcement" :id="_id" />
+    <comment v-if="user" style="margin-top: 12px" :type="CommentType.Announcement" :id="_id" />
   </div>
 </template>
 
@@ -33,12 +33,15 @@ import { Announcement, announcementFormat } from '@/views/Announcement/announcem
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { CommentType } from '@/services/comment/types'
+import { useAppStore } from '@/store'
 
 defineComponent({ Comment })
 
 const props = defineProps<{ id: string | number }>()
-
 const _id = computed(() => ~~(props.id || '1'))
+
+const appStore = useAppStore()
+const user = computed(() => appStore.user)
 const announcement = ref<Announcement>()
 
 const request = useTimeoutFn(async () => {
