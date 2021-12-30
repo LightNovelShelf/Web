@@ -36,5 +36,15 @@ $breakpoint-lg: 1919px !default;
   color: #757575 !important;
 }
 
+div.q-tab-panels{
+  background-color: unset;
+
+  .q-tab-panel{
+    padding: 0;
+  }
+}
+
+
+
 @import '~quasar-variables-styl';
 
