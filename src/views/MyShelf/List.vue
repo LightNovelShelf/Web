@@ -16,9 +16,9 @@
           :disable="selectedCount === 0"
           >加入文件夹</q-btn
         >
-        <q-btn class="action" color="primary" outline @click="selectAllHandle">{{
+        <!-- <q-btn class="action" color="primary" outline @click="selectAllHandle">{{
           isSelectedAll ? '取消全选' : '全选'
-        }}</q-btn>
+        }}</q-btn> -->
       </div>
 
       <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
@@ -152,7 +152,7 @@ import produce, { setAutoFreeze } from 'immer'
 import { mdiCheckCircle, mdiCheckboxBlankCircleOutline } from '@/plugins/icon/export'
 import { nanoid } from 'nanoid'
 import ShelfFolder from './components/ShelfFolder.vue'
-import { useShelfStore } from '@/store/shelf'
+import { ShelfBranch, useShelfStore } from '@/store/shelf'
 import { mdiFolderOpen } from '@/plugins/icon/export'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
@@ -170,35 +170,9 @@ useShelfStore()
 const $ = useQuasar()
 /** 加载标记 */
 const loading = ref(false)
-/** 编辑状态 */
-const editMode = ref(false)
 const shelfStore = useShelfStore()
-/**
- * 所有书籍
- * @private 考虑使用shelf代替
- **/
-const _stableShelf = computed(() => shelfStore.getShelfByParents([]))
-
-/**
- * 编辑期间的书籍列表
- * @private 考虑使用shelf代替
- * @unorder 跟 _stableShelf 不一样，这个数组不保证按照index大小排好序
- * @immutable 请不要单独修改draft里的某一项，避免数据串通造成“取消保存”功能失效
- **/
-let _draftShelf = ref<ShelfTypes.ShelfItem[]>([])
-/** @public 用作渲染的书架列表 */
-const shelf = computed<ShelfTypes.ShelfItem[]>({
-  get() {
-    return editMode.value ? _draftShelf.value : _stableShelf.value
-  },
-  set(val) {
-    if (editMode.value) {
-      _draftShelf.value = val
-    } else {
-      shelfStore.$patch({ shelf: val })
-    }
-  }
-})
+const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
+const shelf = computed(() => shelfStore.shelf)
 
 /** 书架文件夹列表 */
 const folders = computed<ShelfTypes.ShelfFolderItem[]>(() =>
@@ -302,9 +276,9 @@ function folderSelectorSubmitHandle() {
 }
 
 /** 选中计数 */
-const selectedCount = computed<number>(() => shelf.value.filter((_) => _.selected).length)
+const selectedCount = computed(() => shelfStore.selectedNum)
 /** 是否全选 */
-const isSelectedAll = computed<boolean>(() => selectedCount.value === shelf.value.length)
+// const isSelectedAll = computed<boolean>(() => selectedCount.value === shelf.value.length)
 /** 排序列表容器 */
 const [listWrapRef, setListWrapRef] = useForwardRef()
 /** 排序操作句柄 */
@@ -315,15 +289,11 @@ const destorySortable = () => {
 }
 /** 进入编辑模式 */
 const enterEditMode = () => {
-  // 复制 _stableShelf 里的数据到 _draftShelf 中；toRaw一次可以让immer修改不触发vue hook
-  _draftShelf.value = toRaw(_stableShelf.value)
-  editMode.value = true
+  shelfStore.checkout({ to: ShelfBranch.draft, reset: true })
 }
 /** 退出编辑模式 */
 const quiteEditMode = () => {
-  // 清空 _draftShelf 数据，减少内存占用
-  _draftShelf.value = []
-  editMode.value = false
+  shelfStore.checkout({ to: ShelfBranch.main })
 }
 
 /** 屏蔽编辑模式下的事件 */
@@ -341,26 +311,12 @@ function listItemClickHandle(evt: MouseEvent) {
     evt.preventDefault()
     evt.stopPropagation()
 
-    const idx = (evt.currentTarget as HTMLElement).dataset.idx as string
-    const type = shelf.value[+idx].type
+    const index = (evt.currentTarget as HTMLElement).dataset.idx as string
 
-    const nextSelected = !shelf.value[+idx].selected
-
-    shelf.value = produce(toRaw(shelf.value), (draft) => {
-      draft[+idx].selected = nextSelected
-    })
+    shelfStore.selectItem({ index: Number(index) })
   }
 }
 
-/** 全选/取消全选 */
-function selectAllHandle() {
-  const nextSelected = !isSelectedAll.value
-  shelf.value = produce(toRaw(shelf.value), (draft) => {
-    draft.forEach((_) => {
-      _.selected = nextSelected
-    })
-  })
-}
 /** 弹出书架文件夹选择弹层 */
 function toggleShelfFolderSelector() {
   folderSelectorVisible.value = !folderSelectorVisible.value
@@ -369,65 +325,21 @@ function toggleShelfFolderSelector() {
 }
 
 /** 同步排序结果到draft */
-const syncSortInfoToDraft = (sortInfo: { oldIndex?: number; newIndex?: number }) => {
-  if (sortInfo.newIndex === undefined || sortInfo.oldIndex === undefined) {
+const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newIndex?: number }) => {
+  if (newIndex === undefined || oldIndex === undefined) {
     // 虽然不知道什么情况没这个index，但既然人家标注了这个可能，那就过滤一次
     $.notify({ type: 'warning', message: '排序字段缺失，本次排序操作无效' })
     return
   }
 
-  const { oldIndex, newIndex } = sortInfo
-  const maxIndex = Math.max(oldIndex, newIndex)
-  const minIndex = Math.min(oldIndex, newIndex)
-
-  // 因为对象是同一个，这里需要用immer隔离这个改动；不然改动会反馈到books里
-  shelf.value = produce(shelf.value, (draft) => {
-    // 不在范围内的书就不用动了
-    // 老的index换成新的index
-    // 剩下的依次左移/右移
-    draft.forEach((item) => {
-      if (item.index < minIndex || item.index > maxIndex) {
-        return
-      }
-
-      if (item.index === oldIndex) {
-        item.index = newIndex
-      } else if (oldIndex === minIndex) {
-        // 从小拖到大，左移填充老的那个位置
-        item.index -= 1
-      } else {
-        // 从大拖到小，右移填充老的那个位置
-        item.index += 1
-      }
-    })
-
-    // 不排序，因为sortable是直接操作dom的，draft不排序也不影响渲染
-    // index修改也是遍历每一项做对比的，对于这个数组是否有序不关心
-    // sortBooksToAsc(_stableShelf)
-  })
+  shelfStore.commitSortInfo({ from: oldIndex, to: newIndex })
 }
 
 /** 确认列表修改结果 */
 const submitListChange = async () => {
-  // 保存修改，把draft的苏剧写入stable
-  // 浅复制一次，避免接下来的sort操作 reactive 到 _draftShelf
-  const nextShelf = [..._draftShelf.value].map((i) => ({ ...toRaw(i), selected: false }))
-
-  // _draft来的数据并不是有序的，这里需要排序一次
-  sortBooksToAsc(nextShelf)
-
-  shelfStore.$patch({ shelf: nextShelf })
-
-  /** 写入本地缓存 */
-  // 1. 先清空缓存，因为书籍有可能被移入文件夹从而不在外部目录了，这部分需要删除掉
-  shelfDB.clear()
-  // 2. 逐个写入
-  for (const item of _stableShelf.value) {
-    await shelfDB.set(item.value.Id + '', item)
-  }
-
-  /** 退出编辑模式 */
-  quiteEditMode()
+  shelfStore.merge({ to: ShelfBranch.main })
+  shelfStore.checkout({ to: ShelfBranch.main })
+  shelfStore.push()
 }
 
 /** 创建排序句柄 */

@@ -101,6 +101,10 @@ const shelfStore = defineStore('app.shelf', {
         map.set(item.id, toRaw(item))
       })
       return map
+    },
+    /** 选中计数 */
+    selectedNum(): number {
+      return this.shelf.filter((i) => i.selected).length
     }
   },
   actions: {
@@ -123,7 +127,7 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** 切换分支 */
-    async checkout({ branch, reset }: { branch: ShelfBranch; reset: boolean }) {
+    async checkout({ to: branch, reset = false }: { to: ShelfBranch; reset?: boolean }) {
       if (reset) {
         this.source[branch] = this.source[this.branch]
       }
@@ -135,7 +139,7 @@ const shelfStore = defineStore('app.shelf', {
       this.source[to] = this.source[this.branch]
     },
 
-    /** 提交更改 */
+    /** 提交更改(覆盖) */
     async commit({ shelf }: { shelf: ShelfItem[] }) {
       this.source[this.branch] = shelf
     },
@@ -214,6 +218,50 @@ const shelfStore = defineStore('app.shelf', {
     async removeFromShelf(bookId: number | string) {
       this.source[this.branch] = this.source[this.branch].filter((i) => i.id !== bookId + '')
       await this.push()
+    },
+    /** 记录排序 */
+    commitSortInfo({ from, to }: { from: number; to: number }) {
+      const maxIndex = Math.max(from, to)
+      const minIndex = Math.min(from, to)
+
+      this.commit({
+        // 这里需要用immer隔离；不然改动会反馈到别的branch
+        shelf: produce(toRaw(this.shelf), (draft) => {
+          // 不在范围内的书就不用动了
+          // 老的index换成新的index
+          // 剩下的依次左移/右移
+          draft.forEach((item) => {
+            if (item.index < minIndex || item.index > maxIndex) {
+              return
+            }
+
+            if (item.index === from) {
+              item.index = to
+            } else if (from === minIndex) {
+              // 从小拖到大，左移填充老的那个位置
+              item.index -= 1
+            } else {
+              // 从大拖到小，右移填充老的那个位置
+              item.index += 1
+            }
+          })
+        })
+      })
+    },
+    /** 点击记录 */
+    selectItem({ index }: { index: number }) {
+      this.commit({
+        shelf: produce(toRaw(this.shelf), (draft) => {
+          // 不在范围内的书就不用动了
+          // 老的index换成新的index
+          // 剩下的依次左移/右移
+          draft.forEach((item, index) => {
+            if (index === index) {
+              item.selected = !item.selected
+            }
+          })
+        })
+      })
     }
   }
 })
