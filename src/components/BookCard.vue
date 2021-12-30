@@ -79,12 +79,12 @@ function onIntersection(entry) {
   height: calc(1em * var(--line-height));
 
   .user-name {
-    flex: 2;
+    flex: 1;
     @include ellipsis(1);
   }
 
   .time {
-    flex: 1;
+    padding-left: 4px;
     text-align: right;
   }
 }
