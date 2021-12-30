@@ -17,12 +17,7 @@
         style="position: relative; z-index: 1"
         :style="readStyle"
       />
-      <q-tooltip
-        :target="commentTarget"
-        v-html="commentHTML"
-        class="tooltip-style"
-        v-model="commentShowing"
-      ></q-tooltip>
+      <q-tooltip :target="commentTarget" v-html="commentHTML" class="note-style" v-model="commentShowing" />
       <div class="row justify-between q-gutter-md" style="margin-top: 24px">
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
         <q-btn @click="back" class="flex-space">目录</q-btn>
@@ -58,7 +53,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch, createApp } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors, debounce, QTooltip } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -214,18 +209,13 @@ watch(
       chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
         element.onclick = previewImg
       })
-      let comments = chapterRef.value.querySelectorAll('aside')
-      let getBindComment = (id: string): HTMLElement => {
-        let bind: HTMLElement = undefined
-        comments.forEach((elem: HTMLElement) => {
-          if (elem.id === id) bind = elem
-        })
-        return bind
-      }
 
       chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
         let id = element.getAttribute('href').replace('#', '')
-        let comment = getBindComment(id).innerHTML
+        let commentElement = document.getElementById(id)
+        let comment = commentElement.innerHTML
+        // 隐藏内容
+        commentElement.style.display = 'none'
         element.id = `v-${id}`
         element.onmouseenter = () => showComment(comment, `v-${id}`)
       })
@@ -254,10 +244,14 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
   display: none;
 }
 
-:deep(.tooltip-style) {
-  @import 'src/assets/style/read';
-
+// 注释
+:global(.note-style) {
   font-family: read, sans-serif !important;
+}
+:global(.note-style ol) {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
 }
 
 :deep(.read) {
