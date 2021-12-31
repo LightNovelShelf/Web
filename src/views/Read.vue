@@ -104,8 +104,6 @@ const comment = reactive({
   content: '',
   showing: false
 })
-//tooltip会改值，无奈之举
-const readonlyCommentShowing = readonly(computed(() => comment.showing))
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
