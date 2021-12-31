@@ -1,5 +1,9 @@
 <template>
-  <div class="q-mx-auto container read-page" :style="{ '--width': settingStore.buildReaderWidth }">
+  <div
+    class="q-mx-auto container read-page"
+    :style="{ '--width': settingStore.buildReaderWidth }"
+    @click="globalCancelShowing($event)"
+  >
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -17,7 +21,14 @@
         style="position: relative; z-index: 1"
         :style="readStyle"
       />
-      <q-tooltip :target="commentTarget" v-html="commentHTML" class="note-style" v-model="commentShowing" />
+      <q-btn @click="commentShowing = !commentShowing">123</q-btn>
+      <q-tooltip
+        :target="commentTarget"
+        v-html="commentHTML"
+        class="note-style"
+        v-model="readonlyCommentShowing"
+        no-parent-event
+      />
       <div class="row justify-between q-gutter-md" style="margin-top: 24px">
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
         <q-btn @click="back" class="flex-space">目录</q-btn>
@@ -53,9 +64,9 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, readonly, ref, watch } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import { useQuasar, Dark, colors, debounce, QTooltip } from 'quasar'
+import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading, scrollToHistory, loadHistory } from '@/utils/biz/read'
 import { useLayout } from '@/components/app/useLayout'
@@ -81,9 +92,11 @@ const $q = useQuasar()
 const chapter = ref<any>()
 const chapterRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
-const commentTarget = ref('')
-const commentHTML = ref('')
-const commentShowing = ref(false)
+const commentTarget = ref<string>('')
+const commentHTML = ref<string>('')
+const commentShowing = ref<boolean>(false)
+//tooltip会改值，无奈之举
+const readonlyCommentShowing = readonly(commentShowing)
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
@@ -193,10 +206,25 @@ function previewImg(event) {
   viewerRef.value.$viewer.show()
 }
 
-function showComment(html: string, id: string) {
-  commentTarget.value = `#${id}`
-  commentHTML.value = html
-  commentShowing.value = true
+function showComment(event: MouseEvent, html: string, id: string) {
+  event.stopPropagation()
+  if (commentTarget.value !== `#${id}`) {
+    commentTarget.value = `#${id}`
+    commentHTML.value = html
+  }
+  if (!commentShowing.value) {
+    toggleShowing(true)
+  }
+}
+
+function toggleShowing(isShow: boolean) {
+  commentShowing.value = isShow
+}
+
+function globalCancelShowing(event: any) {
+  if (!event.target.hasAttribute('global-cancel')) {
+    toggleShowing(false)
+  }
 }
 
 onMounted(getContent.syncCall)
@@ -211,14 +239,23 @@ watch(
       })
 
       chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
-        let id = element.getAttribute('href').replace('#', '')
-        let commentElement = document.getElementById(id)
-        let comment = commentElement.innerHTML
+        const id = element.getAttribute('href').replace('#', '')
+        //获取注释内容
+        const commentElement = document.getElementById(id)
+        const comment = commentElement.innerHTML
         // 隐藏内容
-        commentElement.style.display = 'none'
-        element.removeAttribute('href')
+        // 显示注释应该更符合 epub 的样式
+        // commentElement.style.display = 'none'
+        // element.removeAttribute('href')
         element.id = `v-${id}`
-        element.onmouseenter = () => showComment(comment, `v-${id}`)
+        element.setAttribute('global-cancel', 'true')
+        //根据屏幕大小决定触发方式
+        if ($q.screen.gt.md) {
+          element.onmouseenter = (event) => showComment(event, comment, `v-${id}`)
+          element.onmouseleave = () => toggleShowing(false)
+        } else {
+          element.onclick = (event) => showComment(event, comment, `v-${id}`)
+        }
       })
       await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
     })
