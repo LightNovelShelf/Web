@@ -293,6 +293,7 @@ const enterEditMode = () => {
 }
 /** 退出编辑模式 */
 const quiteEditMode = () => {
+  shelfStore.clearSelected()
   shelfStore.checkout({ to: ShelfBranch.main })
 }
 
@@ -337,6 +338,7 @@ const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newInd
 
 /** 确认列表修改结果 */
 const submitListChange = async () => {
+  shelfStore.clearSelected()
   shelfStore.merge({ to: ShelfBranch.main })
   shelfStore.checkout({ to: ShelfBranch.main })
   shelfStore.push()
