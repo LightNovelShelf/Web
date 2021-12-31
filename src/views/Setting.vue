@@ -7,6 +7,17 @@
         </template>
       </q-tabs>
       <q-tab-panels v-model="tab" animated>
+        <q-tab-panel name="Setting">
+          <div class="q-pa-md">
+            <div class="q-gutter-sm light-radio">
+              <div>网站模式</div>
+              <q-radio v-model="dark" :val="false" label="明亮" />
+              <q-radio v-model="dark" :val="true" label="夜间" />
+              <q-radio v-model="dark" val="auto" label="自动" />
+            </div>
+          </div>
+        </q-tab-panel>
+
         <q-tab-panel name="Read">
           <div class="q-pa-md">
             <div class="q-gutter-sm bg-radio">
@@ -56,17 +67,6 @@
                   </div>
                 </q-scroll-area>
               </div> -->
-            </div>
-          </div>
-        </q-tab-panel>
-
-        <q-tab-panel name="Setting">
-          <div class="q-pa-md">
-            <div class="q-gutter-sm light-radio">
-              <div>网站模式</div>
-              <q-radio v-model="dark" :val="false" label="明亮" />
-              <q-radio v-model="dark" :val="true" label="夜间" />
-              <q-radio v-model="dark" val="auto" label="自动" />
             </div>
           </div>
         </q-tab-panel>

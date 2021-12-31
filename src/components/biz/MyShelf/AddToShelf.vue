@@ -10,6 +10,10 @@
   />
 </template>
 
+<script lang="ts">
+export default {}
+</script>
+
 <script lang="ts" setup>
 // 加入书架按钮
 import { computed, ref, toRaw } from 'vue'

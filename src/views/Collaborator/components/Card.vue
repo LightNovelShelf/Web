@@ -39,6 +39,10 @@ const loadedHandle = () => {
 }
 </script>
 
+<script lang="ts">
+export default {}
+</script>
+
 <style lang="scss" scoped>
 .wrap {
   border-radius: 8px;

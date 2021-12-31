@@ -1,4 +1,4 @@
-import { onActivated, onMounted } from 'vue'
+import { onActivated, onMounted, onDeactivated } from 'vue'
 import { useRoute } from 'vue-router'
 import { safeCall } from '@/utils/safeCall'
 import { UseTimeoutFnAction } from '../useTimeoutFn'
@@ -26,8 +26,8 @@ export function useInitRequest(
       if (before) before()
       await safeCall(cb)()
       if (after) after()
-    } else {
-      first = true
     }
   })
+
+  onDeactivated(() => (first = true))
 }

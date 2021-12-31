@@ -21,10 +21,9 @@
       </div>
     </div>
 
-    <div class="text-grey-7" style="display: flex; padding: 0 4px">
-      <div>{{ book.UserName }}</div>
-      <div class="flex-space"></div>
-      <div>{{ updateTime }}</div>
+    <div class="extra text-grey-7" style="display: flex; padding: 0 4px">
+      <div class="user-name">{{ book.UserName }}</div>
+      <div class="time">{{ updateTime }}</div>
     </div>
   </div>
 </template>
@@ -65,14 +64,28 @@ function onIntersection(entry) {
 .book-name {
   display: flex;
   align-items: center;
-  --font-size: 12px;
   --line-height: 1.6;
   line-height: var(--line-height);
-  font-size: var(--font-size);
-  height: calc(var(--font-size) * var(--line-height) * 2);
+  font-size: 12px;
+  height: calc(1em * var(--line-height) * 2);
 
   .book-name-text {
     @include ellipsis(2);
+  }
+}
+
+.extra {
+  --line-height: 1.5;
+  height: calc(1em * var(--line-height));
+
+  .user-name {
+    flex: 1;
+    @include ellipsis(1);
+  }
+
+  .time {
+    padding-left: 4px;
+    text-align: right;
   }
 }
 </style>
