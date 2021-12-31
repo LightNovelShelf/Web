@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="q-mx-auto container read-page"
-    :style="{ '--width': settingStore.buildReaderWidth }"
-    @click="globalCancelShowing($event)"
-  >
+  <div class="q-mx-auto container read-page" :style="{ '--width': settingStore['buildReaderWidth'] }">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -22,11 +18,12 @@
         :style="readStyle"
       />
       <q-tooltip
-        :target="commentTarget"
-        v-html="commentHTML"
+        :target="comment.target"
+        v-html="comment.content"
         class="note-style"
-        v-model="readonlyCommentShowing"
+        v-model="comment.showing"
         no-parent-event
+        :max-width="$q.platform.is.mobile ? '90%' : '100%'"
       />
       <div class="row justify-between q-gutter-md" style="margin-top: 24px">
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
@@ -63,7 +60,18 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, readonly, ref, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  reactive,
+  readonly,
+  ref,
+  watch
+} from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -91,11 +99,13 @@ const $q = useQuasar()
 const chapter = ref<any>()
 const chapterRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
-const commentTarget = ref<string>('')
-const commentHTML = ref<string>('')
-const commentShowing = ref<boolean>(false)
+const comment = reactive({
+  target: '',
+  content: '',
+  showing: false
+})
 //tooltip会改值，无奈之举
-const readonlyCommentShowing = readonly(commentShowing)
+const readonlyCommentShowing = readonly(computed(() => comment.showing))
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
@@ -207,27 +217,32 @@ function previewImg(event) {
 
 function showComment(event: MouseEvent, html: string, id: string) {
   event.stopPropagation()
-  if (commentTarget.value !== `#${id}`) {
-    commentTarget.value = `#${id}`
-    commentHTML.value = html
+  if (comment.target !== `#${id}`) {
+    comment.target = `#${id}`
+    comment.content = html
   }
-  if (!commentShowing.value) {
-    toggleShowing(true)
+  if (!comment.showing) {
+    comment.showing = true
   }
-}
-
-function toggleShowing(isShow: boolean) {
-  commentShowing.value = isShow
 }
 
 function globalCancelShowing(event: any) {
   if (!event.target.hasAttribute('global-cancel')) {
-    toggleShowing(false)
+    comment.showing = false
   }
 }
+onActivated(() => document.addEventListener('click', globalCancelShowing))
+onDeactivated(() => document.removeEventListener('click', globalCancelShowing))
 
 onMounted(getContent.syncCall)
-watch(() => [bid.value, sortNum.value], getContent)
+watch(
+  () => [bid.value, sortNum.value],
+  async () => {
+    comment.showing = false
+    comment.target = ''
+    await getContent()
+  }
+)
 // 如果章节变了，重新观察dom记录阅读记录
 watch(
   () => chapter.value?.Id,
@@ -241,19 +256,17 @@ watch(
         const id = element.getAttribute('href').replace('#', '')
         //获取注释内容
         const commentElement = document.getElementById(id)
-        const comment = commentElement.innerHTML
+        const content = commentElement.innerHTML
         // 隐藏内容
-        // 显示注释应该更符合 epub 的样式
-        // commentElement.style.display = 'none'
-        // element.removeAttribute('href')
+        commentElement.style.display = 'none'
+        element.removeAttribute('href')
         element.id = `v-${id}`
         element.setAttribute('global-cancel', 'true')
-        //根据屏幕大小决定触发方式
-        if ($q.screen.gt.md) {
-          element.onmouseenter = (event) => showComment(event, comment, `v-${id}`)
-          element.onmouseleave = () => toggleShowing(false)
+        if ($q.platform.is.mobile) {
+          element.onclick = (event) => showComment(event, content, `v-${id}`)
         } else {
-          element.onclick = (event) => showComment(event, comment, `v-${id}`)
+          element.onmouseenter = (event) => showComment(event, content, `v-${id}`)
+          element.onmouseleave = () => (comment.showing = false)
         }
       })
       await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
@@ -284,6 +297,8 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 // 注释
 :global(.note-style) {
   font-family: read, sans-serif !important;
+  line-break: anywhere;
+  font-size: 1rem;
 }
 :global(.note-style ol) {
   list-style: none;
