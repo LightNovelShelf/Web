@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="q-mx-auto container read-page"
-    :style="{ '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px' }"
-  >
+  <div class="q-mx-auto container read-page" :style="{ '--width': settingStore['buildReaderWidth'] }">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -19,6 +16,14 @@
         v-html="chapterContent"
         style="position: relative; z-index: 1"
         :style="readStyle"
+      />
+      <q-tooltip
+        :target="comment.target"
+        v-html="comment.content"
+        class="note-style"
+        v-model="comment.showing"
+        no-parent-event
+        :max-width="$q.platform.is.mobile ? '90%' : '100%'"
       />
       <div class="row justify-between q-gutter-md" style="margin-top: 24px">
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
@@ -54,8 +59,19 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { computed, defineComponent, nextTick, onActivated, onMounted, reactive, ref, watch } from 'vue'
+<script lang="tsx" setup>
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  reactive,
+  readonly,
+  ref,
+  watch
+} from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -83,6 +99,11 @@ const $q = useQuasar()
 const chapter = ref<any>()
 const chapterRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
+const comment = reactive({
+  target: '',
+  content: '',
+  showing: false
+})
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
@@ -93,7 +114,6 @@ const showImage = reactive({
   src: null,
   alt: ''
 })
-
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
 function moveFab(ev) {
@@ -193,8 +213,34 @@ function previewImg(event) {
   viewerRef.value.$viewer.show()
 }
 
+function showComment(event: MouseEvent, html: string, id: string) {
+  event.stopPropagation()
+  if (comment.target !== `#${id}`) {
+    comment.target = `#${id}`
+    comment.content = html
+  }
+  if (!comment.showing) {
+    comment.showing = true
+  }
+}
+
+function globalCancelShowing(event: any) {
+  if (!event.target.hasAttribute('global-cancel')) {
+    comment.showing = false
+  }
+}
+onActivated(() => document.addEventListener('click', globalCancelShowing))
+onDeactivated(() => document.removeEventListener('click', globalCancelShowing))
+
 onMounted(getContent.syncCall)
-watch(() => [bid.value, sortNum.value], getContent)
+watch(
+  () => [bid.value, sortNum.value],
+  async () => {
+    comment.showing = false
+    comment.target = ''
+    await getContent()
+  }
+)
 // 如果章节变了，重新观察dom记录阅读记录
 watch(
   () => chapter.value?.Id,
@@ -202,6 +248,24 @@ watch(
     nextTick(async () => {
       chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
         element.onclick = previewImg
+      })
+
+      chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
+        const id = element.getAttribute('href').replace('#', '')
+        //获取注释内容
+        const commentElement = document.getElementById(id)
+        const content = commentElement.innerHTML
+        // 隐藏内容
+        commentElement.style.display = 'none'
+        element.removeAttribute('href')
+        element.id = `v-${id}`
+        element.setAttribute('global-cancel', 'true')
+        if ($q.platform.is.mobile) {
+          element.onclick = (event) => showComment(event, content, `v-${id}`)
+        } else {
+          element.onmouseenter = (event) => showComment(event, content, `v-${id}`)
+          element.onmouseleave = () => (comment.showing = false)
+        }
       })
       await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
     })
@@ -226,6 +290,18 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 .v-viewer {
   display: none;
+}
+
+// 注释
+:global(.note-style) {
+  font-family: read, sans-serif !important;
+  line-break: anywhere;
+  font-size: 1rem;
+}
+:global(.note-style ol) {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
 }
 
 :deep(.read) {
