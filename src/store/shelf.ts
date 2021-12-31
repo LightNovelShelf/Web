@@ -225,7 +225,6 @@ const shelfStore = defineStore('app.shelf', {
       const minIndex = Math.min(from, to)
 
       this.commit({
-        // 这里需要用immer隔离；不然改动会反馈到别的branch
         shelf: produce(toRaw(this.shelf), (draft) => {
           // 不在范围内的书就不用动了
           // 老的index换成新的index
@@ -248,7 +247,7 @@ const shelfStore = defineStore('app.shelf', {
         })
       })
     },
-    /** 点击记录 */
+    /** 选中记录 */
     selectItem(payload: { index: number }) {
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
@@ -259,6 +258,16 @@ const shelfStore = defineStore('app.shelf', {
             if (index === payload.index) {
               item.selected = !item.selected
             }
+          })
+        })
+      })
+    },
+    /** 清空选中记录 */
+    clearSelected() {
+      this.commit({
+        shelf: produce(toRaw(this.shelf), (draft) => {
+          draft.forEach((item) => {
+            item.selected = false
           })
         })
       })
