@@ -21,7 +21,6 @@
         style="position: relative; z-index: 1"
         :style="readStyle"
       />
-      <q-btn @click="commentShowing = !commentShowing">123</q-btn>
       <q-tooltip
         :target="commentTarget"
         v-html="commentHTML"
