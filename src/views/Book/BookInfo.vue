@@ -116,6 +116,7 @@ import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { BookInList } from '@/services/book/types'
 import { DateTime } from 'luxon'
 import { CommentType } from '@/services/comment/types'
+import { userReadPositionDB } from '@/utils/storage/db'
 
 const props = defineProps<{ bid: string }>()
 
@@ -135,6 +136,7 @@ const getInfo = useTimeoutFn(async () => {
         cid: temp.Cid,
         xPath: temp.XPath
       }
+      await userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
     }
   } catch (error) {
     $q.notify({

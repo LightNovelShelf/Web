@@ -53,38 +53,8 @@ img.footnote {
   display: inline-block;
 }
 
-.duokan-footnote-item {
-  font-size: 0.8em;
-  color: #960014;
-  font-weight: bold;
-  text-align: left;
-  text-indent: 0;
-  a {
-    color: #960014;
-    text-decoration: none;
-  }
-}
-
-aside ol {
-  list-style: none;
-  margin: 0;
-  padding: 10px;
-}
-
 a.duokan-footnote {
-  position: relative;
-  aside {
-    position: absolute;
-    z-index: 12;
-    background: #fff;
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
-      0 3px 14px 2px rgba(0, 0, 0, 0.12);
-    border-radius: 4px;
-    transform-origin: center center;
-    transition: transform 0.2s;
-    cursor: default;
-    // transform: scale(0.2);
-  }
+  cursor: pointer;
 }
 
 a.duokan-footnote img {

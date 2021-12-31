@@ -29,5 +29,11 @@ export const useSettingStore = defineStore('app.setting', {
       await Promise.all([p1])
       Dark.set(this.dark)
     }
+  },
+  getters: {
+    buildReaderWidth(): string {
+      if (this.readSetting.readPageWidth === 0) return '100%'
+      return this.readSetting.readPageWidth + 'px'
+    }
   }
 })

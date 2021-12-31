@@ -52,13 +52,16 @@
 
           <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
             <q-list v-if="user">
-              <q-item clickable v-ripple>
+              <q-item>
                 <q-item-section avatar>
                   <q-avatar>
                     <img :src="user.Avatar" alt="avatar" />
                   </q-avatar>
                 </q-item-section>
-                <q-item-section>{{ user.UserName }}</q-item-section>
+                <q-item-section>
+                  <div>{{ user.UserName }}</div>
+                  <div class="text-caption text-grey-7">{{ user['Role'].Name }}</div>
+                </q-item-section>
               </q-item>
 
               <q-separator />

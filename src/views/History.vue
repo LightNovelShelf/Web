@@ -8,7 +8,7 @@
         </template>
       </q-tabs>
       <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="Novel" style="padding: 0">
+        <q-tab-panel name="Novel">
           <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
             <q-grid-item v-for="book in bookData" :key="book['Id']">
               <book-card :book="book"></book-card>
@@ -100,8 +100,4 @@ const onLoad = async (index, done) => {
 }
 </script>
 
-<style scoped lang="scss">
-:deep(.q-tab-panels) {
-  background-color: unset;
-}
-</style>
+<style scoped lang="scss"></style>

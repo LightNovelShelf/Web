@@ -34,7 +34,7 @@
       </template>
 
       <template v-else-if="comment?.Data?.length === 0">
-        <div class="row flex-center" style="height: 40px">
+        <div class="row flex-center" style="height: 40px; padding-bottom: 8px">
           <div>暂无评论</div>
         </div>
       </template>
