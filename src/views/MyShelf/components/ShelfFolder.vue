@@ -1,6 +1,6 @@
 <template>
   <div>
-    <router-link :to="{ name: 'BookInfo', params: { bid: props.folder.Id } }">
+    <router-link :to="{ name: 'MyShelf', params: { folderID: folderIDs } }">
       <div class="book-cover">
         <q-card>
           <q-responsive :ratio="2 / 3">
@@ -14,8 +14,8 @@
 
     <div style="padding: 4px">
       <div class="book-name">
-        <div class="book-name-text" :title="folder?.Title">
-          {{ folder.Title }}
+        <div class="book-name-text" :title="folder.value?.Title">
+          {{ folder.value.Title }}
         </div>
       </div>
     </div>
@@ -31,15 +31,16 @@
 <script lang="ts" setup>
 import { computed, watch } from 'vue'
 import { useToNow } from '@/composition/useToNow'
-import { ShelfFolder } from '@/types/shelf'
+import { ShelfFolder, ShelfFolderItem } from '@/types/shelf'
 import { useShelfStore } from '@/store/shelf'
 import ShelfItemThumb from './ShelfItemThumb.vue'
 
-const props = defineProps<{ folder: ShelfFolder }>()
+const props = defineProps<{ folder: ShelfFolderItem }>()
 const store = useShelfStore()
-const updateTime = useToNow(computed(() => new Date(props.folder.updateAt)))
+const updateTime = useToNow(computed(() => new Date(props.folder.value.updateAt)))
 // 限制最多四本书
-const limitedBooks = computed(() => store.getItemByIDs(props.folder.children.map((i) => i.id).slice(0, 4)))
+const limitedBooks = computed(() => store.getItemByIDs(props.folder.value.children.map((i) => i.id).slice(0, 4)))
+const folderIDs = computed(() => [...props.folder.parents, props.folder.id])
 </script>
 
 <style lang="scss" scoped>

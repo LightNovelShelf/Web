@@ -41,11 +41,7 @@
           <!-- 书籍 -->
           <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" :title="item.index" />
           <!-- 文件夹 -->
-          <shelf-folder
-            v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER"
-            :folder="item.value"
-            :title="item.index"
-          />
+          <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" :title="item.index" />
           <template v-else />
 
           <!-- 选中态icon -->
@@ -177,22 +173,21 @@ const $ = useQuasar()
 const loading = ref(false)
 const shelfStore = useShelfStore()
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
-const { params } = useRoute()
-const shelf = computed(() => {
-  if (typeof params.folderID === 'string') {
-    return shelfStore.getShelfByParents([params.folderID])
-  } else {
-    return shelfStore.getShelfByParents(params.folderID)
+const route = useRoute()
+const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
+  if (typeof route.params.folderID === 'string') {
+    return shelfStore.getShelfByParents([route.params.folderID])
   }
+
+  // route.params.folderID有可能是 undefined，这时候代表顶层
+  return shelfStore.getShelfByParents(route.params.folderID || [])
 })
 
 /** 临时变量：用于处理右键菜单中的单个 加入到 选项 */
 let tempSelectedItemIndex: number[] = []
 
 /** 书架文件夹列表 */
-const folders = computed<ShelfTypes.ShelfFolderItem[]>(() =>
-  shelf.value.filter((i): i is ShelfTypes.ShelfFolderItem => i.type === ShelfTypes.ShelfItemType.FOLDER)
-)
+const folders = computed<ShelfTypes.ShelfFolderItem[]>(() => shelfStore.folders)
 
 /** 文件夹选择弹层 */
 const folderSelectorVisible = ref(false)
@@ -416,6 +411,10 @@ onDeactivated(() => {
   // 移动的动画需要换成flex才能做
   transition: all var(--q-transition-duration);
   // transition: all 5s;
+}
+
+.shelf-item-enter-active {
+  position: absolute;
 }
 
 .shelf-item-enter-from,
