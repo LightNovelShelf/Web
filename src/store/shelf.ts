@@ -252,17 +252,19 @@ const shelfStore = defineStore('app.shelf', {
       })
     },
     /** 选中记录 */
-    selectItem(payload: { index: number }) {
+    selectItem(payload: { id: string; selected?: boolean }) {
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
-          // 不在范围内的书就不用动了
-          // 老的index换成新的index
-          // 剩下的依次左移/右移
-          draft.forEach((item, index) => {
-            if (index === payload.index) {
-              item.selected = !item.selected
+          for (const item of draft) {
+            if (item.id === payload.id) {
+              if (item.type === ShelfItemType.FOLDER) {
+                return
+              }
+
+              item.selected = payload.selected ?? !item.selected
+              return
             }
-          })
+          }
         })
       })
     },
@@ -278,20 +280,24 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 添加到文件夹 */
     addToFolder(payload: { books: string[]; folderID: string }) {
-      const booksInMap = new Map<string, null>()
-      payload.books.forEach((id) => booksInMap.set(id, null))
+      const _map = new Map<string, null>()
+      payload.books.forEach((id) => _map.set(id, null))
 
-      /** 先标记这些项目的parent */
-      this.source[this.branch] = produce(toRaw(this.source[this.branch]), (draft) => {
-        draft.forEach((item) => {
-          if (booksInMap.has(item.id)) {
-            item.parents.unshift(payload.folderID)
-          } else if (item.id === payload.folderID) {
-            console.log('push to folder', payload.books)
-            ;(item as ShelfFolderItem).value.children.push(
-              ...payload.books.map((id): ShelfFolderChild => ({ type: ShelfItemType.BOOK, id }))
-            )
-          }
+      this.commit({
+        shelf: produce(toRaw(this.shelf), (draft) => {
+          draft.forEach((item) => {
+            // 如果是待加入的项目，记录深一层文件夹路径
+            if (_map.has(item.id)) {
+              // 清掉选择状态，不然会导致数据一直认为有已选的项目
+              item.selected = false
+              item.parents.unshift(payload.folderID)
+            } else if (item.id === payload.folderID) {
+              // 如果是文件夹本身，就把那些书籍推进children里
+              ;(item as ShelfFolderItem).value.children.push(
+                ...payload.books.map((id): ShelfFolderChild => ({ type: ShelfItemType.BOOK, id }))
+              )
+            }
+          })
         })
       })
     },

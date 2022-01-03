@@ -29,9 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useToNow } from '@/composition/useToNow'
-import { ShelfFolder, ShelfFolderItem } from '@/types/shelf'
+import { ShelfFolderItem } from '@/types/shelf'
 import { useShelfStore } from '@/store/shelf'
 import ShelfItemThumb from './ShelfItemThumb.vue'
 

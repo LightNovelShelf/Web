@@ -31,17 +31,12 @@
     @contextmenu="muteInEditMode"
   >
     <transition-group name="shelf-item">
-      <q-grid-item
-        v-for="(item, index) in shelf"
-        :key="item.value.Id"
-        :data-idx="index"
-        @click.capture="listItemClickHandle"
-      >
+      <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
         <div class="shelf-item-wrap">
           <!-- 书籍 -->
-          <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" :title="item.index" />
+          <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" />
           <!-- 文件夹 -->
-          <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" :title="item.index" />
+          <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" />
           <template v-else />
 
           <!-- 选中态icon -->
@@ -58,7 +53,7 @@
           <q-list dense style="min-width: 100px">
             <!-- 书籍相关的 -->
             <template v-if="item.type === ShelfTypes.ShelfItemType.BOOK">
-              <q-item clickable v-close-popup @click="addItemToFolderHandle" :data-idx="item.index">
+              <q-item clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
                 <q-item-section>加入到...</q-item-section>
               </q-item>
               <q-item clickable v-close-popup>
@@ -155,8 +150,7 @@ import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
-import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen, mdiChevronRight } from '@/plugins/icon/export'
-import { nanoid } from 'nanoid'
+import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/plugins/icon/export'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ShelfBranch, useShelfStore } from '@/store/shelf'
 import { useRoute } from 'vue-router'
@@ -183,9 +177,6 @@ const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
   return shelfStore.getShelfByParents(route.params.folderID || [])
 })
 
-/** 临时变量：用于处理右键菜单中的单个 加入到 选项 */
-let tempSelectedItemIndex: number[] = []
-
 /** 书架文件夹列表 */
 const folders = computed<ShelfTypes.ShelfFolderItem[]>(() => shelfStore.folders)
 
@@ -211,15 +202,13 @@ const folderOptions = computed<QSelectorOption[]>(() =>
 /** 右键菜单 - 加入文件夹 */
 function addItemToFolderHandle(evt: MouseEvent) {
   if (selectedCount.value === 0) {
-    const index = (evt.currentTarget as HTMLElement).dataset.idx
+    const { id } = (evt.currentTarget as HTMLElement).dataset
 
-    // 不是有效整数
-    if (!Number.isInteger(Number(index))) {
-      // 退出
+    if (id === undefined) {
       return
     }
 
-    shelfStore.selectItem({ index: Number(index) })
+    shelfStore.selectItem({ id })
   }
 
   // 打开文件夹弹层
@@ -233,11 +222,7 @@ function folderSelectorSubmitHandle() {
   }
 
   /** 要更改的书籍 */
-  const bookIds: string[] = (
-    tempSelectedItemIndex.length // 如果有临时记录的index数组，代表是在有选中的情况下点右键加入单个到文件夹，优先使用这个变量
-      ? tempSelectedItemIndex.map((i) => shelf.value[i]).filter((i) => !!i)
-      : shelf.value.filter((i) => !!i.selected)
-  ).map((i) => i.id)
+  const bookIds: string[] = shelf.value.filter((i) => !!i.selected).map((i) => i.id)
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
   if (!bookIds.length) {
@@ -300,22 +285,12 @@ function listItemClickHandle(evt: MouseEvent) {
     evt.stopPropagation()
 
     const { dataset } = evt.currentTarget as HTMLElement
-    const { idx } = dataset
-    if (idx === undefined) {
+    const { id } = dataset
+    if (id === undefined) {
       return
     }
 
-    const shelfItem = shelf.value[+idx]
-    if (!shelfItem) {
-      return
-    }
-
-    /** @todo 先暂时屏蔽文件夹选中功能，文件夹的嵌套需要好好考虑数据交互再实现 */
-    if (shelfItem.type === ShelfTypes.ShelfItemType.FOLDER) {
-      return
-    }
-
-    shelfStore.selectItem({ index: Number(idx) })
+    shelfStore.selectItem({ id })
   }
 }
 
@@ -337,7 +312,7 @@ const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newInd
   shelfStore.commitSortInfo({ from: oldIndex, to: newIndex })
 }
 
-/** 确认列表修改结果 */
+/** 保存修改 */
 const submitListChange = async () => {
   shelfStore.clearSelected()
   shelfStore.merge({ to: ShelfBranch.main })
@@ -365,9 +340,12 @@ watch([listWrapRef, editMode], ([el, mode]) => {
   }
 })
 
+/** 页面销毁之前清掉拖动排序 */
 onBeforeUnmount(() => {
   destorySortable()
 })
+
+// 页面切走时要退出编辑状态取消修改；不然的话加入书架等操作就被迫在草稿状态下读取进行了
 onDeactivated(() => {
   quiteEditMode()
 })
