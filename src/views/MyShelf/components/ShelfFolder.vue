@@ -3,9 +3,11 @@
     <router-link :to="{ name: 'BookInfo', params: { bid: props.folder.Id } }">
       <div class="book-cover">
         <q-card>
-          <transition-group name="shelf-item" tag="div" class="books-group">
-            <shelf-item-thumb v-for="item in limitedBooks" :key="item.id" :item="item" />
-          </transition-group>
+          <q-responsive :ratio="2 / 3">
+            <transition-group name="shelf-item" tag="div" class="books-group">
+              <shelf-item-thumb v-for="item in limitedBooks" :key="item.id" :item="item" />
+            </transition-group>
+          </q-responsive>
         </q-card>
       </div>
     </router-link>
@@ -37,11 +39,7 @@ const props = defineProps<{ folder: ShelfFolder }>()
 const store = useShelfStore()
 const updateTime = useToNow(computed(() => new Date(props.folder.updateAt)))
 // 限制最多四本书
-const limitedBooks = computed(() => store.getItemByIDs(props.folder.children.map((i) => i.id)))
-console.log('limitedBooks', limitedBooks)
-watch(limitedBooks, (next) => {
-  console.log('limitedBooks', next)
-})
+const limitedBooks = computed(() => store.getItemByIDs(props.folder.children.map((i) => i.id).slice(0, 4)))
 </script>
 
 <style lang="scss" scoped>
