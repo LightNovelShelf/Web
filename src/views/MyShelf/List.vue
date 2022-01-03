@@ -3,22 +3,9 @@
   <q-slide-transition>
     <div v-show="editMode">
       <div class="actions-wrap">
-        <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
-        <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
-
         <div style="flex-grow: 1" />
-
-        <q-btn
-          class="action"
-          color="primary"
-          @click="toggleShelfFolderSelector"
-          :outline="selectedCount === 0"
-          :disable="selectedCount === 0"
-          >加入文件夹</q-btn
-        >
-        <!-- <q-btn class="action" color="primary" outline @click="selectAllHandle">{{
-          isSelectedAll ? '取消全选' : '全选'
-        }}</q-btn> -->
+        <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
+        <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
       </div>
 
       <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
@@ -62,13 +49,38 @@
           <template v-else />
 
           <!-- 选中态icon -->
-          <div v-if="editMode" class="shelf-item-check-icon">
+          <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
             <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
           </div>
           <template v-else />
         </div>
+
+        <!-- 编辑状态下，书籍可以有右键菜单 -->
+        <q-menu v-if="editMode" touch-position context-menu>
+          <q-list dense style="min-width: 100px">
+            <!-- 书籍相关的 -->
+            <template v-if="item.type === ShelfTypes.ShelfItemType.BOOK">
+              <q-item clickable v-close-popup @click="addItemToFolderHandle" :data-idx="item.index">
+                <q-item-section>加入到...</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup>
+                <q-item-section>移出</q-item-section>
+              </q-item>
+            </template>
+
+            <template v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER">
+              <!-- 文件夹相关的 -->
+              <q-item clickable v-close-popup>
+                <q-item-section>重命名</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup>
+                <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
+              </q-item>
+            </template>
+          </q-list>
+        </q-menu>
       </q-grid-item>
     </transition-group>
 
@@ -139,21 +151,19 @@
 
 <script lang="ts" setup>
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
-import { shelfDB } from '@/utils/storage/db'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard'
-import { computed, defineComponent, onBeforeUnmount, Ref, ref, toRaw, toRef, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
-import produce, { setAutoFreeze } from 'immer'
-import { mdiCheckCircle, mdiCheckboxBlankCircleOutline } from '@/plugins/icon/export'
+import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen, mdiChevronRight } from '@/plugins/icon/export'
 import { nanoid } from 'nanoid'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ShelfBranch, useShelfStore } from '@/store/shelf'
-import { mdiFolderOpen } from '@/plugins/icon/export'
+import { useRoute } from 'vue-router'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -162,17 +172,22 @@ interface QSelectorOption {
   value: string
 }
 
-/** auto freeze的话会导致vue绑定报错 */
-setAutoFreeze(false)
-
-useShelfStore()
-
 const $ = useQuasar()
 /** 加载标记 */
 const loading = ref(false)
 const shelfStore = useShelfStore()
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
-const shelf = computed(() => shelfStore.shelf)
+const { params } = useRoute()
+const shelf = computed(() => {
+  if (typeof params.folderID === 'string') {
+    return shelfStore.getShelfByParents([params.folderID])
+  } else {
+    return shelfStore.getShelfByParents(params.folderID)
+  }
+})
+
+/** 临时变量：用于处理右键菜单中的单个 加入到 选项 */
+let tempSelectedItemIndex: number[] = []
 
 /** 书架文件夹列表 */
 const folders = computed<ShelfTypes.ShelfFolderItem[]>(() =>
@@ -198,81 +213,58 @@ const folderOptions = computed<QSelectorOption[]>(() =>
     })
 )
 
+/** 右键菜单 - 加入文件夹 */
+function addItemToFolderHandle(evt: MouseEvent) {
+  if (selectedCount.value === 0) {
+    const index = (evt.currentTarget as HTMLElement).dataset.idx
+
+    // 不是有效整数
+    if (!Number.isInteger(Number(index))) {
+      // 退出
+      return
+    }
+
+    shelfStore.selectItem({ index: Number(index) })
+  }
+
+  // 打开文件夹弹层
+  folderSelectorVisible.value = true
+}
+
 /** 文件夹选择器提交 */
 function folderSelectorSubmitHandle() {
   if (!selectorValue.value) {
     return
   }
 
-  /** 需要创建文件夹：值是字符串而不是option */
-  const shouldCreateFolder = typeof selectorValue.value === 'string'
   /** 要更改的书籍 */
-  const children: ShelfTypes.ShelfFolderChild[] = shelf.value
-    .filter((i) => !!i.selected)
-    .map((i) => ({ type: i.type, id: i.id }))
+  const bookIds: string[] = (
+    tempSelectedItemIndex.length // 如果有临时记录的index数组，代表是在有选中的情况下点右键加入单个到文件夹，优先使用这个变量
+      ? tempSelectedItemIndex.map((i) => shelf.value[i]).filter((i) => !!i)
+      : shelf.value.filter((i) => !!i.selected)
+  ).map((i) => i.id)
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
-  if (!children.length) {
+  if (!bookIds.length) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
     return
   }
 
-  // 1. 创建文件夹场景
-  if (shouldCreateFolder) {
-    const folderID = nanoid()
-    /** 新的文件夹 */
-    const folder: ShelfTypes.ShelfFolderItem = {
-      // 固定在第一
-      index: 0,
-      type: ShelfTypes.ShelfItemType.FOLDER,
-      parents: [],
-      id: folderID,
-      value: {
-        Id: folderID,
-        Title: selectorValue.value as string,
-        children: children,
-        updateAt: new Date().toISOString()
-      }
-    }
+  let folderID = ''
 
-    // 1. 把选中的项目标记有文件夹
-    shelf.value.forEach((i) => {
-      if (i.selected) {
-        i.parents.unshift(folderID)
-      }
-    })
-
-    // 2. 剩余项目往后挪一位，腾出第一个位置给新增的文件夹
-    shelf.value.forEach((i) => (i.index += 1))
-
-    // 3. 在第一位插入一个文件夹
-    shelf.value.unshift(folder)
-
-    // 4. 完成
-    return
+  /** 需要创建文件夹：值是字符串而不是option */
+  if (typeof selectorValue.value === 'string') {
+    folderID = shelfStore.createFolder({ name: selectorValue.value })
+  } else {
+    folderID = selectorValue.value.value
   }
 
-  // 2. 加入文件夹场景
-
-  // 1. 把选中的项目从shelf中移除，只留下没选的
-  shelf.value.forEach((i) => {
-    if (i.selected) {
-      i.parents.unshift(folderID)
-    }
-  })
-
-  const folderID = (selectorValue.value as QSelectorOption).value
-
-  // 2. 把children合并到目标文件夹中并更新时间
-  shelf.value.forEach((shelfItem) => {
-    if (shelfItem.value.Id === folderID) {
-      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.children.push(...children)
-      ;(shelfItem as ShelfTypes.ShelfFolderItem).value.updateAt = new Date().toISOString()
-    }
-  })
-
-  // 3. 完成
+  // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
+  // 选项有问题的时候也可能出现 folderID 为空
+  if (folderID) {
+    shelfStore.addToFolder({ books: bookIds, folderID })
+  }
 }
 
 /** 选中计数 */
@@ -312,9 +304,23 @@ function listItemClickHandle(evt: MouseEvent) {
     evt.preventDefault()
     evt.stopPropagation()
 
-    const index = (evt.currentTarget as HTMLElement).dataset.idx as string
+    const { dataset } = evt.currentTarget as HTMLElement
+    const { idx } = dataset
+    if (idx === undefined) {
+      return
+    }
 
-    shelfStore.selectItem({ index: Number(index) })
+    const shelfItem = shelf.value[+idx]
+    if (!shelfItem) {
+      return
+    }
+
+    /** @todo 先暂时屏蔽文件夹选中功能，文件夹的嵌套需要好好考虑数据交互再实现 */
+    if (shelfItem.type === ShelfTypes.ShelfItemType.FOLDER) {
+      return
+    }
+
+    shelfStore.selectItem({ index: Number(idx) })
   }
 }
 
@@ -364,13 +370,11 @@ watch([listWrapRef, editMode], ([el, mode]) => {
   }
 })
 
-/** 按照index排序书籍数组，因为indexedDB读出来的书籍是按照DB key排序的，没法更改 */
-const sortBooksToAsc = (list: ShelfTypes.ShelfItem[]) => {
-  list.sort((a, b) => (a.index > b.index ? 1 : -1))
-}
-
 onBeforeUnmount(() => {
   destorySortable()
+})
+onDeactivated(() => {
+  quiteEditMode()
 })
 </script>
 
