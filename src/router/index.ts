@@ -84,7 +84,7 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   {
-    path: '/my-shelf',
+    path: '/my-shelf/:folderID*',
     name: 'MyShelf',
     // 书架需要获取书本信息，书本信息接口是一个授权接口
     // meta: { requiresAuth: false },
