@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
-import { ShelfBook, ShelfBookItem, ShelfFolderItem, ShelfItem, ShelfItemType } from '@/types/shelf'
+import { ShelfBook, ShelfBookItem, ShelfFolderChild, ShelfFolderItem, ShelfItem, ShelfItemType } from '@/types/shelf'
 import { shelfDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
-import produce from 'immer'
+import produce, { setAutoFreeze } from 'immer'
 import { isEqual } from 'lodash-es'
+import { Notify } from 'quasar'
+import { nanoid } from 'nanoid'
 
 export enum ShelfBranch {
   main = 'main',
@@ -47,7 +49,9 @@ const shelfStore = defineStore('app.shelf', {
     /** 获取指定层级的内容 */
     getShelfByParents(): (parents: string[]) => ShelfItem[] {
       return (parents: string[]) => {
-        return this.shelf.filter((i) => isEqual(i.parents, parents))
+        // 有可能是空字符串数组，过滤掉无效的那些空字符串
+        const _parents = parents.filter((i) => !!i)
+        return this.shelf.filter((i) => isEqual(i.parents, _parents))
       }
     },
     /** 获取指定层级的内容 */
@@ -271,6 +275,69 @@ const shelfStore = defineStore('app.shelf', {
           })
         })
       })
+    },
+    /** 添加到文件夹 */
+    addToFolder(payload: { books: string[]; folderID: string }) {
+      const booksInMap = new Map<string, null>()
+      payload.books.forEach((id) => booksInMap.set(id, null))
+
+      /** 先标记这些项目的parent */
+      this.source[this.branch] = produce(toRaw(this.source[this.branch]), (draft) => {
+        draft.forEach((item) => {
+          if (booksInMap.has(item.id)) {
+            item.parents.unshift(payload.folderID)
+          } else if (item.id === payload.folderID) {
+            console.log('push to folder', payload.books)
+            ;(item as ShelfFolderItem).value.children.push(
+              ...payload.books.map((id): ShelfFolderChild => ({ type: ShelfItemType.BOOK, id }))
+            )
+          }
+        })
+      })
+    },
+    /** 新建文件夹, 返回文件夹ID */
+    createFolder(payload: { name: string }): string {
+      // 校验重名
+      for (const folder of this.folders) {
+        if (payload.name === folder.value.Title) {
+          Notify.create({
+            type: 'negative',
+            timeout: 1500,
+            position: 'bottom',
+            message: '已有同名文件夹'
+          })
+        }
+        return ''
+      }
+
+      const folderID = nanoid()
+
+      /** 新的文件夹 */
+      const folder: ShelfFolderItem = {
+        // 固定在第一
+        index: 0,
+        type: ShelfItemType.FOLDER,
+        parents: [],
+        id: folderID,
+        value: {
+          Id: folderID,
+          Title: payload.name,
+          children: [],
+          updateAt: new Date().toISOString()
+        }
+      }
+
+      this.source[this.branch] = produce(toRaw(this.source[this.branch]), (draft) => {
+        // 腾出首位
+        draft.forEach((item) => {
+          item.index += 1
+        })
+
+        // 压入首位
+        draft.unshift(folder)
+      })
+
+      return folderID
     }
   }
 })
@@ -278,6 +345,9 @@ const shelfStore = defineStore('app.shelf', {
 /** @public 书架store */
 export function useShelfStore() {
   const store = shelfStore()
+
+  /** auto freeze的话会导致vue绑定报错 */
+  setAutoFreeze(false)
 
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (store._first) {
