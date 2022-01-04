@@ -63,9 +63,13 @@
 
             <template v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER">
               <!-- 文件夹相关的 -->
-              <q-item clickable v-close-popup>
-                <q-item-section>重命名</q-item-section>
-              </q-item>
+              <folder-rename @rename="renameHandle">
+                <template v-slot:default="slotProps">
+                  <q-item clickable v-close-popup @click="slotProps.onClick(item.value.Title)">
+                    <q-item-section>重命名</q-item-section>
+                  </q-item>
+                </template>
+              </folder-rename>
               <q-item clickable v-close-popup>
                 <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
               </q-item>
@@ -154,6 +158,7 @@ import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ShelfBranch, useShelfStore } from '@/store/shelf'
 import { useRoute } from 'vue-router'
+import FolderRename from './components/FolderRename.vue'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -267,6 +272,11 @@ const enterEditMode = () => {
 const quiteEditMode = () => {
   shelfStore.clearSelected()
   shelfStore.checkout({ to: ShelfBranch.main })
+}
+
+/** 重命名 */
+function renameHandle(name: string) {
+  /** @todo */
 }
 
 /** 屏蔽编辑模式下的事件 */
