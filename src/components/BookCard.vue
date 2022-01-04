@@ -84,7 +84,6 @@ function onIntersection(entry) {
   }
 
   .time {
-    padding-left: 4px;
     text-align: right;
   }
 }

@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === 'production') {
       Notify.create({
         message: '有新内容可用了，请刷新或重新打开网页',
         position: 'bottom',
-        timeout: 1500,
+        timeout: 3000,
         type: 'positive'
       })
     },
