@@ -258,7 +258,7 @@ useInitRequest(request)
 
 <style scoped lang="scss">
 .pre {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 .reply {
   :deep(.q-item__section--avatar) {
