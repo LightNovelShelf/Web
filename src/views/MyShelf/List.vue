@@ -32,7 +32,7 @@
   >
     <transition-group name="shelf-item">
       <!-- 如果有父层文件夹，显示返回卡片 -->
-      <q-grid-item v-if="parentFolder"><nav-back-to-root-folder /></q-grid-item>
+      <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
 
       <!-- 渲染书架列表内容 -->
       <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
@@ -408,21 +408,30 @@ const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newInd
     return
   }
 
-  shelfStore.commitSortInfo({ from: oldIndex, to: newIndex })
+  shelfStore.commitSortInfo({ from: oldIndex, to: newIndex, parents: parentFolders.value })
 }
 
 /** 保存修改 */
 const submitListChange = async () => {
   shelfStore.clearSelected()
+  shelfStore.verifyFolderData()
   shelfStore.merge({ to: ShelfBranch.main })
   shelfStore.checkout({ to: ShelfBranch.main })
-  shelfStore.push()
+  await shelfStore.push()
 }
 
 /** 创建排序句柄 */
 const createSortable = (el: HTMLElement) => {
   sortableRef.value = new Sortable(el, {
     animation: 400,
+    // 不能拖动 no-drag 元素
+    filter: '.no-drag',
+    // 不能放在 no-drop 元素上
+    onMove(evt) {
+      if (evt.related.className.includes('no-drop')) return false
+
+      return true
+    },
     onEnd(evt) {
       const { oldIndex, newIndex } = evt
       syncSortInfoToDraft({ oldIndex, newIndex })
