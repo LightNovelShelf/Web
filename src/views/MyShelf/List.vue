@@ -75,11 +75,11 @@
                 <q-item-section>移动到...</q-item-section>
               </q-item>
               <!-- 否则就是在root层 -->
-              <q-item v-else clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
+              <q-item v-else clickable v-close-popup @click="addItemToFolderHandle">
                 <q-item-section>加入到...</q-item-section>
               </q-item>
 
-              <q-item clickable v-close-popup>
+              <q-item clickable v-close-popup @click="removeItemHandle" :data-id="item.id">
                 <q-item-section>移出书架</q-item-section>
               </q-item>
             </template>
@@ -257,6 +257,19 @@ function addItemToFolderHandle(evt: MouseEvent) {
 
   // 打开文件夹弹层
   folderSelectorVisible.value = true
+}
+
+/** 右键菜单 - 移出书架 */
+function removeItemHandle(evt: MouseEvent) {
+  if (selectedCount.value === 0) {
+    const { id } = (evt.currentTarget as HTMLElement).dataset
+
+    if (id === undefined) {
+      return
+    }
+
+    shelfStore.removeFromShelf({ id })
+  }
 }
 
 /** 右键菜单 - 移动到文件夹 */

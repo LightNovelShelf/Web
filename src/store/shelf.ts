@@ -114,16 +114,13 @@ const shelfStore = defineStore('app.shelf', {
   actions: {
     /** git ------------ */
     /** 从db中拉数据 */
-    async pull() {
-      const db = (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
-      // 设定当前分支；可以理解为 git pull
-      this.source[this.branch] = db
-
-      // 其它branch在checkout的时候才维护
+    async fetch(): Promise<ShelfItem[]> {
+      return (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
     },
 
     /** push到db */
     async push() {
+      // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
       await shelfDB.clear()
       for (const i of this.shelf) {
         await shelfDB.set(i.id, i)
@@ -148,10 +145,16 @@ const shelfStore = defineStore('app.shelf', {
       this.source[this.branch] = shelf
     },
 
+    /** 从db中拉数据(pull = fetch + commit) */
+    async pull() {
+      const shelf = await this.fetch()
+      this.commit({ shelf })
+    },
+
     /** git end -------- */
 
     /** 校验书架文件夹ID是否有失效 */
-    async verifyFolderData() {
+    async verifyFolderData(payload: { push: boolean }) {
       let nextShelf: ShelfItem[] = toRaw(this.shelf)
 
       this.shelf.forEach((item, folderIdx) => {
@@ -201,12 +204,14 @@ const shelfStore = defineStore('app.shelf', {
       // 如果有更改
       if (nextShelf !== toRaw(this.folders)) {
         // 更新记录
-        this.source[this.branch] = nextShelf
+        this.commit({ shelf: nextShelf })
         // 写到DB
-        this.push()
+        if (payload.push) {
+          this.push()
+        }
       }
     },
-    /** 添加到收藏 */
+    /** 添加到书架 */
     async addToShelf(book: ShelfBook) {
       const item: ShelfBookItem = {
         id: book.Id + '',
@@ -218,10 +223,12 @@ const shelfStore = defineStore('app.shelf', {
       this.source[this.branch].push(item)
       await this.push()
     },
-    /** 移出收藏 @param bookId 书籍的id */
-    async removeFromShelf(bookId: number | string) {
-      this.source[this.branch] = this.source[this.branch].filter((i) => i.id !== bookId + '')
-      await this.push()
+    /** 移出书架 */
+    async removeFromShelf(payload: { id: string; selected?: boolean }) {
+      this.commit({
+        shelf: this.shelf.filter((i) => i.id !== payload.id)
+      })
+      this.verifyFolderData({ push: false })
     },
     /** 记录排序 */
     commitSortInfo({ from, to }: { from: number; to: number }) {
@@ -333,14 +340,16 @@ const shelfStore = defineStore('app.shelf', {
         }
       }
 
-      this.source[this.branch] = produce(toRaw(this.source[this.branch]), (draft) => {
-        // 腾出首位
-        draft.forEach((item) => {
-          item.index += 1
-        })
+      this.commit({
+        shelf: produce(this.shelf, (draft) => {
+          // 腾出首位
+          draft.forEach((item) => {
+            item.index += 1
+          })
 
-        // 压入首位
-        draft.unshift(folder)
+          // 压入首位
+          draft.unshift(folder)
+        })
       })
 
       return folderID
@@ -371,7 +380,7 @@ export function useShelfStore() {
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (store._first) {
     store.$patch({ _first: false })
-    store.pull().then(() => store.verifyFolderData())
+    store.pull().then(() => store.verifyFolderData({ push: true }))
   }
 
   return store
