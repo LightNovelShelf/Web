@@ -63,13 +63,9 @@
 
             <template v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER">
               <!-- 文件夹相关的 -->
-              <folder-rename @rename="renameHandle">
-                <template v-slot:default="slotProps">
-                  <q-item clickable v-close-popup @click="slotProps.onClick(item.value.Title)">
-                    <q-item-section>重命名</q-item-section>
-                  </q-item>
-                </template>
-              </folder-rename>
+              <q-item clickable v-close-popup @click="currentFolderToRename = item">
+                <q-item-section>重命名</q-item-section>
+              </q-item>
               <q-item clickable v-close-popup>
                 <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
               </q-item>
@@ -142,6 +138,9 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <!-- 书架文件夹重命名弹层 -->
+  <rename-dialog v-model="currentFolderToRename" @rename="renameHandle" />
 </template>
 
 <script lang="ts" setup>
@@ -158,7 +157,7 @@ import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ShelfBranch, useShelfStore } from '@/store/shelf'
 import { useRoute } from 'vue-router'
-import FolderRename from './components/FolderRename.vue'
+import RenameDialog from './components/RenameDialog.vue'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -274,9 +273,14 @@ const quiteEditMode = () => {
   shelfStore.checkout({ to: ShelfBranch.main })
 }
 
+/** 正在重命名的文件夹；置为某一个文件夹时就会触发重命名弹层显示 */
+const currentFolderToRename = ref<ShelfTypes.ShelfFolderItem | null>(null)
 /** 重命名 */
-function renameHandle(name: string) {
-  /** @todo */
+function renameHandle(name: string, cb: (promise: Promise<unknown> | void) => void) {
+  // just for make ts happy
+  if (currentFolderToRename.value?.id) {
+    cb(shelfStore.renameFolder({ name, id: currentFolderToRename.value.id }))
+  }
 }
 
 /** 屏蔽编辑模式下的事件 */

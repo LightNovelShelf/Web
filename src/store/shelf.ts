@@ -344,6 +344,19 @@ const shelfStore = defineStore('app.shelf', {
       })
 
       return folderID
+    },
+    /** 重命名文件夹 */
+    renameFolder(payload: { name: string; id: string }) {
+      this.commit({
+        shelf: produce(toRaw(this.shelf), (draft) => {
+          for (const item of draft) {
+            if (item.id === payload.id) {
+              item.value.Title = payload.name
+            }
+            return
+          }
+        })
+      })
     }
   }
 })
