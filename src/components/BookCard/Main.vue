@@ -63,7 +63,7 @@ function onIntersection(entry) {
 
 .book-name {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   --line-height: 1.6;
   line-height: var(--line-height);
   font-size: 12px;
