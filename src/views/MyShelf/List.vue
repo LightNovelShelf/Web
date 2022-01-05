@@ -401,7 +401,7 @@ onDeactivated(() => {
   // transition: all 5s;
 }
 
-.shelf-item-enter-active {
+.shelf-item-leave-active {
   position: absolute;
 }
 
