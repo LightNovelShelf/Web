@@ -61,7 +61,7 @@ const folderIDs = computed(() => [...props.folder.parents, props.folder.id])
 
 .book-name {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   --font-size: 12px;
   --line-height: 1.6;
   line-height: var(--line-height);
