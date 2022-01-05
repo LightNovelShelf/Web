@@ -307,8 +307,6 @@ const shelfStore = defineStore('app.shelf', {
       const maxIndex = Math.max(from, to)
       const minIndex = Math.min(from, to)
 
-      console.log('from, to', from, to, minIndex, maxIndex)
-
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           // 不在范围内的书就不用动了
