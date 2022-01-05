@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="extra text-grey-7" style="display: flex; padding: 0 4px">
+    <div class="extra" style="display: flex; padding: 0 4px">
       <div class="user-name">{{ book.UserName }}</div>
       <div class="time">{{ updateTime }}</div>
     </div>
@@ -76,6 +76,7 @@ function onIntersection(entry) {
 
 .extra {
   --line-height: 1.5;
+  opacity: 0.6;
   height: calc(1em * var(--line-height));
 
   .user-name {

@@ -39,6 +39,10 @@
               <q-radio v-model="readSetting.convert" val="s2t" label="繁化" />
             </div>
             <div>
+              <div>其他选项</div>
+              <q-toggle v-model="readSetting.justify" label="两端对齐" />
+            </div>
+            <div>
               <div>字体大小</div>
               <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
             </div>
