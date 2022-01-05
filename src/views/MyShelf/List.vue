@@ -32,7 +32,7 @@
   >
     <transition-group name="shelf-item">
       <!-- 如果有父层文件夹，显示返回卡片 -->
-      <q-grid-item v-if="hasParentsFolder"><nav-back-to-root-folder /></q-grid-item>
+      <q-grid-item v-if="parentFolder"><nav-back-to-root-folder /></q-grid-item>
 
       <!-- 渲染书架列表内容 -->
       <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
@@ -55,14 +55,32 @@
 
         <!-- 编辑状态下，书架项目有单独右键菜单 -->
         <q-menu v-if="editMode" touch-position context-menu>
-          <q-list dense style="min-width: 100px">
+          <q-list style="min-width: 100px">
+            <!-- 选中提示 -->
+            <q-item>
+              <!-- @todo 子菜单展示选中的内容并支持在子菜单内取消选中 -->
+              <q-item-section v-if="selectedCount > 1 || (selectedCount && !item.selected)"
+                >已选中{{ selectedCount }}项</q-item-section
+              >
+              <!-- 没有选中时展示当前项标题 -->
+              <q-item-section v-else>{{ item.value.Title }}</q-item-section>
+            </q-item>
+
+            <q-separator />
+
             <!-- 书籍相关的 -->
             <template v-if="item.type === ShelfTypes.ShelfItemType.BOOK">
-              <q-item clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
+              <!-- 有父层文件夹，代表已经在文件夹里了 -->
+              <q-item v-if="parentFolder" clickable v-close-popup @click="moveItemToFolderHandle" :data-id="item.id">
+                <q-item-section>移动到...</q-item-section>
+              </q-item>
+              <!-- 否则就是在root层 -->
+              <q-item v-else clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
                 <q-item-section>加入到...</q-item-section>
               </q-item>
+
               <q-item clickable v-close-popup>
-                <q-item-section>移出</q-item-section>
+                <q-item-section>移出书架</q-item-section>
               </q-item>
             </template>
 
@@ -102,7 +120,7 @@
   <q-dialog :model-value="folderSelectorVisible" @update:model-value="toggleShelfFolderSelector">
     <q-card class="shelf-folder-selector-card">
       <q-card-section>
-        <div class="text-h6">添加到...</div>
+        <div class="text-h6">{{ parentFolder ? '移动' : '加入' }}到...</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
@@ -114,18 +132,19 @@
           filled
           :model-value="selectorValue"
           :options="folderOptions"
-          autofocus
           use-input
           fill-input
           hide-selected
           input-debounce="0"
-          label="输入文件夹名称"
+          label="输入文件夹名称进行筛选或创建"
           @input-value="selectorValue = $event"
           @update:model-value="selectorValue = $event"
         >
           <template v-slot:no-option>
             <q-item>
-              <q-item-section class="text-grey"> 没有找到，将新建文件夹 </q-item-section>
+              <q-item-section class="text-grey">
+                {{ selectorValue ? '没有找到，将新建文件夹' : '请输入文件夹名称' }}
+              </q-item-section>
             </q-item>
           </template></q-select
         >
@@ -135,7 +154,11 @@
         <q-btn
           flat
           :disable="!selectorValue"
-          :label="selectorValue && typeof selectorValue === 'object' ? '加入' : '创建并加入'"
+          :label="
+            selectorValue && typeof selectorValue === 'object'
+              ? `${parentFolder ? '移动' : '加入'}(${selectedCount})`
+              : `${parentFolder ? '创建并移入' : '创建并加入'}(${selectedCount})`
+          "
           color="primary"
           v-close-popup
           @click="folderSelectorSubmitHandle"
@@ -170,6 +193,7 @@ defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 interface QSelectorOption {
   label: string
   value: string
+  disable?: boolean
 }
 
 const $ = useQuasar()
@@ -178,41 +202,65 @@ const loading = ref(false)
 const shelfStore = useShelfStore()
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const route = useRoute()
-/** 是否有父文件夹 */
-const hasParentsFolder = computed<boolean>(() => !!(route.params.folderID && route.params.folderID.length))
-const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
-  if (typeof route.params.folderID === 'string') {
-    return shelfStore.getShelfByParents([route.params.folderID])
+/** 是否有父文件夹(可能有多个) */
+const parentFolders = computed<string[]>(() => {
+  if (route.params.folderID) {
+    if (Array.isArray(route.params.folderID)) {
+      return route.params.folderID
+    }
+
+    return [route.params.folderID]
   }
 
-  // route.params.folderID有可能是 undefined，这时候代表顶层
-  return shelfStore.getShelfByParents(route.params.folderID || [])
+  return []
 })
-
-/** 书架文件夹列表 */
-const folders = computed<ShelfTypes.ShelfFolderItem[]>(() => shelfStore.folders)
+/** 直接关系的父文件夹 */
+const parentFolder = computed<string | null>(() => [...parentFolders.value].pop() ?? null)
+const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
+  return shelfStore.getShelfByParents(parentFolders.value)
+})
 
 /** 文件夹选择弹层 */
 const folderSelectorVisible = ref(false)
 /** 文件夹选择器model值 */
 const selectorValue = ref<string | QSelectorOption | null>(null)
 /** 文件夹选项 */
-const folderOptions = computed<QSelectorOption[]>(() =>
-  folders.value
-    .map((i) => ({ label: i.value.Title, value: i.value.Id + '' }))
-    .filter((i) => {
-      // 如果 selectorValue 有值 且不是选项值
-      if (selectorValue.value && typeof selectorValue.value !== 'object') {
-        // 就筛选
-        return i.label.includes(selectorValue.value)
-      }
+const folderOptions = computed<QSelectorOption[]>(() => {
+  return (
+    shelfStore.folders
+      // 过滤掉自己，移动到自己没有意义
+      .filter((i) => i.id !== parentFolder.value)
+      .map((i): QSelectorOption => ({ label: i.value.Title, value: i.id }))
+      .filter((i) => {
+        // 如果 selectorValue 有值 且不是选项值
+        if (selectorValue.value && typeof selectorValue.value !== 'object') {
+          // 就筛选
+          return i.label.includes(selectorValue.value)
+        }
 
-      return true
-    })
-)
+        return true
+      })
+  )
+})
 
 /** 右键菜单 - 加入文件夹 */
 function addItemToFolderHandle(evt: MouseEvent) {
+  if (selectedCount.value === 0) {
+    const { id } = (evt.currentTarget as HTMLElement).dataset
+
+    if (id === undefined) {
+      return
+    }
+
+    shelfStore.selectItem({ id })
+  }
+
+  // 打开文件夹弹层
+  folderSelectorVisible.value = true
+}
+
+/** 右键菜单 - 移动到文件夹 */
+function moveItemToFolderHandle(evt: MouseEvent) {
   if (selectedCount.value === 0) {
     const { id } = (evt.currentTarget as HTMLElement).dataset
 
@@ -303,15 +351,28 @@ function muteInEditMode(evt: MouseEvent) {
 /** 列表项目点击 */
 function listItemClickHandle(evt: MouseEvent) {
   if (editMode.value) {
-    evt.preventDefault()
-    evt.stopPropagation()
-
     const { dataset } = evt.currentTarget as HTMLElement
     const { id } = dataset
     if (id === undefined) {
       return
     }
 
+    const item = shelfStore.shelfsMap.get(id)
+    if (!item) {
+      return
+    }
+
+    // 文件夹允许点击进入，跨文件夹选中项目
+    if (item.type === ShelfTypes.ShelfItemType.FOLDER) {
+      return
+    }
+
+    // 是书籍，干掉点击防止跳转到书籍详情
+
+    evt.preventDefault()
+    evt.stopPropagation()
+
+    // 选中书籍
     shelfStore.selectItem({ id })
   }
 }
