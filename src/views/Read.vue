@@ -50,8 +50,37 @@
             上一章
           </q-tooltip>
         </q-fab-action>
+        <q-fab-action
+          @click="showCatalog = true"
+          color="primary"
+          :icon="icon.mdiFormatListBulleted"
+          :disable="draggingFab"
+        >
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            目录
+          </q-tooltip>
+        </q-fab-action>
       </q-fab>
     </q-page-sticky>
+
+    <q-dialog v-model="showCatalog">
+      <q-card style="min-width: 300px">
+        <q-card-section>
+          <q-infinite-scroll style="max-height: 80vh">
+            <q-list dense>
+              <q-item
+                v-for="(item, index) in chapter['Chapters']"
+                :key="index"
+                replace
+                :to="{ name: 'Read', params: { bid, sortNum: index + 1 } }"
+              >
+                <q-item-section>{{ item }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-infinite-scroll>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
 
     <div class="v-viewer" ref="viewerRef" v-viewer>
       <img :src="showImage.src" :alt="showImage.alt" />
@@ -104,6 +133,7 @@ const comment = reactive({
   content: '',
   showing: false
 })
+const showCatalog = ref(false)
 const layout = useLayout()
 const { headerOffset } = layout
 const appStore = useAppStore()
