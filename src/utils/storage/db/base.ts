@@ -92,7 +92,7 @@ export class DB<Value = unknown> {
   }
 
   /** 获取DB储存 */
-  public get = <T = Value>(key: string): Promise<T> => {
+  public get = <T = Value>(key: string): Promise<T | null> => {
     return this.db.getItem<T>(key)
   }
   /** 更新DB储存 */
