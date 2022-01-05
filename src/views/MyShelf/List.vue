@@ -63,7 +63,10 @@
                 >已选中{{ selectedCount }}项</q-item-section
               >
               <!-- 没有选中时展示当前项标题 -->
-              <q-item-section v-else>{{ item.value.Title }}</q-item-section>
+              <q-item-section v-else
+                ><q-tooltip anchor="top middle" self="bottom middle">{{ item.value.Title }}</q-tooltip
+                ><div class="max-len-text">{{ item.value.Title }}</div></q-item-section
+              >
             </q-item>
 
             <q-separator />
@@ -536,5 +539,13 @@ onDeactivated(() => {
 // 文件夹选择弹层 相关
 .shelf-folder-selector-card {
   min-width: 300px;
+}
+
+// 限制长度的文字
+.max-len-text {
+  max-width: 12em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
