@@ -31,6 +31,22 @@ const INIT: ShelfStore = {
   branch: ShelfBranch.main
 }
 
+function ascSorter<T extends { index: number }>(a: T, b: T): 1 | -1 {
+  return a.index > b.index ? 1 : -1
+}
+
+/** 排序数组，immutable */
+function sort(shelf: ShelfItem[]): ShelfItem[] {
+  return produce(toRaw(shelf), (draft) => {
+    draft.sort(ascSorter)
+  })
+}
+
+/** 返回数组中最后一个元素; 数组长度为零时返回null */
+function lastItem<T>(arr: T[]): T | null {
+  return arr[arr.length - 1] ?? null
+}
+
 /** @private 书架store */
 const shelfStore = defineStore('app.shelf', {
   state: () => INIT,
@@ -73,14 +89,16 @@ const shelfStore = defineStore('app.shelf', {
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
-    curMaxShelfIndex(): number {
-      let max = -1
+    curMaxShelfIndex(): (parents: string[]) => number {
+      return (parents) => {
+        let max = -1
 
-      this.shelf.forEach(({ index }) => {
-        max = Math.max(index, max)
-      })
+        this.getShelfByParents(parents).forEach((item) => {
+          max = Math.max(item.index, max)
+        })
 
-      return max
+        return max
+      }
     },
     /** map格式的书籍数据，方便查找 */
     booksMap(): Map<string, ShelfBookItem> {
@@ -114,8 +132,8 @@ const shelfStore = defineStore('app.shelf', {
   actions: {
     /** git ------------ */
     /** 从db中拉数据 */
-    async fetch(): Promise<ShelfItem[]> {
-      return (await shelfDB.getItems()).sort((a, b) => (a.index > b.index ? 1 : -1))
+    fetch(): Promise<ShelfItem[]> {
+      return shelfDB.getItems()
     },
 
     /** push到db */
@@ -128,33 +146,76 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** 切换分支 */
-    async checkout({ to: branch, reset = false }: { to: ShelfBranch; reset?: boolean }) {
+    checkout({ to: branch, reset = false }: { to: ShelfBranch; reset?: boolean }) {
       if (reset) {
         this.source[branch] = this.source[this.branch]
       }
       this.branch = branch
     },
 
+    /** 按照index重排shelf数组 */
+    sort() {
+      this.commit({ shelf: sort(toRaw(this.shelf)) })
+    },
+    /**
+     * 把书架内每层书籍的index“挤压”一次，把稀疏的index值重排回连续的、0起点的index
+     *
+     * @description
+     * 如果不做这个操作就进行排序，会出现这个情况：
+     * 书籍A index值1，书籍B index值3，AB书籍紧靠彼此
+     *
+     * 用户对调AB书籍，
+     * 这时候会出现A的index值+1了还是比B小，排序结果保存失效
+     */
+    squeezeShelfItemIndex() {
+      this.commit({
+        shelf: produce(sort(toRaw(this.shelf)), (draft) => {
+          /**
+           * 最小index记录
+           *
+           * key是parents数组的最后一个值（代表直接父文件夹ID
+           * value是遇到过的个数
+           */
+          const minIndexMap = new Map<string, number>()
+
+          /** 表示顶层的数字 */
+          const ROOT = '__ROOT__' + '.' + nanoid()
+
+          draft.forEach((item) => {
+            if (item.parents.length) {
+              // 只有在数组不为空的时候会lastItem，所以这里一定有
+              const parentID = lastItem(item.parents)!
+              item.index = (minIndexMap.get(parentID) ?? -1) + 1
+              minIndexMap.set(parentID, item.index)
+            } else {
+              item.index = (minIndexMap.get(ROOT) ?? -1) + 1
+              minIndexMap.set(ROOT, item.index)
+            }
+          })
+        })
+      })
+    },
+
     /** 把当前分支的数据覆盖到指定分支 */
-    async merge({ to }: { to: ShelfBranch }) {
+    merge({ to }: { to: ShelfBranch }) {
       this.source[to] = this.source[this.branch]
     },
 
     /** 提交更改(覆盖) */
-    async commit({ shelf }: { shelf: ShelfItem[] }) {
+    commit({ shelf }: { shelf: ShelfItem[] }) {
       this.source[this.branch] = shelf
     },
 
     /** 从db中拉数据(pull = fetch + commit) */
     async pull() {
       const shelf = await this.fetch()
-      this.commit({ shelf })
+      this.commit({ shelf: sort(shelf) })
     },
 
     /** git end -------- */
 
-    /** 校验书架文件夹ID是否有失效 */
-    async verifyFolderData(payload: { push: boolean }) {
+    /** 校验失去关联的书架项目并修复数据中不合理的排布 */
+    verifyFolderData() {
       let nextShelf: ShelfItem[] = toRaw(this.shelf)
 
       this.shelf.forEach((item, folderIdx) => {
@@ -201,24 +262,24 @@ const shelfStore = defineStore('app.shelf', {
         }
       })
 
-      // 如果有更改
-      if (nextShelf !== toRaw(this.folders)) {
-        // 更新记录
-        this.commit({ shelf: nextShelf })
-        // 写到DB
-        if (payload.push) {
-          this.push()
-        }
-      }
+      // 更新记录
+      this.commit({ shelf: nextShelf })
+
+      // 根据index重排一次数组
+      this.sort()
+
+      // 根据排序结果重设一次index，保证index不是稀疏的
+      this.squeezeShelfItemIndex()
     },
-    /** 添加到书架 */
+    /** 添加到书架，立即生效 */
     async addToShelf(book: ShelfBook) {
       const item: ShelfBookItem = {
         id: book.Id + '',
         type: ShelfItemType.BOOK,
         value: toRaw(book),
         parents: [],
-        index: this.curMaxShelfIndex + 1
+        // 添加到书架默认就是第一层
+        index: this.curMaxShelfIndex([]) + 1
       }
       this.source[this.branch].push(item)
       await this.push()
@@ -228,19 +289,37 @@ const shelfStore = defineStore('app.shelf', {
       this.commit({
         shelf: this.shelf.filter((i) => i.id !== payload.id)
       })
-      this.verifyFolderData({ push: false })
+      this.verifyFolderData()
     },
-    /** 记录排序 */
-    commitSortInfo({ from, to }: { from: number; to: number }) {
+    /**
+     * 记录排序
+     *
+     * 这里有一个比较绕的逻辑：传入的from/to都是界面上的index（初始状态下就是数组上的index，界面是按照数组顺序来渲染的）
+     * 但操作时是跟item的index比较
+     *
+     * @description
+     * 这个做法的原因是：
+     * 1. 书架显示的书籍时当前文件夹内的项目，而数据库存储的是全部项目；直接拿展示的index去跟全部项目的index去比较肯定是不对应的
+     * 2. 因为排序后的数组需要commit，所以以当前层的数据去遍历显然也不可行，这时候index对上了但是没法commit（内容只有本层的）
+     * 3. 所以这里假定每次触发排序时；书架的index都是已经被挤压过的、item.index就是对应了书籍在文件夹的位置
+     */
+    commitSortInfo({ from, to, parents }: { from: number; to: number; parents: string[] }) {
       const maxIndex = Math.max(from, to)
       const minIndex = Math.min(from, to)
+
+      console.log('from, to', from, to, minIndex, maxIndex)
 
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           // 不在范围内的书就不用动了
           // 老的index换成新的index
           // 剩下的依次左移/右移
-          draft.forEach((item) => {
+          draft.forEach((item, index) => {
+            // 不是本层的，不要动
+            if (!isEqual(item.parents, parents)) {
+              return
+            }
+
             if (item.index < minIndex || item.index > maxIndex) {
               return
             }
@@ -255,6 +334,9 @@ const shelfStore = defineStore('app.shelf', {
               item.index += 1
             }
           })
+
+          // 这个sort可要可不要；因为就算不sort，界面上的顺序还是跟item.index一样（即使这个时候数组的index跟item的index不一样）
+          draft.sort(ascSorter)
         })
       })
     },
@@ -290,6 +372,8 @@ const shelfStore = defineStore('app.shelf', {
       const _map = new Map<string, null>()
       payload.books.forEach((id) => _map.set(id, null))
 
+      let index = 0
+
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           draft.forEach((item) => {
@@ -297,6 +381,8 @@ const shelfStore = defineStore('app.shelf', {
             if (_map.has(item.id)) {
               // 清掉选择状态，不然会导致数据一直认为有已选的项目
               item.selected = false
+              // 重新赋值index
+              item.index = index++
               item.parents.unshift(payload.folderID)
             } else if (item.id === payload.folderID) {
               // 如果是文件夹本身，就把那些书籍推进children里
@@ -352,6 +438,8 @@ const shelfStore = defineStore('app.shelf', {
         })
       })
 
+      this.verifyFolderData()
+
       return folderID
     },
     /** 重命名文件夹 */
@@ -380,7 +468,10 @@ export function useShelfStore() {
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (store._first) {
     store.$patch({ _first: false })
-    store.pull().then(() => store.verifyFolderData({ push: true }))
+    store
+      .pull()
+      .then(() => store.verifyFolderData())
+      .then(() => store.push())
   }
 
   return store
