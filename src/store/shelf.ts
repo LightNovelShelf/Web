@@ -63,6 +63,12 @@ const shelfStore = defineStore('app.shelf', {
       return this.shelf.filter((i): i is ShelfFolderItem => i.type === ShelfItemType.FOLDER)
     },
     /** 获取指定层级的内容 */
+    getShelfByParent(): (parent: string | null) => ShelfItem[] {
+      return (parent) => {
+        return this.shelf.filter((i) => lastItem(i.parents) === parent)
+      }
+    },
+    /** 获取指定层级的内容 */
     getShelfByParents(): (parents: string[]) => ShelfItem[] {
       return (parents: string[]) => {
         // 有可能是空字符串数组，过滤掉无效的那些空字符串
@@ -89,11 +95,11 @@ const shelfStore = defineStore('app.shelf', {
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
-    curMaxShelfIndex(): (parents: string[]) => number {
-      return (parents) => {
+    curShelfMaxIndex(): (parent: string | null) => number {
+      return (parent) => {
         let max = -1
 
-        this.getShelfByParents(parents).forEach((item) => {
+        this.getShelfByParent(parent).forEach((item) => {
           max = Math.max(item.index, max)
         })
 
@@ -279,7 +285,7 @@ const shelfStore = defineStore('app.shelf', {
         value: toRaw(book),
         parents: [],
         // 添加到书架默认就是第一层
-        index: this.curMaxShelfIndex([]) + 1
+        index: this.curShelfMaxIndex(null) + 1
       }
       this.source[this.branch].push(item)
       await this.push()
@@ -365,12 +371,13 @@ const shelfStore = defineStore('app.shelf', {
         })
       })
     },
-    /** 添加到文件夹 */
+    /** 添加到文件夹，排在现有内容之后 */
     addToFolder(payload: { books: string[]; folderID: string }) {
       const _map = new Map<string, null>()
       payload.books.forEach((id) => _map.set(id, null))
 
-      let index = 0
+      /** 目标文件夹的 最大index + 1 作为初始index */
+      let index = this.curShelfMaxIndex(payload.folderID) + 1
 
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
@@ -391,6 +398,9 @@ const shelfStore = defineStore('app.shelf', {
           })
         })
       })
+
+      // 项目进入文件夹后，index有可能会生成空洞；挤掉
+      this.verifyFolderData()
     },
     /** 新建文件夹, 返回文件夹ID */
     createFolder(payload: { name: string }): string {
