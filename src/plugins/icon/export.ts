@@ -53,5 +53,6 @@ export {
   mdiAccount,
   mdiCloseCircle,
   mdiFolderOpen,
+  mdiReply,
   mdiFormatListBulleted
 } from '@mdi/js'

@@ -31,7 +31,12 @@
     @contextmenu="muteInEditMode"
   >
     <transition-group name="shelf-item">
+      <!-- 如果有父层文件夹，显示返回卡片 -->
+      <q-grid-item v-if="hasParentsFolder"><nav-back-to-root-folder /></q-grid-item>
+
+      <!-- 渲染书架列表内容 -->
       <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
+        <!-- 书架项目 -->
         <div class="shelf-item-wrap">
           <!-- 书籍 -->
           <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" />
@@ -48,7 +53,7 @@
           <template v-else />
         </div>
 
-        <!-- 编辑状态下，书籍可以有右键菜单 -->
+        <!-- 编辑状态下，书架项目有单独右键菜单 -->
         <q-menu v-if="editMode" touch-position context-menu>
           <q-list dense style="min-width: 100px">
             <!-- 书籍相关的 -->
@@ -75,7 +80,7 @@
       </q-grid-item>
     </transition-group>
 
-    <!-- 右键菜单 -->
+    <!-- 列表右键菜单 -->
     <q-menu v-if="!editMode" touch-position context-menu>
       <q-list dense style="min-width: 100px">
         <q-item clickable v-close-popup @click="enterEditMode">
@@ -158,6 +163,7 @@ import ShelfFolder from './components/ShelfFolder.vue'
 import { ShelfBranch, useShelfStore } from '@/store/shelf'
 import { useRoute } from 'vue-router'
 import RenameDialog from './components/RenameDialog.vue'
+import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -172,6 +178,8 @@ const loading = ref(false)
 const shelfStore = useShelfStore()
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const route = useRoute()
+/** 是否有父文件夹 */
+const hasParentsFolder = computed<boolean>(() => !!(route.params.folderID && route.params.folderID.length))
 const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
   if (typeof route.params.folderID === 'string') {
     return shelfStore.getShelfByParents([route.params.folderID])
