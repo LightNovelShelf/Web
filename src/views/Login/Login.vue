@@ -1,9 +1,9 @@
 <template>
   <div class="fit row flex-center column absolute-full">
     <div style="width: 300px" class="q-gutter-sm">
-      <div class="text-grey-7 text-center">
+      <div class="text-opacity text-center">
         <q-icon size="60px" :name="icon.mdiAccountCircle"></q-icon>
-        <div class="text-grey-7 text-h5">登录到 轻书架</div>
+        <div class="text-opacity text-h5">登录到 轻书架</div>
       </div>
       <div>
         <q-form @submit="_login">
