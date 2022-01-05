@@ -203,6 +203,7 @@ const bgStyle = computed(() => ({
 }))
 const readStyle = computed(() => ({
   fontSize: readSetting.fontSize + 'px',
+  textAlign: readSetting.justify ? 'justify' : 'initial',
   color:
     readSetting.bgType === 'custom' ? (colors.brightness(readSetting.customColor) < 128 ? '#fff' : '#000') : 'inherit'
 }))

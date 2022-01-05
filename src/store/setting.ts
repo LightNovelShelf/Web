@@ -12,7 +12,8 @@ export const useSettingStore = defineStore('app.setting', {
       bgType: 'none' as 'none' | 'paper' | 'custom',
       customColor: '#000000',
       convert: null as null | 't2s' | 's2t',
-      readPageWidth: 0
+      readPageWidth: 0,
+      justify: false
     }
   }),
   actions: {

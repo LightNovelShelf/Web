@@ -1,9 +1,9 @@
 <template>
   <div class="fit row flex-center column absolute-full">
     <div style="width: 300px" class="q-gutter-sm">
-      <div class="text-grey-7 text-center">
+      <div class="text-opacity text-center">
         <q-icon size="60px" :name="icon.mdiAccountCircle"></q-icon>
-        <div class="text-grey-7 text-h5">重置密码</div>
+        <div class="text-opacity text-h5">重置密码</div>
       </div>
       <div>
         <q-form @submit="_reset">
@@ -76,7 +76,7 @@ import { login, resetPassword, sendResetEmail } from '@/services/user'
 import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
 
 const $q = useQuasar()
@@ -89,7 +89,6 @@ const code = ref('')
 const isPwd = ref(true)
 const loading = ref(false)
 const sending = ref(false)
-const route = useRoute()
 const router = useRouter()
 
 const { executeRecaptcha, recaptchaLoaded } = useReCaptcha() || {}

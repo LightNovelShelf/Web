@@ -60,7 +60,7 @@
                 </q-item-section>
                 <q-item-section>
                   <div>{{ user.UserName }}</div>
-                  <div class="text-caption text-grey-7">{{ user['Role'].Name }}</div>
+                  <div class="text-caption text-opacity">{{ user['Role'].Name }}</div>
                 </q-item-section>
               </q-item>
 
