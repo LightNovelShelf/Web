@@ -178,7 +178,7 @@
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard'
-import { computed, defineComponent, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -190,6 +190,7 @@ import { ShelfBranch, useShelfStore } from '@/store/shelf'
 import { useRoute } from 'vue-router'
 import RenameDialog from './components/RenameDialog.vue'
 import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
+import { useIsActivated } from '@/composition/useIsActivated'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
@@ -205,18 +206,35 @@ const loading = ref(false)
 const shelfStore = useShelfStore()
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const route = useRoute()
+const isActivated = useIsActivated()
+
 /** 是否有父文件夹(可能有多个) */
-const parentFolders = computed<string[]>(() => {
-  if (route.params.folderID) {
-    if (Array.isArray(route.params.folderID)) {
-      return route.params.folderID
+const parentFolders = ref<string[]>([])
+
+/** 监听路由 修改 parentFolders 值 */
+watch(
+  () => [route, isActivated] as const,
+  ([nextRoute, nextActivated]) => {
+    if (!nextActivated.value) {
+      return
     }
 
-    return [route.params.folderID]
-  }
+    if (!nextRoute.params.folderID) {
+      parentFolders.value = []
+      return
+    }
 
-  return []
-})
+    if (Array.isArray(route.params.folderID)) {
+      parentFolders.value = route.params.folderID.filter((i) => !!i)
+      return
+    }
+
+    parentFolders.value = [route.params.folderID]
+  },
+  // immediate 保证mounted场景能触发
+  { immediate: true, deep: true }
+)
+
 /** 直接关系的父文件夹 */
 const parentFolder = computed<string | null>(() => [...parentFolders.value].pop() ?? null)
 const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
