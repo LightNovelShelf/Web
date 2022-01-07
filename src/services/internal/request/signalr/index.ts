@@ -36,7 +36,8 @@ const hub: HubConnection = new HubConnectionBuilder()
           try {
             token = await refreshToken('' + _token)
           } catch (error) {
-            if (error instanceof ServerError) {
+            // -100 token失效, 404 token不存在
+            if (error instanceof ServerError && [-100, 404].includes(error.status)) {
               await longTermToken.set('')
             }
           }
