@@ -64,7 +64,6 @@
     "webpack-bundle-analyzer": "^4.5.0"
   },
   "browserslist": [
-    "> 1%",
-    "not OperaMini all"
+    "supports es6-module"
   ]
 }
