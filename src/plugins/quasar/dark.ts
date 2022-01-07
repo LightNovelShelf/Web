@@ -6,7 +6,7 @@ export const Dark = {
     const result = localStorage.getItem(Key)
     if (result) {
       if (result === 'true') return true
-      else if (result === 'false') return true
+      else if (result === 'false') return false
       else return 'auto'
     } else {
       return 'auto'
