@@ -385,6 +385,7 @@ const shelfStore = defineStore('app.shelf', {
       this.commit({
         // 返回排序后的
         shelf: sort(
+          // @ts-ignore
           produce(toRaw(this.shelf), (draft) => {
             draft.forEach((item) => {
               // 如果是待加入的项目，记录新的文件夹路径
