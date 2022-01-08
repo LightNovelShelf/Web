@@ -64,7 +64,9 @@
               >
               <!-- 没有选中时展示当前项标题 -->
               <q-item-section v-else
-                ><q-tooltip anchor="top middle" self="bottom middle">{{ item.value.Title }}</q-tooltip
+                ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
+                  item.value.Title
+                }}</q-tooltip
                 ><div class="max-len-text">{{ item.value.Title }}</div></q-item-section
               >
             </q-item>
@@ -92,7 +94,7 @@
               <q-item clickable v-close-popup @click="currentFolderToRename = item">
                 <q-item-section>重命名</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup>
+              <q-item clickable v-close-popup @click="removeFolderHandle" :data-id="item.id">
                 <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
               </q-item>
             </template>
@@ -143,14 +145,25 @@
           @input-value="selectorValue = $event"
           @update:model-value="selectorValue = $event"
         >
+          <!-- 空状态 -->
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
                 {{ selectorValue ? '没有找到，将新建文件夹' : '请输入文件夹名称' }}
               </q-item-section>
             </q-item>
-          </template></q-select
-        >
+          </template>
+          <!-- 覆盖渲染模板 -->
+          <template v-slot:option="scope">
+            <!-- scope.opt 类型是 QSelectorOption -->
+            <q-item v-bind="scope.itemProps">
+              <q-item-section>
+                <q-item-label class="max-len-text">{{ scope.opt.label }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>{{ scope.opt.updateAt }}</q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </q-card-section>
 
       <q-card-actions align="right">
@@ -178,7 +191,7 @@
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard'
-import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -186,17 +199,21 @@ import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
 import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/plugins/icon/export'
 import ShelfFolder from './components/ShelfFolder.vue'
-import { ShelfBranch, useShelfStore } from '@/store/shelf'
+import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/store/shelf'
 import { useRoute } from 'vue-router'
 import RenameDialog from './components/RenameDialog.vue'
 import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
 import { useIsActivated } from '@/composition/useIsActivated'
+import { ALL_VALUE } from '@/const'
+import { parseTime } from '@/utils/time'
 
 defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
 interface QSelectorOption {
   label: string
   value: string
+  /** 格式化好的最后修改时间 */
+  updateAt: string
   disable?: boolean
 }
 
@@ -247,21 +264,36 @@ const folderSelectorVisible = ref(false)
 const selectorValue = ref<string | QSelectorOption | null>(null)
 /** 文件夹选项 */
 const folderOptions = computed<QSelectorOption[]>(() => {
-  return (
-    shelfStore.folders
-      // 过滤掉自己，移动到自己没有意义
-      .filter((i) => i.id !== parentFolder.value)
-      .map((i): QSelectorOption => ({ label: i.value.Title, value: i.id }))
-      .filter((i) => {
-        // 如果 selectorValue 有值 且不是选项值
-        if (selectorValue.value && typeof selectorValue.value !== 'object') {
-          // 就筛选
-          return i.label.includes(selectorValue.value)
-        }
-
-        return true
+  const realFolders = shelfStore.folders
+    // 过滤掉自己，移动到自己没有意义
+    .filter((i) => i.id !== parentFolder.value)
+    .map(
+      (i): QSelectorOption => ({
+        label: i.value.Title,
+        value: i.id,
+        updateAt: parseTime(i.value.updateAt).toLocaleString()
       })
-  )
+    )
+    .filter((i) => {
+      // 如果 selectorValue 有值 且不是选项值
+      if (selectorValue.value && typeof selectorValue.value !== 'object') {
+        // 就筛选
+        return i.label.includes(selectorValue.value)
+      }
+
+      return true
+    })
+
+  // 如果不在根文件夹
+  if (parentFolder.value) {
+    // 把根文件夹推入选项
+    realFolders.push({
+      label: ROOT_LEVEL_FOLDER_NAME,
+      value: ALL_VALUE,
+      updateAt: '系统创建'
+    })
+  }
+  return realFolders
 })
 
 /** 右键菜单 - 加入文件夹 */
@@ -289,8 +321,14 @@ function removeItemHandle(evt: MouseEvent) {
       return
     }
 
-    shelfStore.removeFromShelf({ id })
+    shelfStore.removeFromShelf({ id, push: false })
   }
+}
+
+/** 右键菜单 - 删除文件夹 @todo */
+function removeFolderHandle(evt: MouseEvent) {
+  // 从 evt.currentTarget.dataset 中拿到 item-id
+  $.dialog({ title: 'TODO', message: '文件夹不为空时二次确认，提示内部书籍会返回到顶层文件夹' })
 }
 
 /** 右键菜单 - 移动到文件夹 */
@@ -316,7 +354,7 @@ function folderSelectorSubmitHandle() {
   }
 
   /** 要更改的书籍 */
-  const bookIds: string[] = shelf.value.filter((i) => !!i.selected).map((i) => i.id)
+  const bookIds: string[] = shelfStore.books.filter((i) => !!i.selected).map((i) => i.id)
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
   if (!bookIds.length) {
@@ -337,7 +375,7 @@ function folderSelectorSubmitHandle() {
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
-    shelfStore.addToFolder({ books: bookIds, folderID })
+    shelfStore.addToFolder({ books: bookIds, folderID: folderID === ALL_VALUE ? null : folderID })
   }
 }
 
@@ -367,7 +405,7 @@ const quiteEditMode = () => {
 const currentFolderToRename = ref<ShelfTypes.ShelfFolderItem | null>(null)
 /** 重命名 */
 function renameHandle(name: string, cb: (promise: Promise<unknown> | void) => void) {
-  // just for make ts happy
+  // make ts happy；实际运行 currentFolderToRename 理应一定有值
   if (currentFolderToRename.value?.id) {
     cb(shelfStore.renameFolder({ name, id: currentFolderToRename.value.id }))
   }
@@ -565,7 +603,7 @@ onDeactivated(() => {
 
 // 文件夹选择弹层 相关
 .shelf-folder-selector-card {
-  min-width: 300px;
+  min-width: 320px;
 }
 
 // 限制长度的文字
