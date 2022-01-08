@@ -38,9 +38,9 @@ import ShelfItemThumb from './ShelfItemThumb.vue'
 const props = defineProps<{ folder: ShelfFolderItem }>()
 const store = useShelfStore()
 const updateTime = useToNow(computed(() => new Date(props.folder.value.updateAt)))
-// 限制最多四本书
-const limitedBooks = computed(() => store.getItemByIDs(props.folder.value.children.map((i) => i.id).slice(0, 4)))
 const folderIDs = computed(() => [...props.folder.parents, props.folder.id])
+// 限制最多四本书
+const limitedBooks = computed(() => store.getShelfByParent(props.folder.id).slice(0, 4))
 </script>
 
 <style lang="scss" scoped>
