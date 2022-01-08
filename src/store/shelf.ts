@@ -477,7 +477,6 @@ const shelfStore = defineStore('app.shelf', {
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           for (const item of draft) {
-            console.log('item', item.value.Title, payload.id, typeof payload.id)
             if (item.id === payload.id) {
               item.value.Title = payload.name
               return
