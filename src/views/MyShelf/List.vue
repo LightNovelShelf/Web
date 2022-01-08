@@ -78,7 +78,7 @@
                 <q-item-section>移动到...</q-item-section>
               </q-item>
               <!-- 否则就是在root层 -->
-              <q-item v-else clickable v-close-popup @click="addItemToFolderHandle">
+              <q-item v-else clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
                 <q-item-section>加入到...</q-item-section>
               </q-item>
 
