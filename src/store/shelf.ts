@@ -72,30 +72,12 @@ const shelfStore = defineStore('app.shelf', {
         return this.shelf.filter((i) => lastItem(i.parents) === parent)
       }
     },
-    /** 获取指定层级的内容 */
+    /** 根据文件夹路径获取内容 */
     getShelfByParents(): (parents: string[]) => ShelfItem[] {
       return (parents: string[]) => {
         // 有可能是空字符串数组，过滤掉无效的那些空字符串
         const _parents = parents.filter((i) => !!i)
         return this.shelf.filter((i) => isEqual(i.parents, _parents))
-      }
-    },
-    /** 根据书籍id批量获取书籍 */
-    getBooksByIDs(): (parents: string[]) => ShelfItem[] {
-      return (itemID: string[]) => {
-        return itemID.map((id: string) => this.booksMap.get(id)!).filter((o) => !!o)
-      }
-    },
-    /** 根据文件夹id批量获取文件夹 */
-    getFolderByIDs(): (parents: string[]) => ShelfItem[] {
-      return (itemID: string[]) => {
-        return itemID.map((id: string) => this.foldersMap.get(id)!).filter((o) => !!o)
-      }
-    },
-    /** 根据项目id批量获取书架内项目 */
-    getItemByIDs(): (parents: string[]) => ShelfItem[] {
-      return (itemID: string[]) => {
-        return itemID.map((id: string) => this.shelfsMap.get(id)!).filter((o) => !!o)
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
@@ -173,31 +155,31 @@ const shelfStore = defineStore('app.shelf', {
      * 用户对调AB书籍，
      * 这时候会出现A的index值+1了还是比B小，排序结果保存失效
      */
-    squeezeShelfItemIndex() {
-      this.commit({
-        shelf: produce(sort(toRaw(this.shelf)), (draft) => {
-          /**
-           * 最小index记录
-           *
-           * key是parents数组的最后一个值（代表直接父文件夹ID
-           * value是遇到过的个数
-           */
-          const minIndexMap = new Map<string, number>()
+    squeezeShelfItemIndex(curShelf: ShelfItem[]): ShelfItem[] {
+      return produce(sort(toRaw(curShelf)), (draft) => {
+        /** 一个带前缀randomID表示顶层文件夹 */
+        const ROOT = '__ROOT__' + '.' + nanoid()
 
-          /** 表示顶层的数字 */
-          const ROOT = '__ROOT__' + '.' + nanoid()
+        /**
+         * 当前index记录
+         *
+         * key是parents数组的最后一个值（代表直接父文件夹ID），ROOT代表根文件夹
+         * value是遇到过的个数
+         */
+        const minIndexMap = new Map<string, number>()
 
-          draft.forEach((item) => {
-            if (item.parents.length) {
-              // 只有在数组不为空的时候会lastItem，所以这里一定有
-              const parentID = lastItem(item.parents)!
-              item.index = (minIndexMap.get(parentID) ?? -1) + 1
-              minIndexMap.set(parentID, item.index)
-            } else {
-              item.index = (minIndexMap.get(ROOT) ?? -1) + 1
-              minIndexMap.set(ROOT, item.index)
-            }
-          })
+        draft.forEach((item) => {
+          if (item.parents.length) {
+            // 只有在数组不为空的时候会lastItem，所以这里一定有
+            const parentID = lastItem(item.parents)!
+            // 更新当前index为最小index+1
+            item.index = (minIndexMap.get(parentID) ?? -1) + 1
+            // 记录该index
+            minIndexMap.set(parentID, item.index)
+          } else {
+            item.index = (minIndexMap.get(ROOT) ?? -1) + 1
+            minIndexMap.set(ROOT, item.index)
+          }
         })
       })
     },
@@ -220,60 +202,6 @@ const shelfStore = defineStore('app.shelf', {
 
     /** git end -------- */
 
-    /** 校验失去关联的书架项目并修复数据中不合理的排布 */
-    verifyFolderData() {
-      let nextShelf: ShelfItem[] = toRaw(this.shelf)
-
-      this.shelf.forEach((item, folderIdx) => {
-        switch (item.type) {
-          // 书架的书籍，不用管
-          case ShelfItemType.BOOK: {
-            break
-          }
-          // 书架的文件夹，进入清理逻辑
-          case ShelfItemType.FOLDER: {
-            // 遍历文件夹中内容
-            item.value.children.forEach(({ id, type }, childIdx) => {
-              switch (type) {
-                // 文件夹中的书籍
-                case ShelfItemType.BOOK: {
-                  // 发现无效的书籍ID
-                  if (!this.booksMap.has(id)) {
-                    nextShelf = produce(nextShelf, (draft) => {
-                      ;(draft[folderIdx] as ShelfFolderItem).value.children.splice(childIdx, 1)
-                    })
-                  }
-                  break
-                }
-                // 文件夹中的文件夹
-                case ShelfItemType.FOLDER: {
-                  // 发现无效的文件夹ID
-                  if (!this.foldersMap.has(id)) {
-                    nextShelf = produce(nextShelf, (draft) => {
-                      ;(draft[folderIdx] as ShelfFolderItem).value.children.splice(childIdx, 1)
-                    })
-                  }
-                  break
-                }
-                default: {
-                  break
-                }
-              }
-            })
-            break
-          }
-          default: {
-            break
-          }
-        }
-      })
-
-      // 更新记录
-      this.commit({ shelf: sort(nextShelf) })
-
-      // 根据排序结果重设一次index，保证index不是稀疏的
-      this.squeezeShelfItemIndex()
-    },
     /** 添加到书架，立即生效 */
     async addToShelf(book: ShelfBook) {
       const item: ShelfBookItem = {
@@ -290,9 +218,12 @@ const shelfStore = defineStore('app.shelf', {
     /** 移出书架 */
     removeFromShelf(payload: { id: string; push: boolean }) {
       this.commit({
-        shelf: produce(toRaw(this.shelf), (draft) => draft.filter((i) => i.id !== payload.id))
+        // 移动后index就会出现空洞，squeeze一次
+        shelf: this.squeezeShelfItemIndex(
+          // 删除项目
+          produce(toRaw(this.shelf), (draft) => draft.filter((i) => i.id !== payload.id))
+        )
       })
-      this.verifyFolderData()
 
       // 如果标记为立即push（比如 详请页 移出收藏 场景）
       if (payload.push) {
@@ -383,9 +314,7 @@ const shelfStore = defineStore('app.shelf', {
       let index = this.curMaxIndexInFolder(payload.folderID) + 1
 
       this.commit({
-        // 返回排序后的
-        shelf: sort(
-          // @ts-ignore
+        shelf: this.squeezeShelfItemIndex(
           produce(toRaw(this.shelf), (draft) => {
             draft.forEach((item) => {
               // 如果是待加入的项目，记录新的文件夹路径
@@ -400,20 +329,11 @@ const shelfStore = defineStore('app.shelf', {
                 } else {
                   item.parents = [payload.folderID]
                 }
-              } else if (item.id === payload.folderID && payload.folderID !== null) {
-                // 如果是文件夹本身，就把那些书籍推进children里
-                // 如果是根文件夹，那就不用做额外处理了，处理好书籍本身的就可以
-                ;(item as ShelfFolderItem).value.children.push(
-                  ...payload.books.map((id): ShelfFolderChild => ({ type: ShelfItemType.BOOK, id }))
-                )
               }
             })
           })
         )
       })
-
-      // 项目进入文件夹后，index有可能会生成空洞；挤掉
-      this.verifyFolderData()
     },
     /** 新建文件夹, 返回文件夹ID */
     createFolder(payload: { name: string }): string {
@@ -452,24 +372,23 @@ const shelfStore = defineStore('app.shelf', {
         value: {
           Id: folderID,
           Title: payload.name,
-          children: [],
           updateAt: new Date().toISOString()
         }
       }
 
       this.commit({
-        shelf: produce(this.shelf, (draft) => {
-          // 腾出首位
-          draft.forEach((item) => {
-            item.index += 1
+        shelf: this.squeezeShelfItemIndex(
+          produce(this.shelf, (draft) => {
+            // 腾出首位
+            draft.forEach((item) => {
+              item.index += 1
+            })
+
+            // 压入首位
+            draft.unshift(folder)
           })
-
-          // 压入首位
-          draft.unshift(folder)
-        })
+        )
       })
-
-      this.verifyFolderData()
 
       return folderID
     },
@@ -542,7 +461,7 @@ export function useShelfStore() {
     store.$patch({ _first: false })
     store
       .pull()
-      .then(() => store.verifyFolderData())
+      .then(() => store.commit({ shelf: store.squeezeShelfItemIndex(store.shelf) }))
       .then(() => store.push())
   }
 
