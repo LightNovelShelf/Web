@@ -495,7 +495,6 @@ const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newInd
 /** 保存修改 */
 const submitListChange = async () => {
   shelfStore.clearSelected()
-  shelfStore.verifyFolderData()
   shelfStore.merge({ to: ShelfBranch.main })
   shelfStore.checkout({ to: ShelfBranch.main })
   await shelfStore.push()

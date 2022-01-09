@@ -14,8 +14,6 @@ export interface ShelfFolder {
   Id: string
   /** 文件夹名称，尽量跟Book同名方便模板书写 */
   Title: string
-  /** 文件夹内子数据 */
-  children: ShelfFolderChild[]
   /** 更改时间，iso格式字符串 */
   updateAt: string
 }
