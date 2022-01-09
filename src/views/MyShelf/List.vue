@@ -325,10 +325,32 @@ function removeItemHandle(evt: MouseEvent) {
   }
 }
 
-/** 右键菜单 - 删除文件夹 @todo */
+/** 右键菜单 - 删除文件夹 */
 function removeFolderHandle(evt: MouseEvent) {
-  // 从 evt.currentTarget.dataset 中拿到 item-id
-  $.dialog({ title: 'TODO', message: '文件夹不为空时二次确认，提示内部书籍会返回到顶层文件夹' })
+  const id = (evt.currentTarget as HTMLElement).dataset.id as string
+  const children = shelfStore.getShelfByParent(id)
+  Promise.resolve()
+    .then(() => {
+      // 判断是否还有子元素
+      if (children.length) {
+        // 弹二次确认
+        return new Promise((resolve, reject) => {
+          $.dialog({
+            title: '删除文件夹',
+            message: `该文件夹不为空，删除后内容会转移到${ROOT_LEVEL_FOLDER_NAME}`,
+            cancel: true
+          })
+            .onOk(resolve)
+            .onCancel(reject)
+        })
+      }
+    })
+    .then(() => {
+      shelfStore.deleteFolder({ id })
+    })
+    .catch(() => {
+      // 用户取消（或者代码有bug抛错）
+    })
 }
 
 /** 右键菜单 - 移动到文件夹 */
