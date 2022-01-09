@@ -485,7 +485,48 @@ const shelfStore = defineStore('app.shelf', {
           }
         })
       })
+    },
+    /** 删除文件夹 */
+    deleteFolder(payload: { id: string }) {
+      this.commit({
+        shelf: sort(
+          produce(toRaw(this.shelf), (draft) => {
+            let currentMaxIndex = this.curMaxIndexInFolder(null)
+
+            let folderIndex = -1
+            // 遍历所有书籍同时找到文件夹所在index
+            draft.forEach((item, index) => {
+              if (item.type === ShelfItemType.BOOK) {
+                if (item.parents.includes(payload.id)) {
+                  // 放回根文件夹
+                  item.parents = []
+                  // 更新index，不然index会出现重复
+                  item.index = ++currentMaxIndex
+                }
+              } else if (item.type === ShelfItemType.FOLDER && item.id === payload.id) {
+                folderIndex = index
+              }
+            })
+
+            // 校验一次index
+            if (folderIndex === -1) {
+              // 错误的id，没有这个文件夹，提示
+              Notify.create({
+                type: 'negative',
+                timeout: 1500,
+                position: 'bottom',
+                message: '文件夹ID无效，请联系开发者'
+              })
+              return
+            }
+
+            // 删除文件夹
+            delete draft[folderIndex]
+          })
+        )
+      })
     }
+    /** actions end */
   }
 })
 
