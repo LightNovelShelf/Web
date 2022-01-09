@@ -14,104 +14,105 @@
   </q-slide-transition>
 
   <!-- 书籍列表 -->
-  <!-- key要写个1和2是告诉vue不能复用这个div，复用了就会导致sortjs清理有问题 -->
-  <!-- @todo 缺点是会导致整个列表闪一下，这个看有没有办法处理（看起来是loading的原因） -->
-  <q-grid
-    :key="editMode ? 1 : 2"
-    v-if="shelf.length"
-    cols="2"
-    xs="2"
-    sm="4"
-    md="6"
-    lg="8"
-    xl="10"
-    x-gap="20"
-    y-gap="20"
-    :forward-ref="setListWrapRef"
-    @contextmenu="muteInEditMode"
-  >
-    <transition-group name="shelf-item">
-      <!-- 如果有父层文件夹，显示返回卡片 -->
-      <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
+  <template v-if="shelf.length || parentFolder">
+    <!-- key要写个1和2是告诉vue不能复用这个div，复用了就会导致sortjs清理有问题 -->
+    <!-- @todo 缺点是会导致整个列表闪一下，这个看有没有办法处理（看起来是loading的原因） -->
+    <q-grid
+      :key="editMode ? 1 : 2"
+      cols="2"
+      xs="2"
+      sm="4"
+      md="6"
+      lg="8"
+      xl="10"
+      x-gap="20"
+      y-gap="20"
+      :forward-ref="setListWrapRef"
+      @contextmenu="muteInEditMode"
+    >
+      <transition-group name="shelf-item">
+        <!-- 如果有父层文件夹，显示返回卡片 -->
+        <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
 
-      <!-- 渲染书架列表内容 -->
-      <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
-        <!-- 书架项目 -->
-        <div class="shelf-item-wrap">
-          <!-- 书籍 -->
-          <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" />
-          <!-- 文件夹 -->
-          <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" />
-          <template v-else />
+        <!-- 渲染书架列表内容 -->
+        <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
+          <!-- 书架项目 -->
+          <div class="shelf-item-wrap">
+            <!-- 书籍 -->
+            <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" />
+            <!-- 文件夹 -->
+            <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" />
+            <template v-else />
 
-          <!-- 选中态icon -->
-          <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
-            <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
-            <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
-            <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+            <!-- 选中态icon -->
+            <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
+              <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
+              <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
+              <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+            </div>
+            <template v-else />
           </div>
-          <template v-else />
-        </div>
 
-        <!-- 编辑状态下，书架项目有单独右键菜单 -->
-        <q-menu v-if="editMode" touch-position context-menu>
-          <q-list style="min-width: 100px">
-            <!-- 选中提示 -->
-            <q-item>
-              <!-- @todo 子菜单展示选中的内容并支持在子菜单内取消选中 -->
-              <q-item-section v-if="selectedCount > 1 || (selectedCount && !item.selected)"
-                >已选中{{ selectedCount }}项</q-item-section
-              >
-              <!-- 没有选中时展示当前项标题 -->
-              <q-item-section v-else
-                ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
-                  item.value.Title
-                }}</q-tooltip
-                ><div class="max-len-text">{{ item.value.Title }}</div></q-item-section
-              >
-            </q-item>
-
-            <q-separator />
-
-            <!-- 书籍相关的 -->
-            <template v-if="item.type === ShelfTypes.ShelfItemType.BOOK">
-              <!-- 有父层文件夹，代表已经在文件夹里了 -->
-              <q-item v-if="parentFolder" clickable v-close-popup @click="moveItemToFolderHandle" :data-id="item.id">
-                <q-item-section>移动到...</q-item-section>
-              </q-item>
-              <!-- 否则就是在root层 -->
-              <q-item v-else clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
-                <q-item-section>加入到...</q-item-section>
+          <!-- 编辑状态下，书架项目有单独右键菜单 -->
+          <q-menu v-if="editMode" touch-position context-menu>
+            <q-list style="min-width: 100px">
+              <!-- 选中提示 -->
+              <q-item>
+                <!-- @todo 子菜单展示选中的内容并支持在子菜单内取消选中 -->
+                <q-item-section v-if="selectedCount > 1 || (selectedCount && !item.selected)"
+                  >已选中{{ selectedCount }}项</q-item-section
+                >
+                <!-- 没有选中时展示当前项标题 -->
+                <q-item-section v-else
+                  ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
+                    item.value.Title
+                  }}</q-tooltip
+                  ><div class="max-len-text">{{ item.value.Title }}</div></q-item-section
+                >
               </q-item>
 
-              <q-item clickable v-close-popup @click="removeItemHandle" :data-id="item.id">
-                <q-item-section>移出书架</q-item-section>
-              </q-item>
-            </template>
+              <q-separator />
 
-            <template v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER">
-              <!-- 文件夹相关的 -->
-              <q-item clickable v-close-popup @click="currentFolderToRename = item">
-                <q-item-section>重命名</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="removeFolderHandle" :data-id="item.id">
-                <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
-              </q-item>
-            </template>
-          </q-list>
-        </q-menu>
-      </q-grid-item>
-    </transition-group>
+              <!-- 书籍相关的 -->
+              <template v-if="item.type === ShelfTypes.ShelfItemType.BOOK">
+                <!-- 有父层文件夹，代表已经在文件夹里了 -->
+                <q-item v-if="parentFolder" clickable v-close-popup @click="moveItemToFolderHandle" :data-id="item.id">
+                  <q-item-section>移动到...</q-item-section>
+                </q-item>
+                <!-- 否则就是在root层 -->
+                <q-item v-else clickable v-close-popup @click="addItemToFolderHandle" :data-id="item.id">
+                  <q-item-section>加入到...</q-item-section>
+                </q-item>
 
-    <!-- 列表右键菜单 -->
-    <q-menu v-if="!editMode" touch-position context-menu>
-      <q-list dense style="min-width: 100px">
-        <q-item clickable v-close-popup @click="enterEditMode">
-          <q-item-section>编辑</q-item-section>
-        </q-item>
-      </q-list>
-    </q-menu>
-  </q-grid>
+                <q-item clickable v-close-popup @click="removeItemHandle" :data-id="item.id">
+                  <q-item-section>移出书架</q-item-section>
+                </q-item>
+              </template>
+
+              <template v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER">
+                <!-- 文件夹相关的 -->
+                <q-item clickable v-close-popup @click="currentFolderToRename = item">
+                  <q-item-section>重命名</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="removeFolderHandle" :data-id="item.id">
+                  <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
+                </q-item>
+              </template>
+            </q-list>
+          </q-menu>
+        </q-grid-item>
+      </transition-group>
+
+      <!-- 列表右键菜单 -->
+      <q-menu v-if="!editMode" touch-position context-menu>
+        <q-list dense style="min-width: 100px">
+          <q-item clickable v-close-popup @click="enterEditMode">
+            <q-item-section>编辑</q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-grid>
+  </template>
 
   <!-- 空态 -->
   <div v-else class="empty-placeholder">
@@ -200,7 +201,7 @@ import { useQuasar } from 'quasar'
 import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/plugins/icon/export'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/store/shelf'
-import { useRoute } from 'vue-router'
+import { RouteLocationNormalizedLoaded, useRoute } from 'vue-router'
 import RenameDialog from './components/RenameDialog.vue'
 import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
 import { useIsActivated } from '@/composition/useIsActivated'
@@ -225,8 +226,20 @@ const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const route = useRoute()
 const isActivated = useIsActivated()
 
-/** 是否有父文件夹(可能有多个) */
-const parentFolders = ref<string[]>([])
+function getParentFolders(curRoute: RouteLocationNormalizedLoaded): string[] {
+  if (!curRoute.params.folderID) {
+    return []
+  }
+
+  if (Array.isArray(curRoute.params.folderID)) {
+    return curRoute.params.folderID.filter((i) => !!i)
+  }
+
+  return [curRoute.params.folderID]
+}
+
+/** 是否有父文件夹(可能有多个); 初始值就解析一次 */
+const parentFolders = ref<string[]>(getParentFolders(route))
 
 /** 监听路由 修改 parentFolders 值 */
 watch(
@@ -236,17 +249,7 @@ watch(
       return
     }
 
-    if (!nextRoute.params.folderID) {
-      parentFolders.value = []
-      return
-    }
-
-    if (Array.isArray(route.params.folderID)) {
-      parentFolders.value = route.params.folderID.filter((i) => !!i)
-      return
-    }
-
-    parentFolders.value = [route.params.folderID]
+    parentFolders.value = getParentFolders(nextRoute)
   },
   // immediate 保证mounted场景能触发
   { immediate: true, deep: true }
