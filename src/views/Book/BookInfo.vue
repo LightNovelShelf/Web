@@ -40,7 +40,7 @@
                   <!-- TODO 这个组件点击的行为非常奇怪 -->
                   <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
                     <q-card>
-                      <q-card-section> 这里放上传者的信息 </q-card-section>
+                      <q-card-section> {{ book.User.UserName }} </q-card-section>
                     </q-card>
                   </q-menu>
                 </div>
@@ -59,7 +59,7 @@
 
               <div class="row q-gutter-md" v-if="isActive">
                 <q-btn>加入书架</q-btn>
-                <q-btn @click="startRead">继续阅读</q-btn>
+                <q-btn color="primary" @click="startRead">继续阅读</q-btn>
               </div>
             </div>
             <div v-else class="q-gutter-md">
