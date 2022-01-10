@@ -29,7 +29,8 @@ export interface GetBookInfoRes {
     ExtraInfo: any
     Introduction: string
     LastUpdate: string
-    LastUpdateTime: Date | DateTime
+    LastUpdateTime: Date
+    CreatedTime: Date
     Subscription: number
     Title: string
     User: {
