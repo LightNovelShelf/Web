@@ -171,6 +171,7 @@ router.beforeEach(async function (to) {
 const readyRoute = []
 router.afterEach((to) => {
   const key = history.state['key']
+  to.meta.key = key
   if (readyRoute.includes(to.name)) {
     if (key) {
       to.meta.reload = keys.findIndex((item) => item === key) === keys.length - 1

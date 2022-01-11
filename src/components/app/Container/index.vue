@@ -1,14 +1,9 @@
 <template>
   <q-page-container>
     <div :style="containerStyle">
-      <router-view v-slot="{ Component }">
-        <template v-if="Component">
-          <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
-          <keep-alive :exclude="['CollaboratorList']">
-            <component :is="Component"></component>
-          </keep-alive>
-        </template>
-      </router-view>
+      <page-stack>
+        <router-view />
+      </page-stack>
     </div>
   </q-page-container>
   <!-- 登陆页跳转 -->
@@ -19,9 +14,10 @@
 import { computed, defineComponent } from 'vue'
 import AuthenticationGuard from './AuthenticationGuard.vue'
 import { useLayout } from '@/components/app/useLayout'
+import PageStack from '@/components/app/Container/PageStack.vue'
 
 export default defineComponent({
-  components: { AuthenticationGuard },
+  components: { PageStack, AuthenticationGuard },
   setup() {
     let layout = useLayout()
 
