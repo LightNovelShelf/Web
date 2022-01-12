@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, onActivated, toRaw } from 'vue'
+import { computed, defineComponent, ref, onActivated, toRaw, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Comment } from '@/components/'
 import { getBookInfo } from '@/services/book'
@@ -154,14 +154,16 @@ const startRead = async () => {
   await router.push({ name: 'Read', params: { bid: _bid.value, sortNum: sortNum } })
 }
 
-useInitRequest(getInfo)
+// 只要数据中的id和props不同，就当在加载
+const isActive = computed(() => book.value?.Id === _bid.value)
+useInitRequest(getInfo, { isActive })
+
+// 读取历史
 onActivated(async () => {
   position.value = await loadHistory(appStore.userId, _bid.value)
 })
 
-// 只要数据中的id和props不同，就当在加载
 const book = computed(() => bookInfo.value?.Book)
-const isActive = computed(() => book.value?.Id === _bid.value)
 const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 const lastReadTitle = computed(() => {
   if (position && position.value?.cid) {

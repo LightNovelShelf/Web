@@ -76,10 +76,12 @@ const requestHistory = useTimeoutFn(async () => {
       console.log(error)
     })
 })
-useInitRequest(requestHistory, () => {
-  bookData.value = []
-  history.value = []
-  scroll.value.reset()
+useInitRequest(requestHistory, {
+  before: () => {
+    bookData.value = []
+    history.value = []
+    scroll.value.reset()
+  }
 })
 
 // 滚动拉取数据

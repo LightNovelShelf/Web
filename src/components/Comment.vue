@@ -27,7 +27,7 @@
 
       <q-separator spaced />
 
-      <template v-if="loading">
+      <template v-if="!isActive">
         <div class="row flex-center">
           <q-spinner-dots color="primary" size="40px" />
         </div>
@@ -141,7 +141,7 @@
           <q-pagination
             style="margin-bottom: 12px"
             padding="4px"
-            :disable="loading"
+            :disable="!isActive"
             v-model="currentPage"
             :max="comment?.TotalPages"
             direction-links
@@ -206,9 +206,8 @@ const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const comment = ref<GetComment.Response>()
 
-const loading = computed(
-  () =>
-    !(comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page)
+const isActive = computed(
+  () => comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page
 )
 
 const currentPage = ref(1)
@@ -278,7 +277,7 @@ const _delete = async (id) => {
   await request.syncCall()
 }
 
-useInitRequest(request)
+useInitRequest(request, { isActive })
 </script>
 
 <style scoped lang="scss">
