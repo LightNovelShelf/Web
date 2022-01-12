@@ -16,6 +16,7 @@ import { useSettingStore } from '@/store/setting'
 import { useAppStore } from '@/store'
 import { longTermToken } from '@/utils/session'
 import { getMyInfo } from '@/services/user'
+import { NOOP } from '@/const/empty'
 
 defineComponent({ AppSider, AppHeader, AppContainer })
 
@@ -59,7 +60,8 @@ useServerNotify('OnMessage', (message: string) => {
     position: 'top',
     html: true,
     message: sanitizerHtml(message),
-    timeout: 2500
+    timeout: 2500,
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
   })
 })
 
