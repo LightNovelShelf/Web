@@ -74,3 +74,8 @@ export async function saveBookShelf(json) {
 export async function getBookShelf() {
   return requestWithSignalr('GetBookShelf')
 }
+
+/** 清空用户历史记录 */
+export async function clearHistory() {
+  return requestWithSignalr('ClearHistory')
+}
