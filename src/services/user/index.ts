@@ -64,3 +64,13 @@ export async function resetPassword(email: string, newPassword: string, code: st
     payload: { email, code, newPassword }
   })
 }
+
+/** 保存用户书架信息 */
+export async function saveBookShelf(json) {
+  return requestWithSignalr('SaveBookShelf', json)
+}
+
+/** 取用户书架信息 */
+export async function getBookShelf() {
+  return requestWithSignalr('GetBookShelf')
+}

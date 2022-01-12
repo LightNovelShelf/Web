@@ -2,13 +2,13 @@
   <div class="title mx-auto">
     <q-card>
       <q-card-section>
-        <div v-if="ready" class="text-h6">[{{ announcement.Create }}] {{ announcement.Title }}</div>
+        <div v-if="isActive" class="text-h6">[{{ announcement.Create }}] {{ announcement.Title }}</div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-section>
-        <div v-if="ready" v-html="sanitizerHtml(announcement.Content)"></div>
+        <div v-if="isActive" v-html="sanitizerHtml(announcement.Content)"></div>
         <div v-else>
           <q-skeleton type="text" height="50px" width="50%" />
           <q-skeleton type="text" />
@@ -49,9 +49,9 @@ const request = useTimeoutFn(async () => {
   const res = await getAnnouncementDetail({ Id: _id.value })
   announcement.value = announcementFormat(res)
 })
-const ready = computed(() => _id.value === announcement.value?.Id)
+const isActive = computed(() => _id.value === announcement.value?.Id)
 
-useInitRequest(request)
+useInitRequest(request, { isActive })
 </script>
 
 <style scoped lang="scss">
