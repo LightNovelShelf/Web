@@ -15,3 +15,8 @@ export function replyComment(req: PostComment.Request) {
 export function getComment(req: GetComment.Request) {
   return requestWithSignalr<GetComment.Response>('GetComment', req)
 }
+
+/** 删除评论 */
+export function deleteComment(id: number) {
+  return requestWithSignalr('DeleteComment', id)
+}

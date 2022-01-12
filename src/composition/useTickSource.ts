@@ -1,4 +1,3 @@
-import { sleep } from '@/utils/sleep'
 import { onUnmounted, getCurrentInstance } from 'vue'
 
 /**
@@ -20,20 +19,12 @@ import { onUnmounted, getCurrentInstance } from 'vue'
  * ```
  */
 export function useTickSource(cb: () => unknown, ms = 1000): () => void {
-  const shouldContinue = { value: true }
+  const id = setInterval(cb, ms)
+
   /** 停止循环 */
   const unsubscribe = () => {
-    shouldContinue.value = false
+    clearInterval(id)
   }
-
-  async function loop() {
-    while (shouldContinue.value) {
-      cb()
-      await sleep(ms)
-    }
-  }
-
-  loop()
 
   const instance = getCurrentInstance()
   // 判断当前组件实例是否存在

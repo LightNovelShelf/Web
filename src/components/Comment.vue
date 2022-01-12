@@ -58,7 +58,12 @@
               <q-item-label caption>
                 <div class="row flex-align-center q-gutter-x-md">
                   <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime, baseTime) }}</div>
-                  <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
+                  <div>
+                    <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
+                    <q-btn flat dense v-if="comment.Commentaries[`${item.Id}`].CanEdit" @click="_delete(item.Id)">
+                      删除
+                    </q-btn>
+                  </div>
                 </div>
               </q-item-label>
             </q-item-section>
@@ -104,7 +109,17 @@
                         <q-item-label caption>
                           <div class="row flex-align-center q-gutter-x-md">
                             <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime, baseTime) }}</div>
-                            <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
+                            <div>
+                              <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
+                              <q-btn
+                                flat
+                                dense
+                                v-if="comment.Commentaries[`${replyId}`].CanEdit"
+                                @click="_delete(replyId)"
+                              >
+                                删除
+                              </q-btn>
+                            </div>
                           </div>
                         </q-item-label>
                       </q-item-section>
@@ -173,7 +188,7 @@
 </template>
 
 <script lang="ts" setup>
-import { postComment, replyComment, getComment } from '@/services/comment'
+import { postComment, replyComment, getComment, deleteComment } from '@/services/comment'
 import { CommentType, GetComment } from '@/services/comment/types'
 import { baseTime } from '@/composition/useToNow'
 import { toNow } from '@/utils/time'
@@ -251,6 +266,16 @@ const reply = async () => {
     inputReplyComment.value = null
     await request.syncCall()
   }
+}
+
+const _delete = async (id) => {
+  await deleteComment(id)
+  $q.notify({
+    message: '删除成功',
+    timeout: 2000,
+    type: 'positive'
+  })
+  await request.syncCall()
 }
 
 useInitRequest(request)
