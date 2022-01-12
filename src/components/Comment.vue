@@ -27,7 +27,7 @@
 
       <q-separator spaced />
 
-      <template v-if="loading">
+      <template v-if="!isActive">
         <div class="row flex-center">
           <q-spinner-dots color="primary" size="40px" />
         </div>
@@ -58,7 +58,12 @@
               <q-item-label caption>
                 <div class="row flex-align-center q-gutter-x-md">
                   <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime, baseTime) }}</div>
-                  <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
+                  <div>
+                    <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
+                    <q-btn flat dense v-if="comment.Commentaries[`${item.Id}`].CanEdit" @click="_delete(item.Id)">
+                      删除
+                    </q-btn>
+                  </div>
                 </div>
               </q-item-label>
             </q-item-section>
@@ -104,7 +109,17 @@
                         <q-item-label caption>
                           <div class="row flex-align-center q-gutter-x-md">
                             <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime, baseTime) }}</div>
-                            <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
+                            <div>
+                              <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
+                              <q-btn
+                                flat
+                                dense
+                                v-if="comment.Commentaries[`${replyId}`].CanEdit"
+                                @click="_delete(replyId)"
+                              >
+                                删除
+                              </q-btn>
+                            </div>
                           </div>
                         </q-item-label>
                       </q-item-section>
@@ -126,7 +141,7 @@
           <q-pagination
             style="margin-bottom: 12px"
             padding="4px"
-            :disable="loading"
+            :disable="!isActive"
             v-model="currentPage"
             :max="comment?.TotalPages"
             direction-links
@@ -173,7 +188,7 @@
 </template>
 
 <script lang="ts" setup>
-import { postComment, replyComment, getComment } from '@/services/comment'
+import { postComment, replyComment, getComment, deleteComment } from '@/services/comment'
 import { CommentType, GetComment } from '@/services/comment/types'
 import { baseTime } from '@/composition/useToNow'
 import { toNow } from '@/utils/time'
@@ -191,9 +206,8 @@ const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const comment = ref<GetComment.Response>()
 
-const loading = computed(
-  () =>
-    !(comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page)
+const isActive = computed(
+  () => comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page
 )
 
 const currentPage = ref(1)
@@ -253,7 +267,17 @@ const reply = async () => {
   }
 }
 
-useInitRequest(request)
+const _delete = async (id) => {
+  await deleteComment(id)
+  $q.notify({
+    message: '删除成功',
+    timeout: 2000,
+    type: 'positive'
+  })
+  await request.syncCall()
+}
+
+useInitRequest(request, { isActive })
 </script>
 
 <style scoped lang="scss">
