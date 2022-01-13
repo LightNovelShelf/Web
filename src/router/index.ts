@@ -80,6 +80,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Reset',
         meta: { requiresAuth: false },
         component: () => import('../views/Login/Reset.vue')
+      },
+      {
+        path: 'register',
+        name: 'Register',
+        meta: { requiresAuth: false },
+        component: () => import('../views/Login/Register.vue')
       }
     ]
   },
