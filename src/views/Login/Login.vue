@@ -32,7 +32,7 @@
             </template>
           </q-input>
           <div class="row">
-            <q-btn rounded flat disable>注册</q-btn>
+            <q-btn rounded flat :to="{ name: 'Register' }">注册</q-btn>
             <q-space />
             <q-btn rounded flat :to="{ name: 'Reset' }">忘记密码</q-btn>
           </div>
@@ -87,7 +87,6 @@ const _login = async () => {
     })
 
     // 跳转首页或者来源路由
-
     let to: RouteLocationRaw = { name: 'Home' }
 
     try {
@@ -99,10 +98,17 @@ const _login = async () => {
 
     await router.replace(to)
   } catch (e) {
-    $q.notify({
-      type: 'negative',
-      message: getErrMsg(e)
-    })
+    if (e?.target?.localName === 'script') {
+      $q.notify({
+        type: 'negative',
+        message: '加载reCAPTCHA服务失败，请检查网络并刷新网页重试'
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: getErrMsg(e)
+      })
+    }
   }
 
   loading.value = false

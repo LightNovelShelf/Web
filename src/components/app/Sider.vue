@@ -84,6 +84,7 @@ const menuOptions: Array<Record<string, any>> = [
     label: '我的书架',
     key: 'MyShelf',
     route: 'MyShelf',
+    disabled: true,
     icon: icon.mdiFolderHeartOutline
   },
   {
@@ -123,6 +124,7 @@ const menuOptions: Array<Record<string, any>> = [
   {
     label: '发送反馈',
     key: 'send_feedback',
+    disabled: true,
     icon: icon.mdiMessageAlert
   },
   {

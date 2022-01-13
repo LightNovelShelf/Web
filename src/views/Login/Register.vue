@@ -3,10 +3,15 @@
     <div style="width: 300px" class="q-gutter-sm">
       <div class="text-opacity text-center">
         <q-icon size="60px" :name="icon.mdiAccountCircle"></q-icon>
-        <div class="text-opacity text-h5">重置密码</div>
+        <div class="text-opacity text-h5">注册到 轻书架</div>
       </div>
       <div>
-        <q-form @submit="_reset">
+        <q-form @submit="_register">
+          <q-input no-error-icon :rules="[(val) => !!val || '无效的用户名']" v-model="userName" label="昵称">
+            <template v-slot:prepend>
+              <q-icon :name="icon.mdiAccount" />
+            </template>
+          </q-input>
           <q-input
             no-error-icon
             :rules="[(val) => /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/i.test(val) || '必须是有效的邮箱']"
@@ -54,12 +59,12 @@
             </template>
           </q-input>
           <div class="row">
-            <q-btn rounded flat :to="{ name: 'Register' }">注册</q-btn>
-            <q-space />
             <q-btn rounded flat :to="{ name: 'Login' }">登录</q-btn>
+            <q-space />
+            <q-btn rounded flat :to="{ name: 'Reset' }">忘记密码</q-btn>
           </div>
           <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" type="submit">
-            重置
+            注册
             <q-icon right size="24px" :name="icon.mdiSend" />
           </q-btn>
         </q-form>
@@ -72,7 +77,7 @@
 import { icon } from '@/plugins/icon'
 import { ref } from 'vue'
 import { useReCaptcha } from 'vue-recaptcha-v3'
-import { login, resetPassword, sendResetEmail } from '@/services/user'
+import { login, register, resetPassword, sendRegisterEmail } from '@/services/user'
 import { sha256 } from '@/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from '@/utils/getErrMsg'
@@ -82,6 +87,7 @@ import { useAppStore } from '@/store'
 const $q = useQuasar()
 const appStore = useAppStore()
 
+const userName = ref('')
 const email = ref('')
 const password = ref('')
 const rePassword = ref('')
@@ -99,7 +105,7 @@ const sendEmail = async () => {
     await recaptchaLoaded!()
     const token = await executeRecaptcha!('login')
 
-    await sendResetEmail(email.value, token)
+    await sendRegisterEmail(email.value, token)
 
     $q.notify({
       message: '发送成功',
@@ -121,16 +127,17 @@ const sendEmail = async () => {
   sending.value = false
 }
 
-const _reset = async () => {
+const _register = async () => {
   loading.value = true
 
   try {
-    await resetPassword(email.value, await sha256(password.value), code.value)
+    const [, user] = await register(userName.value, email.value, await sha256(password.value), code.value)
+    appStore.user = user
     $q.notify({
-      message: '重置成功',
+      message: '注册成功',
       timeout: 3000
     })
-    await router.replace({ name: 'Login' })
+    await router.replace({ name: 'Home' })
   } catch (e) {
     $q.notify({
       type: 'negative',
