@@ -199,6 +199,8 @@ import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
+import { longTermToken, sessionToken } from '@/utils/session'
+import { rebootSignalr } from '@/services/internal/request'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
@@ -268,13 +270,20 @@ const reply = async () => {
 }
 
 const _delete = async (id) => {
-  await deleteComment(id)
-  $q.notify({
-    message: '删除成功',
-    timeout: 2000,
-    type: 'positive'
+  $q.dialog({
+    title: '提示',
+    message: '你确定要删除这条评论吗？',
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    await deleteComment(id)
+    $q.notify({
+      message: '删除成功',
+      timeout: 2000,
+      type: 'positive'
+    })
+    await request.syncCall()
   })
-  await request.syncCall()
 }
 
 useInitRequest(request, { isActive })
