@@ -84,7 +84,6 @@ const menuOptions: Array<Record<string, any>> = [
     label: '我的书架',
     key: 'MyShelf',
     route: 'MyShelf',
-    disabled: true,
     icon: icon.mdiFolderHeartOutline
   },
   {
