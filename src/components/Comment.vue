@@ -199,8 +199,6 @@ import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
-import { longTermToken, sessionToken } from '@/utils/session'
-import { rebootSignalr } from '@/services/internal/request'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
