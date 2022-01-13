@@ -324,7 +324,9 @@ function removeItemHandle(evt: MouseEvent) {
       return
     }
 
-    shelfStore.removeFromShelf({ id, push: false })
+    shelfStore.removeFromShelf({ books: [id], push: false })
+  } else {
+    shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
   }
 }
 

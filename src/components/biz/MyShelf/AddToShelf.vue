@@ -61,7 +61,7 @@ const clickHandle = async () => {
     if (nextLike) {
       await shelfStore.addToShelf(props.book)
     } else {
-      await shelfStore.removeFromShelf({ id: bookId.value, push: true })
+      await shelfStore.removeFromShelf({ books: [bookId.value], push: true })
     }
     disMiss = $.notify({ message: nextLike ? '加入成功' : '移除成功' })
   } catch (e) {

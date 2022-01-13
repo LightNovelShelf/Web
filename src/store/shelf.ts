@@ -6,6 +6,7 @@ import produce, { setAutoFreeze } from 'immer'
 import { isEqual } from 'lodash-es'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
+import { getBookShelf, saveBookShelf } from '@/services/user'
 
 export enum ShelfBranch {
   main = 'main',
@@ -119,6 +120,10 @@ const shelfStore = defineStore('app.shelf', {
     /** 选中计数 */
     selectedNum(): number {
       return this.shelf.filter((i) => i.selected).length
+    },
+    /** 选中的书籍 */
+    selectedBooks(): ShelfBookItem[] {
+      return this.shelf.filter((i): i is ShelfBookItem => !!(i.type === ShelfItemType.BOOK && i.selected))
     }
   },
   actions: {
@@ -135,6 +140,14 @@ const shelfStore = defineStore('app.shelf', {
       for (const i of this.shelf) {
         await shelfDB.set(i.id, i)
       }
+
+      await this.syncToRemote()
+    },
+
+    /** 同步到服务器 */
+    async syncToRemote() {
+      debugger
+      await saveBookShelf({ data: toRaw(this.shelf) })
     },
 
     /** 切换分支 */
@@ -216,18 +229,19 @@ const shelfStore = defineStore('app.shelf', {
       await this.push()
     },
     /** 移出书架 */
-    removeFromShelf(payload: { id: string; push: boolean }) {
+    async removeFromShelf(payload: { books: string[]; push: boolean }) {
+      const booksInSet = new Set(payload.books)
       this.commit({
         // 移动后index就会出现空洞，squeeze一次
         shelf: this.squeezeShelfItemIndex(
           // 删除项目
-          produce(toRaw(this.shelf), (draft) => draft.filter((i) => i.id !== payload.id))
+          produce(toRaw(this.shelf), (draft) => draft.filter((i) => booksInSet.has(i.id)))
         )
       })
 
       // 如果标记为立即push（比如 详请页 移出收藏 场景）
       if (payload.push) {
-        this.push()
+        await this.push()
       }
     },
     /**

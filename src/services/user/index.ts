@@ -4,6 +4,7 @@ import { longTermToken, sessionToken } from '@/utils/session'
 
 import * as Types from './type'
 import { RequestMethod } from '@/services/types'
+import { ShelfItem } from '@/types/shelf'
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
@@ -89,13 +90,13 @@ export async function register(userName: string, email: string, password: string
 }
 
 /** 保存用户书架信息 */
-export async function saveBookShelf(json) {
+export async function saveBookShelf(json: { data: ShelfItem[] }) {
   return requestWithSignalr('SaveBookShelf', json)
 }
 
 /** 取用户书架信息 */
 export async function getBookShelf() {
-  return requestWithSignalr('GetBookShelf')
+  return requestWithSignalr<string>('GetBookShelf')
 }
 
 /** 清空用户历史记录 */
