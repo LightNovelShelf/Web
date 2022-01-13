@@ -152,17 +152,22 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   let Success, Response, Status, Msg
 
+  if (__DEV__ && VUE_TRACE_SERVER) {
+    console.groupCollapsed(`signalr request data trace: '${url}'`)
+    console.log('send:', [...data])
+  }
+
   // 处理请求本身就失败的情况（比如没授权）
   try {
     const res = await (await getSignalr()).invoke(url, ...data)
     ;({ Success, Response, Status, Msg } = res)
   } catch (e) {
-    console.groupCollapsed(`signalr request data trace: '${url}'`)
-    console.log('send:', [...data])
-    console.log('err:', e)
+    if (__DEV__ && VUE_TRACE_SERVER) {
+      console.log('err:', e)
 
-    console.log('at:', new Date().toLocaleString())
-    console.groupEnd()
+      console.log('at:', new Date().toLocaleString())
+      console.groupEnd()
+    }
 
     // 如果是未授权，通知一声
     if (IS_UN_AUTH_ERR(e)) {
@@ -176,8 +181,6 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   // 处理请求成功但响应内容提示失败的情况
   if (__DEV__ && VUE_TRACE_SERVER) {
-    console.groupCollapsed(`signalr request data trace: '${url}'`)
-    console.log('send:', [...data])
     console.log('Success:', Success)
     if (Success) {
       console.log('Response:', Response)
