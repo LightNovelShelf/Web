@@ -59,10 +59,33 @@ export async function sendResetEmail(email: string, token: string) {
   })
 }
 
+export async function sendRegisterEmail(email: string, token: string) {
+  await requestWithFetch<void, { email: string; token: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
+    payload: { email, token },
+    method: RequestMethod.GET
+  })
+}
+
 export async function resetPassword(email: string, newPassword: string, code: string) {
   await requestWithFetch<void, { email: string; code: string; newPassword: string }>(PATH.USER_RESET_PASSWORD, {
     payload: { email, code, newPassword }
   })
+}
+
+export async function register(userName: string, email: string, password: string, code: string) {
+  const res = await requestWithFetch<
+    Types.Login.Res,
+    { userName: string; email: string; code: string; password: string }
+  >(PATH.USER_REGISTER, {
+    payload: { userName, email, password, code }
+  })
+
+  sessionToken.set(res.Token)
+  await longTermToken.set(res.RefreshToken)
+  await rebootSignalr()
+  const myInfo = await getMyInfo()
+
+  return [res, myInfo]
 }
 
 /** 保存用户书架信息 */

@@ -87,7 +87,11 @@
                     <q-btn color="primary">登录</q-btn>
                   </router-link>
                 </div>
-                <div><q-btn color="primary" disable>注册</q-btn></div>
+                <div>
+                  <router-link :to="{ name: 'Register' }">
+                    <q-btn color="primary">注册</q-btn>
+                  </router-link>
+                </div>
               </div>
             </div>
           </q-menu>
