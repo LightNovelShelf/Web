@@ -224,7 +224,11 @@ const shelfStore = defineStore('app.shelf', {
         // 添加到书架默认就是第一层
         index: this.curMaxIndexInFolder(null) + 1
       }
-      this.source[this.branch].push(item)
+      this.commit({
+        shelf: produce(toRaw(this.shelf), (draft) => {
+          draft.push(item)
+        })
+      })
       await this.push()
     },
     /** 移出书架 */
