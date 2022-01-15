@@ -13,7 +13,8 @@ export const useSettingStore = defineStore('app.setting', {
       customColor: '#000000',
       convert: null as null | 't2s' | 's2t',
       readPageWidth: 0,
-      justify: false
+      justify: false,
+      showButton: false
     }
   }),
   actions: {

@@ -18,6 +18,19 @@
         <q-tab-panel name="Thread"></q-tab-panel>
       </q-tab-panels>
     </div>
+    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
+      <q-btn round color="primary" size="lg" :icon="icon.mdiDelete" @click="showConfirm = true" />
+    </q-page-sticky>
+    <q-dialog v-model="showConfirm">
+      <q-card style="min-width: 200px">
+        <q-card-section class="row items-center">是否清空阅读历史</q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="清空" color="primary" v-close-popup @click="confirmClear" />
+          <q-btn flat label="取消" color="primary" v-close-popup @click="showConfirm = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <template v-slot:loading>
       <div class="row justify-center q-my-md">
         <q-spinner-dots color="primary" size="40px" />
@@ -28,7 +41,7 @@
 
 <script setup lang="ts">
 import { ref, defineComponent, computed } from 'vue'
-import { getReadHistory } from '@/services/user'
+import { getReadHistory, clearHistory } from '@/services/user'
 import BookCard from '@/components/BookCard.vue'
 import { getBookListByIds } from '@/services/book'
 import { BookInList } from '@/services/book/types'
@@ -56,12 +69,24 @@ const tabOptions: Array<Record<string, any>> = [
   }
 ]
 
+const fabPos = ref([18, 18])
 const tab = ref('Novel')
 const bookData = ref<BookInList[]>([])
 const history = ref<number[]>([])
+const showConfirm = ref(false)
 let size = 24
 const totalPages = computed(() => Math.ceil(history.value.length / size) || 1)
 const scroll = ref(null)
+
+const confirmClear = async () => {
+  await clearHistory()
+    .then((res) => {
+      bookData.value = []
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
 
 const requestHistory = useTimeoutFn(async () => {
   await getReadHistory()
