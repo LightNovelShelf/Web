@@ -16,6 +16,12 @@
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
           </div>
+          <div class="q-pa-md">
+            <div class="q-gutter-sm light-radio">
+              <div>阅读按钮</div>
+              <q-toggle v-model="readSetting.showButton" :label="readSetting.showButton ? '显示按钮' : '隐藏按钮'" />
+            </div>
+          </div>
         </q-tab-panel>
 
         <q-tab-panel name="Read">

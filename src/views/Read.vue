@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
+    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1" v-show="readSetting['showButton']">
       <q-fab
         :icon="icon.mdiPlus"
         direction="up"
