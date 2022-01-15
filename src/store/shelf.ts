@@ -146,7 +146,6 @@ const shelfStore = defineStore('app.shelf', {
 
     /** 同步到服务器 */
     async syncToRemote() {
-      debugger
       await saveBookShelf({ data: toRaw(this.shelf) })
     },
 
@@ -231,11 +230,12 @@ const shelfStore = defineStore('app.shelf', {
     /** 移出书架 */
     async removeFromShelf(payload: { books: string[]; push: boolean }) {
       const booksInSet = new Set(payload.books)
+
       this.commit({
         // 移动后index就会出现空洞，squeeze一次
         shelf: this.squeezeShelfItemIndex(
           // 删除项目
-          produce(toRaw(this.shelf), (draft) => draft.filter((i) => booksInSet.has(i.id)))
+          produce(toRaw(this.shelf), (draft) => draft.filter((i) => !booksInSet.has(i.id)))
         )
       })
 
