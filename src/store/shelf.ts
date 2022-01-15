@@ -61,16 +61,16 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 所有书籍（包括已经被放入文件夹的） */
     books(): ShelfBookItem[] {
-      return this.shelf.filter((i): i is ShelfBookItem => i.type === ShelfItemType.BOOK)
+      return toRaw(this.shelf).filter((i): i is ShelfBookItem => i.type === ShelfItemType.BOOK)
     },
     /** 所有文件夹 */
     folders(): ShelfFolderItem[] {
-      return this.shelf.filter((i): i is ShelfFolderItem => i.type === ShelfItemType.FOLDER)
+      return toRaw(this.shelf).filter((i): i is ShelfFolderItem => i.type === ShelfItemType.FOLDER)
     },
     /** 根据最后一层文件夹名称获取书籍 */
     getShelfByParent(): (parent: string | null) => ShelfItem[] {
       return (parent) => {
-        return this.shelf.filter((i) => lastItem(i.parents) === parent)
+        return toRaw(this.shelf).filter((i) => lastItem(i.parents) === parent)
       }
     },
     /** 根据文件夹路径获取内容 */
@@ -78,7 +78,7 @@ const shelfStore = defineStore('app.shelf', {
       return (parents: string[]) => {
         // 有可能是空字符串数组，过滤掉无效的那些空字符串
         const _parents = parents.filter((i) => !!i)
-        return this.shelf.filter((i) => isEqual(i.parents, _parents))
+        return toRaw(this.shelf).filter((i) => isEqual(i.parents, _parents))
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
