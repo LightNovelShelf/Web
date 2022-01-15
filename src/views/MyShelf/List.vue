@@ -15,8 +15,10 @@
 
   <!-- 书籍列表 -->
   <template v-if="shelf.length || parentFolder">
-    <!-- key要写个1和2是告诉vue不能复用这个div，复用了就会导致sortjs清理有问题 -->
-    <!-- @todo 缺点是会导致整个列表闪一下，这个看有没有办法处理（看起来是loading的原因） -->
+    <!-- 
+      key的指定是告诉vue不能复用DOM，因为DOM已经跟数据脱钩了
+      复现：进入文件夹排序后取消保存，退出编辑；查看数据已经恢复了，但DOM没有恢复
+     -->
     <q-grid
       :key="editMode ? 1 : 2"
       :x-gap="12"
