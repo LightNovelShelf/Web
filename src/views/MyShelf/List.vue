@@ -36,7 +36,7 @@
       <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
 
       <!-- 渲染书架列表内容 -->
-      <q-grid-item v-for="item in shelf" :key="item.value.Id" :data-id="item.id" @click.capture="listItemClickHandle">
+      <q-grid-item v-for="item in shelf" :key="item.value.Id" @click.capture="listItemClickHandle(item, $event)">
         <!-- 书架项目 -->
         <div class="shelf-item-wrap">
           <!-- 书籍 -->
@@ -95,7 +95,7 @@
               <q-item clickable v-close-popup @click="currentFolderToRename = item">
                 <q-item-section>重命名</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup @click="removeFolderHandle" :data-id="item.id">
+              <q-item clickable v-close-popup @click="removeFolderHandle(item)">
                 <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
               </q-item>
             </template>
@@ -322,8 +322,8 @@ function removeItemHandle(item: ShelfTypes.ShelfItem) {
 }
 
 /** 右键菜单 - 删除文件夹 */
-function removeFolderHandle(evt: MouseEvent) {
-  const id = (evt.currentTarget as HTMLElement).dataset.id as string
+function removeFolderHandle(item: ShelfTypes.ShelfItem) {
+  const { id } = item
   const children = shelfStore.getShelfByParent(id)
   Promise.resolve()
     .then(() => {
@@ -433,16 +433,10 @@ function muteInEditMode(evt: MouseEvent) {
 }
 
 /** 列表项目点击 */
-function listItemClickHandle(evt: MouseEvent) {
+function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
   if (editMode.value) {
-    const { dataset } = evt.currentTarget as HTMLElement
-    const { id } = dataset
+    const { id } = item
     if (id === undefined) {
-      return
-    }
-
-    const item = shelfStore.shelfsMap.get(id)
-    if (!item) {
       return
     }
 
