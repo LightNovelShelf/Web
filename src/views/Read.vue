@@ -25,14 +25,14 @@
         no-parent-event
         :max-width="$q.platform.is.mobile ? '90%' : '100%'"
       />
-      <div class="row justify-between q-gutter-md" style="margin-top: 24px">
+      <div v-if="readSetting['showButton']" class="row justify-between q-gutter-md" style="margin-top: 24px">
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
         <q-btn @click="back" class="flex-space">目录</q-btn>
         <q-btn @click="next" class="flex-space">下一章</q-btn>
       </div>
     </div>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1" v-show="readSetting['showButton']">
+    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
       <q-fab
         :icon="icon.mdiPlus"
         direction="up"

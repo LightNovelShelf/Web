@@ -16,12 +16,6 @@
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
           </div>
-          <div class="q-pa-md">
-            <div class="q-gutter-sm light-radio">
-              <div>阅读按钮</div>
-              <q-toggle v-model="readSetting.showButton" :label="readSetting.showButton ? '显示按钮' : '隐藏按钮'" />
-            </div>
-          </div>
         </q-tab-panel>
 
         <q-tab-panel name="Read">
@@ -47,6 +41,10 @@
             <div>
               <div>其他选项</div>
               <q-toggle v-model="readSetting.justify" label="两端对齐" />
+              <q-toggle
+                v-model="readSetting.showButton"
+                :label="readSetting.showButton ? '显示底部按钮' : '隐藏底部按钮'"
+              />
             </div>
             <div>
               <div>字体大小</div>
@@ -61,22 +59,6 @@
                   </template>
                 </q-input>
               </div>
-              <!-- <div class="q-ma-md">预览</div>
-              <div
-                class="preview"
-                :style="{
-                  '--width': readSetting.readPageWidth === 0 ? '100%' : readSetting.readPageWidth + 'px'
-                }"
-              >
-                <q-scroll-area style="height: 200px; width: 100%">
-                  <div v-for="n in 100" :key="n" class="q-py-xs">
-                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
-                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
-                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
-                    这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，这是一段预览文本，
-                  </div>
-                </q-scroll-area>
-              </div> -->
             </div>
           </div>
         </q-tab-panel>
