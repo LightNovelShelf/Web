@@ -19,7 +19,7 @@
       </q-tab-panels>
     </div>
     <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-btn round color="primary" size="lg" :icon="icon.mdiDelete" @click="showConfirm = true" />
+      <q-btn round color="primary" size="md" :icon="icon.mdiDelete" @click="showConfirm = true" />
     </q-page-sticky>
     <q-dialog v-model="showConfirm">
       <q-card style="min-width: 200px">

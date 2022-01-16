@@ -56,7 +56,8 @@ export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>
     let rst = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
     let target = rst.iterateNext() as HTMLElement
     if (target) {
-      document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset.value
+      target.scrollIntoView()
+      // document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset.value
     }
   } catch (e) {
     console.log(e)
