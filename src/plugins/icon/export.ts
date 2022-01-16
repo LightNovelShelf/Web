@@ -51,5 +51,6 @@ export {
   mdiEyeOff,
   mdiAccount,
   mdiCloseCircle,
-  mdiFormatListBulleted
+  mdiFormatListBulleted,
+  mdiDelete
 } from '@mdi/js'
