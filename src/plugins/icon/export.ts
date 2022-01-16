@@ -54,5 +54,6 @@ export {
   mdiCloseCircle,
   mdiFolderOpen,
   mdiReply,
-  mdiFormatListBulleted
+  mdiFormatListBulleted,
+  mdiDelete
 } from '@mdi/js'
