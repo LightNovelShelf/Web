@@ -48,8 +48,8 @@
           <!-- 选中态icon -->
           <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
-            <q-icon v-if="item.selected" size="24" color="primary" :name="mdiCheckCircle" />
-            <q-icon v-else size="24" color="grey" :name="mdiCheckboxBlankCircleOutline" />
+            <q-icon v-if="item.selected" size="24px" color="primary" :name="mdiCheckCircle" />
+            <q-icon v-else size="24px" color="grey" :name="mdiCheckboxBlankCircleOutline" />
           </div>
           <template v-else />
         </div>
@@ -117,7 +117,7 @@
   <!-- 空态 -->
   <div v-else class="empty-placeholder">
     <div>
-      <q-icon class="empty-placeholder-icon" size="160" color="grey" :name="mdiFolderOpen" />
+      <q-icon class="empty-placeholder-icon" size="160px" color="grey" :name="mdiFolderOpen" />
       <div class="empty-placeholder-label">{{ loading ? '读取中...' : '空空如也' }}</div>
     </div>
   </div>
