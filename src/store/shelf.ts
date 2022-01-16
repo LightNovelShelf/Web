@@ -144,6 +144,11 @@ const shelfStore = defineStore('app.shelf', {
       await this.syncToRemote()
     },
 
+    /** 从服务器同步 */
+    async syncFromRemote() {
+      const serve = await getBookShelf()
+      console.log('serve', serve)
+    },
     /** 同步到服务器 */
     async syncToRemote() {
       await saveBookShelf({ data: toRaw(this.shelf) })
@@ -479,7 +484,8 @@ export function useShelfStore() {
   if (store._first) {
     store.$patch({ _first: false })
     store
-      .pull()
+      .syncFromRemote()
+      .then(() => store.pull())
       .then(() => store.commit({ shelf: store.squeezeShelfItemIndex(store.shelf) }))
       .then(() => store.push())
   }
