@@ -114,13 +114,15 @@
     </q-grid>
   </template>
 
-  <!-- 空态 -->
-  <div v-else class="empty-placeholder">
+  <!-- 空态; 初始化之后才展示空态，防止初始化就看到空态，然后一闪消失 -->
+  <div v-else-if="initialized" class="empty-placeholder">
     <div>
       <q-icon class="empty-placeholder-icon" size="160px" color="grey" :name="mdiFolderOpen" />
       <div class="empty-placeholder-label">{{ loading ? '读取中...' : '空空如也' }}</div>
     </div>
   </div>
+
+  <template v-else />
 
   <!-- 书架文件夹选择弹层 -->
   <q-dialog :model-value="folderSelectorVisible" @update:model-value="toggleShelfFolderSelector">
@@ -219,6 +221,7 @@ const $ = useQuasar()
 /** 加载标记 */
 const loading = ref(false)
 const shelfStore = useShelfStore()
+const initialized = computed(() => shelfStore.initialized)
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const route = useRoute()
 const isActivated = useIsActivated()
@@ -472,10 +475,7 @@ const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newInd
 
 /** 保存修改 */
 const submitListChange = async () => {
-  shelfStore.clearSelected()
-  shelfStore.merge({ to: ShelfBranch.main })
-  shelfStore.checkout({ to: ShelfBranch.main })
-  await shelfStore.push()
+  await shelfStore.submitChange()
 }
 
 /** 创建排序句柄 */
