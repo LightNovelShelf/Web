@@ -1,6 +1,7 @@
 import { useToNow } from '@/composition/useToNow'
 import { computed, Ref } from 'vue'
 import sanitizerHtml from '@/utils/sanitizeHtml'
+import { DateTime } from 'luxon'
 
 export interface Announcement {
   Id: number
@@ -22,8 +23,7 @@ function getPreview(html: string): string {
 export function announcementFormat(element): Announcement {
   return {
     Id: element.Id,
-    Create:
-      element.CreateTime.getFullYear() + '.' + (element.CreateTime.getMonth() + 1) + '.' + element.CreateTime.getDate(),
+    Create: DateTime.fromJSDate(element.CreateTime).toFormat('yyyy-MM-dd'),
     Before: useToNow(computed(() => element.CreateTime)),
     PreviewContent: getPreview(element.Content),
     Content: element.Content,
