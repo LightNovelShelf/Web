@@ -2,15 +2,10 @@
   <div>这是社区</div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { defineComponent } from 'vue'
 
-export default defineComponent({
-  name: 'Community',
-  setup() {
-    return {}
-  }
-})
+defineComponent({ name: 'Community' })
 </script>
 
 <style scoped></style>
