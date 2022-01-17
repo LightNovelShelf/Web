@@ -189,10 +189,9 @@
 </template>
 
 <script lang="ts" setup>
-import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import BookCard from '@/components/BookCard'
-import { computed, defineComponent, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import BookCard from '@/components/BookCard.vue'
+import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -207,8 +206,6 @@ import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
 import { useIsActivated } from '@/composition/useIsActivated'
 import { ALL_VALUE } from '@/const'
 import { parseTime } from '@/utils/time'
-
-defineComponent({ AddToShelf, QGrid, QGridItem, BookCard, ShelfFolder })
 
 interface QSelectorOption {
   label: string
