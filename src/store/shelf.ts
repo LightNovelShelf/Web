@@ -17,14 +17,15 @@ type ShelfSourceStruct = {
 }
 
 export interface ShelfStore {
-  _first: boolean
+  /** 是否已经初始化 */
+  initialized: boolean
   source: ShelfSourceStruct
   branch: ShelfBranch
 }
 
 /** 初始state */
 const INIT: ShelfStore = {
-  _first: true,
+  initialized: false,
   source: {
     [ShelfBranch.main]: [],
     [ShelfBranch.draft]: []
@@ -134,24 +135,16 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** push到db */
-    async push() {
+    async push(config: { syncRetome?: boolean } = {}) {
       // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
       await shelfDB.clear()
       for (const i of this.shelf) {
         await shelfDB.set(i.id, i)
       }
 
-      await this.syncToRemote()
-    },
-
-    /** 从服务器同步 */
-    async syncFromRemote() {
-      const serve = await getBookShelf()
-      console.log('serve', serve)
-    },
-    /** 同步到服务器 */
-    async syncToRemote() {
-      await saveBookShelf({ data: toRaw(this.shelf) })
+      if (config.syncRetome) {
+        await this.syncToRemote()
+      }
     },
 
     /** 切换分支 */
@@ -160,6 +153,34 @@ const shelfStore = defineStore('app.shelf', {
         this.source[branch] = this.source[this.branch]
       }
       this.branch = branch
+    },
+
+    /** 把当前分支的数据覆盖到指定分支 */
+    merge({ to }: { to: ShelfBranch }) {
+      this.source[to] = this.source[this.branch]
+    },
+
+    /** 提交更改(覆盖) */
+    commit({ shelf }: { shelf: ShelfItem[] }) {
+      this.source[this.branch] = shelf
+    },
+
+    /** 从db中拉数据(pull = fetch + commit) */
+    async pull() {
+      const shelf = await this.fetch()
+      this.commit({ shelf: sort(shelf) })
+    },
+
+    /** git end -------- */
+
+    /** 从服务器同步 */
+    async syncFromRemote() {
+      const serve = await getBookShelf()
+      this.commit({ shelf: serve.data })
+    },
+    /** 同步到服务器 */
+    async syncToRemote() {
+      await saveBookShelf({ data: toRaw(this.shelf) })
     },
 
     /**
@@ -200,24 +221,6 @@ const shelfStore = defineStore('app.shelf', {
         })
       })
     },
-
-    /** 把当前分支的数据覆盖到指定分支 */
-    merge({ to }: { to: ShelfBranch }) {
-      this.source[to] = this.source[this.branch]
-    },
-
-    /** 提交更改(覆盖) */
-    commit({ shelf }: { shelf: ShelfItem[] }) {
-      this.source[this.branch] = shelf
-    },
-
-    /** 从db中拉数据(pull = fetch + commit) */
-    async pull() {
-      const shelf = await this.fetch()
-      this.commit({ shelf: sort(shelf) })
-    },
-
-    /** git end -------- */
 
     /** 添加到书架，立即生效 */
     async addToShelf(book: ShelfBook) {
@@ -468,7 +471,15 @@ const shelfStore = defineStore('app.shelf', {
           })
         )
       })
+    },
+    /** 保存修改 */
+    async submitChange() {
+      this.clearSelected()
+      this.merge({ to: ShelfBranch.main })
+      this.checkout({ to: ShelfBranch.main })
+      await this.push({ syncRetome: true })
     }
+
     /** actions end */
   }
 })
@@ -481,13 +492,31 @@ export function useShelfStore() {
   setAutoFreeze(false)
 
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
-  if (store._first) {
-    store.$patch({ _first: false })
+  if (!store.initialized) {
     store
-      .syncFromRemote()
-      .then(() => store.pull())
-      .then(() => store.commit({ shelf: store.squeezeShelfItemIndex(store.shelf) }))
-      .then(() => store.push())
+      // 先从缓存读出来，展示在界面
+      .pull()
+      // 缓存读取之后就写入store，标记已经初始化完成
+      .then(() => store.$patch({ initialized: true }))
+      // 从服务器更新一次
+      .then(() => store.syncFromRemote())
+      // 服务器有返回的话，就整理一次（本地的缓存不需要再整理了
+      .then(() => {
+        const currentData = toRaw(store.shelf)
+        const nextData = store.squeezeShelfItemIndex(currentData)
+
+        const hasChange = currentData !== nextData
+
+        if (hasChange) {
+          store.commit({ shelf: nextData })
+        }
+
+        return hasChange
+      })
+      // 根据整理结果决定是否需要触发服务器保存（没变也需要保存一次本地，防止本地与服务器不同步
+      .then(async (hasChange) => {
+        await store.push({ syncRetome: hasChange })
+      })
   }
 
   return store

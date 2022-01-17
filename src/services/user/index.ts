@@ -96,7 +96,7 @@ export async function saveBookShelf(json: { data: ShelfItem[] }) {
 
 /** 取用户书架信息 */
 export async function getBookShelf() {
-  return requestWithSignalr<string>('GetBookShelf')
+  return requestWithSignalr<{ data: ShelfItem[] }>('GetBookShelf')
 }
 
 /** 清空用户历史记录 */
