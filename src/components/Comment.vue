@@ -162,7 +162,7 @@
           <div class="text-h6">
             回复
             <span class="text-bold">
-              {{ comment.Users[`${comment.Commentaries[`${parentId}`].UserId}`].UserName }}
+              {{ comment.Users[`${comment.Commentaries[`${replyId || parentId}`].UserId}`].UserName }}
             </span>
             的评论
           </div>
