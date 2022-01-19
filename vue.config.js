@@ -59,15 +59,9 @@ module.exports = {
       return args
     })
 
+    // 捏麻麻滴, 好事不干坏事做尽；ts校验就留在IDE算了吧，反正IDE不支持的校验都关掉了，强行开着没啥用
     /** https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-typescript */
-    config.when(__DEV__, (config) => {
-      // 启用了严格模式的情况下移除ts-checker, 靠编辑器报错就够了；不然其它文件的报错也会跑出来
-      const { readFileSync } = require('fs')
-      const { parse } = require('json5')
-      config.when(parse(readFileSync('./tsconfig.json')).compilerOptions.strict, (config) => {
-        config.plugins.delete('fork-ts-checker')
-      })
-    })
+    config.plugins.delete('fork-ts-checker')
 
     // 加入打包分析
     const ANALYZE = !!process.env.ANALYZE

@@ -55,7 +55,6 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.3.0",
-    "json5": "^2.2.0",
     "npm-check-updates": "^12.1.0",
     "prettier": "^2.5.1",
     "process": "^0.11.10",
