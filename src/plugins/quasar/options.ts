@@ -2,7 +2,7 @@ import '@/styles/quasar.scss'
 import lang from 'quasar/lang/zh-CN.js'
 import mdiIconSet from './iconSet'
 import '@quasar/extras/roboto-font/roboto-font.css'
-import { Notify, LoadingBar, Dialog } from 'quasar'
+import { Notify, LoadingBar, Dialog, AppFullscreen } from 'quasar'
 import { Dark } from './dark'
 
 export default {
@@ -20,7 +20,8 @@ export default {
   plugins: {
     Notify,
     LoadingBar,
-    Dialog
+    Dialog,
+    AppFullscreen
   },
   lang: lang
 }
