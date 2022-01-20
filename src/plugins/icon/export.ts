@@ -52,5 +52,7 @@ export {
   mdiAccount,
   mdiCloseCircle,
   mdiFormatListBulleted,
-  mdiDelete
+  mdiDelete,
+  mdiFullscreen,
+  mdiFullscreenExit
 } from '@mdi/js'
