@@ -272,8 +272,25 @@ function globalCancelShowing(event: any) {
     comment.showing = false
   }
 }
-onActivated(() => document.addEventListener('click', globalCancelShowing))
-onDeactivated(() => document.removeEventListener('click', globalCancelShowing))
+
+function manageKeydown(event: KeyboardEvent) {
+  // @ts-ignore
+  if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
+  if (event.code === 'ArrowRight') {
+    next()
+  } else if (event.code === 'ArrowLeft') {
+    prev()
+  }
+}
+
+onActivated(() => {
+  document.addEventListener('click', globalCancelShowing)
+  document.addEventListener('keydown', manageKeydown)
+})
+onDeactivated(() => {
+  document.removeEventListener('click', globalCancelShowing)
+  document.removeEventListener('keydown', manageKeydown)
+})
 
 onMounted(getContent.syncCall)
 watch(
