@@ -3,7 +3,7 @@
     <!-- todo 针对小屏幕可能得换个写法 -->
     <q-list v-if="user">
       <q-item>
-        <q-item-section avatar>
+        <q-item-section avatar v-if="!$q.screen.xs">
           <q-avatar size="48px">
             <img :src="user.Avatar" alt="avatar" />
           </q-avatar>
