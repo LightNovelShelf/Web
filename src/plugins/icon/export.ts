@@ -55,5 +55,7 @@ export {
   mdiFolderOpen,
   mdiReply,
   mdiFormatListBulleted,
-  mdiDelete
+  mdiDelete,
+  mdiFullscreen,
+  mdiFullscreenExit
 } from '@mdi/js'
