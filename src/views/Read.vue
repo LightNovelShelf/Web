@@ -60,6 +60,17 @@
             目录
           </q-tooltip>
         </q-fab-action>
+        <q-fab-action
+          v-if="$q.fullscreen.isCapable"
+          @click="$q.fullscreen.toggle()"
+          color="primary"
+          :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen"
+          :disable="draggingFab"
+        >
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            {{ $q.fullscreen.isActive ? '退出全屏' : '全屏' }}
+          </q-tooltip>
+        </q-fab-action>
       </q-fab>
     </q-page-sticky>
 
@@ -233,6 +244,7 @@ const prev = debounce(() => {
     router.replace({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value - 1 } })
   }
 }, 300)
+
 function back() {
   router.push({ name: 'BookInfo', params: { id: bid.value } })
 }
@@ -260,8 +272,25 @@ function globalCancelShowing(event: any) {
     comment.showing = false
   }
 }
-onActivated(() => document.addEventListener('click', globalCancelShowing))
-onDeactivated(() => document.removeEventListener('click', globalCancelShowing))
+
+function manageKeydown(event: KeyboardEvent) {
+  // @ts-ignore
+  if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
+  if (event.code === 'ArrowRight') {
+    next()
+  } else if (event.code === 'ArrowLeft') {
+    prev()
+  }
+}
+
+onActivated(() => {
+  document.addEventListener('click', globalCancelShowing)
+  document.addEventListener('keydown', manageKeydown)
+})
+onDeactivated(() => {
+  document.removeEventListener('click', globalCancelShowing)
+  document.removeEventListener('keydown', manageKeydown)
+})
 
 onMounted(getContent.syncCall)
 watch(
