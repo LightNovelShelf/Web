@@ -118,7 +118,7 @@ export const createPiniaLoading = (): PiniaPlugin => {
 
         // 计算 loading，作为 producer 的入参
         return Object.keys(storeDispatchRecordMap).reduce((loadingMap, actionName) => {
-          loadingMap[actionName] = !!loadingMap[actionName]?.size
+          loadingMap[actionName] = !!storeDispatchRecordMap[actionName]?.size
           return loadingMap
         }, {} as any)
       })
