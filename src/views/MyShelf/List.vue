@@ -193,7 +193,7 @@
 <script lang="ts" setup>
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -209,6 +209,8 @@ import { useIsActivated } from '@/composition/useIsActivated'
 import { ALL_VALUE } from '@/const'
 import { parseTime } from '@/utils/time'
 import { isConnecting } from '@/services/utils'
+import { NOOP } from '@/const/empty'
+import router from '@/router'
 
 interface QSelectorOption {
   label: string
@@ -306,14 +308,41 @@ function addItemToFolderHandle(item: ShelfTypes.ShelfItem) {
 }
 
 /** 右键菜单 - 移出书架 */
-function removeItemHandle(item: ShelfTypes.ShelfItem) {
+async function removeItemHandle(item: ShelfTypes.ShelfItem) {
   // 没有选择书籍
   if (selectedCount.value === 0) {
     // 移除鼠标右键的那一本
-    shelfStore.removeFromShelf({ books: [item.id], push: false })
+    await shelfStore.removeFromShelf({ books: [item.id], push: false })
   } else {
     // 否则就是移除已经选中的
-    shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
+    await shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
+  }
+
+  // 如果是文件夹
+  if (parentFolder.value) {
+    const id = parentFolder.value
+    // 且文件夹是空的
+    if (!shelfData.value.length) {
+      // 弹层询问用户是否要清空文件夹
+      new Promise((resolve, reject) => {
+        $.dialog({
+          title: '删除文件夹',
+          message: '该文件夹为空，是否删除文件夹？',
+          cancel: true
+        })
+          .onOk(resolve)
+          .onCancel(reject)
+      })
+        .then(() => {
+          shelfStore.deleteFolder({ id })
+          // replace为父层
+          router.replace({
+            ...route,
+            params: { folderID: parentFolders.value.filter((i) => i !== id) }
+          })
+        })
+        .catch(NOOP)
+    }
   }
 }
 
