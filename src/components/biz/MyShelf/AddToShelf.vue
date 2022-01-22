@@ -16,14 +16,14 @@ export default {}
 
 <script lang="ts" setup>
 // 加入书架按钮
-import { computed, ref, toRaw } from 'vue'
+import { computed, ref } from 'vue'
 import { mdiHeartOutline, mdiHeartRemoveOutline } from '@/plugins/icon/export'
 import { useQuasar } from 'quasar'
 import { AnyVoidFunc } from '@/types/utils'
 import type { BookServicesTypes } from '@/services/book'
-import * as ShelfTypes from '@/types/shelf'
 import { useShelfStore } from '@/store/shelf'
 import { getErrMsg } from '@/utils/getErrMsg'
+import { isConnecting } from '@/services/utils'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 
@@ -34,8 +34,8 @@ const $ = useQuasar()
 const shelfStore = useShelfStore()
 /** 是否已经收藏 */
 const liked = computed<boolean>(() => shelfStore.booksMap.has(bookId.value))
-/** 读取/写入中 @todo 给pinia添加plugin让它可以识别是否有action在执行 */
-const loading = ref(false)
+/** 读取/写入中 */
+const loading = computed(() => shelfStore.useLoading((s) => s.pull || s.push).value || isConnecting.value)
 /** 收起最后一次通知 */
 let disMiss: AnyVoidFunc
 
@@ -53,8 +53,6 @@ const clickHandle = async () => {
   // 先取消，免得界面上有多个提示框
   if (disMiss) disMiss()
 
-  loading.value = true
-
   const nextLike = !liked.value
 
   try {
@@ -67,7 +65,5 @@ const clickHandle = async () => {
   } catch (e) {
     disMiss = $.notify({ type: 'waring', message: getErrMsg(e) })
   }
-
-  loading.value = false
 }
 </script>
