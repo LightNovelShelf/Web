@@ -14,7 +14,7 @@
   </q-slide-transition>
 
   <!-- 书籍列表 -->
-  <template v-if="shelf.length || parentFolder">
+  <template v-if="shelfData.length || parentFolder">
     <!-- 
       key的指定是告诉vue不能复用DOM，因为DOM已经跟数据脱钩了
       复现：进入文件夹排序后取消保存，退出编辑；查看数据已经恢复了，但DOM没有恢复
@@ -36,7 +36,7 @@
       <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
 
       <!-- 渲染书架列表内容 -->
-      <q-grid-item v-for="item in shelf" :key="item.value.Id" @click.capture="listItemClickHandle(item, $event)">
+      <q-grid-item v-for="item in shelfData" :key="item.value.Id" @click.capture="listItemClickHandle(item, $event)">
         <!-- 书架项目 -->
         <div class="shelf-item-wrap">
           <!-- 书籍 -->
@@ -225,42 +225,6 @@ const initialized = computed(() => shelfStore.initialized)
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const route = useRoute()
 const isActivated = useIsActivated()
-
-function getParentFolders(curRoute: RouteLocationNormalizedLoaded): string[] {
-  if (!curRoute.params.folderID) {
-    return []
-  }
-
-  if (Array.isArray(curRoute.params.folderID)) {
-    return curRoute.params.folderID.filter((i) => !!i)
-  }
-
-  return [curRoute.params.folderID]
-}
-
-/** 是否有父文件夹(可能有多个); 初始值就解析一次 */
-const parentFolders = ref<string[]>(getParentFolders(route))
-
-/** 监听路由 修改 parentFolders 值 */
-watch(
-  () => [route, isActivated] as const,
-  ([nextRoute, nextActivated]) => {
-    if (!nextActivated.value) {
-      return
-    }
-
-    parentFolders.value = getParentFolders(nextRoute)
-  },
-  // immediate 保证mounted场景能触发
-  { immediate: true, deep: true }
-)
-
-/** 直接关系的父文件夹 */
-const parentFolder = computed<string | null>(() => [...parentFolders.value].pop() ?? null)
-const shelf = computed<ShelfTypes.ShelfItem[]>(() => {
-  return shelfStore.getShelfByParents(parentFolders.value)
-})
-
 /** 文件夹选择弹层 */
 const folderSelectorVisible = ref(false)
 /** 文件夹选择器model值 */
@@ -297,6 +261,37 @@ const folderOptions = computed<QSelectorOption[]>(() => {
     })
   }
   return realFolders
+})
+/** 选中计数 */
+const selectedCount = computed(() => shelfStore.selectedNum)
+/** 是否全选 */
+// const isSelectedAll = computed<boolean>(() => selectedCount.value === shelf.value.length)
+/** 排序列表容器 */
+const [listWrapRef, setListWrapRef] = useForwardRef()
+/** 排序操作句柄 */
+const sortableRef = ref<Sortable | null>(null)
+
+/** 父文件俺家数组 */
+function getParentFolders(curRoute: RouteLocationNormalizedLoaded): string[] {
+  if (!curRoute.params.folderID) {
+    return []
+  }
+
+  if (Array.isArray(curRoute.params.folderID)) {
+    return curRoute.params.folderID.filter((i) => !!i)
+  }
+
+  return [curRoute.params.folderID]
+}
+
+/** 是否有父文件夹(可能有多个); 初始值就解析一次 */
+const parentFolders = ref<string[]>(getParentFolders(route))
+
+/** 直接关系的父文件夹 */
+const parentFolder = computed<string | null>(() => [...parentFolders.value].pop() ?? null)
+/** 书架数据 */
+const shelfData = computed<ShelfTypes.ShelfItem[]>(() => {
+  return shelfStore.getShelfByParents(parentFolders.value)
 })
 
 /** 右键菜单 - 加入文件夹 */
@@ -391,14 +386,6 @@ function folderSelectorSubmitHandle() {
   }
 }
 
-/** 选中计数 */
-const selectedCount = computed(() => shelfStore.selectedNum)
-/** 是否全选 */
-// const isSelectedAll = computed<boolean>(() => selectedCount.value === shelf.value.length)
-/** 排序列表容器 */
-const [listWrapRef, setListWrapRef] = useForwardRef()
-/** 排序操作句柄 */
-const sortableRef = ref<Sortable | null>(null)
 /** 清理排序句柄 */
 const destorySortable = () => {
   safeCall(() => sortableRef.value?.destroy())
@@ -496,6 +483,20 @@ const createSortable = (el: HTMLElement) => {
     }
   })
 }
+
+/** 监听路由 修改 parentFolders 值 */
+watch(
+  () => [route, isActivated] as const,
+  ([nextRoute, nextActivated]) => {
+    if (!nextActivated.value) {
+      return
+    }
+
+    parentFolders.value = getParentFolders(nextRoute)
+  },
+  // immediate 保证mounted场景能触发
+  { immediate: true, deep: true }
+)
 
 // 监控组件挂载情况，挂载了就初始化拖动排序
 watch([listWrapRef, editMode], ([el, mode]) => {
