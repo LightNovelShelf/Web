@@ -5,7 +5,7 @@
     <div class="book-cover">
       <q-card>
         <q-responsive :ratio="2 / 3">
-          <q-icon size="80" color="grey" :name="mdiReply" />
+          <q-icon size="80px" color="grey" :name="mdiReply" />
         </q-responsive>
       </q-card>
     </div>
