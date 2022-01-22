@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ShelfBook, ShelfBookItem, ShelfFolderChild, ShelfFolderItem, ShelfItem, ShelfItemType } from '@/types/shelf'
+import { ShelfBook, ShelfBookItem, ShelfFolderItem, ShelfItem, ShelfItemType } from '@/types/shelf'
 import { shelfDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
 import produce, { setAutoFreeze } from 'immer'
@@ -33,8 +33,26 @@ const INIT: ShelfStore = {
   branch: ShelfBranch.main
 }
 
-function ascSorter<T extends { index: number }>(a: T, b: T): 1 | -1 {
-  return a.index > b.index ? 1 : -1
+/**
+ * 升序排序
+ *
+ * @description
+ * 注意sort实现的差异
+ * 1. es2019 开始要求sort算法必须是稳定算法（也就是同index时保证不交换），在此之前看js引擎心情
+ * 2. sort返回值的意思：
+ *  - 返回 >0 把b放在a之前
+ *  - 返回 =0 不动
+ *  - 返回 <0 把b放在a之前
+ *
+ * @url https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#sort_stability
+ */
+function ascSorter<T extends ShelfItem>(a: T, b: T): number {
+  // 两个值index一致的情况下，需要细化场景，保证排序操作稳定
+  if (a.index === b.index) {
+    // index相同目前只有一种可能：两者的层级不一样；这时候按照层级排一次就可以保证稳定了
+    return a.parents.length - b.parents.length
+  }
+  return a.index - b.index
 }
 
 /** 排序数组，immutable */
