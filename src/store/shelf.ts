@@ -237,7 +237,7 @@ const shelfStore = defineStore('app.shelf', {
           draft.push(item)
         })
       })
-      await this.push()
+      await this.push({ syncRetome: true })
     },
     /** 移出书架 */
     async removeFromShelf(payload: { books: string[]; push: boolean }) {
@@ -253,7 +253,7 @@ const shelfStore = defineStore('app.shelf', {
 
       // 如果标记为立即push（比如 详请页 移出收藏 场景）
       if (payload.push) {
-        await this.push()
+        await this.push({ syncRetome: true })
       }
     },
     /**
