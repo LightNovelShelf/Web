@@ -453,7 +453,6 @@ const shelfStore = defineStore('app.shelf', {
     deleteFolder(payload: { id: string }) {
       this.commit({
         shelf: sort(
-          // @ts-ignore
           produce(toRaw(this.shelf), (draft) => {
             let currentMaxIndex = this.curMaxIndexInFolder(null)
 
@@ -485,7 +484,7 @@ const shelfStore = defineStore('app.shelf', {
             }
 
             // 删除文件夹
-            delete draft[folderIndex]
+            draft.splice(folderIndex, 1)
           })
         )
       })
