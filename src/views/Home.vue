@@ -141,7 +141,9 @@
                     @click="showImage(ban.Images)"
                   >
                     <img :src="ban.Avatar" alt="avatar" />
-                    <q-tooltip>{{ ban.Description }}</q-tooltip>
+                    <q-tooltip class="ban-tooltip">
+                      {{ ban.Description }}
+                    </q-tooltip>
                   </q-avatar>
                 </div>
               </q-card-section>
@@ -198,4 +200,8 @@ const showImage = (img) => {
 useInitRequest(getInfo)
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+:global(.ban-tooltip) {
+  max-width: unset !important;
+}
+</style>
