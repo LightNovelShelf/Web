@@ -113,7 +113,7 @@ import {
   watch
 } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import { useQuasar, Dark, colors, debounce } from 'quasar'
+import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading, scrollToHistory, loadHistory } from '@/utils/biz/read'
 import { useLayout } from '@/components/app/useLayout'
@@ -267,9 +267,20 @@ function showComment(event: MouseEvent, html: string, id: string) {
   }
 }
 
-function globalCancelShowing(event: any) {
+function managePageClick(event: any) {
   if (!event.target.hasAttribute('global-cancel')) {
+    // globalCancelShowing
     comment.showing = false
+  }
+
+  if (readSetting.tapToScroll) {
+    let h = window.innerHeight
+    if (event.y < 0.25 * h || event.y > 0.75 * h) {
+      let target = scroll.getScrollTarget(event.target)
+      let offset = scroll.getVerticalScrollPosition(target)
+      console.log(offset)
+      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
+    }
   }
 }
 
@@ -284,11 +295,11 @@ function manageKeydown(event: KeyboardEvent) {
 }
 
 onActivated(() => {
-  document.addEventListener('click', globalCancelShowing)
+  document.addEventListener('click', managePageClick)
   document.addEventListener('keydown', manageKeydown)
 })
 onDeactivated(() => {
-  document.removeEventListener('click', globalCancelShowing)
+  document.removeEventListener('click', managePageClick)
   document.removeEventListener('keydown', manageKeydown)
 })
 
