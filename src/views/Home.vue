@@ -124,19 +124,35 @@
                 <div class="row flex-center">
                   <div class="text-h6">处刑列表</div>
                   <q-space />
-                  <div class="text-subtitle2">更多</div>
                 </div>
               </q-card-section>
 
               <q-separator />
               <q-card-section>
-                <div>让我们期待一下哪位帅气的小哥哥能榜上有名呢</div>
+                <div v-if="loading" class="row flex-center">
+                  <q-spinner-dots color="primary" size="40px" />
+                </div>
+                <div v-else>
+                  <q-avatar
+                    class="cursor-pointer"
+                    v-for="ban in banList"
+                    :key="ban.Id"
+                    size="32px"
+                    @click="showImage(ban.Images)"
+                  >
+                    <img :src="ban.Avatar" alt="avatar" />
+                    <q-tooltip>{{ ban.Description }}</q-tooltip>
+                  </q-avatar>
+                </div>
               </q-card-section>
             </q-card>
           </q-grid-item>
         </q-grid>
       </q-grid-item>
     </q-grid>
+    <div ref="viewerRef" v-viewer="{ navbar: true, rebuild: true }" v-show="false">
+      <img v-for="img in banImages" :key="img" :src="img" alt="" />
+    </div>
   </div>
 </template>
 
@@ -145,7 +161,7 @@ import { defineComponent, ref, computed } from 'vue'
 import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
-import { getOnlineInfo, getAnnouncementList } from '@/services/context'
+import { getOnlineInfo, getAnnouncementList, getBanInfoList } from '@/services/context'
 import { announcementListFormat } from './Announcement/announcementFormat'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -157,12 +173,27 @@ defineComponent({ QGridItem, QGrid, BookCard })
 const onlineInfo = ref<OnlineInfo>()
 const announcementList = ref<any[]>()
 const bookData = ref<BookInList[]>()
+const banList = ref<any[]>()
+const banImages = ref<string[]>()
+const viewerRef = ref<any>()
 const getInfo = useTimeoutFn(async () => {
-  onlineInfo.value = await getOnlineInfo()
-  announcementList.value = announcementListFormat((await getAnnouncementList({ Page: 1, Size: 5 })).Data)
-  bookData.value = (await getLatestBookList()).Data
+  // 这样可以使Signalr在一个ws消息中并发调用
+  let p1 = getOnlineInfo().then((res) => (onlineInfo.value = res))
+  let p2 = getAnnouncementList({ Page: 1, Size: 5 }).then(
+    (res) => (announcementList.value = announcementListFormat(res.Data))
+  )
+  let p3 = getLatestBookList().then((res) => (bookData.value = res.Data))
+  let p4 = getBanInfoList().then((res: any[]) => (banList.value = res))
+  await Promise.all([p1, p2, p3, p4])
 })
-const loading = computed(() => getInfo.loading.value || !(onlineInfo.value || announcementList.value))
+const loading = computed(() => getInfo.loading.value || !(onlineInfo.value || announcementList.value || banList.value))
+
+const showImage = (img) => {
+  banImages.value = img
+  let viewer = viewerRef.value.$viewer
+  viewer.show()
+  viewer.view(0)
+}
 
 useInitRequest(getInfo)
 </script>

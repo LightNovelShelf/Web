@@ -18,3 +18,7 @@ export function getAnnouncementList(request: GetAnnouncementList.Request) {
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
   return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request)
 }
+
+export function getBanInfoList() {
+  return requestWithSignalr('GetBanInfoList')
+}
