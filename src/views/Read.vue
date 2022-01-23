@@ -16,6 +16,7 @@
         v-html="chapterContent"
         style="position: relative; z-index: 1"
         :style="readStyle"
+        @click="manageScrollClick"
       />
       <q-tooltip
         :target="comment.target"
@@ -267,18 +268,19 @@ function showComment(event: MouseEvent, html: string, id: string) {
   }
 }
 
-function managePageClick(event: any) {
+function globalCancelShowing(event: any) {
   if (!event.target.hasAttribute('global-cancel')) {
-    // globalCancelShowing
     comment.showing = false
   }
+}
 
-  if (readSetting.tapToScroll) {
+function manageScrollClick(event: any) {
+  // @ts-ignore
+  if (readSetting.tapToScroll && !viewerRef.value.$viewer.isShown) {
     let h = window.innerHeight
     if (event.y < 0.25 * h || event.y > 0.75 * h) {
-      let target = scroll.getScrollTarget(event.target)
+      let target = scroll.getScrollTarget(chapterRef.value)
       let offset = scroll.getVerticalScrollPosition(target)
-      console.log(offset)
       scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
     }
   }
@@ -295,11 +297,11 @@ function manageKeydown(event: KeyboardEvent) {
 }
 
 onActivated(() => {
-  document.addEventListener('click', managePageClick)
+  document.addEventListener('click', globalCancelShowing)
   document.addEventListener('keydown', manageKeydown)
 })
 onDeactivated(() => {
-  document.removeEventListener('click', managePageClick)
+  document.removeEventListener('click', globalCancelShowing)
   document.removeEventListener('keydown', manageKeydown)
 })
 
