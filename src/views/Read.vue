@@ -16,6 +16,7 @@
         v-html="chapterContent"
         style="position: relative; z-index: 1"
         :style="readStyle"
+        @click="manageScrollClick"
       />
       <q-tooltip
         :target="comment.target"
@@ -113,7 +114,7 @@ import {
   watch
 } from 'vue'
 import { getChapterContent } from '@/services/chapter'
-import { useQuasar, Dark, colors, debounce } from 'quasar'
+import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { syncReading, scrollToHistory, loadHistory } from '@/utils/biz/read'
 import { useLayout } from '@/components/app/useLayout'
@@ -270,6 +271,18 @@ function showComment(event: MouseEvent, html: string, id: string) {
 function globalCancelShowing(event: any) {
   if (!event.target.hasAttribute('global-cancel')) {
     comment.showing = false
+  }
+}
+
+function manageScrollClick(event: any) {
+  // @ts-ignore
+  if (readSetting.tapToScroll && !viewerRef.value.$viewer.isShown) {
+    let h = window.innerHeight
+    if (event.y < 0.25 * h || event.y > 0.75 * h) {
+      let target = scroll.getScrollTarget(chapterRef.value)
+      let offset = scroll.getVerticalScrollPosition(target)
+      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
+    }
   }
 }
 
