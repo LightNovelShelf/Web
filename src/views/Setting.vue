@@ -45,6 +45,7 @@
                 v-model="readSetting.showButton"
                 :label="readSetting.showButton ? '显示底部按钮' : '隐藏底部按钮'"
               />
+              <q-toggle v-model="readSetting.tapToScroll" label="点击边缘滚动页面" />
             </div>
             <div>
               <div>字体大小</div>
