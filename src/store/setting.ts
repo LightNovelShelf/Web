@@ -14,7 +14,8 @@ export const useSettingStore = defineStore('app.setting', {
       convert: null as null | 't2s' | 's2t',
       readPageWidth: 0,
       justify: false,
-      showButton: true
+      showButton: true,
+      tapToScroll: false
     }
   }),
   actions: {
