@@ -255,6 +255,8 @@ function previewImg(event) {
   showImage.alt = event.target.alt
   // @ts-ignore
   viewerRef.value.$viewer.show()
+  event.stopPropagation()
+  globalCancelShowing(event)
 }
 
 function showComment(event: MouseEvent, html: string, id: string) {
