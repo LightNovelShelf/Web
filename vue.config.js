@@ -47,6 +47,16 @@ module.exports = {
               statuses: [200]
             }
           }
+        },
+        {
+          urlPattern: /.*\/img\/icons\/.*/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'image-cache',
+            cacheableResponse: {
+              statuses: [200]
+            }
+          }
         }
       ]
     }
