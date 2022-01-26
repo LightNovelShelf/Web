@@ -1,10 +1,7 @@
 import { computed } from 'vue'
-import { isConnected as _isConnected, connectPromise } from '@/services/internal/request/signalr'
+import { connectState as _connectState } from '@/services/internal/request/signalr'
 
-/** 是否已经建立ws连接 */
-export const isConnected = _isConnected
-
-/** 是否正在建立ws连接 */
-export const isConnecting = computed(() => !!connectPromise.value)
+/** 连接状态 */
+export const connectState = _connectState
 
 export { useCacheNotify } from './useCacheNotify'

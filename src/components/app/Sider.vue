@@ -32,13 +32,18 @@
 
     <div class="absolute-bottom row flex-center" style="bottom: 24px">
       <div class="row flex-align-center">
-        <q-icon left v-if="isConnected" color="positive" size="24px" :name="icon.mdiBroadcast" />
+        <q-icon
+          left
+          v-if="connectState === HubConnectionState.Connected"
+          color="positive"
+          size="24px"
+          :name="icon.mdiBroadcast"
+        />
         <q-icon left v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
 
-        <span v-if="isConnected">当前在线</span>
-        <span v-else-if="isConnecting">正在尝试连接</span>
-        <!-- todo 添加重连倒计时 -->
-        <span v-else>当前离线，等待重连</span>
+        <span v-if="connectState === HubConnectionState.Connected">当前在线</span>
+        <span v-else-if="connectState === HubConnectionState.Reconnecting">正在尝试重新连接</span>
+        <span v-else>当前离线，等待连接</span>
       </div>
     </div>
   </q-drawer>
@@ -46,8 +51,9 @@
 
 <script lang="tsx" setup>
 import { icon } from '@/plugins/icon'
-import { isConnected, isConnecting } from '@/services/utils'
+import { connectState } from '@/services/utils'
 import { useLayout } from './useLayout'
+import { HubConnectionState } from '@microsoft/signalr'
 
 const menuOptions: Array<Record<string, any>> = [
   {
