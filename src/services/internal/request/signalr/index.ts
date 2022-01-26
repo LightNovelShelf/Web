@@ -8,6 +8,7 @@ import { longTermToken, sessionToken } from '@/utils/session'
 import { refreshToken } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
+import { AppVisibility } from 'quasar'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
@@ -80,18 +81,22 @@ function getSignalr(): Promise<HubConnection> {
     return Promise.resolve(hub)
   }
 
-  /** 否则检查是否有正在进行的连接 */
-  if (!connectPromise.value) {
-    connectPromise.value = hub.start().then(() => hub)
+  if (AppVisibility.appVisible) {
+    /** 否则检查是否有正在进行的连接 */
+    if (!connectPromise.value) {
+      connectPromise.value = hub.start().then(() => hub)
 
-    /** 记录已连接标志 */
-    connectPromise.value.then(() => (isConnected.value = true))
-    /** start抛出错误后，安排重连 */
-    connectPromise.value.catch(reConnectLater)
-    /** start完成后清除Promise，避免掉线重连时发现有Promise就不执行重连操作 */
-    connectPromise.value.finally(() => {
-      connectPromise.value = null
-    })
+      /** 记录已连接标志 */
+      connectPromise.value.then(() => (isConnected.value = true))
+      /** start抛出错误后，安排重连 */
+      connectPromise.value.catch(reConnectLater)
+      /** start完成后清除Promise，避免掉线重连时发现有Promise就不执行重连操作 */
+      connectPromise.value.finally(() => {
+        connectPromise.value = null
+      })
+    }
+  } else {
+    reConnectLater()
   }
 
   return connectPromise.value
