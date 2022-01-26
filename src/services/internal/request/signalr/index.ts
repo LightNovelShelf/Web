@@ -58,9 +58,6 @@ hub.onclose(setState)
 hub.onreconnecting(setState)
 hub.onreconnected(setState)
 
-window['hub'] = hub
-window['connectState'] = connectState
-
 /** 返回一个 signalr 连接中心 */
 function getSignalr(): Promise<HubConnection> {
   if (isStart.value) {
