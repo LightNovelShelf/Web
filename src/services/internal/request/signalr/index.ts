@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
+import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref } from 'vue'
 import { ServerError } from '@/services/internal/ServerError'
@@ -8,6 +8,8 @@ import { longTermToken, sessionToken } from '@/utils/session'
 import { refreshToken } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
+import { AppVisibility } from 'quasar'
+import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
@@ -15,12 +17,10 @@ const HOST = `${VUE_APP_API_SERVER}/hub/api`
 const IS_UN_AUTH_ERR = (err: unknown): boolean =>
   /** @todo 未授权没有别的特征，只有通过message来检查 */ getErrMsg(err).includes('user is unauthorized')
 
-/** @internal 记录Promise避免重复start */
-export const connectPromise = ref<null | Promise<HubConnection>>(null)
-/** @internal signalr连接情况标志 */
-export const isConnected = ref<boolean>(false)
+export const connectState = ref<HubConnectionState>(HubConnectionState.Disconnected)
 /** 最后一次重连定时器句柄 */
 const lastReConnect = ref<number>(0)
+const isStart = ref<boolean>(false)
 
 /** signalr 连接中心 */
 const hub: HubConnection = new HubConnectionBuilder()
@@ -48,54 +48,37 @@ const hub: HubConnection = new HubConnectionBuilder()
       return token
     }
   })
+  .withAutomaticReconnect(new RetryPolicy())
   .withHubProtocol(new MessagePackHubProtocol())
   .configureLogging(__DEV__ ? LogLevel.Information : LogLevel.Critical)
   .build()
 
-/** 断联时更新连接情况 */
-hub.onclose(() => {
-  isConnected.value = false
-  reConnectLater()
-})
+const setState = () => (connectState.value = hub.state)
+hub.onclose(setState)
+hub.onreconnecting(setState)
+hub.onreconnected(setState)
 
-/** 延时重连 */
-function reConnectLater() {
-  // 1. 如果已经有重连定时器，就不用覆盖设置了
-  if (lastReConnect.value) {
-    return
-  }
-
-  // 2. 没有已有的重连定时器，新建一个
-  lastReConnect.value = setTimeout(getSignalr, 10 * 1000) as unknown as number
-}
+window['hub'] = hub
+window['connectState'] = connectState
 
 /** 返回一个 signalr 连接中心 */
 function getSignalr(): Promise<HubConnection> {
-  /** 清空重连定时器记录 */
-  clearTimeout(lastReConnect.value)
-  lastReConnect.value = 0
-
-  /** 如果实例已连接 */
-  if (isConnected.value) {
+  if (isStart.value) {
     return Promise.resolve(hub)
-  }
-
-  /** 否则检查是否有正在进行的连接 */
-  if (!connectPromise.value) {
-    connectPromise.value = hub.start().then(() => hub)
-
-    /** 记录已连接标志 */
-    connectPromise.value.then(() => (isConnected.value = true))
-    /** start抛出错误后，安排重连 */
-    connectPromise.value.catch(reConnectLater)
-    /** start完成后清除Promise，避免掉线重连时发现有Promise就不执行重连操作 */
-    connectPromise.value.finally(() => {
-      connectPromise.value = null
+  } else {
+    isStart.value = true
+    const startPromise = hub.start().then(() => hub)
+    startPromise.catch(() => {
+      lastReConnect.value = setInterval(() => {
+        hub.start().then(() => clearInterval(lastReConnect.value))
+      }, 15000) as unknown as number
     })
+    /** 记录已连接标志 */
+    startPromise.then(setState)
+    return startPromise
   }
-
-  return connectPromise.value
 }
+
 /** 立即运行一次保证连接ws服务器，并记录成Promise */
 const firstConnect: () => Promise<HubConnection> = (() => {
   let context: Promise<HubConnection>
@@ -110,6 +93,8 @@ const firstConnect: () => Promise<HubConnection> = (() => {
 /** 强制断开当前连接 */
 export async function rebootSignalr() {
   await hub.stop()
+  clearInterval(lastReConnect.value)
+  isStart.value = false
   await getSignalr()
 }
 
@@ -142,7 +127,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     // 不需要管错误，这里只关注连过就好
   }
 
-  if (!isConnected.value) {
+  if (connectState.value !== HubConnectionState.Connected) {
     try {
       return await tryResponseFromCache(url, ...data)
     } catch (e) {
