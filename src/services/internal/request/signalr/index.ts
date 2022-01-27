@@ -8,9 +8,8 @@ import { longTermToken, sessionToken } from '@/utils/session'
 import { refreshToken } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
-import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
 import { Notify } from 'quasar'
-import { NOOP } from '@/const/empty'
+import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
@@ -19,6 +18,9 @@ const IS_UN_AUTH_ERR = (err: unknown): boolean =>
   /** @todo 未授权没有别的特征，只有通过message来检查 */ getErrMsg(err).includes('user is unauthorized')
 
 export const connectState = ref<HubConnectionState>(HubConnectionState.Disconnected)
+/** 最后一次重连定时器句柄 */
+const lastReConnect = ref<number>(0)
+const isStart = ref<boolean>(false)
 
 /** signalr 连接中心 */
 const hub: HubConnection = new HubConnectionBuilder()
@@ -54,21 +56,41 @@ hub.onclose(setState)
 hub.onreconnecting(setState)
 hub.onreconnected(setState)
 
-let initalPromise: null | Promise<void> = null
-function initalSignalr() {
-  if (!initalPromise) {
-    initalPromise = hub.start()
-    initalPromise.finally(setState)
-    initalPromise.then(NOOP, () => {
-      initalPromise = null
+/** 返回一个 signalr 连接中心 */
+function getSignalr(): Promise<HubConnection> {
+  if (isStart.value) {
+    return Promise.resolve(hub)
+  } else {
+    isStart.value = true
+    const startPromise = hub.start().then(() => hub)
+    startPromise.catch(() => {
+      lastReConnect.value = setInterval(() => {
+        hub.start().then(() => clearInterval(lastReConnect.value))
+      }, 15000) as unknown as number
     })
+    /** 记录已连接标志 */
+    startPromise.then(setState)
+    return startPromise
   }
-  return initalPromise
 }
 
+/** 立即运行一次保证连接ws服务器，并记录成Promise */
+const firstConnect: () => Promise<HubConnection> = (() => {
+  let context: Promise<HubConnection>
+  return () => {
+    if (!context) {
+      context = getSignalr()
+    }
+    return context
+  }
+})()
+
 /** 强制断开当前连接 */
-export function stopSignalr() {
-  return hub.stop()
+export async function rebootSignalr() {
+  await hub.stop()
+  clearInterval(lastReConnect.value)
+  isStart.value = false
+  await getSignalr()
 }
 
 /**
@@ -90,19 +112,19 @@ export function stopSignalr() {
  * 3.2.2. 请求失败，throw error
  */
 export async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknown[]>(
-  method: string,
+  url: string,
   ...data: Data
 ): Promise<Res> {
+  // 等待第一次connect
   try {
-    await initalSignalr()
+    await firstConnect()
   } catch (e) {
-    Notify.create({ type: 'error', message: getErrMsg(e) })
-    // 第一次连接失败，fallback回缓存
+    // 不需要管错误，这里只关注连过就好
   }
 
   if (connectState.value !== HubConnectionState.Connected) {
     try {
-      return await tryResponseFromCache(method, ...data)
+      return await tryResponseFromCache(url, ...data)
     } catch (e) {
       // 如果没有cache；吞掉这个错误，走正常的请求流程
     }
@@ -112,11 +134,11 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   // 处理请求本身就失败的情况（比如没授权）
   try {
-    const res = await hub.invoke(method, ...data)
+    const res = await (await getSignalr()).invoke(url, ...data)
     ;({ Success, Response, Status, Msg } = res)
   } catch (e) {
     if (__DEV__ && VUE_TRACE_SERVER) {
-      console.groupCollapsed(`signalr request data trace: '${method}'`)
+      console.groupCollapsed(`signalr request data trace: '${url}'`)
       console.log('send:', [...data])
       console.log('err:', e)
 
@@ -129,7 +151,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
       unAuthenticationNotify.notify()
     }
 
-    Notify.create({ type: 'error', message: getErrMsg(e) })
+    Notify.create({ type: 'error', message: getErrMsg(Msg) })
 
     // catch & throw;
     // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住
@@ -138,7 +160,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
 
   // 处理请求成功但响应内容提示失败的情况
   if (__DEV__ && VUE_TRACE_SERVER) {
-    console.groupCollapsed(`signalr request data trace: '${method}'`)
+    console.groupCollapsed(`signalr request data trace: '${url}'`)
     console.log('send:', [...data])
     console.log('Success:', Success)
     if (Success) {
@@ -155,7 +177,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
     // @todo 暂不确定请求失败后是否使用缓存代替：
     // 如果有两个接口的内容互为呼应，前一个请求成功，是更新后的内容，而后一个请求失败，如果回退使用缓存则可能会出现内容之间脱钩的问题
-    updateResponseCache(method, Response, ...data)
+    updateResponseCache(url, Response, ...data)
     return Response
   } else {
     Notify.create({ type: 'error', message: getErrMsg(Msg) })
@@ -164,7 +186,6 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
   }
 }
 
-/** 订阅消息 */
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
   if (__DEV__ && VUE_TRACE_SERVER) {
