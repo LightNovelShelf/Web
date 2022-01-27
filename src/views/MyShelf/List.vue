@@ -208,9 +208,10 @@ import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
 import { useIsActivated } from '@/composition/useIsActivated'
 import { ALL_VALUE } from '@/const'
 import { parseTime } from '@/utils/time'
-import { isConnecting } from '@/services/utils'
+import { connectState } from '@/services/utils'
 import { NOOP } from '@/const/empty'
 import router from '@/router'
+import { HubConnectionState } from '@microsoft/signalr'
 
 interface QSelectorOption {
   label: string
@@ -222,7 +223,7 @@ interface QSelectorOption {
 
 const $ = useQuasar()
 /** 加载标记 */
-const loading = computed(() => shelfStore.useLoading().value || isConnecting.value)
+const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
 const shelfStore = useShelfStore()
 const initialized = computed(() => shelfStore.initialized)
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
