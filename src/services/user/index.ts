@@ -1,4 +1,4 @@
-import { rebootSignalr, requestWithFetch, requestWithSignalr } from '@/services/internal/request'
+import { stopSignalr, requestWithFetch, requestWithSignalr } from '@/services/internal/request'
 import { PATH } from '@/services/path'
 import { longTermToken, sessionToken } from '@/utils/session'
 import * as Types from './type'
@@ -19,7 +19,7 @@ export async function login(email: string, password: string, token: string) {
   await longTermToken.set(res.RefreshToken)
 
   // 重启链接
-  await rebootSignalr()
+  await stopSignalr()
 
   // 触发一次请求, 连接ws服务
   // 登录就是为了连接ws服务, 连接失败的话等于没有登录
@@ -83,7 +83,7 @@ export async function register(userName: string, email: string, password: string
 
   sessionToken.set(res.Token)
   await longTermToken.set(res.RefreshToken)
-  await rebootSignalr()
+  await stopSignalr()
   const myInfo = await getMyInfo()
 
   return [res, myInfo]
