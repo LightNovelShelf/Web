@@ -53,7 +53,13 @@ export const bookShelfDataTransform = {
 
     /** 全部能拉回来的书籍 */
     const allBooks = new Map<number, ShelfBook>()
-    await Promise.allSettled(bookIds.map((ids) => getBookListByIds(ids))).then((promises) => {
+    const allPromise: ReturnType<typeof getBookListByIds>[] = []
+    const sleep = () => new Promise((resolve) => setTimeout(resolve, 500))
+    for (const IdGroup of bookIds) {
+      allPromise.push(getBookListByIds(IdGroup))
+      await sleep()
+    }
+    await Promise.allSettled(allPromise).then((promises) => {
       promises.forEach((promise) => {
         if (promise.status === 'fulfilled') {
           promise.value.forEach((book) => {
