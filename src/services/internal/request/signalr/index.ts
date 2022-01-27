@@ -151,7 +151,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
       unAuthenticationNotify.notify()
     }
 
-    Notify.create({ type: 'error', message: getErrMsg(Msg) })
+    Notify.create({ type: 'negative', message: getErrMsg(Msg) })
 
     // catch & throw;
     // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住
@@ -180,7 +180,7 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     updateResponseCache(url, Response, ...data)
     return Response
   } else {
-    Notify.create({ type: 'error', message: getErrMsg(Msg) })
+    Notify.create({ type: 'negative', message: getErrMsg(Msg) })
 
     throw new ServerError(Msg, Status)
   }
