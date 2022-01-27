@@ -23,7 +23,8 @@ import { AnyVoidFunc } from '@/types/utils'
 import type { BookServicesTypes } from '@/services/book'
 import { useShelfStore } from '@/store/shelf'
 import { getErrMsg } from '@/utils/getErrMsg'
-import { isConnecting } from '@/services/utils'
+import { connectState } from '@/services/utils'
+import { HubConnectionState } from '@microsoft/signalr'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 
@@ -35,7 +36,9 @@ const shelfStore = useShelfStore()
 /** 是否已经收藏 */
 const liked = computed<boolean>(() => shelfStore.booksMap.has(bookId.value))
 /** 读取/写入中 */
-const loading = computed(() => shelfStore.useLoading((s) => s.pull || s.push).value || isConnecting.value)
+const loading = computed(
+  () => shelfStore.useLoading((s) => s.pull || s.push).value || connectState.value !== HubConnectionState.Connected
+)
 /** 收起最后一次通知 */
 let disMiss: AnyVoidFunc
 
