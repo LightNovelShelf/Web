@@ -509,7 +509,7 @@ export function useShelfStore() {
   setAutoFreeze(false)
 
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
-  if (!store.initialized) {
+  if (!store.initialized && !store.useLoading().value) {
     store
       // 先从缓存读出来，展示在界面
       .pull()
