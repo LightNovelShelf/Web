@@ -3,7 +3,15 @@
     <router-link :to="{ name: 'BookInfo', params: { bid: props.book.Id } }">
       <div class="book-cover">
         <q-card v-intersection.once="onIntersection">
-          <q-img v-if="visible" :src="cover" :ratio="2 / 3" />
+          <q-img v-if="visible" :src="cover" :ratio="2 / 3">
+            <div class="absolute-bottom bottom-shadow">
+              <div class="row">
+                <div>{{ book.Level && !book.InteriorLevel ? `Level ${book.Level}` : '' }}</div>
+                <q-space />
+                <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>
+              </div>
+            </div>
+          </q-img>
           <q-responsive v-else :ratio="2 / 3" />
         </q-card>
 
@@ -74,9 +82,19 @@ function onIntersection(entry) {
   }
 }
 
+.bottom-shadow {
+  background-color: unset;
+  background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+}
+
+:deep(.q-img__content > div) {
+  padding: 3px 6px;
+}
+
 .extra {
   --line-height: 1.5;
   opacity: 0.6;
+  font-size: 12px;
   height: calc(1em * var(--line-height));
 
   .user-name {
