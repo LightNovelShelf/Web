@@ -1,5 +1,5 @@
 <template>
-  <div :style="styleObj">
+  <div :style="styleObj" :ref="(el) => forwardRef && forwardRef(el)">
     <slot />
   </div>
 </template>
@@ -45,7 +45,9 @@ export default defineComponent({
     // 很大
     xl: {
       type: [Number, String]
-    }
+    },
+    // divref
+    forwardRef: Function
   },
   setup(props) {
     const $q = useQuasar()

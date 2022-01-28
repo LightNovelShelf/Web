@@ -58,7 +58,7 @@
               <div style="margin-top: 24px"></div>
 
               <div class="row q-gutter-md" v-if="isActive">
-                <q-btn>加入书架</q-btn>
+                <add-to-shelf :book="bookInList" />
                 <q-btn color="primary" @click="startRead">继续阅读</q-btn>
               </div>
             </div>
@@ -112,11 +112,12 @@ import { useAppStore } from '@/store'
 import { icon } from '@/plugins/icon'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
+import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
+import { BookInList } from '@/services/book/types'
 import { DateTime } from 'luxon'
 import { CommentType } from '@/services/comment/types'
 import { userReadPositionDB } from '@/utils/storage/db'
 
-defineComponent({ QGrid, QGridItem, Comment })
 const props = defineProps<{ bid: string }>()
 
 const $q = useQuasar()
@@ -164,6 +165,14 @@ onActivated(async () => {
 })
 
 const book = computed(() => bookInfo.value?.Book)
+const bookInList = computed<BookInList | null>(() =>
+  book.value
+    ? ({
+        ...toRaw(book.value),
+        UserName: book.value?.User.UserName
+      } as BookInList)
+    : null
+)
 const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 const lastReadTitle = computed(() => {
   if (position && position.value?.cid) {

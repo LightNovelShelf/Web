@@ -21,10 +21,16 @@ export function getReadPosition(bid: number) {
   return requestWithSignalr('GetReadPosition', bid)
 }
 /** 从一批id获取书籍列表 */
-export async function getBookListByIds(ids: number[]) {
+export function getBookListByIds(ids: number[]) {
+  // 校验数量，接口限制一次最多24本
+  if (__DEV__) {
+    if (ids.length > 24) {
+      throw new Error('单次批量操作最多24本')
+    }
+  }
   return requestWithSignalr<Types.BookInList[]>('GetBookListByIds', ids)
 }
 /** 取最新的6本书，无需登录 */
-export async function getLatestBookList() {
+export function getLatestBookList() {
   return requestWithSignalr<Types.GetBookListRes>('GetLatestBookList')
 }

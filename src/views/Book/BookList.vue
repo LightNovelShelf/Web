@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, defineComponent } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
-import BookCard from '@/components/BookCard.vue'
+import BookCard from '@/components/BookCard'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'

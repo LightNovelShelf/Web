@@ -1,9 +1,10 @@
 import { rebootSignalr, requestWithFetch, requestWithSignalr } from '@/services/internal/request'
 import { PATH } from '@/services/path'
 import { longTermToken, sessionToken } from '@/utils/session'
-
 import * as Types from './type'
 import { RequestMethod } from '@/services/types'
+import { ShelfItem, ShelfItemType } from '@/types/shelf'
+import { bookShelfDataTransform, MiniShelfItem } from './utils/bookShelfDataTransform'
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
@@ -89,13 +90,16 @@ export async function register(userName: string, email: string, password: string
 }
 
 /** 保存用户书架信息 */
-export async function saveBookShelf(json) {
-  return requestWithSignalr('SaveBookShelf', json)
+export async function saveBookShelf(json: { data: ShelfItem[] }) {
+  return requestWithSignalr('SaveBookShelf', { data: bookShelfDataTransform.TO_SERVER(json.data) })
 }
 
 /** 取用户书架信息 */
-export async function getBookShelf() {
-  return requestWithSignalr('GetBookShelf')
+export async function getBookShelf(): Promise<{ data: ShelfItem[] }> {
+  const res = await requestWithSignalr<{ data: MiniShelfItem[] }>('GetBookShelf')
+
+  // 此时书架只有id信息，需要补全
+  return { data: await bookShelfDataTransform.TO_LCOAL(res.data) }
 }
 
 /** 清空用户历史记录 */
