@@ -4,7 +4,7 @@
       <div class="book-cover">
         <q-card v-intersection.once="onIntersection">
           <q-img v-if="visible" :src="cover" :ratio="2 / 3">
-            <div class="absolute-bottom bottom-shadow">
+            <div v-if="book.Level || book.InteriorLevel" class="absolute-bottom bottom-shadow">
               <div class="row">
                 <div>{{ book.Level && !book.InteriorLevel ? `Level ${book.Level}` : '' }}</div>
                 <q-space />
@@ -88,7 +88,7 @@ function onIntersection(entry) {
 }
 
 :deep(.q-img__content > div) {
-  padding: 3px 6px;
+  padding: 1px 4px;
 }
 
 .extra {
