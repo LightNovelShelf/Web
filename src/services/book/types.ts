@@ -7,6 +7,8 @@ export interface BookInList {
   LastUpdateTime: Date
   UserName: string
   Title: string
+  Level: number
+  InteriorLevel: number
   Category?: {
     ShortName: string
     Name: string
