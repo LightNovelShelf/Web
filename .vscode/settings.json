@@ -8,5 +8,9 @@
   "[vue]": {
     // eslint继承了 prettier 的规则，所以格式化统一由 prettier 进行
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "volar.autoCompleteRefs": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

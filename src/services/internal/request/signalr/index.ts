@@ -8,7 +8,7 @@ import { longTermToken, sessionToken } from '@/utils/session'
 import { refreshToken } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
-import { AppVisibility } from 'quasar'
+import { Notify } from 'quasar'
 import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
 
 /** signalr接入点 */
@@ -41,8 +41,6 @@ const hub: HubConnection = new HubConnectionBuilder()
               await longTermToken.set('')
             }
           }
-          // 目前token只有一次性用途，这里用完就删，以后可能有反复请求的用途
-          sessionToken.set('')
         }
       }
       return token
@@ -139,17 +137,21 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     const res = await (await getSignalr()).invoke(url, ...data)
     ;({ Success, Response, Status, Msg } = res)
   } catch (e) {
-    console.groupCollapsed(`signalr request data trace: '${url}'`)
-    console.log('send:', [...data])
-    console.log('err:', e)
+    if (__DEV__ && VUE_TRACE_SERVER) {
+      console.groupCollapsed(`signalr request data trace: '${url}'`)
+      console.log('send:', [...data])
+      console.log('err:', e)
 
-    console.log('at:', new Date().toLocaleString())
-    console.groupEnd()
+      console.log('at:', new Date().toLocaleString())
+      console.groupEnd()
+    }
 
     // 如果是未授权，通知一声
     if (IS_UN_AUTH_ERR(e)) {
       unAuthenticationNotify.notify()
     }
+
+    Notify.create({ type: 'negative', message: getErrMsg(Msg) })
 
     // catch & throw;
     // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住
@@ -178,6 +180,8 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     updateResponseCache(url, Response, ...data)
     return Response
   } else {
+    Notify.create({ type: 'negative', message: getErrMsg(Msg) })
+
     throw new ServerError(Msg, Status)
   }
 }

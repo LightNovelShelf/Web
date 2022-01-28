@@ -32,8 +32,8 @@ function readXPath(element: Element, context: Element = document.body) {
   }
 }
 
-export async function loadHistory(uid: number, BookId: number) {
-  return await userReadPositionDB.get<{ cid: number; xPath: string }>(`${uid}_${BookId}`)
+export function loadHistory(uid: number, BookId: number) {
+  return userReadPositionDB.get(`${uid}_${BookId}`)
 }
 
 export async function saveHistory(

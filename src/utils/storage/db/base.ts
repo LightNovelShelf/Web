@@ -1,4 +1,5 @@
 import localforage from 'localforage'
+import { toRaw } from 'vue'
 
 if (!window.indexedDB) {
   throw new Error('unsupport browser')
@@ -55,7 +56,7 @@ class MetaDB {
   }
 }
 
-export class DB {
+export class DB<Value = unknown> {
   /** 返回一个DB实例 */
   private static createInstance(name: string, VER: number, DB_DESC: string) {
     return localforage.createInstance({
@@ -91,23 +92,28 @@ export class DB {
   }
 
   /** 获取DB储存 */
-  public get<T>(key: string) {
+  public get = <T = Value>(key: string): Promise<T | null> => {
     return this.db.getItem<T>(key)
   }
   /** 更新DB储存 */
-  public set = (key: string, val: any) => {
-    return this.db.setItem(key, val)
+  public set = async <T = Value>(key: string, val: T): Promise<void> => {
+    // 因为同步的时候经常是vue对象来的，所以这里加点便捷操作，包了toRaw操作免得忘了之后debug
+    await this.db.setItem(key, toRaw(val))
   }
-  /** 移除DB储存 */
-  public remove = (key: string) => {
+  /** 移除DB中某一项目 */
+  public remove = (key: string): Promise<void> => {
     return this.db.removeItem(key)
+  }
+  /** 清空DB */
+  public clear = (): Promise<void> => {
+    return this.db.clear()
   }
   /** 列出DB中所有的储存项名称 */
   public keys = (): Promise<string[]> => {
     return this.db.keys()
   }
   /** 迭代DB中的所有项目 @private 因为这个API没想到能直接用的场景，同时也跟 localforage 有绑定，所以暂不导出 */
-  private iterate: <Value>(cb: (value: Value, key: string, idx: number) => void) => Promise<void> = (cb) => {
+  private iterate: (cb: (value: Value, key: string, idx: number) => void) => Promise<void> = (cb) => {
     return this.db.iterate((value: any, key: string, idx: number) => {
       // localforage.iterate的cb会接受返回值并据此决定是否提早结束迭代
       // 因为这个规则不太容易记住且容易误用，故这里强制吃掉cb的任何返回
@@ -121,7 +127,7 @@ export class DB {
   }
 
   /** 获取DB中所有的项目 */
-  public getItems: <Value = unknown>() => Promise<Value[]> = async () => {
+  public getItems = async <T = Value>(): Promise<T[]> => {
     const list: any[] = []
 
     await this.iterate((item) => list.push(item))

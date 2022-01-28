@@ -33,7 +33,11 @@ export interface GetBookInfoRes {
     CreatedTime: Date
     Subscription: number
     Title: string
-    User: any
+    User: {
+      Id: number
+      Avatar: string
+      UserName: string
+    }
     Views: number
   }
   ReadPosition: any
