@@ -2,14 +2,16 @@
   <!-- 编辑模式下的确认按钮等 -->
   <q-slide-transition>
     <div v-show="editMode">
-      <div class="actions-wrap">
+      <!-- 占高度用的div -->
+      <div class="actions-wrap-placeholder"></div>
+      <!-- 实际展示的block -->
+      <div class="actions-wrap bg-grey-1" :class="editMode && 'actions-wrap-visible'">
         <div style="flex-grow: 1" />
         <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
         <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
       </div>
 
-      <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
-      <div style="height: 20px" />
+      <div style="height: 24px"></div>
     </div>
   </q-slide-transition>
 
@@ -51,6 +53,7 @@
             <q-icon v-if="item.selected" size="24px" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24px" color="grey" :name="mdiCheckboxBlankCircleOutline" />
           </div>
+
           <template v-else />
         </div>
 
@@ -212,6 +215,7 @@ import { connectState } from '@/services/utils'
 import { NOOP } from '@/const/empty'
 import router from '@/router'
 import { HubConnectionState } from '@microsoft/signalr'
+import { useLayout } from '@/components/app/useLayout'
 
 interface QSelectorOption {
   label: string
@@ -222,6 +226,7 @@ interface QSelectorOption {
 }
 
 const $ = useQuasar()
+const headerHeight = computed(() => `${useLayout().dynaicHeaderHeight.value}px`)
 /** 加载标记 */
 const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
 const shelfStore = useShelfStore()
@@ -558,12 +563,38 @@ onDeactivated(() => {
 
 <style lang="scss" scoped>
 // 顶部操作栏
+.actions-wrap-placeholder {
+  height: 48px;
+  height: 48.1px;
+}
 .actions-wrap {
   display: flex;
+  position: fixed;
+  z-index: 1;
+  padding-bottom: 12px;
+  height: 0;
+
+  // top: 12px + 58px;
+  top: v-bind(headerHeight);
+  padding-top: 12px;
+
+  // right: 12px;
+  right: 0;
+  padding-right: 12px;
+
+  opacity: 0;
+  width: 100%;
+  box-shadow: 0 1px 5px rgb(0 0 0 / 20%), 0 2px 2px rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%);
+  transition: all var(--animate-duration);
 
   .action {
     margin-left: 10px;
   }
+}
+
+.actions-wrap-visible {
+  opacity: 1;
+  height: 60px;
 }
 
 // 列表空态
