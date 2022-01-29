@@ -319,13 +319,18 @@ async function removeItemHandle(item: ShelfTypes.ShelfItem) {
     await shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
   }
 
+  removeFolderIfItEmpty()
+}
+
+/** 移除空文件夹 */
+async function removeFolderIfItEmpty(): Promise<void> {
   // 如果是文件夹
   if (parentFolder.value) {
     const id = parentFolder.value
     // 且文件夹是空的
     if (!shelfData.value.length) {
       // 弹层询问用户是否要清空文件夹
-      new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         $.dialog({
           title: '删除文件夹',
           message: '该文件夹为空，是否删除文件夹？',
@@ -414,6 +419,8 @@ function folderSelectorSubmitHandle() {
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
     shelfStore.addToFolder({ books: bookIds, folderID: folderID === ALL_VALUE ? null : folderID })
+
+    removeFolderIfItEmpty()
   }
 }
 
