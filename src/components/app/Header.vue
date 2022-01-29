@@ -4,6 +4,7 @@
     elevated
     :class="($q.dark.isActive ? 'bg-blue-grey-10' : '') + ' q-py-xs'"
     :height-hint="headerHeight"
+    @reveal="dynaicHeaderHeight = $event ? headerHeight : 0"
   >
     <q-toolbar>
       <q-btn flat dense round aria-label="Menu" :icon="icon.mdiMenu" @click="siderShow = !siderShow" />
@@ -119,7 +120,7 @@ const $q = useQuasar()
 const appStore = useAppStore()
 const layout = useLayout()
 const { appName, user } = storeToRefs(appStore)
-const { siderShow, headerHeight, siderBreakpoint } = layout
+const { siderShow, headerHeight, siderBreakpoint, dynaicHeaderHeight } = layout
 const searchKey = ref('')
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),
