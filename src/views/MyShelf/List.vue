@@ -319,7 +319,7 @@ async function removeItemHandle(item: ShelfTypes.ShelfItem) {
     await shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
   }
 
-  removeFolderIfItEmpty()
+  await removeFolderIfItEmpty()
 }
 
 /** 移除空文件夹 */
@@ -391,7 +391,7 @@ function moveItemToFolderHandle(item: ShelfTypes.ShelfItem) {
 }
 
 /** 文件夹选择器提交 */
-function folderSelectorSubmitHandle() {
+async function folderSelectorSubmitHandle() {
   if (!selectorValue.value) {
     return
   }
@@ -418,9 +418,9 @@ function folderSelectorSubmitHandle() {
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
-    shelfStore.addToFolder({ books: bookIds, folderID: folderID === ALL_VALUE ? null : folderID })
+    shelfStore.addToFolder({ books: bookIds, parents: folderID === ALL_VALUE ? [] : [folderID] })
 
-    removeFolderIfItEmpty()
+    await removeFolderIfItEmpty()
   }
 }
 
