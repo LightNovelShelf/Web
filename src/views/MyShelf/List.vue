@@ -33,6 +33,7 @@
       lg="6"
       :forward-ref="setListWrapRef"
       @contextmenu="muteInEditMode"
+      :class="editMode ? 'sortable-list-in-edit-mode' : ''"
     >
       <!-- 如果有父层文件夹，显示返回卡片 -->
       <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
@@ -46,6 +47,18 @@
           <!-- 文件夹 -->
           <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" />
           <template v-else />
+
+          <!-- 遮罩 -->
+          <div v-if="editMode" class="shelf-item-mask">
+            <q-responsive :ratio="2 / 3">
+              <!-- responsive强制要求第一层子元素宽高100%撑满，起不到缩小拖拽区域的作用 -->
+              <div>
+                <!-- 拖拽icon -->
+                <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
+                <q-icon size="40px" color="primary" :name="mdiDragVariant" class="shelf-item-dnd-icon js-drag-target" />
+              </div>
+            </q-responsive>
+          </div>
 
           <!-- 选中态icon -->
           <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
@@ -196,13 +209,13 @@
 <script lang="ts" setup>
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { computed, nextTick, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
-import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/plugins/icon/export'
+import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen, mdiDragVariant } from '@/plugins/icon/export'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/store/shelf'
 import { RouteLocationNormalizedLoaded, useRoute } from 'vue-router'
@@ -471,8 +484,9 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
       return
     }
 
-    // 文件夹允许点击进入，跨文件夹选中项目
+    // 编辑模式下点击事件被蒙层接管，需要手动实现
     if (item.type === ShelfTypes.ShelfItemType.FOLDER) {
+      router.push({ ...route, params: { folderID: item.id } })
       return
     }
 
@@ -514,9 +528,10 @@ const createSortable = (el: HTMLElement) => {
   sortableRef.value = new Sortable(el, {
     animation: 400,
     // 不能拖动 no-drag 元素
-    filter: '.no-drag',
+    // filter: '.no-drag',
     // 不能用delay，和长按右键冲突
     // delay: 300,
+    handle: '.js-drag-target',
     // 不能放在 no-drop 元素上
     onMove(evt) {
       if (evt.related.className.includes('no-drop')) return false
@@ -611,6 +626,11 @@ onDeactivated(() => {
   height: 60px;
 }
 
+// 列表
+.sortable-list-in-edit-mode {
+  user-select: none;
+}
+
 // 列表空态
 .empty-placeholder {
   height: 300px;
@@ -630,6 +650,17 @@ onDeactivated(() => {
 // 列表项
 .shelf-item-wrap {
   position: relative;
+  cursor: pointer;
+}
+
+.shelf-item-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  // bottom: 0;
+  background-color: rgba(#000, 0.7);
+  border-radius: 4px;
 }
 
 // // 列表项动画
@@ -685,6 +716,14 @@ onDeactivated(() => {
     width: 100%;
     height: 100%;
   }
+}
+
+.shelf-item-dnd-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
 }
 
 // 文件夹选择弹层 相关

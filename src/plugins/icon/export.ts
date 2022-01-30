@@ -57,5 +57,6 @@ export {
   mdiFormatListBulleted,
   mdiDelete,
   mdiFullscreen,
-  mdiFullscreenExit
+  mdiFullscreenExit,
+  mdiDragVariant
 } from '@mdi/js'
