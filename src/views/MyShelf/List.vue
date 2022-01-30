@@ -514,6 +514,8 @@ const createSortable = (el: HTMLElement) => {
     animation: 400,
     // 不能拖动 no-drag 元素
     filter: '.no-drag',
+    // 不能用delay，和长按右键冲突
+    // delay: 300,
     // 不能放在 no-drop 元素上
     onMove(evt) {
       if (evt.related.className.includes('no-drop')) return false
@@ -521,7 +523,18 @@ const createSortable = (el: HTMLElement) => {
       return true
     },
     onEnd(evt) {
-      const { oldIndex, newIndex } = evt
+      // index 0 起步，但是在文件夹场景下第一个是返回上一层图标，需要处理
+      let { oldIndex, newIndex } = evt
+
+      if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
+        return
+      }
+
+      if (parentFolder.value) {
+        oldIndex -= 1
+        newIndex -= 1
+      }
+
       syncSortInfoToDraft({ oldIndex, newIndex })
     }
   })

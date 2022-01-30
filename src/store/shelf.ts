@@ -300,34 +300,33 @@ const shelfStore = defineStore('app.shelf', {
       const minIndex = Math.min(from, to)
 
       this.commit({
-        shelf: produce(toRaw(this.shelf), (draft) => {
-          // 不在范围内的书就不用动了
-          // 老的index换成新的index
-          // 剩下的依次左移/右移
-          draft.forEach((item, index) => {
-            // 不是本层的，不要动
-            if (!isEqual(item.parents, parents)) {
-              return
-            }
+        shelf: this.squeezeShelfItemIndex(
+          produce(toRaw(this.shelf), (draft) => {
+            // 不在范围内的书就不用动了
+            // 老的index换成新的index
+            // 剩下的依次左移/右移
+            draft.forEach((item, index) => {
+              // 不是本层的，不要动
+              if (!isEqual(item.parents, parents)) {
+                return
+              }
 
-            if (item.index < minIndex || item.index > maxIndex) {
-              return
-            }
+              if (item.index < minIndex || item.index > maxIndex) {
+                return
+              }
 
-            if (item.index === from) {
-              item.index = to
-            } else if (from === minIndex) {
-              // 从小拖到大，左移填充老的那个位置
-              item.index -= 1
-            } else {
-              // 从大拖到小，右移填充老的那个位置
-              item.index += 1
-            }
+              if (item.index === from) {
+                item.index = to
+              } else if (from === minIndex) {
+                // 从小拖到大，左移填充老的那个位置
+                item.index -= 1
+              } else {
+                // 从大拖到小，右移填充老的那个位置
+                item.index += 1
+              }
+            })
           })
-
-          // 这个sort可要可不要；因为就算不sort，界面上的顺序还是跟item.index一样（即使这个时候数组的index跟item的index不一样）
-          draft.sort(ascSorter)
-        })
+        )
       })
     },
     /** 选中记录 */
