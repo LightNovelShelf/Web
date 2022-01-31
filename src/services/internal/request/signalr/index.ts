@@ -10,6 +10,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
 import { Notify } from 'quasar'
 import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
+import { createRequestQueue } from '../createRequestQueue'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
@@ -111,7 +112,7 @@ export async function rebootSignalr() {
  * 3.2.1. 请求成功，更新缓存并返回结果
  * 3.2.2. 请求失败，throw error
  */
-export async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknown[]>(
+async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknown[]>(
   url: string,
   ...data: Data
 ): Promise<Res> {
@@ -185,6 +186,14 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     throw new ServerError(Msg, Status)
   }
 }
+
+const queue = createRequestQueue()
+/** 速率限制后的请求句柄 */
+const requestWithSignalrInRateLimit = ((...args) => {
+  return queue.add(() => requestWithSignalr(...args))
+}) as typeof requestWithSignalr
+
+export { requestWithSignalrInRateLimit as requestWithSignalr }
 
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
