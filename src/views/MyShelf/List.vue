@@ -2,14 +2,16 @@
   <!-- 编辑模式下的确认按钮等 -->
   <q-slide-transition>
     <div v-show="editMode">
-      <div class="actions-wrap">
+      <!-- 占高度用的div -->
+      <div class="actions-wrap-placeholder"></div>
+      <!-- 实际展示的block -->
+      <div class="actions-wrap bg-grey-1" :class="editMode && 'actions-wrap-visible'">
         <div style="flex-grow: 1" />
         <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
         <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
       </div>
 
-      <!-- 用 padding/margin 实现会导致过渡效果不顺滑，所以这里绕弯用空div了 -->
-      <div style="height: 20px" />
+      <div style="height: 24px"></div>
     </div>
   </q-slide-transition>
 
@@ -31,6 +33,7 @@
       lg="6"
       :forward-ref="setListWrapRef"
       @contextmenu="muteInEditMode"
+      :class="editMode ? 'sortable-list-in-edit-mode' : ''"
     >
       <!-- 如果有父层文件夹，显示返回卡片 -->
       <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
@@ -45,12 +48,25 @@
           <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" />
           <template v-else />
 
+          <!-- 遮罩 -->
+          <div v-if="editMode" class="shelf-item-mask">
+            <q-responsive :ratio="2 / 3">
+              <!-- responsive强制要求第一层子元素宽高100%撑满，起不到缩小拖拽区域的作用 -->
+              <div>
+                <!-- 拖拽icon -->
+                <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
+                <q-icon size="40px" color="primary" :name="mdiDragVariant" class="shelf-item-dnd-icon js-drag-target" />
+              </div>
+            </q-responsive>
+          </div>
+
           <!-- 选中态icon -->
           <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
             <q-icon v-if="item.selected" size="24px" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24px" color="grey" :name="mdiCheckboxBlankCircleOutline" />
           </div>
+
           <template v-else />
         </div>
 
@@ -193,13 +209,13 @@
 <script lang="ts" setup>
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
-import { computed, nextTick, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
-import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen } from '@/plugins/icon/export'
+import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen, mdiDragVariant } from '@/plugins/icon/export'
 import ShelfFolder from './components/ShelfFolder.vue'
 import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/store/shelf'
 import { RouteLocationNormalizedLoaded, useRoute } from 'vue-router'
@@ -212,6 +228,7 @@ import { connectState } from '@/services/utils'
 import { NOOP } from '@/const/empty'
 import router from '@/router'
 import { HubConnectionState } from '@microsoft/signalr'
+import { useLayout } from '@/components/app/useLayout'
 
 interface QSelectorOption {
   label: string
@@ -222,6 +239,8 @@ interface QSelectorOption {
 }
 
 const $ = useQuasar()
+const layout = useLayout()
+const headerHeight = computed(() => `${layout.dynaicHeaderHeight.value}px`)
 /** 加载标记 */
 const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
 const shelfStore = useShelfStore()
@@ -319,7 +338,7 @@ async function removeItemHandle(item: ShelfTypes.ShelfItem) {
     await shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
   }
 
-  removeFolderIfItEmpty()
+  await removeFolderIfItEmpty()
 }
 
 /** 移除空文件夹 */
@@ -391,7 +410,7 @@ function moveItemToFolderHandle(item: ShelfTypes.ShelfItem) {
 }
 
 /** 文件夹选择器提交 */
-function folderSelectorSubmitHandle() {
+async function folderSelectorSubmitHandle() {
   if (!selectorValue.value) {
     return
   }
@@ -418,9 +437,9 @@ function folderSelectorSubmitHandle() {
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
-    shelfStore.addToFolder({ books: bookIds, folderID: folderID === ALL_VALUE ? null : folderID })
+    shelfStore.addToFolder({ books: bookIds, parents: folderID === ALL_VALUE ? [] : [folderID] })
 
-    removeFolderIfItEmpty()
+    await removeFolderIfItEmpty()
   }
 }
 
@@ -465,8 +484,9 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
       return
     }
 
-    // 文件夹允许点击进入，跨文件夹选中项目
+    // 编辑模式下点击事件被蒙层接管，需要手动实现
     if (item.type === ShelfTypes.ShelfItemType.FOLDER) {
+      router.push({ ...route, params: { folderID: item.id } })
       return
     }
 
@@ -508,7 +528,10 @@ const createSortable = (el: HTMLElement) => {
   sortableRef.value = new Sortable(el, {
     animation: 400,
     // 不能拖动 no-drag 元素
-    filter: '.no-drag',
+    // filter: '.no-drag',
+    // 不能用delay，和长按右键冲突
+    // delay: 300,
+    handle: '.js-drag-target',
     // 不能放在 no-drop 元素上
     onMove(evt) {
       if (evt.related.className.includes('no-drop')) return false
@@ -516,7 +539,18 @@ const createSortable = (el: HTMLElement) => {
       return true
     },
     onEnd(evt) {
-      const { oldIndex, newIndex } = evt
+      // index 0 起步，但是在文件夹场景下第一个是返回上一层图标，需要处理
+      let { oldIndex, newIndex } = evt
+
+      if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
+        return
+      }
+
+      if (parentFolder.value) {
+        oldIndex -= 1
+        newIndex -= 1
+      }
+
       syncSortInfoToDraft({ oldIndex, newIndex })
     }
   })
@@ -558,12 +592,43 @@ onDeactivated(() => {
 
 <style lang="scss" scoped>
 // 顶部操作栏
+.actions-wrap-placeholder {
+  height: 48px;
+  height: 48.1px;
+}
 .actions-wrap {
   display: flex;
+  position: fixed;
+  z-index: 1;
+  padding-bottom: 12px;
+  height: 0;
+
+  // top: 12px + 58px;
+  top: v-bind(headerHeight);
+  padding-top: 12px;
+
+  // right: 12px;
+  right: 0;
+  padding-right: 12px;
+
+  opacity: 0;
+  width: 100%;
+  box-shadow: 0 1px 5px rgb(0 0 0 / 20%), 0 2px 2px rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%);
+  transition: all var(--animate-duration);
 
   .action {
     margin-left: 10px;
   }
+}
+
+.actions-wrap-visible {
+  opacity: 1;
+  height: 60px;
+}
+
+// 列表
+.sortable-list-in-edit-mode {
+  user-select: none;
 }
 
 // 列表空态
@@ -585,6 +650,17 @@ onDeactivated(() => {
 // 列表项
 .shelf-item-wrap {
   position: relative;
+  cursor: pointer;
+}
+
+.shelf-item-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  // bottom: 0;
+  background-color: rgba(#000, 0.4);
+  border-radius: 4px;
 }
 
 // // 列表项动画
@@ -640,6 +716,14 @@ onDeactivated(() => {
     width: 100%;
     height: 100%;
   }
+}
+
+.shelf-item-dnd-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
 }
 
 // 文件夹选择弹层 相关

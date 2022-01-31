@@ -246,13 +246,22 @@ const shelfStore = defineStore('app.shelf', {
         id: book.Id + '',
         type: ShelfItemType.BOOK,
         value: toRaw(book),
+        // 添加到书架默认就是添加到root @todo 支持添加到指定文件夹
         parents: [],
-        // 添加到书架默认就是第一层
-        index: this.curMaxIndexInFolder(null) + 1
+        // 添加到首位
+        index: 0
       }
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
-          draft.push(item)
+          // 压入数据
+          draft.unshift(item)
+          // 更新其它同层项目的index
+          draft.forEach((item) => {
+            const root: string[] = []
+            if (isEqual(item.parents, root)) {
+              item.index += 1
+            }
+          })
         })
       })
       await this.push({ syncRetome: true })
@@ -262,7 +271,7 @@ const shelfStore = defineStore('app.shelf', {
       const booksInSet = new Set(payload.books)
 
       this.commit({
-        // 移动后index就会出现空洞，squeeze一次
+        // 移出后index就会出现空洞，squeeze一次
         shelf: this.squeezeShelfItemIndex(
           // 删除项目
           produce(toRaw(this.shelf), (draft) => draft.filter((i) => !booksInSet.has(i.id)))
@@ -291,34 +300,33 @@ const shelfStore = defineStore('app.shelf', {
       const minIndex = Math.min(from, to)
 
       this.commit({
-        shelf: produce(toRaw(this.shelf), (draft) => {
-          // 不在范围内的书就不用动了
-          // 老的index换成新的index
-          // 剩下的依次左移/右移
-          draft.forEach((item, index) => {
-            // 不是本层的，不要动
-            if (!isEqual(item.parents, parents)) {
-              return
-            }
+        shelf: this.squeezeShelfItemIndex(
+          produce(toRaw(this.shelf), (draft) => {
+            // 不在范围内的书就不用动了
+            // 老的index换成新的index
+            // 剩下的依次左移/右移
+            draft.forEach((item, index) => {
+              // 不是本层的，不要动
+              if (!isEqual(item.parents, parents)) {
+                return
+              }
 
-            if (item.index < minIndex || item.index > maxIndex) {
-              return
-            }
+              if (item.index < minIndex || item.index > maxIndex) {
+                return
+              }
 
-            if (item.index === from) {
-              item.index = to
-            } else if (from === minIndex) {
-              // 从小拖到大，左移填充老的那个位置
-              item.index -= 1
-            } else {
-              // 从大拖到小，右移填充老的那个位置
-              item.index += 1
-            }
+              if (item.index === from) {
+                item.index = to
+              } else if (from === minIndex) {
+                // 从小拖到大，左移填充老的那个位置
+                item.index -= 1
+              } else {
+                // 从大拖到小，右移填充老的那个位置
+                item.index += 1
+              }
+            })
           })
-
-          // 这个sort可要可不要；因为就算不sort，界面上的顺序还是跟item.index一样（即使这个时候数组的index跟item的index不一样）
-          draft.sort(ascSorter)
-        })
+        )
       })
     },
     /** 选中记录 */
@@ -348,31 +356,27 @@ const shelfStore = defineStore('app.shelf', {
         })
       })
     },
-    /** 添加到文件夹，排在现有内容之后；同时更新现有文件的所属关系 */
-    addToFolder(payload: { books: string[]; folderID: string | null }) {
-      /** map结构的books记录 */
-      const booksInMap = new Map<string, null>()
-      payload.books.forEach((id) => booksInMap.set(id, null))
-
-      /** 目标文件夹的 最大index + 1 作为初始index */
-      let index = this.curMaxIndexInFolder(payload.folderID) + 1
+    /** 添加到文件夹 */
+    addToFolder(payload: { books: string[]; parents: string[] }) {
+      const booksInSet = new Set(payload.books)
 
       this.commit({
         shelf: this.squeezeShelfItemIndex(
           produce(toRaw(this.shelf), (draft) => {
             draft.forEach((item) => {
               // 如果是待加入的项目，记录新的文件夹路径
-              if (booksInMap.has(item.id)) {
+              if (booksInSet.has(item.id)) {
                 // 清掉选择状态，不然会导致数据一直认为有已选的项目
                 item.selected = false
-                // 重新赋值index
-                item.index = index++
-                // @todo 支持文件夹嵌套的话，传入一个完整路径来替换
-                if (payload.folderID === null) {
+                // 排在开头
+                item.index = 0
+                if (payload.parents === null) {
                   item.parents = []
                 } else {
-                  item.parents = [payload.folderID]
+                  item.parents = payload.parents
                 }
+              } else if (isEqual(item.parents, payload.parents)) {
+                item.index += 1
               }
             })
           })
