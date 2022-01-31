@@ -659,7 +659,7 @@ onDeactivated(() => {
   left: 0;
   right: 0;
   // bottom: 0;
-  background-color: rgba(#000, 0.7);
+  background-color: rgba(#000, 0.4);
   border-radius: 4px;
 }
 
