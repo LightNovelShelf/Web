@@ -1,39 +1,19 @@
-import { defineStore, storeToRefs } from 'pinia'
-import { inject, computed, ref } from 'vue'
+import { inject, computed, reactive, toRefs } from 'vue'
+
+const layoutStore = reactive({
+  siderShow: false,
+  siderBreakpoint: 1023,
+  headerHeight: 58,
+  containerStyle: {
+    padding: '12px'
+  }
+})
 
 export const useLayout = () => {
   const ql = inject('_q_l_') as any
-  const layoutStore = useLayoutStore()
-  const { siderShow, siderBreakpoint, headerHeight, containerStyle } = storeToRefs(layoutStore)
-
-  const headerOffset = computed(() => ql.header.offset)
-  const dynaicHeaderHeight = computed<number>({
-    get() {
-      return layoutStore.dynaicHeaderHeight
-    },
-    set(value) {
-      layoutStore.$patch({ dynaicHeaderHeight: value })
-    }
-  })
 
   return {
-    siderShow,
-    siderBreakpoint,
-    headerHeight,
-    containerStyle,
-    headerOffset,
-    dynaicHeaderHeight
+    ...toRefs(layoutStore),
+    headerOffset: computed(() => ql.header.offset)
   }
 }
-
-const useLayoutStore = defineStore('app.layout', {
-  state: () => ({
-    siderShow: false,
-    siderBreakpoint: 1023,
-    headerHeight: 58,
-    dynaicHeaderHeight: 58,
-    containerStyle: {
-      padding: '12px'
-    }
-  })
-})
