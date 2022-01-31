@@ -240,7 +240,7 @@ interface QSelectorOption {
 
 const $ = useQuasar()
 const layout = useLayout()
-const headerHeight = computed(() => `${layout.dynaicHeaderHeight.value}px`)
+const headerHeight = computed(() => `${layout.headerOffset.value}px`)
 /** 加载标记 */
 const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
 const shelfStore = useShelfStore()
