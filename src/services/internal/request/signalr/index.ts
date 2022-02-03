@@ -8,7 +8,6 @@ import { longTermToken, sessionToken } from '@/utils/session'
 import { refreshToken } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
-import { Notify } from 'quasar'
 import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
 
 /** signalr接入点 */
@@ -150,9 +149,6 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     if (IS_UN_AUTH_ERR(e)) {
       unAuthenticationNotify.notify()
     }
-
-    Notify.create({ type: 'negative', message: getErrMsg(Msg) })
-
     // catch & throw;
     // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住
     throw e
@@ -180,8 +176,6 @@ export async function requestWithSignalr<Res = unknown, Data extends unknown[] =
     updateResponseCache(url, Response, ...data)
     return Response
   } else {
-    Notify.create({ type: 'negative', message: getErrMsg(Msg) })
-
     throw new ServerError(Msg, Status)
   }
 }
