@@ -10,7 +10,7 @@
                   <div class="row">
                     <div class="row flex-align-center q-gutter-xs">
                       <q-icon size="24px" :name="icon.mdiHeart" />
-                      <span>{{ book.Subscription }}</span>
+                      <span>{{ book.Likes }}</span>
                     </div>
                     <q-space />
                     <div class="row flex-align-center q-gutter-xs">
