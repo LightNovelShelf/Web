@@ -4,8 +4,9 @@ import { stringifyQuery } from 'vue-router'
 import { ServerError } from '@/services/internal/ServerError'
 import { RequestMethod } from '@/services/types'
 import { sessionToken } from '@/utils/session'
+import { createRequestQueue } from './createRequestQueue'
 
-export async function requestWithFetch<Res = unknown, Data = any>(
+async function requestWithFetch<Res = unknown, Data = any>(
   url: string,
   options: RequestConfig<Data> = {}
 ): Promise<Res> {
@@ -79,5 +80,9 @@ export async function requestWithFetch<Res = unknown, Data = any>(
   throw new Error(getErrMsg(content))
 }
 
-/** 附加在函数上导出，方便引用 */
-requestWithFetch.RequestMethod = RequestMethod
+const queue = createRequestQueue()
+const requestWithFetchInRateLimit = ((...args) => {
+  return queue.add(() => requestWithFetch(...args))
+}) as typeof requestWithFetch
+
+export { requestWithFetchInRateLimit as requestWithFetch }
