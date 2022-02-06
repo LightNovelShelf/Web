@@ -3,7 +3,7 @@ import { PATH } from '@/services/path'
 import { longTermToken, sessionToken } from '@/utils/session'
 import * as Types from './type'
 import { RequestMethod } from '@/services/types'
-import { ShelfItem, ShelfItemType } from '@/types/shelf'
+import { ShelfItem } from '@/types/shelf'
 import { bookShelfDataTransform, MiniShelfItem } from './utils/bookShelfDataTransform'
 
 /** 登录 */
