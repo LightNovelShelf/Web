@@ -7,7 +7,7 @@
       filled
       v-model="type"
       :options="options"
-      label="排序"
+      label="类别"
       style="max-width: 200px; margin-left: auto"
     />
 
