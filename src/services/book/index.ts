@@ -34,3 +34,7 @@ export function getBookListByIds(ids: number[]) {
 export function getLatestBookList() {
   return requestWithSignalr<Types.GetBookListRes>('GetLatestBookList')
 }
+/** 取最近的排行榜 */
+export function getRank(days: number) {
+  return requestWithSignalr('GetRank', days)
+}

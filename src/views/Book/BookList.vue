@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, defineComponent } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
-import BookCard from '@/components/BookCard'
+import BookCard from '@/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from '@/plugins/icon'
 import { getBookList } from '@/services/book'
@@ -62,25 +62,7 @@ const options = [
   },
   {
     label: '总点击量',
-    value: 'view',
-    children: [
-      {
-        label: '日榜',
-        value: 'daily'
-      },
-      {
-        label: '周榜',
-        value: 'weekly'
-      },
-      {
-        label: '月榜',
-        value: 'Monthly'
-      },
-      {
-        label: '总榜',
-        value: 'all'
-      }
-    ]
+    value: 'view'
   }
 ]
 

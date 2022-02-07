@@ -69,6 +69,13 @@ const menuOptions: Array<Record<string, any>> = [
     icon: icon.mdiBullhorn
   },
   {
+    label: '订阅内容',
+    key: 'Subscriptions',
+    route: 'Subscriptions',
+    disabled: true,
+    icon: icon.mdiPinwheel
+  },
+  {
     label: 'separator',
     key: 'separator 0'
   },
@@ -80,11 +87,12 @@ const menuOptions: Array<Record<string, any>> = [
     params: { order: 'latest', page: '1' }
   },
   {
-    label: '订阅内容',
-    key: 'Subscriptions',
-    route: 'Subscriptions',
+    label: '近期排行',
+    key: 'BookRank',
+    icon: icon.mdiFire,
+    route: 'BookRank',
     disabled: true,
-    icon: icon.mdiBullhorn
+    params: { type: 'weekly' }
   },
   {
     label: '我的书架',
