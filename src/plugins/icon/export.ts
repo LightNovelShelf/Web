@@ -58,5 +58,7 @@ export {
   mdiDelete,
   mdiFullscreen,
   mdiFullscreenExit,
-  mdiDragVariant
+  mdiDragVariant,
+  mdiFire,
+  mdiPinwheel
 } from '@mdi/js'
