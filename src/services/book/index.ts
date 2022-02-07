@@ -36,5 +36,5 @@ export function getLatestBookList() {
 }
 /** 取最近的排行榜 */
 export function getRank(days: number) {
-  return requestWithSignalr('GetRank', days)
+  return requestWithSignalr<Types.BookInList[]>('GetRank', days)
 }
