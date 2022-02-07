@@ -91,7 +91,6 @@ const menuOptions: Array<Record<string, any>> = [
     key: 'BookRank',
     icon: icon.mdiFire,
     route: 'BookRank',
-    disabled: true,
     params: { type: 'weekly' }
   },
   {
