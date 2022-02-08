@@ -1,13 +1,6 @@
 <template>
-  <q-btn
-    v-if="bookId"
-    :outline="outline"
-    :color="color"
-    :loading="loading"
-    :icon="icon"
-    :label="label"
-    @click="clickHandle"
-  />
+  <!-- todo 这个icon要不要得考虑一下 -->
+  <q-btn v-if="bookId" :outline="outline" :color="color" :loading="loading" :label="label" @click="clickHandle" />
 </template>
 
 <script lang="ts">
@@ -45,7 +38,7 @@ let disMiss: AnyVoidFunc
 const icon = computed<string>(() => (liked.value ? mdiHeartRemoveOutline : mdiHeartOutline))
 const label = computed<string>(() => (liked.value ? '移出书架' : '加入书架'))
 const color = 'primary'
-const outline = computed<boolean>(() => (liked.value ? true : false))
+const outline = computed<boolean>(() => liked.value)
 
 /** 切换收藏与否 */
 const clickHandle = async () => {

@@ -35,6 +35,7 @@ export interface GetBookInfoRes {
     CreatedTime: Date
     Likes: number
     Title: string
+    CanEdit: boolean
     User: {
       Id: number
       Avatar: string
