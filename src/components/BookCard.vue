@@ -5,7 +5,7 @@
         <q-card v-intersection.once="onIntersection">
           <q-img v-if="visible" :src="cover" :ratio="2 / 3">
             <div v-if="book.Level || book.InteriorLevel" class="absolute-bottom bottom-shadow">
-              <div class="row">
+              <div class="row text-weight-bold">
                 <div>{{ book.Level && !book.InteriorLevel ? `Level ${book.Level}` : '' }}</div>
                 <q-space />
                 <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>

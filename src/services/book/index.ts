@@ -42,3 +42,7 @@ export function getRank(days: number) {
 export function editBook(request: Types.EditBookRequest) {
   return requestWithSignalr('EditBook', request)
 }
+/** 取编辑用的书籍信息 */
+export function getBookEditInfo(bid: number) {
+  return requestWithSignalr('GetBookEditInfo', bid)
+}
