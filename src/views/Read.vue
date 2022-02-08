@@ -101,18 +101,7 @@
 </template>
 
 <script lang="tsx" setup>
-import {
-  computed,
-  defineComponent,
-  nextTick,
-  onActivated,
-  onDeactivated,
-  onMounted,
-  reactive,
-  readonly,
-  ref,
-  watch
-} from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue'
 import { getChapterContent } from '@/services/chapter'
 import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
 import sanitizerHtml from '@/utils/sanitizeHtml'
