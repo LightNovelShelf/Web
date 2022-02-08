@@ -30,6 +30,7 @@ export interface GetBookInfoRes {
     Cover: string
     ExtraInfo: any
     Introduction: string
+    Author: string
     LastUpdate: string
     LastUpdateTime: Date
     CreatedTime: Date
