@@ -7,8 +7,8 @@ export interface BookInList {
   LastUpdateTime: Date
   UserName: string
   Title: string
-  Level: number
-  InteriorLevel: number
+  Level?: number
+  InteriorLevel?: number
   Category?: {
     ShortName: string
     Name: string
@@ -56,4 +56,14 @@ export interface SaveReadPositionRequest {
   Bid: number
   Cid: number
   XPath: string
+}
+
+export interface EditBookRequest {
+  Bid: number
+  Cover: string
+  Title: string
+  Author: string
+  Introduction: string
+  // 分类ID
+  CategoryId: number
 }

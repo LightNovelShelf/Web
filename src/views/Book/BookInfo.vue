@@ -53,7 +53,7 @@
               <div>上次阅读：{{ lastReadTitle }}</div>
               <div style="margin-top: 24px">
                 <div>简介</div>
-                <div class="introduction" v-html="book['Introduction']"></div>
+                <div class="introduction" v-html="sanitizerHtml(book['Introduction'])"></div>
               </div>
               <div style="margin-top: 24px"></div>
 
@@ -98,7 +98,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, onActivated, toRaw, watch } from 'vue'
+import { computed, ref, onActivated, toRaw } from 'vue'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 import { useRouter } from 'vue-router'
 import { Comment } from '@/components/'
 import { getBookInfo } from '@/services/book'

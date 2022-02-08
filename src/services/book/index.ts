@@ -38,3 +38,7 @@ export function getLatestBookList() {
 export function getRank(days: number) {
   return requestWithSignalr<Types.BookInList[]>('GetRank', days)
 }
+/** 编辑书籍信息 */
+export function editBook(request: Types.EditBookRequest) {
+  return requestWithSignalr('EditBook', request)
+}
