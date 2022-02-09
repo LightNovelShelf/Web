@@ -97,5 +97,6 @@ export {
   mdiNumeric6Box,
   mdiNumeric7Box,
   mdiFormatFont,
-  mdiContentSave
+  mdiContentSave,
+  mdiSquareEditOutline
 } from '@mdi/js'

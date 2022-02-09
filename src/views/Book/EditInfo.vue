@@ -64,7 +64,6 @@ import { getBookEditInfo, editBook } from '@/services/book'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
-import { deleteComment } from '@/services/comment'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)

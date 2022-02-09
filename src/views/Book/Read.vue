@@ -72,6 +72,17 @@
             {{ $q.fullscreen.isActive ? '退出全屏' : '全屏' }}
           </q-tooltip>
         </q-fab-action>
+        <q-fab-action
+          v-if="chapter?.CanEdit"
+          color="primary"
+          :to="{ name: 'EditChapter', param: { bid, sortNum } }"
+          :icon="icon.mdiSquareEditOutline"
+          :disable="draggingFab"
+        >
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            快速编辑
+          </q-tooltip>
+        </q-fab-action>
       </q-fab>
     </q-page-sticky>
 
@@ -369,7 +380,12 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 }
 
 :deep(.read) {
-  @import 'src/assets/style/read';
+  & {
+    all: unset;
+    user-select: none;
+  }
+
+  @import '../../assets/style/read';
 
   font-family: read, sans-serif !important;
 
@@ -380,7 +396,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 /*居中功能*/
 .read-page {
-  @import 'src/styles/quasar.variables';
+  @import '../../styles/quasar.variables';
 
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
