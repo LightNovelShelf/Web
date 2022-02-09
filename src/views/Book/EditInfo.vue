@@ -1,6 +1,6 @@
 <template>
   <div style="max-width: 1920px" class="flex-align-center flex fit">
-    <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
+    <q-grid v-if="isActive" x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
       <q-grid-item>
         <div class="q-gutter-sm">
           <div class="text-opacity">封面预览</div>
@@ -12,7 +12,7 @@
           </q-card>
         </div>
       </q-grid-item>
-      <q-grid-item v-if="isActive" span="2" xs="1" sm="1" md="1">
+      <q-grid-item span="2" xs="1" sm="1" md="1">
         <div class="q-gutter-sm">
           <q-input label="封面地址" placeholder="https://" v-model="book['Cover']" />
           <q-input label="书名" v-model="book['Title']" />
@@ -32,6 +32,10 @@
         </div>
       </q-grid-item>
     </q-grid>
+
+    <div v-else class="absolute-full">
+      <q-inner-loading :showing="!isActive" label="加载中..." label-class="text-teal" label-style="font-size: 1.1em" />
+    </div>
 
     <q-page-sticky position="bottom-right" :offset="fabPos">
       <q-fab
