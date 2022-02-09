@@ -650,7 +650,6 @@ onDeactivated(() => {
 // 列表项
 .shelf-item-wrap {
   position: relative;
-  cursor: pointer;
 }
 
 .shelf-item-mask {
@@ -661,6 +660,7 @@ onDeactivated(() => {
   // bottom: 0;
   background-color: rgba(#000, 0.4);
   border-radius: 4px;
+  cursor: pointer;
 }
 
 // // 列表项动画
