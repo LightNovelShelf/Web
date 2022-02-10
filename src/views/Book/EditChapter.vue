@@ -5,7 +5,16 @@
         <q-input label="标题" v-model="chapter['Title']" />
         <div class="text-opacity">内容</div>
         <q-editor
+          ref="editorRef"
           paragraph-tag="p"
+          :definitions="{
+            beautify: {
+              tip: '格式化代码',
+              label: '格式化',
+              handler: beautify
+            },
+            removeFormat: { handler: removeFormat }
+          }"
           :toolbar="[
             [
               {
@@ -38,9 +47,9 @@
             ],
             ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
             ['undo', 'redo'],
-            ['viewsource']
+            ['viewsource', 'beautify']
           ]"
-          v-model="chapter['Content']"
+          v-model="chapterContent"
           min-height="5rem"
         />
       </div>
@@ -69,13 +78,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRaw } from 'vue'
+import { computed, nextTick, ref, toRaw } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { getErrMsg } from '@/utils/getErrMsg'
-import { useQuasar } from 'quasar'
+import { useQuasar, debounce } from 'quasar'
 import { getChapterEditInfo, editChapterContent } from '@/services/chapter'
+import prettier from 'prettier/esm/standalone.mjs'
+import parserHtml from 'prettier/esm/parser-html.mjs'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)
@@ -83,7 +94,29 @@ const sortNum = computed(() => ~~props.sortNum)
 const chapter = ref<any>()
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
+const editorRef = ref()
 
+const clearHtml = debounce(function clearHtml(html: string) {
+  if (html.indexOf('MsoNormal') !== -1) {
+    console.log('本次可能从word粘贴内容')
+    const el = editorRef.value.getContentEl() as Element
+    el.querySelectorAll('.MsoNormal').forEach((item) => {
+      item.classList.remove('MsoNormal')
+      if (item.classList.length === 0) item.removeAttribute('class')
+    })
+    chapter.value['Content'] = el.innerHTML.replaceAll('<o:p></o:p>', '')
+  }
+}, 100)
+
+const chapterContent = computed<string>({
+  get() {
+    return chapter.value['Content']
+  },
+  set(html) {
+    chapter.value['Content'] = html
+    clearHtml(html)
+  }
+})
 const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.value?.SortNum === sortNum.value)
 
 const request = useTimeoutFn(async () => {
@@ -93,6 +126,19 @@ const request = useTimeoutFn(async () => {
 function moveFab(ev) {
   draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
   fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
+}
+function beautify() {
+  chapter.value['Content'] = prettier.format(chapter.value['Content'], {
+    parser: 'html',
+    plugins: [parserHtml]
+  })
+}
+function removeFormat() {
+  editorRef.value.runCmd('removeFormat')
+  nextTick(() => {
+    chapter.value['Content'] = chapter.value['Content'].replaceAll('style=""', '')
+    chapter.value['Content'] = chapter.value['Content'].replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
+  })
 }
 
 const $q = useQuasar()
