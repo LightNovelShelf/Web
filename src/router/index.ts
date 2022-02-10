@@ -42,6 +42,18 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Book/BookInfo.vue')
   },
   {
+    path: '/book/edit/:bid',
+    name: 'EditBook',
+    props: true,
+    component: () => import('../views/Book/EditInfo.vue')
+  },
+  {
+    path: '/book/edit/chapter/:bid/:sortNum',
+    name: 'EditChapter',
+    props: true,
+    component: () => import('../views/Book/EditChapter.vue')
+  },
+  {
     path: '/book/rank/:type',
     name: 'BookRank',
     props: true,
@@ -51,7 +63,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/read/:bid/:sortNum',
     name: 'Read',
     props: true,
-    component: () => import('../views/Read.vue')
+    component: () => import('../views/Book/Read.vue')
   },
   {
     path: '/collaborator',
