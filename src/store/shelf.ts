@@ -456,6 +456,7 @@ const shelfStore = defineStore('app.shelf', {
     deleteFolder(payload: { id: string }) {
       this.commit({
         shelf: sort(
+          // @ts-ignore
           produce(toRaw(this.shelf), (draft) => {
             let currentMaxIndex = this.curMaxIndexInFolder(null)
 

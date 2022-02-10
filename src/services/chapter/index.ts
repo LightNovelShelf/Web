@@ -6,3 +6,11 @@ import * as Types from './types'
 export function getChapterContent(request: Types.GetChapterContentRequest) {
   return requestWithSignalr('GetChapterContent', request)
 }
+
+export function editChapterContent(request: Types.EditChapterContentRequest) {
+  return requestWithSignalr('EditChapterContent', request)
+}
+
+export function getChapterEditInfo(request: Types.EditChapterContentRequest) {
+  return requestWithSignalr('GetChapterEditInfo', request)
+}
