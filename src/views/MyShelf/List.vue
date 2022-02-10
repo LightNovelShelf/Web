@@ -39,14 +39,10 @@
       <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
 
       <!-- 渲染书架列表内容 -->
-      <q-grid-item v-for="item in shelfData" :key="item.value.Id" @click.capture="listItemClickHandle(item, $event)">
+      <q-grid-item v-for="item in shelfData" :key="item.id" @click.capture="listItemClickHandle(item, $event)">
         <!-- 书架项目 -->
         <div class="shelf-item-wrap">
-          <!-- 书籍 -->
-          <book-card v-if="item.type === ShelfTypes.ShelfItemType.BOOK" :book="item.value" />
-          <!-- 文件夹 -->
-          <shelf-folder v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER" :folder="item" />
-          <template v-else />
+          <shelf-card :item="item" />
 
           <!-- 遮罩 -->
           <div v-if="editMode" class="shelf-item-mask">
@@ -61,7 +57,7 @@
           </div>
 
           <!-- 选中态icon -->
-          <div v-if="editMode && item.type !== ShelfTypes.ShelfItemType.FOLDER" class="shelf-item-check-icon">
+          <div v-if="editMode && item.type !== ShelfTypes.ShelfItemTypeEnum.FOLDER" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
             <q-icon v-if="item.selected" size="24px" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24px" color="grey" :name="mdiCheckboxBlankCircleOutline" />
@@ -82,16 +78,16 @@
               <!-- 没有选中时展示当前项标题 -->
               <q-item-section v-else
                 ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
-                  item.value.Title
+                  item.title
                 }}</q-tooltip
-                ><div class="max-len-text">{{ item.value.Title }}</div></q-item-section
+                ><div class="max-len-text">{{ item.title }}</div></q-item-section
               >
             </q-item>
 
             <q-separator />
 
             <!-- 书籍相关的 -->
-            <template v-if="item.type === ShelfTypes.ShelfItemType.BOOK">
+            <template v-if="item.type === ShelfTypes.ShelfItemTypeEnum.BOOK">
               <!-- 有父层文件夹，代表已经在文件夹里了 -->
               <q-item v-if="parentFolder" clickable v-close-popup @click="moveItemToFolderHandle(item)">
                 <q-item-section>移动到...</q-item-section>
@@ -106,7 +102,7 @@
               </q-item>
             </template>
 
-            <template v-else-if="item.type === ShelfTypes.ShelfItemType.FOLDER">
+            <template v-else-if="item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER">
               <!-- 文件夹相关的 -->
               <q-item clickable v-close-popup @click="currentFolderToRename = item">
                 <q-item-section>重命名</q-item-section>
@@ -208,7 +204,6 @@
 
 <script lang="ts" setup>
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import BookCard from '@/components/BookCard.vue'
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
@@ -216,7 +211,6 @@ import Sortable from 'sortablejs'
 import { safeCall } from '@/utils/safeCall'
 import { useQuasar } from 'quasar'
 import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen, mdiDragVariant } from '@/plugins/icon/export'
-import ShelfFolder from './components/ShelfFolder.vue'
 import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/store/shelf'
 import { RouteLocationNormalizedLoaded, useRoute } from 'vue-router'
 import RenameDialog from './components/RenameDialog.vue'
@@ -229,6 +223,7 @@ import { NOOP } from '@/const/empty'
 import router from '@/router'
 import { HubConnectionState } from '@microsoft/signalr'
 import { useLayout } from '@/components/app/useLayout'
+import ShelfCard from './components/ShelfCard.vue'
 
 interface QSelectorOption {
   label: string
@@ -259,9 +254,9 @@ const folderOptions = computed<QSelectorOption[]>(() => {
     .filter((i) => i.id !== parentFolder.value)
     .map(
       (i): QSelectorOption => ({
-        label: i.value.Title,
+        label: i.title,
         value: i.id,
-        updateAt: parseTime(i.value.updateAt).toLocaleString()
+        updateAt: parseTime(i.updateAt).toLocaleString()
       })
     )
     .filter((i) => {
@@ -314,7 +309,7 @@ const parentFolders = ref<string[]>(getParentFolders(route))
 const parentFolder = computed<string | null>(() => [...parentFolders.value].pop() ?? null)
 /** 书架数据 */
 const shelfData = computed<ShelfTypes.ShelfItem[]>(() => {
-  return shelfStore.getShelfByParents(parentFolders.value)
+  return shelfStore.getItemsByParents(parentFolders.value)
 })
 
 /** 右键菜单 - 加入文件夹 */
@@ -372,9 +367,9 @@ async function removeFolderIfItEmpty(): Promise<void> {
 }
 
 /** 右键菜单 - 删除文件夹 */
-function removeFolderHandle(item: ShelfTypes.ShelfItem) {
+function removeFolderHandle(item: ShelfTypes.ShelfFolderItem) {
   const { id } = item
-  const children = shelfStore.getShelfByParent(id)
+  const children = shelfStore.getItemsByParent(id)
   Promise.resolve()
     .then(() => {
       // 判断是否还有子元素
@@ -416,10 +411,10 @@ async function folderSelectorSubmitHandle() {
   }
 
   /** 要更改的书籍 */
-  const bookIds: string[] = shelfStore.books.filter((i) => !!i.selected).map((i) => i.id)
+  const itemIds: (string | number)[] = shelfStore.books.filter((i) => !!i.selected).map((i) => i.id)
 
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
-  if (!bookIds.length) {
+  if (!itemIds.length) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
     return
@@ -437,7 +432,7 @@ async function folderSelectorSubmitHandle() {
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
-    shelfStore.addToFolder({ books: bookIds, parents: folderID === ALL_VALUE ? [] : [folderID] })
+    shelfStore.addToFolder({ books: itemIds, parents: folderID === ALL_VALUE ? [] : [folderID] })
 
     await removeFolderIfItEmpty()
   }
@@ -485,7 +480,7 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
     }
 
     // 编辑模式下点击事件被蒙层接管，需要手动实现
-    if (item.type === ShelfTypes.ShelfItemType.FOLDER) {
+    if (item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER) {
       router.push({ ...route, params: { folderID: item.id } })
       return
     }

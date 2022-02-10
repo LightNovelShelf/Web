@@ -53,7 +53,7 @@ const clickHandle = async () => {
 
   try {
     if (nextLike) {
-      await shelfStore.addToShelf(props.book)
+      await shelfStore.addToShelf({ id: props.book.Id, title: props.book.Title })
     } else {
       await shelfStore.removeFromShelf({ books: [bookId.value], push: true })
     }

@@ -1,11 +1,18 @@
 <template>
-  <div>
+  <div ref="wrapRef">
     <router-link :to="{ name: 'MyShelf', params: { folderID: folderIDs } }">
       <div class="book-cover">
         <q-card>
           <q-responsive :ratio="2 / 3">
             <transition-group name="shelf-item" tag="div" class="books-group">
-              <shelf-item-thumb v-for="item in limitedBooks" :key="item.id" :item="item" />
+              <!-- <shelf-item-thumb v-for="item in limitedBooks" :key="item.id" :item="item" /> -->
+              <template v-for="item in limitedBooks" :key="item.id">
+                <q-img :src="item.Cover" :ratio="2 / 3" />
+                <!-- <div v-else-if="item.type === ShelfItemTypeEnum.FOLDER"
+                  ><q-icon size="24px" :name="mdiFolderHeartOutline"
+                /></div> -->
+                <!-- <template v-else /> -->
+              </template>
             </transition-group>
           </q-responsive>
         </q-card>
@@ -14,8 +21,8 @@
 
     <div style="padding: 4px">
       <div class="book-name">
-        <div class="book-name-text" :title="folder.value?.Title">
-          {{ folder.value.Title }}
+        <div class="book-name-text" :title="item.title">
+          {{ item.title }}
         </div>
       </div>
     </div>
@@ -29,18 +36,63 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useToNow } from '@/composition/useToNow'
-import { ShelfFolderItem } from '@/types/shelf'
+import { ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum } from '@/types/shelf'
 import { useShelfStore } from '@/store/shelf'
-import ShelfItemThumb from './ShelfItemThumb.vue'
+import { usebookListStore } from '@/store/bookListData'
+import { BookInList } from '@/services/book/types'
 
-const props = defineProps<{ folder: ShelfFolderItem }>()
-const store = useShelfStore()
-const updateTime = useToNow(computed(() => new Date(props.folder.value.updateAt)))
-const folderIDs = computed(() => [...props.folder.parents, props.folder.id])
+const props = defineProps<{ item: ShelfFolderItem }>()
+const shelfStore = useShelfStore()
+const updateTime = useToNow(computed(() => new Date(props.item.updateAt)))
+const folderIDs = computed(() => [...props.item.parents, props.item.id])
+const listDataStore = usebookListStore()
 // 限制最多四本书
-const limitedBooks = computed(() => store.getShelfByParent(props.folder.id).slice(0, 4))
+const limitedBooks = computed<BookInList[]>(() =>
+  shelfStore
+    .getItemsByParent(props.item.id)
+    .filter((i): i is ShelfBookItem => i.type === ShelfItemTypeEnum.BOOK)
+    .map((i) => listDataStore.getBook(i.id))
+    .slice(0, 4)
+)
+
+const wrapRef = ref<HTMLDivElement | null>(null)
+const unWatch = watch(wrapRef, (ele, preEle, onClean) => {
+  if (ele) {
+    const ob = new IntersectionObserver(
+      ([item]) => {
+        if (item.intersectionRatio > 0) {
+          queryItem(true, () => {
+            unWatch()
+            ob.disconnect()
+          })
+        }
+      },
+      { threshold: 0, root: null, rootMargin: '10px' }
+    )
+
+    ob.observe(ele)
+
+    onClean(() => ob.disconnect())
+  }
+})
+
+/** 查询相关item */
+function queryItem(visible: boolean, clean?: () => void) {
+  const { item } = props
+  if (visible && item) {
+    listDataStore.queryBooks({
+      ids: shelfStore
+        .getItemsByParent(item.id)
+        .filter((i): i is ShelfBookItem => i.type === ShelfItemTypeEnum.BOOK)
+        .slice(0, 3)
+        .map((o) => o.id)
+    })
+
+    clean && clean()
+  }
+}
 </script>
 
 <style lang="scss" scoped>
