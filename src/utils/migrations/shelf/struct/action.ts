@@ -18,8 +18,6 @@ export async function shelfStructMigration(
   // 最初的一版本没有版本号概念，入参null
   if (inputVer === null) {
     const res = input as (ShelfLegacyStruct.First.ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[]
-    console.log(res)
-    debugger
     return res.map((item): ShelfItem => {
       let result: ShelfItem
       switch (item.type) {
