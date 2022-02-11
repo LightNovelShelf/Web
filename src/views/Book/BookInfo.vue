@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-card>
+    <q-card v-if="book">
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
