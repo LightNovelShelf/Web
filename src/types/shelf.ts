@@ -13,7 +13,6 @@ export enum SHELF_STRUCT_VER {
 }
 
 interface ShelfCommonItem {
-  ver: SHELF_STRUCT_VER
   /** 类型 */
   type: ShelfItemTypeEnum
   /** Id,目前书籍的Id是数字，文件夹的是字符串 */

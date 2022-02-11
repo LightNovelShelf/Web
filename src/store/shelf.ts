@@ -282,7 +282,6 @@ const shelfStore = defineStore('app.shelf', {
     /** 添加书籍到书架，立即生效 */
     async addToShelf(payload: { id: number }) {
       const item: ShelfBookItem = {
-        ver: SHELF_STRUCT_VER.LATEST,
         id: payload.id,
         type: ShelfItemTypeEnum.BOOK,
         // 添加到书架默认就是添加到root @todo 支持添加到指定文件夹
@@ -434,7 +433,6 @@ const shelfStore = defineStore('app.shelf', {
 
       /** 新的文件夹 */
       const folder: ShelfFolderItem = {
-        ver: SHELF_STRUCT_VER.LATEST,
         // 固定在第一
         index: 0,
         type: ShelfItemTypeEnum.FOLDER,

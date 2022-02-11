@@ -25,7 +25,6 @@ export async function shelfStructMigration(
       switch (item.type) {
         case ShelfLegacyStruct.First.ShelfItemType.BOOK: {
           result = {
-            ver: SHELF_STRUCT_VER.LATEST,
             /** 类型 */
             type: ShelfItemTypeEnum.BOOK,
             /** Id,目前书籍的Id是数字，文件夹的是字符串 */
@@ -41,7 +40,6 @@ export async function shelfStructMigration(
         }
         case ShelfLegacyStruct.First.ShelfItemType.FOLDER: {
           result = {
-            ver: SHELF_STRUCT_VER.LATEST,
             /** 类型 */
             type: ShelfItemTypeEnum.FOLDER,
             /** Id,目前书籍的Id是数字，文件夹的是字符串 */
