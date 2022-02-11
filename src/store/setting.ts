@@ -7,6 +7,9 @@ export const useSettingStore = defineStore('app.setting', {
   state: () => ({
     isInit: true,
     dark: Dark.get(), // dark 设置不保存到服务器
+    generalSetting: {
+      enableBlurHash: true
+    },
     readSetting: {
       fontSize: 16,
       bgType: 'none' as 'none' | 'paper' | 'custom',
@@ -15,8 +18,7 @@ export const useSettingStore = defineStore('app.setting', {
       readPageWidth: 0,
       justify: false,
       showButton: true,
-      tapToScroll: false,
-      enableBlurHash: true // 不在阅读选项卡下，但需要保存到服务器
+      tapToScroll: false
     }
   }),
   actions: {
@@ -27,9 +29,17 @@ export const useSettingStore = defineStore('app.setting', {
           this.readSetting[key] = readSetting[key]
         })
       }
+      const generalSetting = await userSettingDB.get('generalSettings')
+      if (generalSetting) {
+        Object.keys(generalSetting).forEach((key) => {
+          this.generalSetting[key] = generalSetting[key]
+        })
+      }
     },
     async save() {
+      console.log('save')
       const p1 = userSettingDB.set('readSetting', toRaw(this.readSetting))
+      const p2 = userSettingDB.set('generalSettings', toRaw(this.generalSetting))
       await Promise.all([p1])
       Dark.set(this.dark)
     }
