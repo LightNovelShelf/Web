@@ -29,7 +29,7 @@ export const useSettingStore = defineStore('app.setting', {
           this.readSetting[key] = readSetting[key]
         })
       }
-      const generalSetting = await userSettingDB.get('generalSettings')
+      const generalSetting = await userSettingDB.get('generalSetting')
       if (generalSetting) {
         Object.keys(generalSetting).forEach((key) => {
           this.generalSetting[key] = generalSetting[key]
@@ -39,7 +39,7 @@ export const useSettingStore = defineStore('app.setting', {
     async save() {
       console.log('save')
       const p1 = userSettingDB.set('readSetting', toRaw(this.readSetting))
-      const p2 = userSettingDB.set('generalSettings', toRaw(this.generalSetting))
+      const p2 = userSettingDB.set('generalSetting', toRaw(this.generalSetting))
       await Promise.all([p1])
       Dark.set(this.dark)
     }
