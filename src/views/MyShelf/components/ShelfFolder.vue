@@ -14,7 +14,7 @@
                 :src="item.Cover"
                 :ratio="2 / 3"
               >
-                <template v-if="item.Placeholder && readSetting.enableBlurHash" v-slot:loading>
+                <template v-if="item.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
                   <blur-hash :blurhash="item.Placeholder" />
                 </template>
               </q-img>
@@ -57,7 +57,7 @@ import { useSettingStore } from '@/store/setting'
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()
 const settingStore = useSettingStore()
-const { readSetting } = settingStore
+const { generalSetting } = settingStore
 const updateTime = useToNow(computed(() => new Date(props.item.updateAt)))
 const folderIDs = computed(() => [...props.item.parents, props.item.id])
 const listDataStore = useBookListStore()
