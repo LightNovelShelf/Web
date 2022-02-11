@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import { BookInList } from '@/services/book/types'
 import { getBookListByIds } from '@/services/book'
+import { toRaw } from 'vue'
 
 export interface BookListStore {
   books: Map<number, BookInList>
   /** 待查询id队列 */
   pending: Set<number>
+  /** 正在查询的id队列 */
+  querying: Set<number>
   /** 延时查询context */
   schemeContext: number
 }
@@ -14,6 +17,7 @@ export interface BookListStore {
 const INIT: BookListStore = {
   books: new Map(),
   pending: new Set(),
+  querying: new Set(),
   schemeContext: 0
 }
 
@@ -54,7 +58,7 @@ export const useBookListStore = defineStore('app.bookList', {
     queryBooks(payload: { ids: number[]; force?: boolean }): void {
       for (const id of payload.ids) {
         // 如果data已经有了且不force
-        if (!payload.force && this.books.has(id)) {
+        if (!payload.force && (this.books.has(id) || this.querying.has(id))) {
           // 就跳过
           continue
         }
@@ -100,6 +104,8 @@ export const useBookListStore = defineStore('app.bookList', {
         booksGroups[cursor].push(id)
       }
 
+      // 重置pengding队列
+      this.querying = toRaw(this.pending)
       // 重置pengding队列
       this.pending = new Set()
 
