@@ -17,7 +17,7 @@
 
   <!-- 书籍列表 -->
   <template v-if="shelfData.length || parentFolder">
-    <!-- 
+    <!--
       key的指定是告诉vue不能复用DOM，因为DOM已经跟数据脱钩了
       复现：进入文件夹排序后取消保存，退出编辑；查看数据已经恢复了，但DOM没有恢复
      -->
@@ -59,7 +59,7 @@
           <!-- 选中态icon -->
           <div v-if="editMode && item.type !== ShelfTypes.ShelfItemTypeEnum.FOLDER" class="shelf-item-check-icon">
             <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
-            <q-icon v-if="item.selected" size="24px" color="primary" :name="mdiCheckCircle" />
+            <q-icon v-if="selected.has(item.id)" size="24px" color="primary" :name="mdiCheckCircle" />
             <q-icon v-else size="24px" color="grey" :name="mdiCheckboxBlankCircleOutline" />
           </div>
 
@@ -72,16 +72,17 @@
             <!-- 选中提示 -->
             <q-item>
               <!-- @todo 子菜单展示选中的内容并支持在子菜单内取消选中 -->
-              <q-item-section v-if="selectedCount > 1 || (selectedCount && !item.selected)"
+              <q-item-section v-if="selectedCount > 1 || (selectedCount && selected.has(item.id))"
                 >已选中{{ selectedCount }}项</q-item-section
               >
               <!-- 没有选中时展示当前项标题 -->
-              <q-item-section v-else
+              <!-- 目前书架结构没有title数据，要展示的话需要迁到card内，用取出来的list来展示 -->
+              <!-- <q-item-section v-else
                 ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
                   item.title
                 }}</q-tooltip
                 ><div class="max-len-text">{{ item.title }}</div></q-item-section
-              >
+              > -->
             </q-item>
 
             <q-separator />
@@ -144,7 +145,7 @@
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <!-- 
+        <!--
           一定要监听 update:model-value 事件，需要依赖它来分辨 selectorValue 是筛选值还是选择值；
           不监听的话 selectorValue 就都是字符串
          -->
@@ -235,14 +236,21 @@ interface QSelectorOption {
 
 const $ = useQuasar()
 const layout = useLayout()
+const shelfStore = useShelfStore()
+const route = useRoute()
+/** 本组件是否激活展示 */
+const isActivated = useIsActivated()
+
+/** 站点header高度 */
 const headerHeight = computed(() => `${layout.headerOffset.value}px`)
 /** 加载标记 */
 const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
-const shelfStore = useShelfStore()
+/** 选中项ID集合 */
+const selected = computed(() => shelfStore.selcted)
+/** shelfStore 是否已经初始化 */
 const initialized = computed(() => shelfStore.initialized)
+/** 是否处于编辑模式 */
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
-const route = useRoute()
-const isActivated = useIsActivated()
 /** 文件夹选择弹层 */
 const folderSelectorVisible = ref(false)
 /** 文件夹选择器model值 */
@@ -281,7 +289,7 @@ const folderOptions = computed<QSelectorOption[]>(() => {
   return realFolders
 })
 /** 选中计数 */
-const selectedCount = computed(() => shelfStore.selectedNum)
+const selectedCount = computed(() => shelfStore.selectedCount)
 /** 是否全选 */
 // const isSelectedAll = computed<boolean>(() => selectedCount.value === shelf.value.length)
 /** 排序列表容器 */
@@ -410,11 +418,8 @@ async function folderSelectorSubmitHandle() {
     return
   }
 
-  /** 要更改的书籍 */
-  const itemIds: (string | number)[] = shelfStore.books.filter((i) => !!i.selected).map((i) => i.id)
-
   // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
-  if (!itemIds.length) {
+  if (!selected.value.size) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
     return
@@ -432,7 +437,7 @@ async function folderSelectorSubmitHandle() {
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
-    shelfStore.addToFolder({ books: itemIds, parents: folderID === ALL_VALUE ? [] : [folderID] })
+    shelfStore.addToFolder({ books: selected.value, parents: folderID === ALL_VALUE ? [] : [folderID] })
 
     await removeFolderIfItEmpty()
   }

@@ -51,7 +51,7 @@ const props = defineProps<{ book: BookInList }>()
 const cover = computed(() => props.book.Cover)
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 const visible = ref(false)
-function onIntersection(entry) {
+function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting
 }
 </script>
