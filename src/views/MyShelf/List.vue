@@ -17,12 +17,7 @@
 
   <!-- 书籍列表 -->
   <template v-if="shelfData.length || parentFolder">
-    <!--
-      key的指定是告诉vue不能复用DOM，因为DOM已经跟数据脱钩了
-      复现：进入文件夹排序后取消保存，退出编辑；查看数据已经恢复了，但DOM没有恢复
-     -->
     <q-grid
-      :key="editMode ? 1 : 2"
       :x-gap="12"
       :y-gap="8"
       cols="6"
