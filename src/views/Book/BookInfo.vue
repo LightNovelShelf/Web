@@ -19,7 +19,7 @@
                     </div>
                   </div>
                 </div>
-                <template v-if="book.Placeholder" v-slot:loading>
+                <template v-if="book.Placeholder && readSetting.enableBlurHash" v-slot:loading>
                   <blur-hash :blurhash="book.Placeholder" />
                 </template>
               </q-img>
@@ -123,9 +123,12 @@ import { DateTime } from 'luxon'
 import { CommentType } from '@/services/comment/types'
 import { userReadPositionDB } from '@/utils/storage/db'
 import BlurHash from '@/components/BlurHash.vue'
+import { useSettingStore } from '@/store/setting'
 
 const props = defineProps<{ bid: string }>()
 
+const settingStore = useSettingStore()
+const { readSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const router = useRouter()
 const appStore = useAppStore()

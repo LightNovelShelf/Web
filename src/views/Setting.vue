@@ -15,6 +15,10 @@
               <q-radio v-model="dark" :val="true" label="夜间" />
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
+            <div class="q-gutter-sm light-radio">
+              <div>其他选项</div>
+              <q-toggle v-model="readSetting.enableBlurHash" label="打开书籍封面自定义占位符" />
+            </div>
           </div>
         </q-tab-panel>
 
