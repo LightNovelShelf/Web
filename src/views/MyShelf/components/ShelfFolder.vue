@@ -73,7 +73,7 @@ const limitedBooks = computed<BookInList[]>(() =>
 /** 查询相关item */
 function queryItem(entry: IntersectionObserverEntry) {
   const { item } = props
-  if (entry && item) {
+  if (entry.isIntersecting && item) {
     listDataStore.queryBooks({
       ids: shelfStore
         .getItemsByParent(item.id)
