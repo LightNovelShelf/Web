@@ -28,8 +28,8 @@ class EMPTY_BOOK implements BookInList {
   public readonly Cover = ''
   public readonly LastUpdateTime = new Date(1)
   public readonly UserName = ''
-  public readonly Level = 1
-  public readonly InteriorLevel = 1
+  public readonly Level = 0
+  public readonly InteriorLevel = 0
   // public readonly Placeholder = 'L06kq:ofjuoft7fRa|j@bFbGfQa}'
 }
 
