@@ -6,7 +6,7 @@
 import { ref, watchEffect } from 'vue'
 import { decode } from 'blurhash'
 
-const props = defineProps<{ blurhash: string }>()
+const props = defineProps<{ blurhash?: string }>()
 
 const canvas = ref<HTMLCanvasElement>()
 
