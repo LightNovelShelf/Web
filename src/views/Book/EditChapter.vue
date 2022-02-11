@@ -13,6 +13,11 @@
               label: '格式化',
               handler: beautify
             },
+            ShowBBCodePopup: {
+              tip: '转换BBCode',
+              label: 'BBCode',
+              handler: ShowBBCodePopup
+            },
             removeFormat: { handler: removeFormat }
           }"
           :toolbar="[
@@ -47,7 +52,8 @@
             ],
             ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
             ['undo', 'redo'],
-            ['viewsource', 'beautify']
+            ['viewsource', 'beautify'],
+            ['ShowBBCodePopup']
           ]"
           v-model="chapterContent"
           min-height="5rem"
@@ -74,6 +80,23 @@
         </q-fab-action>
       </q-fab>
     </q-page-sticky>
+
+    <q-dialog v-model="BBCodePopup">
+      <q-card style="min-width: 800px">
+        <q-card-section>
+          <div class="text-h6">输入BBcode</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input dense v-model="BBCodeTextarea" autofocus filled type="textarea" @keyup.enter="BBCodePopup = false" />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="取消" v-close-popup />
+          <q-btn flat label="确认转换" v-close-popup @click="BBCodeTransForm" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -87,6 +110,8 @@ import { useQuasar, debounce } from 'quasar'
 import { getChapterEditInfo, editChapterContent } from '@/services/chapter'
 import prettier from 'prettier/esm/standalone.mjs'
 import parserHtml from 'prettier/esm/parser-html.mjs'
+import bbCodeParser from 'js-bbcode-parser'
+import BBCodeParser from 'js-bbcode-parser/src/index.js'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)
@@ -95,6 +120,8 @@ const chapter = ref<any>()
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
 const editorRef = ref()
+const BBCodePopup = ref(false)
+const BBCodeTextarea = ref('')
 
 const clearHtml = debounce(function clearHtml(html: string) {
   if (html.indexOf('MsoNormal') !== -1) {
@@ -132,6 +159,19 @@ function beautify() {
     parser: 'html',
     plugins: [parserHtml]
   })
+}
+// BBCode 弹窗
+var ShowBBCodePopup = () => {
+  BBCodePopup.value = true
+}
+// BBCode 自定义替换
+const customparser = new BBCodeParser({
+  '\\[img=(\\d+),(\\d+)\\](.*?)\\[/img\\]': '<img style="width:$1px; height:$2px" src="$3">'
+})
+var BBCodeTransForm = () => {
+  chapter.value['Content'] =
+    '<p>' + bbCodeParser.parse(customparser.parse(BBCodeTextarea.value)).split('\n').join('</p><p>') + '</p>'
+  BBCodeTextarea.value = ''
 }
 function removeFormat() {
   editorRef.value.runCmd('removeFormat')
