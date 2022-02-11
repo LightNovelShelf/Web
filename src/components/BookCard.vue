@@ -11,6 +11,9 @@
                 <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>
               </div>
             </div>
+            <template v-if="book.Placeholder" v-slot:loading>
+              <blur-hash :blurhash="book.Placeholder" />
+            </template>
           </q-img>
           <q-responsive v-else :ratio="2 / 3" />
         </q-card>
@@ -41,6 +44,7 @@ import { computed, ref } from 'vue'
 import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
 import { useQuasar } from 'quasar'
+import BlurHash from '@/components/BlurHash.vue'
 
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
