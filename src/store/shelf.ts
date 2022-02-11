@@ -371,24 +371,12 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 选中记录 */
     selectItem(payload: { id: string | number; selected?: boolean }) {
-      this.commit({
-        shelf: produce(toRaw(this.shelf), (draft) => {
-          for (const item of draft) {
-            if (item.id === payload.id) {
-              if (item.type === ShelfItemTypeEnum.BOOK) {
-                const nextSelected = payload.selected ?? this.selcted.has(item.id)
-                if (nextSelected) {
-                  this.selcted.add(item.id)
-                } else {
-                  this.selcted.delete(item.id)
-                }
-              }
-
-              return
-            }
-          }
-        })
-      })
+      const nextSelected = payload.selected ?? !this.selcted.has(payload.id)
+      if (nextSelected) {
+        this.selcted.add(payload.id)
+      } else {
+        this.selcted.delete(payload.id)
+      }
     },
     /** 清空选中记录 */
     clearSelected() {
