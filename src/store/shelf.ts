@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
-import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum } from '@/types/shelf'
-import { shelfDB } from '@/utils/storage/db'
+import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum, SHELF_STRUCT_VER } from '@/types/shelf'
+import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
 import produce, { setAutoFreeze } from 'immer'
 import { isEqual } from 'lodash-es'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
-import { DateTime } from 'luxon'
 import { getBookShelf, saveBookShelf } from '@/services/user'
+import { ServerShelf } from '@/services/user/type'
 
 export enum ShelfBranch {
   main = 'main',
@@ -20,6 +20,8 @@ type ShelfSourceStruct = {
 export interface ShelfStore {
   /** 是否已经初始化 */
   initialized: boolean
+  /** 选中项ID集合 */
+  selcted: Set<number | string>
   source: ShelfSourceStruct
   branch: ShelfBranch
 }
@@ -27,6 +29,7 @@ export interface ShelfStore {
 /** 初始state */
 const INIT: ShelfStore = {
   initialized: false,
+  selcted: new Set(),
   source: {
     [ShelfBranch.main]: [],
     [ShelfBranch.draft]: []
@@ -138,12 +141,14 @@ const shelfStore = defineStore('app.shelf', {
       return map
     },
     /** 选中计数 */
-    selectedNum(): number {
-      return this.shelf.filter((i) => i.selected).length
+    selectedCount(): number {
+      return this.selcted.size
     },
     /** 选中的书籍 */
     selectedBooks(): ShelfBookItem[] {
-      return this.shelf.filter((i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && i.selected))
+      return this.shelf.filter(
+        (i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && this.selcted.has(i.id))
+      )
     }
   },
   actions: {
@@ -155,8 +160,12 @@ const shelfStore = defineStore('app.shelf', {
 
     /** push到db */
     async push(config: { syncRetome?: boolean } = {}) {
+      /** 记录的时候结构一定是最新的 */
+      await shelfStructVerDB.set('VER', SHELF_STRUCT_VER.LATEST)
+
       // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
       await shelfDB.clear()
+
       for (const i of this.shelf) {
         await shelfDB.set(i.id + '', i)
       }
@@ -186,7 +195,15 @@ const shelfStore = defineStore('app.shelf', {
 
     /** 从db中拉数据(pull = fetch + commit) */
     async pull() {
-      const shelf = await this.fetch()
+      let shelf = await this.fetch()
+      const structVer = await shelfStructVerDB.get<SHELF_STRUCT_VER>('VER')
+      if (structVer !== SHELF_STRUCT_VER.LATEST) {
+        shelf = await (
+          await import('@/utils/migrations/shelf/struct/action')
+        ).shelfStructMigration(shelf, structVer ?? null)
+      }
+
+      /** @legacy 最初的版本有index不对的 */
       this.commit({ shelf: sort(shelf) })
     },
 
@@ -195,11 +212,32 @@ const shelfStore = defineStore('app.shelf', {
     /** 从服务器同步 */
     async syncFromRemote() {
       const serve = await getBookShelf()
-      this.commit({ shelf: serve.data })
+      let shelf: ShelfItem[]
+
+      if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
+        shelf = await (
+          await import('@/utils/migrations/shelf/struct/action')
+        ).shelfStructMigration(serve.data, serve.ver ?? null)
+      } else {
+        shelf = (serve.data as ServerShelf.Item[]).map((item): ShelfItem => {
+          return {
+            ...item,
+            updateAt: item.updateAt.toISOString()
+          }
+        })
+      }
+
+      // 记录版本到本地
+      this.commit({ shelf })
+
+      // 如果版本不对那就触发一次push
+      if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
+        // this.push({ syncRetome: true })
+      }
     },
     /** 同步到服务器 */
     async syncToRemote() {
-      await saveBookShelf({ data: toRaw(this.shelf) })
+      await saveBookShelf({ data: toRaw(this.shelf), ver: SHELF_STRUCT_VER.LATEST })
     },
 
     /**
@@ -242,16 +280,16 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** 添加书籍到书架，立即生效 */
-    async addToShelf(payload: { id: number; title: string }) {
+    async addToShelf(payload: { id: number }) {
       const item: ShelfBookItem = {
+        ver: SHELF_STRUCT_VER.LATEST,
         id: payload.id,
         type: ShelfItemTypeEnum.BOOK,
         // 添加到书架默认就是添加到root @todo 支持添加到指定文件夹
         parents: [],
         // 添加到首位
         index: 0,
-        title: payload.title,
-        updateAt: DateTime.now().toISO()
+        updateAt: new Date().toISOString()
       }
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
@@ -337,11 +375,15 @@ const shelfStore = defineStore('app.shelf', {
         shelf: produce(toRaw(this.shelf), (draft) => {
           for (const item of draft) {
             if (item.id === payload.id) {
-              if (item.type === ShelfItemTypeEnum.FOLDER) {
-                return
+              if (item.type === ShelfItemTypeEnum.BOOK) {
+                const nextSelected = payload.selected ?? this.selcted.has(item.id)
+                if (nextSelected) {
+                  this.selcted.add(item.id)
+                } else {
+                  this.selcted.delete(item.id)
+                }
               }
 
-              item.selected = payload.selected ?? !item.selected
               return
             }
           }
@@ -350,17 +392,16 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 清空选中记录 */
     clearSelected() {
-      this.commit({
-        shelf: produce(toRaw(this.shelf), (draft) => {
-          draft.forEach((item) => {
-            item.selected = false
-          })
-        })
-      })
+      this.selcted = new Set()
     },
     /** 添加到文件夹 */
-    addToFolder(payload: { books: (string | number)[]; parents: string[] }) {
-      const items = new Set(payload.books)
+    addToFolder(payload: { books: Set<string | number>; parents: string[] }) {
+      const items = payload.books
+
+      // 清掉选择状态，不然会导致数据一直认为有已选的项目
+      items.forEach((item) => {
+        this.selcted.delete(item)
+      })
 
       this.commit({
         shelf: this.squeezeShelfItemIndex(
@@ -368,8 +409,6 @@ const shelfStore = defineStore('app.shelf', {
             draft.forEach((item) => {
               // 如果是待加入的项目，记录新的文件夹路径
               if (items.has(item.id)) {
-                // 清掉选择状态，不然会导致数据一直认为有已选的项目
-                item.selected = false
                 // 排在开头
                 item.index = 0
                 if (payload.parents === null) {
@@ -414,13 +453,14 @@ const shelfStore = defineStore('app.shelf', {
 
       /** 新的文件夹 */
       const folder: ShelfFolderItem = {
+        ver: SHELF_STRUCT_VER.LATEST,
         // 固定在第一
         index: 0,
         type: ShelfItemTypeEnum.FOLDER,
         parents: [],
         id: folderID,
         title: payload.name,
-        updateAt: DateTime.now().toISO()
+        updateAt: new Date().toISOString()
       }
 
       this.commit({
@@ -444,7 +484,7 @@ const shelfStore = defineStore('app.shelf', {
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           for (const item of draft) {
-            if (item.id === payload.id) {
+            if (item.type === ShelfItemTypeEnum.FOLDER && item.id === payload.id) {
               item.title = payload.name
               return
             }

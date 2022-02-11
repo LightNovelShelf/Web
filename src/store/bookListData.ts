@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 import { BookInList } from '@/services/book/types'
 import { getBookListByIds } from '@/services/book'
 
-export interface ShelfStore {
-  data: Map<number, BookInList>
+export interface BookListStore {
+  books: Map<number, BookInList>
   /** 待查询id队列 */
   pending: Set<number>
   /** 延时查询context */
@@ -11,34 +11,25 @@ export interface ShelfStore {
 }
 
 /** 初始state */
-const INIT: ShelfStore = {
-  data: new Map(),
+const INIT: BookListStore = {
+  books: new Map(),
   pending: new Set(),
   schemeContext: 0
 }
 
-// function EMPTY_BOOK(Title = ''): BookInList {
-//   return {
-//     Id: -1,
-//     Cover: '',
-//     LastUpdateTime: new Date(0),
-//     UserName: '',
-//     Title,
-//     Level: 1,
-//     InteriorLevel: 1
-//   }
-// }
-
 class EMPTY_BOOK implements BookInList {
-  constructor(public readonly Title = '') {}
-
   public readonly Id = -1
+  public readonly Title = ''
+  // public readonly Cover = '/img/bg-paper-dark.jpeg'
   public readonly Cover = ''
-  public readonly LastUpdateTime = new Date(0)
+  public readonly LastUpdateTime = new Date(1)
   public readonly UserName = ''
   public readonly Level = 1
   public readonly InteriorLevel = 1
+  // public readonly Placeholder = 'L06kq:ofjuoft7fRa|j@bFbGfQa}'
 }
+
+const DEFAULT_EMPTY_BOOK = new EMPTY_BOOK()
 
 /**
  * 书籍列表数据
@@ -46,12 +37,12 @@ class EMPTY_BOOK implements BookInList {
  * @description
  * 用作列表查询store
  */
-export const usebookListStore = defineStore('app.bookListData', {
+export const useBookListStore = defineStore('app.bookList', {
   state: () => INIT,
   getters: {
     getBook() {
-      return (id: number, title?: string): BookInList => {
-        return this.data.get(id) || new EMPTY_BOOK(title)
+      return (id: number): BookInList => {
+        return this.books.get(id) || DEFAULT_EMPTY_BOOK
       }
     },
     isEmpty() {
@@ -65,7 +56,7 @@ export const usebookListStore = defineStore('app.bookListData', {
     queryBooks(payload: { ids: number[]; force?: boolean }): void {
       for (const id of payload.ids) {
         // 如果data已经有了且不force
-        if (!payload.force && this.data.has(id)) {
+        if (!payload.force && this.books.has(id)) {
           // 就跳过
           continue
         }
@@ -116,6 +107,11 @@ export const usebookListStore = defineStore('app.bookListData', {
 
       // 发出请求
       const res = await Promise.all(booksGroups.map((books) => getBookListByIds(books)))
+      res.forEach((resList) => {
+        resList.forEach((item) => {
+          this.books.set(item.Id, item)
+        })
+      })
     }
   }
 })
