@@ -1,25 +1,33 @@
 <template>
-  <canvas class="fit" ref="canvas" />
+  <canvas class="fit" ref="canvasRef" />
 </template>
 
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import { decode } from 'blurhash'
 
-const props = defineProps<{ blurhash: string }>()
+const props = defineProps<{ blurhash?: string }>()
 
-const canvas = ref<HTMLCanvasElement>()
+const canvasRef = ref<HTMLCanvasElement>()
 
 watchEffect(() => {
-  if (props.blurhash && canvas.value) {
-    const width = canvas.value.clientWidth
-    const height = canvas.value.clientHeight
+  const { value: canvas } = canvasRef
+  if (props.blurhash && canvas) {
+    /** img的比例就是 2/3 所以decode时也贴近这个比例 */
+    const decodeSize = {
+      width: 2 * 10,
+      height: 3 * 10
+    }
 
-    canvas.value.width = width
-    canvas.value.height = height
-    const pixels = decode(props.blurhash, width, height)
-    const ctx = canvas.value.getContext('2d')
-    const imageData = ctx.createImageData(width, height)
+    // canvas的width是指画布的逻辑大小，与canvas元素大小不一样时浏览器会自己拉伸，就像图片拉伸
+    canvas.width = decodeSize.width
+    canvas.height = decodeSize.height
+    const pixels = decode(props.blurhash, decodeSize.width, decodeSize.height)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      return
+    }
+    const imageData = ctx.createImageData(decodeSize.width, decodeSize.height)
     imageData.data.set(pixels)
     ctx.putImageData(imageData, 0, 0)
   }

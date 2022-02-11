@@ -3,8 +3,8 @@ import { PATH } from '@/services/path'
 import { longTermToken, sessionToken } from '@/utils/session'
 import * as Types from './type'
 import { RequestMethod } from '@/services/types'
-import { ShelfItem } from '@/types/shelf'
-import { bookShelfDataTransform, MiniShelfItem } from './utils/bookShelfDataTransform'
+import type { ShelfItem, SHELF_STRUCT_VER } from '@/types/shelf'
+import type { ShelfLegacyStruct } from '@/utils/migrations/shelf/struct/types'
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
@@ -90,16 +90,25 @@ export async function register(userName: string, email: string, password: string
 }
 
 /** 保存用户书架信息 */
-export async function saveBookShelf(json: { data: ShelfItem[] }) {
-  return requestWithSignalr('SaveBookShelf', { data: bookShelfDataTransform.TO_SERVER(json.data) })
+export async function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT_VER }) {
+  return requestWithSignalr('SaveBookShelf', json)
 }
 
 /** 取用户书架信息 */
-export async function getBookShelf(): Promise<{ data: ShelfItem[] }> {
-  const res = await requestWithSignalr<{ data: MiniShelfItem[] }>('GetBookShelf')
+export async function getBookShelf() {
+  const res = await requestWithSignalr<{
+    data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
+    /** @legacy 历史数据可能没有ver这个键值 */
+    ver?: SHELF_STRUCT_VER
+  }>('GetBookShelf')
 
-  // 此时书架只有id信息，需要补全
-  return { data: await bookShelfDataTransform.TO_LCOAL(res.data) }
+  return res
+
+  // return import('./mock.json') as unknown as Promise<{
+  //   data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
+  //   /** @legacy 历史数据可能没有ver这个键值 */
+  //   ver?: SHELF_STRUCT_VER
+  // }>
 }
 
 /** 清空用户历史记录 */

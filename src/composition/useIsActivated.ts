@@ -1,6 +1,7 @@
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, toRaw } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
 
+/** keep-alive的组件是否激活展示 */
 export function useIsActivated(): Ref<boolean> {
   const isActivated = ref(true)
   // toRaw得到第一次挂载时所在路由
