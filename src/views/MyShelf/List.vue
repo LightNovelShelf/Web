@@ -32,7 +32,7 @@
       xl="6"
       lg="6"
       :forward-ref="setListWrapRef"
-      @contextmenu="muteInEditMode"
+      @contextmenu="preventListContextMenuHandle"
       :class="editMode ? 'sortable-list-in-edit-mode' : ''"
     >
       <!-- 如果有父层文件夹，显示返回卡片 -->
@@ -67,7 +67,7 @@
         </div>
 
         <!-- 编辑状态下，书架项目有单独右键菜单 -->
-        <q-menu v-if="editMode" touch-position context-menu>
+        <q-menu v-if="editMode" touch-position context-menu @before-show="prepareBookContextDataHandle(item)">
           <q-list style="min-width: 100px">
             <!-- 选中提示 -->
             <q-item>
@@ -76,13 +76,12 @@
                 >已选中{{ selectedCount }}项</q-item-section
               >
               <!-- 没有选中时展示当前项标题 -->
-              <!-- 目前书架结构没有title数据，要展示的话需要迁到card内，用取出来的list来展示 -->
-              <!-- <q-item-section v-else
+              <q-item-section v-else
                 ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
-                  item.title
+                  contextBook.Title
                 }}</q-tooltip
-                ><div class="max-len-text">{{ item.title }}</div></q-item-section
-              > -->
+                ><div class="max-len-text">{{ contextBook.Title }}</div></q-item-section
+              >
             </q-item>
 
             <q-separator />
@@ -225,6 +224,8 @@ import router from '@/router'
 import { HubConnectionState } from '@microsoft/signalr'
 import { useLayout } from '@/components/app/useLayout'
 import ShelfCard from './components/ShelfCard.vue'
+import { BookInList } from '@/services/book/types'
+import { useBookListStore } from '@/store/bookListData'
 
 interface QSelectorOption {
   label: string
@@ -237,6 +238,7 @@ interface QSelectorOption {
 const $ = useQuasar()
 const layout = useLayout()
 const shelfStore = useShelfStore()
+const bookListStore = useBookListStore()
 const route = useRoute()
 /** 本组件是否激活展示 */
 const isActivated = useIsActivated()
@@ -255,6 +257,9 @@ const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const folderSelectorVisible = ref(false)
 /** 文件夹选择器model值 */
 const selectorValue = ref<string | QSelectorOption | null>(null)
+/** 右键菜单触发的book数据 */
+const contextBookID = ref<number>(-1)
+const contextBook = computed(() => bookListStore.getBook(contextBookID.value))
 /** 文件夹选项 */
 const folderOptions = computed<QSelectorOption[]>(() => {
   const realFolders = shelfStore.folders
@@ -450,6 +455,8 @@ const destorySortable = () => {
 /** 进入编辑模式 */
 const enterEditMode = () => {
   shelfStore.checkout({ to: ShelfBranch.draft, reset: true })
+  // 编辑模式下尽快查询所有书籍
+  bookListStore.queryBooks({ ids: shelfStore.books.map((o) => o.id) })
 }
 /** 退出编辑模式 */
 const quiteEditMode = () => {
@@ -467,8 +474,8 @@ function renameHandle(name: string, cb: (promise: Promise<unknown> | void) => vo
   }
 }
 
-/** 屏蔽编辑模式下的事件 */
-function muteInEditMode(evt: MouseEvent) {
+/** 屏蔽编辑模式下的列表有右键事件 */
+function preventListContextMenuHandle(evt: MouseEvent) {
   if (editMode.value) {
     evt.preventDefault()
     // 不stop的话无法阻止menu组件弹出
@@ -497,6 +504,13 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
 
     // 选中书籍
     shelfStore.selectItem({ id })
+  }
+}
+
+function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
+  if (item.type === ShelfTypes.ShelfItemTypeEnum.BOOK) {
+    contextBookID.value = item.id
+    bookListStore.queryBooks({ ids: [item.id] })
   }
 }
 
