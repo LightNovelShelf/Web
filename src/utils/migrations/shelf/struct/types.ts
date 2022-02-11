@@ -63,7 +63,7 @@ export namespace ShelfLegacyStruct {
     }
 
     interface ServerShelfFolderItem extends Omit<ShelfFolderItem, 'value'> {
-      value: Omit<ShelfFolder, 'updateAt'> & { updateAt: Date }
+      value: Omit<ShelfFolder, 'updateAt'> & { updateAt: Date | string }
     }
 
     /** 服务器裁剪过后的数据 */

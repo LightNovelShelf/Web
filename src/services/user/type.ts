@@ -22,10 +22,10 @@ export namespace RefreshToken {
 
 export namespace ServerShelf {
   export interface BookItem extends Omit<ShelfBookItem, 'updateAt'> {
-    updateAt: Date
+    updateAt: Date | string
   }
   export interface FolderItem extends Omit<ShelfFolderItem, 'updateAt'> {
-    updateAt: Date
+    updateAt: Date | string
   }
   export type Item = BookItem | FolderItem
 }
