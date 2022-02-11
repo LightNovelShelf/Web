@@ -18,7 +18,7 @@ const INIT: BookListStore = {
 }
 
 class EMPTY_BOOK implements BookInList {
-  public readonly Id = -1
+  constructor(public readonly Id = -1) {}
   public readonly Title = ''
   // public readonly Cover = '/img/bg-paper-dark.jpeg'
   public readonly Cover = ''
@@ -28,8 +28,6 @@ class EMPTY_BOOK implements BookInList {
   public readonly InteriorLevel = 1
   // public readonly Placeholder = 'L06kq:ofjuoft7fRa|j@bFbGfQa}'
 }
-
-const DEFAULT_EMPTY_BOOK = new EMPTY_BOOK()
 
 /**
  * 书籍列表数据
@@ -42,7 +40,7 @@ export const useBookListStore = defineStore('app.bookList', {
   getters: {
     getBook() {
       return (id: number): BookInList => {
-        return this.books.get(id) || DEFAULT_EMPTY_BOOK
+        return this.books.get(id) || new EMPTY_BOOK(id)
       }
     },
     isEmpty() {
