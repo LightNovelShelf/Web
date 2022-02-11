@@ -6,23 +6,22 @@
 import { ref, watchEffect } from 'vue'
 import { decode } from 'blurhash'
 
-const props = defineProps<{ blurhash: string; width?: number; height?: number }>()
+const props = defineProps<{ blurhash: string }>()
 
 const canvas = ref<HTMLCanvasElement>()
 
 watchEffect(() => {
   if (props.blurhash && canvas.value) {
-    console.log({ w: canvas.value.clientWidth, h: canvas.value.clientHeight })
-    const pixels = decode(
-      props.blurhash,
-      props.width || canvas.value.clientWidth,
-      props.height || canvas.value.clientHeight
-    )
+    const width = canvas.value.clientWidth
+    const height = canvas.value.clientHeight
+
+    canvas.value.width = width
+    canvas.value.height = height
+    const pixels = decode(props.blurhash, width, height)
     const ctx = canvas.value.getContext('2d')
-    const imageData = ctx.createImageData(canvas.value.clientWidth, canvas.value.clientHeight)
+    const imageData = ctx.createImageData(width, height)
     imageData.data.set(pixels)
     ctx.putImageData(imageData, 0, 0)
-    debugger
   }
 })
 </script>
