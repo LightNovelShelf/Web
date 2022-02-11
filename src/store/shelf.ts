@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum, SHELF_STRUCT_VER } from '@/types/shelf'
 import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
-import produce, { setAutoFreeze } from 'immer'
+import produce from 'immer'
 import { isEqual } from 'lodash-es'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
@@ -21,7 +21,7 @@ export interface ShelfStore {
   /** 是否已经初始化 */
   initialized: boolean
   /** 选中项ID集合 */
-  selcted: Set<number | string>
+  selected: Set<number | string>
   source: ShelfSourceStruct
   branch: ShelfBranch
 }
@@ -29,7 +29,7 @@ export interface ShelfStore {
 /** 初始state */
 const INIT: ShelfStore = {
   initialized: false,
-  selcted: new Set(),
+  selected: new Set(),
   source: {
     [ShelfBranch.main]: [],
     [ShelfBranch.draft]: []
@@ -142,12 +142,12 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 选中计数 */
     selectedCount(): number {
-      return this.selcted.size
+      return this.selected.size
     },
     /** 选中的书籍 */
     selectedBooks(): ShelfBookItem[] {
       return this.shelf.filter(
-        (i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && this.selcted.has(i.id))
+        (i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && this.selected.has(i.id))
       )
     }
   },
@@ -371,39 +371,29 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 选中记录 */
     selectItem(payload: { id: string | number; selected?: boolean }) {
-      const nextSelected = payload.selected ?? !this.selcted.has(payload.id)
+      const nextSelected = payload.selected ?? !this.selected.has(payload.id)
       if (nextSelected) {
-        this.selcted.add(payload.id)
+        this.selected.add(payload.id)
       } else {
-        this.selcted.delete(payload.id)
+        this.selected.delete(payload.id)
       }
     },
     /** 清空选中记录 */
     clearSelected() {
-      this.selcted = new Set()
+      this.selected = new Set()
     },
     /** 添加到文件夹 */
-    addToFolder(payload: { books: Set<string | number>; parents: string[] }) {
-      const items = payload.books
-
-      // 清掉选择状态，不然会导致数据一直认为有已选的项目
-      items.forEach((item) => {
-        this.selcted.delete(item)
-      })
-
+    addToFolder(payload: { parents: string[] }) {
       this.commit({
         shelf: this.squeezeShelfItemIndex(
           produce(toRaw(this.shelf), (draft) => {
             draft.forEach((item) => {
               // 如果是待加入的项目，记录新的文件夹路径
-              if (items.has(item.id)) {
+              if (this.selected.has(item.id)) {
                 // 排在开头
                 item.index = 0
-                if (payload.parents === null) {
-                  item.parents = []
-                } else {
-                  item.parents = payload.parents
-                }
+
+                item.parents = payload.parents
               } else if (isEqual(item.parents, payload.parents)) {
                 item.index += 1
               }
@@ -411,6 +401,9 @@ const shelfStore = defineStore('app.shelf', {
           })
         )
       })
+
+      // 清掉选择状态，不然会导致数据一直认为有已选的项目
+      this.clearSelected()
     },
     /** 新建文件夹, 返回文件夹ID */
     createFolder(payload: { name: string }): string {
@@ -536,9 +529,6 @@ const shelfStore = defineStore('app.shelf', {
 /** @public 书架store */
 export function useShelfStore() {
   const store = shelfStore()
-
-  /** auto freeze的话会导致vue绑定报错 */
-  setAutoFreeze(false)
 
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (!store.initialized && !store.useLoading().value) {
