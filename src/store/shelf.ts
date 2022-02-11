@@ -222,7 +222,7 @@ const shelfStore = defineStore('app.shelf', {
         shelf = (serve.data as ServerShelf.Item[]).map((item): ShelfItem => {
           return {
             ...item,
-            updateAt: item.updateAt.toISOString()
+            updateAt: new Date(item.updateAt).toISOString()
           }
         })
       }

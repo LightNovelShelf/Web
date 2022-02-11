@@ -103,6 +103,12 @@ export async function getBookShelf() {
   }>('GetBookShelf')
 
   return res
+
+  // return import('./mock.json') as unknown as Promise<{
+  //   data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
+  //   /** @legacy 历史数据可能没有ver这个键值 */
+  //   ver?: SHELF_STRUCT_VER
+  // }>
 }
 
 /** 清空用户历史记录 */
