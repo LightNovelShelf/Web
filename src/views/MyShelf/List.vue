@@ -199,7 +199,7 @@
 
 <script lang="ts" setup>
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, ref, toRaw, watch } from 'vue'
 import * as ShelfTypes from '@/types/shelf'
 import { useForwardRef } from '@/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -243,7 +243,7 @@ const headerHeight = computed(() => `${layout.headerOffset.value}px`)
 /** 加载标记 */
 const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
 /** 选中项ID集合 */
-const selected = computed(() => shelfStore.selcted)
+const selected = computed(() => shelfStore.selected)
 /** shelfStore 是否已经初始化 */
 const initialized = computed(() => shelfStore.initialized)
 /** 是否处于编辑模式 */
@@ -414,11 +414,14 @@ function moveItemToFolderHandle(item: ShelfTypes.ShelfItem) {
 
 /** 文件夹选择器提交 */
 async function folderSelectorSubmitHandle() {
+  // 没有文件夹名称或者文件夹id的话就不知道要移去哪了，所以返回
   if (!selectorValue.value) {
+    // 弹个toast
+    $.notify({ type: 'warning', message: '请选择一个文件夹或者输入需要新建的文件夹名称' })
     return
   }
 
-  // 保险逻辑，没有children的化就不走下边的各种创建、修改逻辑了，保持原样
+  // 保险逻辑，没有选中的话就不走下边的各种创建、修改逻辑了，保持原样
   if (!selected.value.size) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
@@ -437,7 +440,7 @@ async function folderSelectorSubmitHandle() {
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
   // 选项有问题的时候也可能出现 folderID 为空
   if (folderID) {
-    shelfStore.addToFolder({ books: selected.value, parents: folderID === ALL_VALUE ? [] : [folderID] })
+    shelfStore.addToFolder({ parents: folderID === ALL_VALUE ? [] : [folderID] })
 
     await removeFolderIfItEmpty()
   }
@@ -502,9 +505,12 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
   }
 }
 
+/** 备好右键菜单数据（展示用的书籍数据） */
 function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
   if (item.type === ShelfTypes.ShelfItemTypeEnum.BOOK) {
+    /** 设置好ID后让vue自己监听数据数据请求情况 */
     contextBookID.value = item.id
+    /** 触发一次书籍数据检查 */
     bookListStore.queryBooks({ ids: [item.id] })
   }
 }
