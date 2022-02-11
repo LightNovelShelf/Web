@@ -15,7 +15,8 @@ export const useSettingStore = defineStore('app.setting', {
       readPageWidth: 0,
       justify: false,
       showButton: true,
-      tapToScroll: false
+      tapToScroll: false,
+      enableBlurHash: true // 不在阅读选项卡下，但需要保存到服务器
     }
   }),
   actions: {

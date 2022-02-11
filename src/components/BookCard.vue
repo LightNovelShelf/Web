@@ -11,7 +11,7 @@
                 <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>
               </div>
             </div>
-            <template v-if="book.Placeholder" v-slot:loading>
+            <template v-if="book.Placeholder && readSetting.enableBlurHash" v-slot:loading>
               <blur-hash :blurhash="book.Placeholder" />
             </template>
           </q-img>
@@ -45,7 +45,10 @@ import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
 import { useQuasar } from 'quasar'
 import BlurHash from '@/components/BlurHash.vue'
+import { useSettingStore } from '@/store/setting'
 
+const settingStore = useSettingStore()
+const { readSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const cover = computed(() => props.book.Cover)
