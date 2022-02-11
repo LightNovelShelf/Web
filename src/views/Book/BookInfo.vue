@@ -19,6 +19,9 @@
                     </div>
                   </div>
                 </div>
+                <template v-if="book.Placeholder" v-slot:loading>
+                  <blur-hash :blurhash="book.Placeholder" />
+                </template>
               </q-img>
               <q-responsive v-else :ratio="2 / 3">
                 <q-skeleton class="fit" square />
@@ -119,6 +122,7 @@ import { BookInList } from '@/services/book/types'
 import { DateTime } from 'luxon'
 import { CommentType } from '@/services/comment/types'
 import { userReadPositionDB } from '@/utils/storage/db'
+import BlurHash from '@/components/BlurHash.vue'
 
 const props = defineProps<{ bid: string }>()
 
