@@ -34,6 +34,7 @@
             v-model="markdownText"
             style="display: flex !important"
             :onHtmlChanged="onMDChanged"
+            :theme="$q.dark.isActive ? 'dark' : 'light'"
           />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
