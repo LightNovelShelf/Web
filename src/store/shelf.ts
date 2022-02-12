@@ -117,10 +117,10 @@ const shelfStore = defineStore('app.shelf', {
       }
     },
     /** map格式的书籍数据，方便查找 */
-    booksMap(): Map<string, ShelfBookItem> {
-      const map = new Map<string, ShelfBookItem>()
+    booksMap(): Map<number, ShelfBookItem> {
+      const map = new Map<number, ShelfBookItem>()
       this.books.forEach((item) => {
-        map.set(item.id + '', toRaw(item))
+        map.set(item.id, toRaw(item))
       })
       return map
     },
