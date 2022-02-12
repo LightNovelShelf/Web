@@ -102,7 +102,6 @@ const request = useTimeoutFn(async () => {
   markdownText.value = turndownService.turndown(book.value['Introduction'])
   markdownHtml.value = book.value['Introduction']
   watch(editorSetting, (newValue) => {
-    console.log(newValue)
     if (newValue.mode === 'html') {
       book.value['Introduction'] = markdownHtml.value
     } else {
