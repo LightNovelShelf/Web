@@ -58,6 +58,7 @@
           v-model="markdownText"
           style="display: flex !important"
           :onHtmlChanged="onMDChanged"
+          :theme="$q.dark.isActive ? 'dark' : 'light'"
         />
       </div>
     </div>
