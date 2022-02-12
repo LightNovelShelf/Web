@@ -5,6 +5,7 @@
         <q-input label="标题" v-model="chapter['Title']" />
         <div class="text-opacity">内容</div>
         <q-editor
+          v-if="editorSetting.mode === 'html'"
           ref="editorRef"
           paragraph-tag="p"
           :definitions="{
@@ -52,6 +53,12 @@
           v-model="chapterContent"
           min-height="5rem"
         />
+        <md-editor
+          v-if="editorSetting.mode === 'markdown'"
+          v-model="markdownText"
+          style="display: flex !important"
+          :onHtmlChanged="onMDChanged"
+        />
       </div>
     </div>
 
@@ -78,7 +85,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, toRaw } from 'vue'
+import { watch, computed, nextTick, ref, toRaw } from 'vue'
 import { icon } from '@/plugins/icon'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
@@ -87,14 +94,22 @@ import { useQuasar, debounce } from 'quasar'
 import { getChapterEditInfo, editChapterContent } from '@/services/chapter'
 import prettier from 'prettier/esm/standalone.mjs'
 import parserHtml from 'prettier/esm/parser-html.mjs'
+import { useSettingStore } from '@/store/setting'
+import MdEditor from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import TurndownService from 'turndown'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)
 const sortNum = computed(() => ~~props.sortNum)
 const chapter = ref<any>()
 const fabPos = ref([18, 18])
+const settingStore = useSettingStore()
 const draggingFab = ref(false)
 const editorRef = ref()
+const markdownText = ref('')
+const markdownHtml = ref('')
+const turndownService = new TurndownService()
 
 const clearHtml = debounce(function clearHtml(html: string) {
   if (html.indexOf('MsoNormal') !== -1) {
@@ -107,6 +122,8 @@ const clearHtml = debounce(function clearHtml(html: string) {
     chapter.value['Content'] = el.innerHTML.replaceAll('<o:p></o:p>', '')
   }
 }, 100)
+
+const { editorSetting } = settingStore
 
 const chapterContent = computed<string>({
   get() {
@@ -121,7 +138,21 @@ const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.v
 
 const request = useTimeoutFn(async () => {
   chapter.value = await getChapterEditInfo({ BookId: bid.value, SortNum: sortNum.value })
+  markdownText.value = turndownService.turndown(chapter.value['Content'])
+  markdownHtml.value = chapter.value['Content']
+  watch(editorSetting, (newValue) => {
+    console.log(newValue)
+    if (newValue.mode === 'html') {
+      chapter.value['Content'] = markdownHtml.value
+    } else {
+      markdownText.value = turndownService.turndown(chapter.value['Content'])
+    }
+  })
 })
+
+const onMDChanged = (html: string) => {
+  markdownHtml.value = html
+}
 
 function moveFab(ev) {
   draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
