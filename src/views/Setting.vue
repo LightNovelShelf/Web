@@ -63,6 +63,22 @@
             </div>
           </div>
         </q-tab-panel>
+
+        <q-tab-panel name="Edit">
+          <div class="q-pa-md">
+            <div class="q-gutter-sm">
+              <div>编辑器</div>
+              <q-btn-toggle
+                v-model="editorSetting.mode"
+                toggle-color="primary"
+                :options="[
+                  { label: 'Html', value: 'html' },
+                  { label: 'Markdown', value: 'markdown' }
+                ]"
+              />
+            </div>
+          </div>
+        </q-tab-panel>
       </q-tab-panels>
     </div>
   </div>
@@ -87,6 +103,12 @@ const tabOptions: Array<Record<string, any>> = [
     key: 'Read',
     label: '阅读',
     icon: icon.mdiFormatSize
+  },
+  {
+    name: 'Edit',
+    key: 'Edit',
+    label: '编辑',
+    icon: icon.mdiPen
   }
 ]
 
@@ -96,6 +118,7 @@ export default defineComponent({
     const settingStore = useSettingStore()
     const { dark } = storeToRefs(settingStore)
     const readSetting = settingStore.readSetting
+    const editorSetting = settingStore.editorSetting
 
     let tab = ref('Setting')
 
@@ -104,7 +127,7 @@ export default defineComponent({
       settingStore.save()
     })
 
-    watch(readSetting, () => {
+    watch([readSetting, editorSetting], () => {
       settingStore.save()
     })
 
@@ -113,7 +136,8 @@ export default defineComponent({
       tabOptions,
       tab,
       readSetting,
-      dark
+      dark,
+      editorSetting
     }
   }
 })

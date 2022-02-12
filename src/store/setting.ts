@@ -16,20 +16,30 @@ export const useSettingStore = defineStore('app.setting', {
       justify: false,
       showButton: true,
       tapToScroll: false
+    },
+    editorSetting: {
+      mode: 'html'
     }
   }),
   actions: {
     async init() {
       const readSetting = await userSettingDB.get('readSetting')
+      const editorSetting = await userSettingDB.get('editorSetting')
       if (readSetting) {
         Object.keys(readSetting).forEach((key) => {
           this.readSetting[key] = readSetting[key]
         })
       }
+      if (editorSetting) {
+        Object.keys(editorSetting).forEach((key) => {
+          this.editorSetting[key] = editorSetting[key]
+        })
+      }
     },
     async save() {
       const p1 = userSettingDB.set('readSetting', toRaw(this.readSetting))
-      await Promise.all([p1])
+      const p2 = userSettingDB.set('editorSetting', toRaw(this.editorSetting))
+      await Promise.all([p1, p2])
       Dark.set(this.dark)
     }
   },

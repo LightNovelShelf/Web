@@ -19,6 +19,7 @@
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
           <q-editor
+            v-if="editorSetting.mode === 'html'"
             :toolbar="[
               ['left', 'center', 'right', 'justify'],
               ['bold', 'italic', 'underline', 'strike'],
@@ -27,6 +28,12 @@
             ]"
             v-model="book['Introduction']"
             min-height="5rem"
+          />
+          <md-editor
+            v-if="editorSetting.mode === 'markdown'"
+            v-model="markdownText"
+            style="display: flex !important"
+            :onHtmlChanged="onMDChanged"
           />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
@@ -56,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRaw } from 'vue'
+import { watch, computed, ref, toRaw } from 'vue'
 import { icon } from '@/plugins/icon'
 import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -64,14 +71,24 @@ import { getBookEditInfo, editBook } from '@/services/book'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
+import { useSettingStore } from '@/store/setting'
+import MdEditor from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import TurndownService from 'turndown'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)
 const book = ref<any>()
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
+const settingStore = useSettingStore()
 const options = ref([])
 const isActive = computed(() => book.value?.Id === bid.value)
+const markdownText = ref('')
+const markdownHtml = ref('')
+const turndownService = new TurndownService()
+
+const { editorSetting } = settingStore
 
 const request = useTimeoutFn(async () => {
   const data = (await getBookEditInfo(bid.value)) as any
@@ -82,7 +99,21 @@ const request = useTimeoutFn(async () => {
     }
   })
   book.value = data.Book
+  markdownText.value = turndownService.turndown(book.value['Introduction'])
+  markdownHtml.value = book.value['Introduction']
+  watch(editorSetting, (newValue) => {
+    console.log(newValue)
+    if (newValue.mode === 'html') {
+      book.value['Introduction'] = markdownHtml.value
+    } else {
+      markdownText.value = turndownService.turndown(book.value['Introduction'])
+    }
+  })
 })
+
+const onMDChanged = (html: string) => {
+  markdownHtml.value = html
+}
 
 function moveFab(ev) {
   draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
