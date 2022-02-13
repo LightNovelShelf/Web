@@ -59,6 +59,7 @@
           style="display: flex !important"
           :onHtmlChanged="onMDChanged"
           :theme="$q.dark.isActive ? 'dark' : 'light'"
+          :toolbarsExclude="['image', 'save']"
         />
       </div>
     </div>
@@ -182,6 +183,7 @@ async function save() {
     persistent: true
   }).onOk(async () => {
     try {
+      chapter.value['Content'] = markdownHtml.value
       await editChapterContent(toRaw(chapter.value))
 
       $q.notify({
