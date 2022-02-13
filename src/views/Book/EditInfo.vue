@@ -32,9 +32,10 @@
           <md-editor
             v-if="editorSetting.mode === 'markdown'"
             v-model="markdownText"
-            style="display: flex !important"
+            style="display: flex !important; width: 99%"
             :onHtmlChanged="onMDChanged"
             :theme="$q.dark.isActive ? 'dark' : 'light'"
+            :toolbarsExclude="['image', 'save', 'github']"
           />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
@@ -130,6 +131,7 @@ async function save() {
     persistent: true
   }).onOk(async () => {
     try {
+      book.value['Introduction'] = markdownHtml.value
       await editBook(toRaw(book.value))
 
       $q.notify({
