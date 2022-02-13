@@ -53,14 +53,16 @@
           v-model="chapterContent"
           min-height="5rem"
         />
-        <md-editor
-          v-if="editorSetting.mode === 'markdown'"
-          v-model="markdownText"
-          style="display: flex !important"
-          :onHtmlChanged="onMDChanged"
-          :theme="$q.dark.isActive ? 'dark' : 'light'"
-          :toolbarsExclude="['image', 'save']"
-        />
+        <div>
+          <md-editor
+            v-if="editorSetting.mode === 'markdown'"
+            v-model="markdownText"
+            style="display: flex !important"
+            :onHtmlChanged="onHtmlChanged"
+            :theme="$q.dark.isActive ? 'dark' : 'light'"
+            :toolbarsExclude="['image', 'save']"
+          />
+        </div>
       </div>
     </div>
 
@@ -110,7 +112,6 @@ const settingStore = useSettingStore()
 const draggingFab = ref(false)
 const editorRef = ref()
 const markdownText = ref('')
-const markdownHtml = ref('')
 const turndownService = new TurndownService()
 
 const clearHtml = debounce(function clearHtml(html: string) {
@@ -141,18 +142,16 @@ const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.v
 const request = useTimeoutFn(async () => {
   chapter.value = await getChapterEditInfo({ BookId: bid.value, SortNum: sortNum.value })
   markdownText.value = turndownService.turndown(chapter.value['Content'])
-  markdownHtml.value = chapter.value['Content']
-  watch(editorSetting, (newValue) => {
-    if (newValue.mode === 'html') {
-      chapter.value['Content'] = markdownHtml.value
-    } else {
-      markdownText.value = turndownService.turndown(chapter.value['Content'])
-    }
-  })
 })
 
-const onMDChanged = (html: string) => {
-  markdownHtml.value = html
+watch(editorSetting, (newValue) => {
+  if (newValue.mode === 'markdown') {
+    markdownText.value = turndownService.turndown(chapter.value['Content'])
+  }
+})
+
+const onHtmlChanged = (html: string) => {
+  chapter.value['Content'] = html
 }
 
 function moveFab(ev) {
@@ -183,7 +182,6 @@ async function save() {
     persistent: true
   }).onOk(async () => {
     try {
-      chapter.value['Content'] = markdownHtml.value
       await editChapterContent(toRaw(chapter.value))
 
       $q.notify({
