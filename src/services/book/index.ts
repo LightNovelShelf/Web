@@ -30,6 +30,8 @@ export function getBookListByIds(ids: number[]) {
   }
   return requestWithSignalr<Types.BookInList[]>('GetBookListByIds', ids)
 }
+/** 最大并行数量 */
+getBookListByIds.MAX_CONCURRENT = 24
 /** 取最新的6本书，无需登录 */
 export function getLatestBookList() {
   return requestWithSignalr<Types.GetBookListRes>('GetLatestBookList')

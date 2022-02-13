@@ -15,6 +15,10 @@
               <q-radio v-model="dark" :val="true" label="夜间" />
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
+            <div class="q-gutter-sm light-radio">
+              <div>其他选项</div>
+              <q-toggle v-model="generalSetting.enableBlurHash" label="打开书籍封面自定义占位符" />
+            </div>
           </div>
         </q-tab-panel>
 
@@ -84,7 +88,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { watch, defineComponent, ref, onActivated } from 'vue'
 import { icon } from '@/plugins/icon'
 import { Dark } from 'quasar'
@@ -112,35 +116,18 @@ const tabOptions: Array<Record<string, any>> = [
   }
 ]
 
-export default defineComponent({
-  name: 'Setting',
-  setup() {
-    const settingStore = useSettingStore()
-    const { dark } = storeToRefs(settingStore)
-    const readSetting = settingStore.readSetting
-    const editorSetting = settingStore.editorSetting
+const settingStore = useSettingStore()
+const { dark } = storeToRefs(settingStore)
+const { readSetting, generalSetting, editorSetting } = settingStore
 
-    let tab = ref('Setting')
+let tab = ref('Setting')
 
-    watch(dark, (newDark) => {
-      Dark.set(newDark)
-      settingStore.save()
-    })
-
-    watch([readSetting, editorSetting], () => {
-      settingStore.save()
-    })
-
-    return {
-      icon,
-      tabOptions,
-      tab,
-      readSetting,
-      dark,
-      editorSetting
-    }
-  }
+watch(dark, (newDark) => {
+  Dark.set(newDark)
+  settingStore.save()
 })
+
+watch([readSetting, generalSetting, editorSetting], settingStore.save)
 </script>
 
 <style lang="scss">
