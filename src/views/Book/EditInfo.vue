@@ -33,7 +33,7 @@
             v-if="editorSetting.mode === 'markdown'"
             v-model="markdownText"
             style="display: flex !important; width: 99%"
-            :onHtmlChanged="onMDChanged"
+            :onHtmlChanged="onHtmlChanged"
             :theme="$q.dark.isActive ? 'dark' : 'light'"
             :toolbarsExclude="['image', 'save', 'github']"
           />
@@ -87,7 +87,6 @@ const settingStore = useSettingStore()
 const options = ref([])
 const isActive = computed(() => book.value?.Id === bid.value)
 const markdownText = ref('')
-const markdownHtml = ref('')
 const turndownService = new TurndownService()
 
 const { editorSetting } = settingStore
@@ -102,18 +101,16 @@ const request = useTimeoutFn(async () => {
   })
   book.value = data.Book
   markdownText.value = turndownService.turndown(book.value['Introduction'])
-  markdownHtml.value = book.value['Introduction']
-  watch(editorSetting, (newValue) => {
-    if (newValue.mode === 'html') {
-      book.value['Introduction'] = markdownHtml.value
-    } else {
-      markdownText.value = turndownService.turndown(book.value['Introduction'])
-    }
-  })
 })
 
-const onMDChanged = (html: string) => {
-  markdownHtml.value = html
+watch(editorSetting, (newValue) => {
+  if (newValue.mode === 'markdown') {
+    markdownText.value = turndownService.turndown(book.value['Introduction'])
+  }
+})
+
+const onHtmlChanged = (html: string) => {
+  book.value['Introduction'] = html
 }
 
 function moveFab(ev) {
@@ -131,7 +128,6 @@ async function save() {
     persistent: true
   }).onOk(async () => {
     try {
-      book.value['Introduction'] = markdownHtml.value
       await editBook(toRaw(book.value))
 
       $q.notify({

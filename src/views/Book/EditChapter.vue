@@ -94,7 +94,7 @@
     <q-dialog v-model="BBCodePopup">
       <q-card style="min-width: 800px">
         <q-card-section>
-          <div class="text-h6">输入BBcode</div>
+          <div class="text-h6">输入BBCode</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
