@@ -166,11 +166,18 @@ var ShowBBCodePopup = () => {
 }
 // BBCode 自定义替换
 const customparser = new BBCodeParser({
-  '\\[img=(\\d+),(\\d+)\\](.*?)\\[/img\\]': '<img style="width:$1px; height:$2px" src="$3">'
+  '\\[img=(\\d+),(\\d+)\\](.*?)\\[/img\\]':
+    '<div class="illus duokan-image-single"><img style="width:$1px; height:$2px" src="$3"></div>'
 })
 var BBCodeTransForm = () => {
-  chapter.value['Content'] =
-    '<p>' + bbCodeParser.parse(customparser.parse(BBCodeTextarea.value)).split('\n').join('</p><p>') + '</p>'
+  let arr = bbCodeParser.parse(customparser.parse(BBCodeTextarea.value)).split('\n')
+  arr = arr.map((o: string) => {
+    if (o.substr(0, 4) !== '<div') {
+      o = '<p>' + o + '</p>'
+    }
+    return o
+  })
+  chapter.value['Content'] = arr.join('')
   BBCodeTextarea.value = ''
 }
 function removeFormat() {
