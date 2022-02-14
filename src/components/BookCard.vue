@@ -3,15 +3,23 @@
     <router-link :to="{ name: 'BookInfo', params: { bid: props.book.Id } }">
       <div class="book-cover">
         <q-card v-intersection.once="onIntersection">
-          <q-img v-if="visible" :src="cover" :ratio="2 / 3">
-            <div v-if="book.Level || book.InteriorLevel" class="absolute-bottom bottom-shadow">
-              <div class="row text-weight-bold">
-                <div>{{ book.Level && !book.InteriorLevel ? `Level ${book.Level}` : '' }}</div>
-                <q-space />
-                <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>
+          <div v-if="visible">
+            <q-img v-if="cover" :src="cover" :ratio="2 / 3">
+              <div v-if="book.Level || book.InteriorLevel" class="absolute-bottom bottom-shadow">
+                <div class="row text-weight-bold">
+                  <div>{{ book.Level && !book.InteriorLevel ? `Level ${book.Level}` : '' }}</div>
+                  <q-space />
+                  <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>
+                </div>
               </div>
-            </div>
-          </q-img>
+              <template v-if="book.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
+                <blur-hash :blurhash="book.Placeholder" />
+              </template>
+            </q-img>
+            <q-responsive v-else :ratio="2 / 3">
+              <q-skeleton class="fit" />
+            </q-responsive>
+          </div>
           <q-responsive v-else :ratio="2 / 3" />
         </q-card>
 
@@ -41,13 +49,17 @@ import { computed, ref } from 'vue'
 import { useToNow } from '@/composition/useToNow'
 import { BookInList } from '@/services/book/types'
 import { useQuasar } from 'quasar'
+import BlurHash from '@/components/BlurHash.vue'
+import { useSettingStore } from '@/store/setting'
 
+const settingStore = useSettingStore()
+const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const cover = computed(() => props.book.Cover)
 const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
 const visible = ref(false)
-function onIntersection(entry) {
+function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting
 }
 </script>
