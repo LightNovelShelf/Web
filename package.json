@@ -20,7 +20,6 @@
     "dompurify": "^2.3.5",
     "hash.js": "^1.1.7",
     "immer": "^9.0.12",
-    "js-bbcode-parser": "^4.0.0",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
     "luxon": "^2.3.0",
