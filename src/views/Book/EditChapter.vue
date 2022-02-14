@@ -13,7 +13,7 @@
               label: '格式化',
               handler: beautify
             },
-            ShowBBCodePopup: {
+            bbcode: {
               tip: '转换BBCode',
               label: 'BBCode',
               handler: ShowBBCodePopup
@@ -52,8 +52,7 @@
             ],
             ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
             ['undo', 'redo'],
-            ['viewsource', 'beautify'],
-            ['ShowBBCodePopup']
+            ['viewsource', 'bbcode', 'beautify']
           ]"
           v-model="chapterContent"
           min-height="5rem"
@@ -110,8 +109,7 @@ import { useQuasar, debounce } from 'quasar'
 import { getChapterEditInfo, editChapterContent } from '@/services/chapter'
 import prettier from 'prettier/esm/standalone.mjs'
 import parserHtml from 'prettier/esm/parser-html.mjs'
-import bbCodeParser from 'js-bbcode-parser'
-import BBCodeParser from 'js-bbcode-parser/src/index.js'
+import bbCodeParser from '@/utils/bbcode/simple'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)
@@ -161,16 +159,11 @@ function beautify() {
   })
 }
 // BBCode 弹窗
-var ShowBBCodePopup = () => {
+const ShowBBCodePopup = () => {
   BBCodePopup.value = true
 }
-// BBCode 自定义替换
-const customparser = new BBCodeParser({
-  '\\[img=(\\d+),(\\d+)\\](.*?)\\[/img\\]':
-    '<div class="illus duokan-image-single"><img style="width:$1px; height:$2px" src="$3"></div>'
-})
-var BBCodeTransForm = () => {
-  let arr = bbCodeParser.parse(customparser.parse(BBCodeTextarea.value)).split('\n')
+const BBCodeTransForm = () => {
+  let arr = bbCodeParser.parse(BBCodeTextarea.value).split('\n')
   arr = arr.map((o: string) => {
     if (o.substr(0, 4) !== '<div') {
       o = '<p>' + o + '</p>'
@@ -180,6 +173,7 @@ var BBCodeTransForm = () => {
   chapter.value['Content'] = arr.join('')
   BBCodeTextarea.value = ''
 }
+
 function removeFormat() {
   editorRef.value.runCmd('removeFormat')
   nextTick(() => {
