@@ -1,9 +1,9 @@
 import { ListResult } from '../types'
-import { DateTime } from 'luxon'
 
 export interface BookInList {
   Id: number
   Cover: string
+  Placeholder?: string
   LastUpdateTime: Date
   UserName: string
   Title: string
@@ -28,8 +28,10 @@ export interface GetBookInfoRes {
     Chapter: ChapterInfo[]
     Id: number
     Cover: string
+    Placeholder?: string
     ExtraInfo: any
     Introduction: string
+    Author: string
     LastUpdate: string
     LastUpdateTime: Date
     CreatedTime: Date
