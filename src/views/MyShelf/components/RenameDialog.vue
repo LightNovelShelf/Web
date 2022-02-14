@@ -42,7 +42,7 @@ watch(
   (nextValue) => {
     visible.value = !!nextValue
     if (nextValue) {
-      newName.value = nextValue.value.Title
+      newName.value = nextValue.title
     }
   }
 )

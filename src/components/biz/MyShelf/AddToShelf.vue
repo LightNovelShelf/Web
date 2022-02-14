@@ -22,12 +22,12 @@ import { HubConnectionState } from '@microsoft/signalr'
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 
 /** 目前的DB方案只能接受string类型的key */
-const bookId = computed<string>(() => (props.book?.Id ?? '') + '')
+const bookId = computed<number | null>(() => props.book?.Id ?? null)
 const bookPath = ref<string[]>([])
 const $ = useQuasar()
 const shelfStore = useShelfStore()
 /** 是否已经收藏 */
-const liked = computed<boolean>(() => shelfStore.booksMap.has(bookId.value))
+const liked = computed<boolean>(() => shelfStore.booksMap.has(bookId.value ?? -1))
 /** 读取/写入中 */
 const loading = computed(
   () => shelfStore.useLoading((s) => s.pull || s.push).value || connectState.value !== HubConnectionState.Connected
@@ -42,7 +42,7 @@ const outline = computed<boolean>(() => liked.value)
 
 /** 切换收藏与否 */
 const clickHandle = async () => {
-  if (!props.book) {
+  if (!bookId.value) {
     return
   }
 
@@ -53,7 +53,7 @@ const clickHandle = async () => {
 
   try {
     if (nextLike) {
-      await shelfStore.addToShelf(props.book)
+      await shelfStore.addToShelf({ id: bookId.value })
     } else {
       await shelfStore.removeFromShelf({ books: [bookId.value], push: true })
     }
