@@ -16,7 +16,7 @@
     <q-dialog v-model="BBCodePopup">
       <q-card style="min-width: 800px">
         <q-card-section>
-          <div class="text-h6">输入BBcode</div>
+          <div class="text-h6">输入BBCode</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -43,10 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue'
-
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useQuasar, debounce } from 'quasar'
 import prettier from 'prettier/esm/standalone.mjs'
 import parserHtml from 'prettier/esm/parser-html.mjs'
@@ -116,9 +113,8 @@ const toolbar = computed(() => {
     return CommonToolbar
   }
 })
+
 const chapter = ref<any>()
-const fabPos = ref([18, 18])
-const draggingFab = ref(false)
 const editorRef = ref()
 const BBCodePopup = ref(false)
 const BBCodeTextarea = ref('')
@@ -126,10 +122,8 @@ const settingStore = useSettingStore()
 const { editorSetting } = settingStore
 const turndownService = new TurndownService()
 const markdownText = ref('')
-
-const request = useTimeoutFn(async () => {
-  markdownText.value = turndownService.turndown(htmlContent.value)
-})
+// 第一次进来初始化
+if (editorSetting.mode === 'markdown') markdownText.value = turndownService.turndown(htmlContent.value)
 
 const clearHtml = debounce(function clearHtml(html: string) {
   if (html.indexOf('MsoNormal') !== -1) {
@@ -139,18 +133,20 @@ const clearHtml = debounce(function clearHtml(html: string) {
       item.classList.remove('MsoNormal')
       if (item.classList.length === 0) item.removeAttribute('class')
     })
-    htmlContent.value = el.innerHTML.replaceAll('<o:p></o:p>', '')
+    emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
   }
 }, 100)
 
 const onHtmlChanged = (html: string) => {
-  htmlContent.value = html
+  // MarkDown模式下不需要清理代码
+  emit('update:html', html)
 }
+watch(editorSetting, (newValue) => {
+  if (newValue.mode === 'markdown') {
+    markdownText.value = turndownService.turndown(htmlContent.value)
+  }
+})
 
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
-}
 function beautify() {
   htmlContent.value = prettier.format(htmlContent.value, {
     parser: 'html',
@@ -180,6 +176,4 @@ function removeFormat() {
     htmlContent.value = htmlContent.value.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
   })
 }
-
-useInitRequest(request)
 </script>

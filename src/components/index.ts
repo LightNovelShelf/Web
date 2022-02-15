@@ -1,5 +1,4 @@
 import { defineAsyncComponent } from 'vue'
 
-export { default as Comment } from './Comment.vue'
-
-export const htmlContent = defineAsyncComponent(() => import('./HtmlContent.vue'))
+export const HtmlEditor = defineAsyncComponent(() => import('./HtmlEditor.vue'))
+export const Comment = defineAsyncComponent(() => import('./Comment.vue'))
