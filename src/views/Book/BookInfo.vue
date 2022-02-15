@@ -19,6 +19,9 @@
                     </div>
                   </div>
                 </div>
+                <template v-if="book.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
+                  <blur-hash :blurhash="book.Placeholder" />
+                </template>
               </q-img>
               <q-responsive v-else :ratio="2 / 3">
                 <q-skeleton class="fit" square />
@@ -46,8 +49,8 @@
                 </div>
               </div>
 
-              <div class="text-subtitle1 text-weight-bold" style="margin-bottom: 24px">《{{ book['Title'] }}》</div>
-              <div>作者：{{ book['Author'] }}</div>
+              <div class="text-subtitle1 text-weight-bold">《{{ book['Title'] }}》</div>
+              <div style="margin-top: 24px">作者：{{ book['Author'] }}</div>
               <div>最后更新：{{ book['LastUpdate'] }}</div>
               <div>更新时间：{{ dateFormat(book['LastUpdateTime']) }} ({{ LastUpdateTimeDesc }})</div>
               <div>上次阅读：{{ lastReadTitle }}</div>
@@ -119,9 +122,13 @@ import { BookInList } from '@/services/book/types'
 import { DateTime } from 'luxon'
 import { CommentType } from '@/services/comment/types'
 import { userReadPositionDB } from '@/utils/storage/db'
+import BlurHash from '@/components/BlurHash.vue'
+import { useSettingStore } from '@/store/setting'
 
 const props = defineProps<{ bid: string }>()
 
+const settingStore = useSettingStore()
+const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const router = useRouter()
 const appStore = useAppStore()
