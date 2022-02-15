@@ -37,7 +37,7 @@
             :theme="$q.dark.isActive ? 'dark' : 'light'"
             :toolbarsExclude="['image', 'save', 'github']"
           /> -->
-          <html-content v-model:html="book['Introduction']" mode="common" />
+          <html-content v-model:html="book['Introduction']" mode="simple" />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
       </q-grid-item>
