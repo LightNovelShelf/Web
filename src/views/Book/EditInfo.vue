@@ -18,7 +18,7 @@
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
-          <q-editor
+          <!-- <q-editor
             v-if="editorSetting.mode === 'html'"
             :toolbar="[
               ['left', 'center', 'right', 'justify'],
@@ -36,7 +36,8 @@
             :onHtmlChanged="onHtmlChanged"
             :theme="$q.dark.isActive ? 'dark' : 'light'"
             :toolbarsExclude="['image', 'save', 'github']"
-          />
+          /> -->
+          <html-content v-model:html="book['Introduction']" mode="simple" />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
       </q-grid-item>
@@ -77,6 +78,7 @@ import { useSettingStore } from '@/store/setting'
 import MdEditor from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import TurndownService from 'turndown'
+import HtmlContent from '@/components/HtmlContent.vue'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)
