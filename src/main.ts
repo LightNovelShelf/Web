@@ -7,14 +7,12 @@ import { QGridItem, QGrid } from '@/plugins/quasar/components'
 import { app } from './app'
 import { pinia } from '@/plugins/pinia'
 import { enableMapSet, setAutoFreeze } from 'immer'
-import { htmlContent } from '@/components'
 
 enableMapSet()
 // AutoFreeze 与响应式冲突，关掉才能用
 setAutoFreeze(false)
 app.component('q-grid', QGrid)
 app.component('q-grid-item', QGridItem)
-app.component('html-content', htmlContent)
 
 import Viewer from 'v-viewer'
 import 'viewerjs/dist/viewer.min.css'
