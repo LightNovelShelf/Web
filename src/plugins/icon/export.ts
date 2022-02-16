@@ -22,6 +22,7 @@ export {
   mdiSkipNext,
   mdiSkipPrevious,
   mdiAccountCircle,
+  mdiAccountOutline,
   mdiEmail,
   mdiLock,
   mdiSend,
@@ -99,5 +100,7 @@ export {
   mdiFormatFont,
   mdiContentSave,
   mdiSquareEditOutline,
-  mdiPen
+  mdiWalletOutline,
+  mdiAccountCog,
+  mdiPe
 } from '@mdi/js'

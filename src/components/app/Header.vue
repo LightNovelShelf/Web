@@ -50,34 +50,85 @@
           <img v-if="user" :src="user.Avatar" alt="avatar" />
           <q-icon size="36px" v-else :name="icon.mdiAccountCircle"></q-icon>
 
-          <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
-            <q-list v-if="user">
-              <q-item>
-                <q-item-section avatar>
-                  <q-avatar>
-                    <img :src="user.Avatar" alt="avatar" />
-                  </q-avatar>
-                </q-item-section>
-                <q-item-section>
-                  <div>{{ user.UserName }}</div>
-                  <div class="text-caption text-opacity">{{ user['Role'].Name }}</div>
-                </q-item-section>
-              </q-item>
+          <q-menu
+            class="avatar-popover"
+            :offset="[-30, 5]"
+            anchor="bottom left"
+            self="top right"
+            style="border-radius: 8px"
+          >
+            <q-list class="avatar-panel-popover" v-if="user">
+              <div class="nickname-item text-center">
+                <q-item>
+                  <q-item-section>
+                    <div>{{ user.UserName }}</div>
+                    <div class="text-caption text-opacity">{{ user['Role'].Name }}</div>
+                  </q-item-section>
+                </q-item>
+              </div>
 
-              <q-separator />
+              <div class="level-item">
+                <div class="row q-col-gutter-sm items-center">
+                  <div class="col level-item__bar--tag level-item__bar--now">lv0</div>
+                  <div class="col">
+                    <q-linear-progress size="xs" :value="0.3" />
+                  </div>
+                  <div class="col level-item__bar--tag level-item__bar--next">lv1</div>
+                </div>
 
-              <q-item clickable v-ripple>
-                <q-item-section>个人中心</q-item-section>
-              </q-item>
-              <q-item clickable v-ripple :to="{ name: 'Setting' }">
-                <q-item-section>网站设置</q-item-section>
-              </q-item>
-              <q-item>
-                <q-btn @click="logout" color="red" class="full-width flex-center row">
-                  <q-icon size="18px" left :name="icon.mdiLogoutVariant" />
-                  <span>退出登录</span>
-                </q-btn>
-              </q-item>
+                <div class="text-caption text-opacity level-item__text"> 当前经验0, 还需要114514经验升级到lv1 </div>
+              </div>
+
+              <div class="counts-item">
+                <div class="row justify-between">
+                  <a class="col single-count-item">
+                    <div class="count-num">0</div>
+                    <div class="count-text">关注</div>
+                  </a>
+                  <a class="col single-count-item">
+                    <div class="count-num">0</div>
+                    <div class="count-text">粉丝</div>
+                  </a>
+                  <a class="col single-count-item">
+                    <div class="count-num">0</div>
+                    <div class="count-text">发帖</div>
+                  </a>
+                </div>
+              </div>
+
+              <div class="link-item">
+                <template v-for="option in userInfoMenuOptions" :key="option.key">
+                  <!-- TODO: 需要解决点击路由时，相应 menu 会被一直激活 -->
+                  <q-item
+                    clickable
+                    v-ripple
+                    :to="
+                      (option.disabled ?? true) && option.route ? { name: option.route, params: option.params } : null
+                    "
+                  >
+                    <q-item-section avatar>
+                      <q-icon size="18px" :name="option.icon" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{ option.label }}</q-item-label>
+                    </q-item-section>
+                    <q-item-section side>
+                      <q-icon size="18px" :name="icon.mdiChevronRight" />
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </div>
+
+              <q-separator style="margin: 10px 0" />
+
+              <div class="logout-item">
+                <q-item clickable v-ripple @click="logout">
+                  <q-item-section avatar>
+                    <q-icon size="18px" :name="icon.mdiLogoutVariant" />
+                  </q-item-section>
+                  <q-item-section>退出登录</q-item-section>
+                </q-item>
+              </div>
             </q-list>
 
             <div v-else class="q-pa-sm">
@@ -126,6 +177,34 @@ const reveal = useMedia(
   window.innerWidth <= siderBreakpoint.value
 )
 const router = useRouter()
+
+const userInfoMenuOptions: Array<Record<string, any>> = [
+  {
+    label: '个人中心',
+    key: 'Account',
+    route: '',
+    icon: icon.mdiAccountOutline
+  },
+  {
+    label: '发布管理',
+    key: 'Contribution',
+    route: '',
+    icon: icon.mdiAccountCog
+  },
+  {
+    label: '我的书架',
+    key: 'MyShelf',
+    route: 'MyShelf',
+    icon: icon.mdiFolderHeartOutline
+  },
+  {
+    label: '网站设置',
+    key: 'Setting',
+    route: 'Setting',
+    icon: icon.mdiCog
+  }
+]
+
 function search() {
   router.push({ name: 'Search', params: { keyWords: searchKey.value } })
   searchKey.value = ''
@@ -149,25 +228,82 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-.header {
-  display: flex;
-  align-items: center;
-  height: var(--header-height);
-  padding: 0 var(--side-padding);
+@import '~@/styles/quasar.variables';
 
-  .header-title {
-    align-items: center;
-    font-size: 24px;
-    width: calc(var(--slider-width) - var(--side-padding) + var(--content-padding-w));
-  }
+.avatar-popover {
+  .avatar-panel-popover {
+    width: 300px;
+    padding: 10px 20px;
 
-  .search {
-    min-width: 200px;
-    max-width: 300px;
-  }
+    .nickname-item {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
 
-  .action:nth-child(n) {
-    cursor: pointer;
+    .level-item {
+      margin-bottom: 6px;
+
+      &__bar--tag {
+        flex: none;
+      }
+
+      &__bar--next {
+        color: $grey-6;
+      }
+
+      &__text {
+        color: $grey-6;
+      }
+    }
+
+    .counts-item {
+      margin-bottom: 12px;
+      padding: 0 20px;
+
+      .single-count-item {
+        flex: none;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: color 0.2s;
+        cursor: pointer;
+
+        .count-num {
+          font-weight: 500;
+          font-size: 16px;
+          transition: color 0.2s;
+        }
+
+        .count-text {
+          font-size: 12px;
+          color: $grey-7;
+          font-weight: 400;
+          transition: color 0.2s;
+        }
+
+        &:hover .count-num,
+        &:hover .count-text {
+          color: $light-blue-13 !important;
+        }
+      }
+    }
+
+    .link-item,
+    .logout-item {
+      color: $grey-9;
+    }
+
+    :deep(.q-item__section--avatar) {
+      min-width: unset !important;
+    }
+
+    :deep(.q-item) {
+      border-radius: 8px;
+      margin-bottom: 2px;
+      padding: 10px 14px;
+    }
   }
 }
 
