@@ -58,7 +58,7 @@
             style="border-radius: 8px"
           >
             <q-list class="avatar-panel-popover" v-if="user">
-              <div class="nickname-item center">
+              <div class="nickname-item text-center">
                 <q-item>
                   <q-item-section>
                     <div>{{ user.UserName }}</div>
@@ -67,7 +67,7 @@
                 </q-item>
               </div>
 
-              <div class="level-item em08">
+              <div class="level-item">
                 <div class="row q-col-gutter-sm items-center">
                   <div class="col level-item__bar--tag level-item__bar--now">lv0</div>
                   <div class="col">
@@ -76,22 +76,22 @@
                   <div class="col level-item__bar--tag level-item__bar--next">lv1</div>
                 </div>
 
-                <div class="text-caption text-opacity level-item__text"> 需先注册成为正式会员 </div>
+                <div class="text-caption text-opacity level-item__text"> 当前经验0, 还需要114514经验升级到lv1 </div>
               </div>
 
               <div class="counts-item">
                 <div class="row justify-between">
                   <a class="col single-count-item">
-                    <div class="count-num em13">0</div>
-                    <div class="count-text em08">关注</div>
+                    <div class="count-num">0</div>
+                    <div class="count-text">关注</div>
                   </a>
                   <a class="col single-count-item">
-                    <div class="count-num em13">0</div>
-                    <div class="count-text em08">粉丝</div>
+                    <div class="count-num">0</div>
+                    <div class="count-text">粉丝</div>
                   </a>
                   <a class="col single-count-item">
-                    <div class="count-num em13">1220</div>
-                    <div class="count-text em08">动态</div>
+                    <div class="count-num">1220</div>
+                    <div class="count-text">动态</div>
                   </a>
                 </div>
               </div>
@@ -192,29 +192,11 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
     icon: ''
   },
   {
-    label: '钱包',
-    key: 'Wallet',
-    route: '',
-    icon: icon.mdiWalletOutline
-  },
-  {
     label: '我的书架',
     key: 'MyShelf',
     route: 'MyShelf',
     icon: icon.mdiFolderHeartOutline
   },
-  // {
-  //   label: '订单中心',
-  //   key: 'OrderCenter',
-  //   route: '',
-  //   icon: ''
-  // },
-  // {
-  //   label: '直播中心',
-  //   key: 'LiveCenter',
-  //   route: '',
-  //   icon: ''
-  // },
   {
     label: '网站设置',
     key: 'Setting',
@@ -246,35 +228,12 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/style/read';
 @import '~@/styles/quasar.variables';
-
-.header {
-  display: flex;
-  align-items: center;
-  height: var(--header-height);
-  padding: 0 var(--side-padding);
-
-  .header-title {
-    align-items: center;
-    font-size: 24px;
-    width: calc(var(--slider-width) - var(--side-padding) + var(--content-padding-w));
-  }
-
-  .search {
-    min-width: 200px;
-    max-width: 300px;
-  }
-
-  .action:nth-child(n) {
-    cursor: pointer;
-  }
-}
 
 .avatar-popover {
   .avatar-panel-popover {
     width: 300px;
-    padding: 18px 24px;
+    padding: 10px 20px;
 
     .nickname-item {
       font-size: 18px;
@@ -313,10 +272,12 @@ function logout() {
 
         .count-num {
           font-weight: 500;
+          font-size: 16px;
           transition: color 0.2s;
         }
 
         .count-text {
+          font-size: 12px;
           color: $grey-7;
           font-weight: 400;
           transition: color 0.2s;
