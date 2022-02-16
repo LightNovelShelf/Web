@@ -86,8 +86,4 @@ async function save() {
 useInitRequest(request, { isActive: isActive })
 </script>
 
-<style scoped lang="scss">
-:deep(.q-editor__content) {
-  @import '../../assets/style/read';
-}
-</style>
+<style scoped lang="scss"></style>

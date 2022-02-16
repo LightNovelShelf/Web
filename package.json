@@ -42,6 +42,7 @@
     "@types/lodash-es": "^4.17.6",
     "@types/luxon": "^2.0.9",
     "@types/sortablejs": "^1.10.7",
+    "@types/turndown": "^5.0.1",
     "@types/webpack-bundle-analyzer": "^4.4.1",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
