@@ -90,8 +90,8 @@
                     <div class="count-text">粉丝</div>
                   </a>
                   <a class="col single-count-item">
-                    <div class="count-num">1220</div>
-                    <div class="count-text">动态</div>
+                    <div class="count-num">0</div>
+                    <div class="count-text">发帖</div>
                   </a>
                 </div>
               </div>
@@ -186,10 +186,10 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
     icon: icon.mdiAccountOutline
   },
   {
-    label: '投稿管理',
+    label: '发布管理',
     key: 'Contribution',
     route: '',
-    icon: ''
+    icon: icon.mdiAccountCog
   },
   {
     label: '我的书架',
@@ -201,7 +201,7 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
     label: '网站设置',
     key: 'Setting',
     route: 'Setting',
-    icon: icon.mdiWeb
+    icon: icon.mdiCog
   }
 ]
 

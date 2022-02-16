@@ -101,5 +101,5 @@ export {
   mdiContentSave,
   mdiSquareEditOutline,
   mdiWalletOutline,
-  mdiWeb
+  mdiAccountCog
 } from '@mdi/js'
