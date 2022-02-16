@@ -1,5 +1,4 @@
 import './assets/style/main.scss'
-import './assets/style/color.scss'
 import './registerServiceWorker'
 import router from './router'
 import { Quasar } from 'quasar'

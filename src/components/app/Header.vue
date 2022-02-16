@@ -50,7 +50,13 @@
           <img v-if="user" :src="user.Avatar" alt="avatar" />
           <q-icon size="36px" v-else :name="icon.mdiAccountCircle"></q-icon>
 
-          <q-menu class="avatar-popover" :offset="[-30, 5]" anchor="bottom left" self="top right">
+          <q-menu
+            class="avatar-popover"
+            :offset="[-30, 5]"
+            anchor="bottom left"
+            self="top right"
+            style="border-radius: 8px"
+          >
             <q-list class="avatar-panel-popover" v-if="user">
               <div class="nickname-item center">
                 <q-item>
@@ -61,13 +67,13 @@
                 </q-item>
               </div>
 
-              <div class="level-item">
+              <div class="level-item em08">
                 <div class="row q-col-gutter-sm items-center">
-                  <div class="col level-item__bar--tag level-item__bar--now" style="font-size: 12px">lv0</div>
+                  <div class="col level-item__bar--tag level-item__bar--now">lv0</div>
                   <div class="col">
-                    <q-linear-progress size="xs" :value="0" />
+                    <q-linear-progress size="xs" :value="0.3" />
                   </div>
-                  <div class="col level-item__bar--tag level-item__bar--next" style="font-size: 12px">lv1</div>
+                  <div class="col level-item__bar--tag level-item__bar--next">lv1</div>
                 </div>
 
                 <div class="text-caption text-opacity level-item__text"> 需先注册成为正式会员 </div>
@@ -76,16 +82,16 @@
               <div class="counts-item">
                 <div class="row justify-between">
                   <a class="col single-count-item">
-                    <div class="count-num">0</div>
-                    <div class="count-text">关注</div>
+                    <div class="count-num em13">0</div>
+                    <div class="count-text em08">关注</div>
                   </a>
                   <a class="col single-count-item">
-                    <div class="count-num">0</div>
-                    <div class="count-text">粉丝</div>
+                    <div class="count-num em13">0</div>
+                    <div class="count-text em08">粉丝</div>
                   </a>
                   <a class="col single-count-item">
-                    <div class="count-num">1220</div>
-                    <div class="count-text">动态</div>
+                    <div class="count-num em13">1220</div>
+                    <div class="count-text em08">动态</div>
                   </a>
                 </div>
               </div>
@@ -101,13 +107,13 @@
                     "
                   >
                     <q-item-section avatar>
-                      <q-icon size="18px" style="color: #61666d" :name="option.icon" />
+                      <q-icon size="18px" :name="option.icon" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ option.label }}</q-item-label>
                     </q-item-section>
                     <q-item-section side>
-                      <q-icon size="18px" style="color: #61666d" :name="icon.mdiChevronRight" />
+                      <q-icon size="18px" :name="icon.mdiChevronRight" />
                     </q-item-section>
                   </q-item>
                 </template>
@@ -115,12 +121,14 @@
 
               <q-separator style="margin: 10px 0" />
 
-              <q-item clickable v-ripple @click="logout">
-                <q-item-section avatar>
-                  <q-icon size="18px" :name="icon.mdiLogoutVariant" />
-                </q-item-section>
-                <q-item-section>退出登录</q-item-section>
-              </q-item>
+              <div class="logout-item">
+                <q-item clickable v-ripple @click="logout">
+                  <q-item-section avatar>
+                    <q-icon size="18px" :name="icon.mdiLogoutVariant" />
+                  </q-item-section>
+                  <q-item-section>退出登录</q-item-section>
+                </q-item>
+              </div>
             </q-list>
 
             <div v-else class="q-pa-sm">
@@ -238,8 +246,8 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/style/color';
 @import '~@/assets/style/read';
+@import '~@/styles/quasar.variables';
 
 .header {
   display: flex;
@@ -267,7 +275,6 @@ function logout() {
   .avatar-panel-popover {
     width: 300px;
     padding: 18px 24px;
-    border-radius: 8px;
 
     .nickname-item {
       font-size: 18px;
@@ -283,12 +290,11 @@ function logout() {
       }
 
       &__bar--next {
-        color: var(--text4);
+        color: $grey-6;
       }
 
       &__text {
-        color: var(--text4);
-        font-size: 12px;
+        color: $grey-6;
       }
     }
 
@@ -306,24 +312,26 @@ function logout() {
         cursor: pointer;
 
         .count-num {
-          color: var(--text1);
           font-weight: 500;
-          font-size: 18px;
           transition: color 0.2s;
         }
 
         .count-text {
-          color: var(--text3);
+          color: $grey-7;
           font-weight: 400;
-          font-size: 12px;
           transition: color 0.2s;
         }
 
         &:hover .count-num,
         &:hover .count-text {
-          color: var(--text_link) !important;
+          color: $light-blue-13 !important;
         }
       }
+    }
+
+    .link-item,
+    .logout-item {
+      color: $grey-9;
     }
 
     :deep(.q-item__section--avatar) {
