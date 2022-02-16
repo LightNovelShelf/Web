@@ -177,3 +177,9 @@ function removeFormat() {
   })
 }
 </script>
+
+<style scoped lang="scss">
+:deep(.q-editor__content) {
+  @import '../assets/style/read';
+}
+</style>
