@@ -102,5 +102,5 @@ export {
   mdiSquareEditOutline,
   mdiWalletOutline,
   mdiAccountCog,
-  mdiPe
+  mdiPen
 } from '@mdi/js'
