@@ -18,7 +18,8 @@ export const useSettingStore = defineStore('app.setting', {
       readPageWidth: 0,
       justify: false,
       showButton: true,
-      tapToScroll: false
+      tapToScroll: false,
+      hideFullScreen: false
     },
     editorSetting: {
       mode: 'html' as 'html' | 'markdown'
