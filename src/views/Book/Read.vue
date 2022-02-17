@@ -62,7 +62,7 @@
           </q-tooltip>
         </q-fab-action>
         <q-fab-action
-          v-if="$q.fullscreen.isCapable"
+          v-if="$q.fullscreen.isCapable && !readSetting['hideFullScreen']"
           @click="$q.fullscreen.toggle()"
           color="primary"
           :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen"
