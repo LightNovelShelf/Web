@@ -111,6 +111,21 @@ export async function getBookShelf() {
   // }>
 }
 
+/** 取用户书架二进制信息 */
+export async function getBookShelfBinaryGzip() {
+  return requestWithSignalr('GetBookShelfBinaryGzip')
+}
+
+/** 取用户书架二进制信息 */
+export async function getBookShelfBinaryBrotli() {
+  return requestWithSignalr('GetBookShelfBinaryBrotli')
+}
+
+/** 取用户书架二进制信息 */
+export async function getBookShelfBinaryDeflate() {
+  return requestWithSignalr('GetBookShelfBinaryDeflate')
+}
+
 /** 清空用户历史记录 */
 export async function clearHistory() {
   return requestWithSignalr('ClearHistory')
