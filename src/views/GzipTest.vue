@@ -16,14 +16,16 @@ import {
   getBookShelfBinaryDeflate,
   getBookShelfBinaryGzip
 } from '@/services/user'
-import { gzip, inflate, inflateRaw } from 'pako'
+import diff from 'microdiff'
+import { ungzip } from 'pako'
 
 async function clickHandle() {
   try {
-    const resInstr = await getBookShelf()
+    const res = JSON.parse(JSON.stringify(await getBookShelf()))
     const resInGzip = await getBookShelfBinaryGzip()
-    const unZipd = inflateRaw(resInGzip)
-    console.log([resInstr, resInGzip, unZipd])
+    const unZipd = ungzip(resInGzip, { to: 'string' })
+    const unZipdObj = JSON.parse(unZipd)
+    console.log([res, unZipdObj, diff(res, JSON.parse(unZipd))])
   } catch (e) {
     console.log(e)
   }
