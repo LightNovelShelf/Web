@@ -124,6 +124,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Search',
     props: true,
     component: () => import('../views/Search.vue')
+  },
+  {
+    path: '/__/gzip/test',
+    name: '__GzipTest',
+    component: () => import('../views/GzipTest.vue')
   }
 ]
 
