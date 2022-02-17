@@ -111,6 +111,11 @@ export async function getBookShelf() {
   // }>
 }
 
+/** 取用户书架二进制信息 */
+export async function getBookShelfBinary() {
+  return requestWithSignalr('GetBookShelfBinary')
+}
+
 /** 清空用户历史记录 */
 export async function clearHistory() {
   return requestWithSignalr('ClearHistory')
