@@ -130,3 +130,8 @@ export async function getBookShelfBinaryDeflate() {
 export async function clearHistory() {
   return requestWithSignalr('ClearHistory')
 }
+
+/** 设置头像 */
+export async function setAvatar(url: string) {
+  return requestWithSignalr('SetAvatar', url)
+}
