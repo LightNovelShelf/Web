@@ -122,6 +122,9 @@ const settingStore = useSettingStore()
 const { editorSetting } = settingStore
 const turndownService = new TurndownService()
 const markdownText = ref('')
+
+turndownService.keep(['ruby', 'rt'])
+
 // 第一次进来初始化
 if (editorSetting.mode === 'markdown') markdownText.value = turndownService.turndown(htmlContent.value)
 
