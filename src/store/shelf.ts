@@ -2,12 +2,11 @@ import { defineStore } from 'pinia'
 import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum, SHELF_STRUCT_VER } from '@/types/shelf'
 import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
-import produce from 'immer'
+import { produce } from 'immer'
 import { isEqual } from 'lodash-es'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
-import { getBookShelf, saveBookShelf } from '@/services/user'
-import { ServerShelf } from '@/services/user/type'
+import { getBookShelfBinaryGzip, saveBookShelf } from '@/services/user'
 
 export enum ShelfBranch {
   main = 'main',
@@ -195,23 +194,24 @@ const shelfStore = defineStore('app.shelf', {
 
     /** 从db中拉数据(pull = fetch + commit) */
     async pull() {
-      let shelf = await this.fetch()
+      const shelf = await this.fetch()
       const structVer = await shelfStructVerDB.get<SHELF_STRUCT_VER>('VER')
+
+      // 如果版本不对，丢掉，多兼容一份数据逻辑有点烦了，等服务器返回就好
       if (structVer !== SHELF_STRUCT_VER.LATEST) {
-        shelf = await (
-          await import('@/utils/migrations/shelf/struct/action')
-        ).shelfStructMigration(shelf, structVer ?? null)
+        this.commit({ shelf: [] })
+        this.push({ syncRetome: false })
+        return
       }
 
-      /** @legacy 最初的版本有index不对的 */
-      this.commit({ shelf: sort(shelf) })
+      this.commit({ shelf })
     },
 
     /** git end -------- */
 
     /** 从服务器同步 */
     async syncFromRemote() {
-      const serve = await getBookShelf()
+      const serve = await getBookShelfBinaryGzip()
       let shelf: ShelfItem[]
 
       if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
@@ -219,12 +219,7 @@ const shelfStore = defineStore('app.shelf', {
           await import('@/utils/migrations/shelf/struct/action')
         ).shelfStructMigration(serve.data, serve.ver ?? null)
       } else {
-        shelf = (serve.data as ServerShelf.Item[]).map((item): ShelfItem => {
-          return {
-            ...item,
-            updateAt: new Date(item.updateAt).toISOString()
-          }
-        })
+        shelf = serve.data as ShelfItem[]
       }
 
       // 记录版本到本地
