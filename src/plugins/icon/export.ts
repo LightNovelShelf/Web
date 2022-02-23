@@ -101,5 +101,10 @@ export {
   mdiContentSave,
   mdiSquareEditOutline,
   mdiWalletOutline,
-  mdiAccountCog
+  mdiAccountCog,
+  mdiAccountSupervisor,
+  mdiCalendarRangeOutline,
+  mdiTicketConfirmation,
+  mdiLinkVariant,
+  mdiCalendarAccount
 } from '@mdi/js'
