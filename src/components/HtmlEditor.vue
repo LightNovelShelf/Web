@@ -9,7 +9,8 @@
       :definitions="{
         beautify: { tip: '格式化代码', label: '格式化', handler: beautify },
         bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
-        removeFormat: { handler: removeFormat }
+        removeFormat: { handler: removeFormat },
+        ruby: { tip: '添加注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler }
       }"
       min-height="5rem"
     />
@@ -30,14 +31,58 @@
       </q-card>
     </q-dialog>
     <div>
-      <md-editor
+      <MdEditor
         v-if="editorSetting.mode === 'markdown'"
         v-model="markdownText"
+        editorId="md-introduction"
         :onHtmlChanged="onHtmlChanged"
         style="display: flex !important"
         :theme="$q.dark.isActive ? 'dark' : 'light'"
-        :toolbarsExclude="['image', 'save']"
-      />
+        :toolbars="[
+          'bold',
+          'underline',
+          'italic',
+          'strikeThrough',
+          '-',
+          'title',
+          'sub',
+          'sup',
+          'quote',
+          'unorderedList',
+          'orderedList',
+          '-',
+          'codeRow',
+          'code',
+          'link',
+          'table',
+          'mermaid',
+          'katex',
+          0,
+          '-',
+          'revoke',
+          'next',
+          '=',
+          'prettier',
+          'pageFullscreen',
+          'fullscreen',
+          'preview',
+          'htmlPreview',
+          'catalog',
+          'github'
+        ]"
+      >
+        <template #defToolbars>
+          <MdEditor.NormalToolbar title="mark" @click="mdRubyHandler">
+            <template #trigger>
+              <svg class="md-icon" aria-hidden="true">
+                <path
+                  d="M8.5 2C7.12 2 6 3.12 6 4.5S7.12 7 8.5 7 11 5.88 11 4.5 9.88 2 8.5 2M15.5 2C14.12 2 13 3.12 13 4.5S14.12 7 15.5 7 18 5.88 18 4.5 16.88 2 15.5 2M11 8V10H5V12H14.95C14.53 13.13 13.5 14.5 12.16 15.67C11.12 14.74 10.35 13.82 9.82 13H7.5C8.08 14.25 9.13 15.62 10.62 16.96L6.55 20.22L5.76 20.84L7 22.41L7.8 21.78L12.17 18.28L16.55 21.78L17.33 22.41L18.58 20.84L17.8 20.22L13.73 16.97C15.34 15.5 16.7 13.85 17.07 12H19V10H13V8H11Z"
+                />
+              </svg>
+            </template>
+          </MdEditor.NormalToolbar>
+        </template>
+      </MdEditor>
     </div>
   </div>
 </template>
@@ -51,6 +96,7 @@ import { useSettingStore } from '@/store/setting'
 import bbCodeParser from '@/utils/bbcode/simple'
 import TurndownService from 'turndown'
 import MdEditor from 'md-editor-v3'
+import { icon } from '@/plugins/icon'
 import 'md-editor-v3/lib/style.css'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
@@ -82,7 +128,7 @@ const CommonToolbar = [
       options: ['left', 'center', 'right', 'justify']
     }
   ],
-  ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+  ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript', 'ruby'],
   ['token', 'hr', 'link', 'custom_btn'],
   ['fullscreen'],
   [
@@ -122,6 +168,40 @@ const settingStore = useSettingStore()
 const { editorSetting } = settingStore
 const turndownService = new TurndownService()
 const markdownText = ref('')
+
+const mdRubyHandler = () => {
+  const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
+  const selection = window.getSelection()
+  const endPoint = textarea.selectionStart
+
+  if (!selection.anchorNode.contains(textarea) || !selection.focusNode.contains(textarea)) {
+    return
+  }
+
+  const rubyStr = selection
+    ? `<ruby>${selection.toString()}<rt>注音内容</rt></ruby>`
+    : `<ruby>被注音文字<rt>注音内容</rt></ruby>`
+
+  const prefixStr = textarea.value.substring(0, endPoint)
+  const suffixStr = textarea.value.substring(endPoint + (selection?.length || 0))
+
+  markdownText.value = `${prefixStr}${rubyStr}${suffixStr}`
+
+  setTimeout(() => {
+    textarea.setSelectionRange(endPoint, rubyStr.length + endPoint)
+    textarea.focus()
+  }, 0)
+}
+
+const htmlRubyHandler = () => {
+  const selection = window.getSelection()?.toString()
+  if (!selection) return
+  const rubyStr = `<ruby>${selection}<rt>注音内容</rt></ruby>`
+  editorRef.value.runCmd('insertHTML', rubyStr)
+}
+
+turndownService.keep(['ruby', 'rt'])
+
 // 第一次进来初始化
 if (editorSetting.mode === 'markdown') markdownText.value = turndownService.turndown(htmlContent.value)
 
