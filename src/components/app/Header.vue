@@ -182,7 +182,7 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
   {
     label: '个人中心',
     key: 'Account',
-    route: '',
+    route: 'UserProfile',
     icon: icon.mdiAccountOutline
   },
   {
