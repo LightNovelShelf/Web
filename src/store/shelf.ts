@@ -153,14 +153,18 @@ const shelfStore = defineStore('app.shelf', {
   actions: {
     /** git ------------ */
     /** 从db中拉数据 */
-    fetch(): Promise<ShelfItem[]> {
-      return shelfDB.getItems()
+    async fetch(): Promise<ShelfItem[]> {
+      return this.squeezeShelfItemIndex(await shelfDB.getItems())
     },
 
     /** push到db */
     async push(config: { syncRetome?: boolean } = {}) {
       /** 记录的时候结构一定是最新的 */
       await shelfStructVerDB.set('VER', SHELF_STRUCT_VER.LATEST)
+
+      this.commit({
+        shelf: this.squeezeShelfItemIndex(toRaw(this.shelf))
+      })
 
       // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
       await shelfDB.clear()
@@ -223,11 +227,11 @@ const shelfStore = defineStore('app.shelf', {
       }
 
       // 记录版本到本地
-      this.commit({ shelf })
+      this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
 
       // 如果版本不对那就触发一次push
       if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
-        // this.push({ syncRetome: true })
+        this.push({ syncRetome: true })
       }
     },
     /** 同步到服务器 */
@@ -469,7 +473,7 @@ const shelfStore = defineStore('app.shelf', {
     /** 删除文件夹 */
     deleteFolder(payload: { id: string }) {
       this.commit({
-        shelf: sort(
+        shelf: this.squeezeShelfItemIndex(
           // @ts-ignore
           produce(toRaw(this.shelf), (draft) => {
             let currentMaxIndex = this.curMaxIndexInFolder(null)
