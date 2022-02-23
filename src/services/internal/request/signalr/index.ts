@@ -12,6 +12,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
 import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
 import { createRequestQueue } from '../createRequestQueue'
+import { SignalrInspector } from './inspector'
 
 /** signalr接入点 */
 const HOST = `${VUE_APP_API_SERVER}/hub/api`
@@ -117,6 +118,8 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
   url: string,
   ...data: Data
 ): Promise<Res> {
+  const inspector = new SignalrInspector(url, [...data])
+
   // 等待第一次connect
   try {
     await firstConnect()
@@ -126,8 +129,12 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
 
   if (connectState.value !== HubConnectionState.Connected) {
     try {
-      return await tryResponseFromCache(url, ...data)
+      const res = await tryResponseFromCache(url, ...data)
+      inspector.add(inspector.TYPE_ENUM.SUCCESS, { message: '返回缓存结果', data: res })
+      inspector.flush()
+      return res as Res
     } catch (e) {
+      inspector.add(inspector.TYPE_ENUM.FAIL, { message: '缓存查询失败，回退请求流程', data: e })
       // 如果没有cache；吞掉这个错误，走正常的请求流程
     }
   }
@@ -136,46 +143,41 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
 
   // 处理请求本身就失败的情况（比如没授权）
   try {
+    inspector.add(inspector.TYPE_ENUM.SENT)
     const res = await (await getSignalr()).invoke(url, ...data)
     ;({ Success, Response, Status, Msg } = res)
 
     if (Response instanceof Uint8Array) {
+      inspector.add(inspector.TYPE_ENUM.REVICE, { message: '请求Response为 Uint8Array, 尝试进行gzip解码', data: res })
       // Response是一个gzip后的json, 解码出来
       Response = JSON.parse(ungzip(Response, { to: 'string' }))
+    } else {
+      inspector.add(inspector.TYPE_ENUM.REVICE, { data: res })
     }
   } catch (e) {
-    if (__DEV__ && VUE_TRACE_SERVER) {
-      console.groupCollapsed(`signalr request data trace: '${url}'`)
-      console.log('send:', [...data])
-      console.log('err:', e)
-
-      console.log('at:', new Date().toLocaleString())
-      console.groupEnd()
-    }
+    inspector.add(inspector.TYPE_ENUM.FAIL, { data: e })
 
     // 如果是未授权，通知一声
     if (IS_UN_AUTH_ERR(e)) {
       unAuthenticationNotify.notify()
     }
+
+    // 要throw了，flush掉
+    inspector.flush()
+
     // catch & throw;
     // 这个 try...catch 本意就是监听打点而已，不是真的想把错误catch住
     throw e
   }
 
   // 处理请求成功但响应内容提示失败的情况
-  if (__DEV__ && VUE_TRACE_SERVER) {
-    console.groupCollapsed(`signalr request data trace: '${url}'`)
-    console.log('send:', [...data])
-    console.log('Success:', Success)
-    if (Success) {
-      console.log('Response:', Response)
-    } else {
-      console.log('Status:', Status)
-      console.log('Msg:', Msg)
-    }
-    console.log('at:', new Date().toLocaleString())
-    console.groupEnd()
+  if (Success) {
+    inspector.add(inspector.TYPE_ENUM.SUCCESS, { data: { Success, Response, Status, Msg } })
+  } else {
+    inspector.add(inspector.TYPE_ENUM.FAIL, { data: { Success, Response, Status, Msg } })
   }
+
+  inspector.flush()
 
   if (Success) {
     // 只在成功时储存这个response，在读取了cache之后还得判断是否有效；浪费一次读取行为
@@ -198,12 +200,11 @@ export { requestWithSignalrInRateLimit as requestWithSignalr }
 
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
+  const inspector = new SignalrInspector(methodName, [])
   if (__DEV__ && VUE_TRACE_SERVER) {
     _cb = (res: Res): void => {
-      console.groupCollapsed(`signalr subscribe data trace: '${methodName}'`)
-      console.log('received:', res)
-      console.log('at:', new Date().toLocaleString())
-      console.groupEnd()
+      inspector.add(inspector.TYPE_ENUM.REVICE, { data: res })
+      inspector.flush({ clear: false })
       cb(res)
     }
   }
