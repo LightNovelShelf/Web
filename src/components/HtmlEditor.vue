@@ -171,10 +171,16 @@ const markdownText = ref('')
 
 const mdRubyHandler = () => {
   const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
-  const selection = window.getSelection()?.toString()
+  const selection = window.getSelection()
   const endPoint = textarea.selectionStart
 
-  const rubyStr = selection ? `<ruby>${selection}<rt>注音内容</rt></ruby>` : `<ruby>被注音文字<rt>注音内容</rt></ruby>`
+  if (!selection.anchorNode.contains(textarea) || !selection.focusNode.contains(textarea)) {
+    return
+  }
+
+  const rubyStr = selection
+    ? `<ruby>${selection.toString()}<rt>注音内容</rt></ruby>`
+    : `<ruby>被注音文字<rt>注音内容</rt></ruby>`
 
   const prefixStr = textarea.value.substring(0, endPoint)
   const suffixStr = textarea.value.substring(endPoint + (selection?.length || 0))
