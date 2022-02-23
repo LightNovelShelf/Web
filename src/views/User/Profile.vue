@@ -23,46 +23,47 @@
 
       <q-dialog ref="dialog" v-model="visible" persistent>
         <q-card style="min-width: 350px">
-          <q-card-section>
-            <div class="text-h6">修改头像</div>
-          </q-card-section>
-          <q-card-section class="q-pt-none">
-            <q-select
-              v-model="urlType"
-              emit-value
-              map-options
-              :options="[
-                { label: '普通URL', value: 0 },
-                { label: 'QQ头像', value: 1 }
-              ]"
-              @update:model-value="avatarUrl = ''"
-            />
-          </q-card-section>
+          <q-form @submit="handleSubmit">
+            <q-card-section>
+              <div class="text-h6">修改头像</div>
+            </q-card-section>
+            <q-card-section class="q-pt-none">
+              <q-select
+                v-model="urlType"
+                emit-value
+                map-options
+                :options="[
+                  { label: '普通URL', value: 0 },
+                  { label: 'QQ头像', value: 1 }
+                ]"
+                @update:model-value="avatarUrl = ''"
+              />
+            </q-card-section>
 
-          <q-card-section class="q-pt-none">
-            <q-input
-              dense
-              v-model="avatarUrl"
-              @keyup.enter="visible = false"
-              bottom-slots
-              :placeholder="urlType === 1 ? '请输入QQ号' : '请输入图片URL'"
-              :rules="
-                urlType === 1
-                  ? [(val) => qqReg.test(val) || '请输入正确的 QQ 号']
-                  : [(val) => httpsReg.test(val) || '请输入正确的图片URL']
-              "
-            >
-              <template v-slot:hint>
-                <span v-if="urlType === 1">使用此功能会导致你的 QQ 号暴露，但可以实时同步你的 QQ 头像</span>
-                <span v-else>图片 URL 仅支持 https</span>
-              </template>
-            </q-input>
-          </q-card-section>
+            <q-card-section class="q-pt-none">
+              <q-input
+                dense
+                v-model="avatarUrl"
+                bottom-slots
+                :placeholder="urlType === 1 ? '请输入QQ号' : '请输入图片URL'"
+                :rules="
+                  urlType === 1
+                    ? [(val) => qqReg.test(val) || '请输入正确的 QQ 号']
+                    : [(val) => httpsReg.test(val) || '请输入正确的图片URL']
+                "
+              >
+                <template v-slot:hint>
+                  <span v-if="urlType === 1">使用此功能会导致你的 QQ 号暴露，但可以实时同步你的 QQ 头像</span>
+                  <span v-else>图片 URL 仅支持 https</span>
+                </template>
+              </q-input>
+            </q-card-section>
 
-          <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="取消" v-close-popup />
-            <q-btn flat label="确定" @click="handleSubmit" />
-          </q-card-actions>
+            <q-card-actions align="right" class="text-primary">
+              <q-btn flat label="取消" v-close-popup />
+              <q-btn flat label="确定" type="submit" />
+            </q-card-actions>
+          </q-form>
         </q-card>
       </q-dialog>
     </div>
