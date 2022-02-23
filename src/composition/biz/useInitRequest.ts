@@ -25,7 +25,7 @@ export function useInitRequest(
 
   const router = useRoute()
   onActivated(async () => {
-    if (first && (router.meta.reload || config?.isActive ? !config?.isActive?.value : false)) {
+    if (first && (router.meta.reload || (config?.isActive ? !config?.isActive?.value : false))) {
       if (config?.before) config?.before()
       await safeCall(cb)()
       if (config?.after) config?.after()
