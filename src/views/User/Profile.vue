@@ -3,10 +3,9 @@
     <div class="q-pa-md q-gutter-md list-card" style="max-width: 900px">
       <div class="h2 title"> 个人资料 </div>
 
-      <!-- <div class="card"> -->
       <q-list class="card" bordered separator>
         <template v-for="option in profileListOptions" :key="option.key">
-          <q-item clickable v-ripple :active="active" active-class="bg-teal-1 text-grey-8" @click="option.onClick">
+          <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="option.onClick">
             <q-item-section class="avatar-item" avatar>
               <q-avatar>
                 <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
@@ -21,7 +20,6 @@
           </q-item>
         </template>
       </q-list>
-      <!-- </div> -->
 
       <q-dialog ref="dialog" v-model="visible" persistent>
         <q-card style="min-width: 350px">
@@ -77,7 +75,7 @@ import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { setAvatar } from '@/services/user'
+import { setAvatar, getMyInfo } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
 const avatar = computed(() => appStore.avatar)
 
@@ -149,7 +147,7 @@ async function handleSubmit() {
 
   try {
     await setAvatar(avatarVal)
-
+    appStore.user = await getMyInfo()
     visible.value = false // 关闭弹窗
 
     $q.notify({
