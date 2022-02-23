@@ -1,72 +1,74 @@
 <template>
   <div>
-    <div class="q-pa-md q-gutter-md list-card" style="max-width: 900px">
-      <div class="h2 title"> 个人资料 </div>
+    <div class="list-card" style="max-width: 900px">
+      <div class="q-gutter-md">
+        <div class="h2 title"> 个人资料 </div>
 
-      <q-list class="card" bordered separator>
-        <template v-for="option in profileListOptions" :key="option.key">
-          <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="option.onClick">
-            <q-item-section class="avatar-item" avatar>
-              <q-avatar>
-                <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
-                <q-icon v-else :name="option.icon" />
-              </q-avatar>
-            </q-item-section>
-            <q-item-section class="label-item">{{ option.label }}</q-item-section>
-            <q-item-section side v-if="!['Avatar'].includes(option.key)">{{ user?.[option.key] }}</q-item-section>
-            <q-item-section side v-if="option.editable">
-              <q-icon size="18px" :name="icon.mdiChevronRight" />
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-list>
-
-      <q-dialog ref="dialog" v-model="visible" persistent>
-        <q-card style="min-width: 350px">
-          <q-form @submit="handleSubmit">
-            <q-card-section>
-              <div class="text-h6">修改头像</div>
-            </q-card-section>
-            <q-card-section class="q-pt-none">
-              <q-select
-                v-model="urlType"
-                emit-value
-                map-options
-                :options="[
-                  { label: '普通URL', value: 0 },
-                  { label: 'QQ头像', value: 1 }
-                ]"
-                @update:model-value="avatarUrl = ''"
-              />
-            </q-card-section>
-
-            <q-card-section class="q-pt-none">
-              <q-input
-                dense
-                v-model="avatarUrl"
-                bottom-slots
-                :placeholder="urlType === 1 ? '请输入QQ号' : '请输入图片URL'"
-                :rules="
-                  urlType === 1
-                    ? [(val) => qqReg.test(val) || '请输入正确的 QQ 号']
-                    : [(val) => httpsReg.test(val) || '请输入正确的图片URL']
-                "
-              >
-                <template v-slot:hint>
-                  <span v-if="urlType === 1">使用此功能会导致你的 QQ 号暴露，但可以实时同步你的 QQ 头像</span>
-                  <span v-else>图片 URL 仅支持 https</span>
-                </template>
-              </q-input>
-            </q-card-section>
-
-            <q-card-actions align="right" class="text-primary">
-              <q-btn flat label="取消" v-close-popup />
-              <q-btn flat label="确定" type="submit" />
-            </q-card-actions>
-          </q-form>
-        </q-card>
-      </q-dialog>
+        <q-list class="card" bordered separator>
+          <template v-for="option in profileListOptions" :key="option.key">
+            <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="option.onClick">
+              <q-item-section class="avatar-item" avatar>
+                <q-avatar>
+                  <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
+                  <q-icon v-else :name="option.icon" />
+                </q-avatar>
+              </q-item-section>
+              <q-item-section class="label-item">{{ option.label }}</q-item-section>
+              <q-item-section side v-if="!['Avatar'].includes(option.key)">{{ user?.[option.key] }}</q-item-section>
+              <q-item-section side v-if="option.editable">
+                <q-icon size="18px" :name="icon.mdiChevronRight" />
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-list>
+      </div>
     </div>
+
+    <q-dialog ref="dialog" v-model="visible" persistent>
+      <q-card style="min-width: 350px">
+        <q-form @submit="handleSubmit">
+          <q-card-section>
+            <div class="text-h6">修改头像</div>
+          </q-card-section>
+          <q-card-section class="q-pt-none">
+            <q-select
+              v-model="urlType"
+              emit-value
+              map-options
+              :options="[
+                { label: '普通URL', value: 0 },
+                { label: 'QQ头像', value: 1 }
+              ]"
+              @update:model-value="avatarUrl = ''"
+            />
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <q-input
+              dense
+              v-model="avatarUrl"
+              bottom-slots
+              :placeholder="urlType === 1 ? '请输入QQ号' : '请输入图片URL'"
+              :rules="
+                urlType === 1
+                  ? [(val) => qqReg.test(val) || '请输入正确的 QQ 号']
+                  : [(val) => httpsReg.test(val) || '请输入正确的图片URL']
+              "
+            >
+              <template v-slot:hint>
+                <span v-if="urlType === 1">使用此功能会导致你的 QQ 号暴露，但可以实时同步你的 QQ 头像</span>
+                <span v-else>图片 URL 仅支持 https</span>
+              </template>
+            </q-input>
+          </q-card-section>
+
+          <q-card-actions align="right" class="text-primary">
+            <q-btn flat label="取消" v-close-popup />
+            <q-btn flat label="确定" type="submit" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -186,7 +188,7 @@ watch(visible, (newVisible) => {
   display: flex;
   flex-direction: column;
   max-width: 900px;
-  margin: 0 auto;
+  margin: 12px auto 0 auto;
 
   .card {
     background: #fff;
