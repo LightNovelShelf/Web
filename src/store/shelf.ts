@@ -81,6 +81,10 @@ const shelfStore = defineStore('app.shelf', {
     shelf(): ShelfItem[] {
       return this.source[this.branch]
     },
+    /** 当前分支的全量项目 */
+    shelfInMap(): Map<string | number, ShelfItem> {
+      return new Map<string | number, ShelfItem>(this.shelf.map((i) => [i.id, i]))
+    },
     /** 所有书籍（包括已经被放入文件夹的） */
     books(): ShelfBookItem[] {
       return toRaw(this.shelf).filter((i): i is ShelfBookItem => i.type === ShelfItemTypeEnum.BOOK)
