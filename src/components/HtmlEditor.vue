@@ -180,7 +180,7 @@ const mdRubyHandler = () => {
 
   const rubyStr = selection
     ? `<ruby>${selection.toString()}<rt>注音内容</rt></ruby>`
-    : `<ruby>被注音文字<rt>注音内容</rt></ruby>`
+    : '<ruby>被注音文字<rt>注音内容</rt></ruby>'
 
   const prefixStr = textarea.value.substring(0, endPoint)
   const suffixStr = textarea.value.substring(endPoint + (selection?.length || 0))
@@ -203,7 +203,21 @@ const htmlRubyHandler = () => {
 turndownService.keep(['ruby', 'rt'])
 
 // 第一次进来初始化
-if (editorSetting.mode === 'markdown') markdownText.value = turndownService.turndown(htmlContent.value)
+const parseMarkDown = () => {
+  if (editorSetting.mode === 'markdown') markdownText.value = turndownService.turndown(htmlContent.value)
+}
+parseMarkDown()
+watch(
+  () => props.html,
+  () => {
+    if (!isChange.value) {
+      console.log('change')
+      parseMarkDown()
+    } else {
+      isChange.value = false
+    }
+  }
+)
 
 const clearHtml = debounce(function clearHtml(html: string) {
   if (html.indexOf('MsoNormal') !== -1) {
@@ -217,8 +231,10 @@ const clearHtml = debounce(function clearHtml(html: string) {
   }
 }, 100)
 
+const isChange = ref(false)
 const onHtmlChanged = (html: string) => {
   // MarkDown模式下不需要清理代码
+  isChange.value = true
   emit('update:html', html)
 }
 watch(editorSetting, (newValue) => {
