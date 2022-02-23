@@ -9,7 +9,8 @@
       :definitions="{
         beautify: { tip: '格式化代码', label: '格式化', handler: beautify },
         bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
-        removeFormat: { handler: removeFormat }
+        removeFormat: { handler: removeFormat },
+        ruby: { tip: '添加注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler }
       }"
       min-height="5rem"
     />
@@ -71,7 +72,7 @@
         ]"
       >
         <template #defToolbars>
-          <MdEditor.NormalToolbar title="mark" @click="rubyHandler">
+          <MdEditor.NormalToolbar title="mark" @click="mdRubyHandler">
             <template #trigger>
               <svg class="md-icon" aria-hidden="true">
                 <path
@@ -95,6 +96,7 @@ import { useSettingStore } from '@/store/setting'
 import bbCodeParser from '@/utils/bbcode/simple'
 import TurndownService from 'turndown'
 import MdEditor from 'md-editor-v3'
+import { icon } from '@/plugins/icon'
 import 'md-editor-v3/lib/style.css'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
@@ -126,7 +128,7 @@ const CommonToolbar = [
       options: ['left', 'center', 'right', 'justify']
     }
   ],
-  ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+  ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript', 'ruby'],
   ['token', 'hr', 'link', 'custom_btn'],
   ['fullscreen'],
   [
@@ -167,7 +169,7 @@ const { editorSetting } = settingStore
 const turndownService = new TurndownService()
 const markdownText = ref('')
 
-const rubyHandler = () => {
+const mdRubyHandler = () => {
   const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
   const selection = window.getSelection()?.toString()
   const endPoint = textarea.selectionStart
@@ -183,6 +185,13 @@ const rubyHandler = () => {
     textarea.setSelectionRange(endPoint, rubyStr.length + endPoint)
     textarea.focus()
   }, 0)
+}
+
+const htmlRubyHandler = () => {
+  const selection = window.getSelection()?.toString()
+  if (!selection) return
+  const rubyStr = `<ruby>${selection}<rt>注音内容</rt></ruby>`
+  editorRef.value.runCmd('insertHTML', rubyStr)
 }
 
 turndownService.keep(['ruby', 'rt'])
