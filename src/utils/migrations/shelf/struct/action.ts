@@ -1,4 +1,3 @@
-import { ServerShelf } from '@/services/user/type'
 import { ShelfItem, ShelfItemTypeEnum, SHELF_STRUCT_VER } from '@/types/shelf'
 import { ShelfLegacyStruct } from './types'
 
@@ -8,7 +7,7 @@ import { ShelfLegacyStruct } from './types'
  * @throws 没有 找到合适版本时会报错
  */
 export async function shelfStructMigration(
-  input: (ShelfItem | ServerShelf.Item | ShelfLegacyStruct.First.ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[],
+  input: (ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[],
   inputVer: SHELF_STRUCT_VER | null
 ): Promise<ShelfItem[]> {
   if (inputVer === SHELF_STRUCT_VER.LATEST) {
@@ -17,7 +16,7 @@ export async function shelfStructMigration(
 
   // 最初的一版本没有版本号概念，入参null
   if (inputVer === null) {
-    const res = input as (ShelfLegacyStruct.First.ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[]
+    const res = input as ShelfLegacyStruct.First.ServerShelfItem[]
     return res.map((item): ShelfItem => {
       let result: ShelfItem
       switch (item.type) {
