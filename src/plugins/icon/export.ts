@@ -103,5 +103,10 @@ export {
   mdiWalletOutline,
   mdiAccountCog,
   mdiPen,
-  mdiFuriganaHorizontal
+  mdiFuriganaHorizontal,
+  mdiAccountSupervisor,
+  mdiCalendarRangeOutline,
+  mdiTicketConfirmation,
+  mdiLinkVariant,
+  mdiCalendarAccount
 } from '@mdi/js'

@@ -77,6 +77,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Setting.vue')
   },
   {
+    path: '/user/profile',
+    name: 'UserProfile',
+    component: () => import('../views/User/Profile.vue')
+  },
+  {
     path: '/test',
     name: 'Test',
     meta: { requiresAuth: false },
@@ -124,6 +129,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Search',
     props: true,
     component: () => import('../views/Search.vue')
+  },
+  {
+    path: '/forum/list',
+    name: 'ForumList',
+    props: true,
+    component: () => import('../views/Forum/List.vue')
   }
 ]
 
