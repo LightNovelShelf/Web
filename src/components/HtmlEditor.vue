@@ -31,48 +31,18 @@
       </q-card>
     </q-dialog>
     <div>
-      <MdEditor
+      <md-editor
         v-if="editorSetting.mode === 'markdown'"
         v-model="markdownText"
         editorId="md-introduction"
         :onHtmlChanged="onHtmlChanged"
-        style="display: flex !important"
+        :sanitize="sanitizeHtml"
+        style="display: flex !important; height: calc(100vh - 180px)"
         :theme="$q.dark.isActive ? 'dark' : 'light'"
-        :toolbars="[
-          'bold',
-          'underline',
-          'italic',
-          'strikeThrough',
-          '-',
-          'title',
-          'sub',
-          'sup',
-          'quote',
-          'unorderedList',
-          'orderedList',
-          '-',
-          'codeRow',
-          'code',
-          'link',
-          'table',
-          'mermaid',
-          'katex',
-          0,
-          '-',
-          'revoke',
-          'next',
-          '=',
-          'prettier',
-          'pageFullscreen',
-          'fullscreen',
-          'preview',
-          'htmlPreview',
-          'catalog',
-          'github'
-        ]"
+        :toolbars="mdToolBar"
       >
         <template #defToolbars>
-          <MdEditor.NormalToolbar title="mark" @click="mdRubyHandler">
+          <md-editor.NormalToolbar title="mark" @click="mdRubyHandler">
             <template #trigger>
               <svg class="md-icon" aria-hidden="true">
                 <path
@@ -80,9 +50,9 @@
                 />
               </svg>
             </template>
-          </MdEditor.NormalToolbar>
+          </md-editor.NormalToolbar>
         </template>
-      </MdEditor>
+      </md-editor>
     </div>
   </div>
 </template>
@@ -159,6 +129,37 @@ const toolbar = computed(() => {
     return CommonToolbar
   }
 })
+const mdToolBar = [
+  'bold',
+  'underline',
+  'italic',
+  'strikeThrough',
+  '-',
+  'title',
+  'sub',
+  'sup',
+  'quote',
+  'unorderedList',
+  'orderedList',
+  '-',
+  'codeRow',
+  'code',
+  'link',
+  'table',
+  'mermaid',
+  'katex',
+  0,
+  '-',
+  'revoke',
+  'next',
+  '=',
+  'prettier',
+  'pageFullscreen',
+  'fullscreen',
+  'preview',
+  'htmlPreview',
+  'catalog'
+]
 
 const chapter = ref<any>()
 const editorRef = ref()
@@ -230,6 +231,14 @@ const clearHtml = debounce(function clearHtml(html: string) {
     emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
   }
 }, 100)
+function sanitizeHtml(html: string) {
+  // 对markdown生成的代码进行一些自定义
+  html = html.replace(
+    /<p><figure>(.*?)<figcaption>.*?<\/figcaption><\/figure><\/p>/g,
+    '<div class="illus duokan-image-single">$1</div>'
+  )
+  return html
+}
 
 const isChange = ref(false)
 const onHtmlChanged = (html: string) => {
