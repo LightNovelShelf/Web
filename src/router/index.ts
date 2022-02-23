@@ -129,6 +129,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Search',
     props: true,
     component: () => import('../views/Search.vue')
+  },
+  {
+    path: '/forum/list',
+    name: 'ForumList',
+    props: true,
+    component: () => import('../views/Forum/List.vue')
   }
 ]
 
