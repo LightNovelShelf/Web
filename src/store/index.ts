@@ -33,6 +33,9 @@ export const useAppStore = defineStore('app', {
     },
     userId(): number {
       return this.user?.Id
+    },
+    avatar(): string {
+      return this.user?.Avatar
     }
   },
   actions: {
