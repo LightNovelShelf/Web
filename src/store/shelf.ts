@@ -2,12 +2,11 @@ import { defineStore } from 'pinia'
 import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum, SHELF_STRUCT_VER } from '@/types/shelf'
 import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 import { toRaw } from 'vue'
-import produce from 'immer'
+import { produce } from 'immer'
 import { isEqual } from 'lodash-es'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
-import { getBookShelf, saveBookShelf } from '@/services/user'
-import { ServerShelf } from '@/services/user/type'
+import { getBookShelfBinaryGzip, saveBookShelf } from '@/services/user'
 
 export enum ShelfBranch {
   main = 'main',
@@ -154,14 +153,18 @@ const shelfStore = defineStore('app.shelf', {
   actions: {
     /** git ------------ */
     /** 从db中拉数据 */
-    fetch(): Promise<ShelfItem[]> {
-      return shelfDB.getItems()
+    async fetch(): Promise<ShelfItem[]> {
+      return this.squeezeShelfItemIndex(await shelfDB.getItems())
     },
 
     /** push到db */
     async push(config: { syncRetome?: boolean } = {}) {
       /** 记录的时候结构一定是最新的 */
       await shelfStructVerDB.set('VER', SHELF_STRUCT_VER.LATEST)
+
+      this.commit({
+        shelf: this.squeezeShelfItemIndex(toRaw(this.shelf))
+      })
 
       // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
       await shelfDB.clear()
@@ -195,23 +198,24 @@ const shelfStore = defineStore('app.shelf', {
 
     /** 从db中拉数据(pull = fetch + commit) */
     async pull() {
-      let shelf = await this.fetch()
+      const shelf = await this.fetch()
       const structVer = await shelfStructVerDB.get<SHELF_STRUCT_VER>('VER')
+
+      // 如果版本不对，丢掉，多兼容一份数据逻辑有点烦了，等服务器返回就好
       if (structVer !== SHELF_STRUCT_VER.LATEST) {
-        shelf = await (
-          await import('@/utils/migrations/shelf/struct/action')
-        ).shelfStructMigration(shelf, structVer ?? null)
+        this.commit({ shelf: [] })
+        this.push({ syncRetome: false })
+        return
       }
 
-      /** @legacy 最初的版本有index不对的 */
-      this.commit({ shelf: sort(shelf) })
+      this.commit({ shelf })
     },
 
     /** git end -------- */
 
     /** 从服务器同步 */
     async syncFromRemote() {
-      const serve = await getBookShelf()
+      const serve = await getBookShelfBinaryGzip()
       let shelf: ShelfItem[]
 
       if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
@@ -219,20 +223,15 @@ const shelfStore = defineStore('app.shelf', {
           await import('@/utils/migrations/shelf/struct/action')
         ).shelfStructMigration(serve.data, serve.ver ?? null)
       } else {
-        shelf = (serve.data as ServerShelf.Item[]).map((item): ShelfItem => {
-          return {
-            ...item,
-            updateAt: new Date(item.updateAt).toISOString()
-          }
-        })
+        shelf = serve.data as ShelfItem[]
       }
 
       // 记录版本到本地
-      this.commit({ shelf })
+      this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
 
       // 如果版本不对那就触发一次push
       if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
-        // this.push({ syncRetome: true })
+        this.push({ syncRetome: true })
       }
     },
     /** 同步到服务器 */
@@ -474,7 +473,7 @@ const shelfStore = defineStore('app.shelf', {
     /** 删除文件夹 */
     deleteFolder(payload: { id: string }) {
       this.commit({
-        shelf: sort(
+        shelf: this.squeezeShelfItemIndex(
           // @ts-ignore
           produce(toRaw(this.shelf), (draft) => {
             let currentMaxIndex = this.curMaxIndexInFolder(null)

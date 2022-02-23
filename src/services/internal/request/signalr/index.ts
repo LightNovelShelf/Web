@@ -1,6 +1,8 @@
 import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref } from 'vue'
+import { ungzip } from 'pako'
+
 import { ServerError } from '@/services/internal/ServerError'
 
 import { tryResponseFromCache, updateResponseCache } from './cache'
@@ -136,6 +138,11 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
   try {
     const res = await (await getSignalr()).invoke(url, ...data)
     ;({ Success, Response, Status, Msg } = res)
+
+    if (Response instanceof Uint8Array) {
+      // Response是一个gzip后的json, 解码出来
+      Response = JSON.parse(ungzip(Response, { to: 'string' }))
+    }
   } catch (e) {
     if (__DEV__ && VUE_TRACE_SERVER) {
       console.groupCollapsed(`signalr request data trace: '${url}'`)
