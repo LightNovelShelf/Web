@@ -1,17 +1,16 @@
 <template>
-  <div>
+  <div :class="mode">
     <q-editor
       v-if="editorSetting.mode === 'html'"
       ref="editorRef"
       paragraph-tag="p"
       :toolbar="toolbar"
-      :class="mode"
       v-model="htmlContent"
       :definitions="{
         beautify: { tip: '格式化代码', label: '格式化', handler: beautify },
         bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
         removeFormat: { handler: removeFormat },
-        ruby: { tip: '添加注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler }
+        ruby: { tip: '插入注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler }
       }"
       min-height="5rem"
     />
@@ -43,7 +42,7 @@
         :toolbars="mdToolBar"
       >
         <template #defToolbars>
-          <md-editor.NormalToolbar title="mark" @click="mdRubyHandler">
+          <md-editor.NormalToolbar title="插入注音" @click="mdRubyHandler">
             <template #trigger>
               <svg class="md-icon" aria-hidden="true">
                 <path
@@ -87,7 +86,7 @@ const SimpleToolbar = [
   ['left', 'center', 'right', 'justify'],
   ['bold', 'italic', 'underline', 'strike'],
   ['undo', 'redo'],
-  ['viewsource']
+  ['removeFormat', 'beautify', 'viewsource']
 ]
 const CommonToolbar = [
   [
@@ -284,10 +283,18 @@ function removeFormat() {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .common {
-  :deep(.q-editor__content) {
+  .q-editor__content,
+  .md-preview {
     @import '../assets/style/read';
+  }
+}
+
+.simple .md-preview {
+  p {
+    padding: unset;
+    margin: 0 0 0.5em 0;
   }
 }
 </style>
