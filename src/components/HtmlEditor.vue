@@ -5,6 +5,7 @@
       ref="editorRef"
       paragraph-tag="p"
       :toolbar="toolbar"
+      :class="mode"
       v-model="htmlContent"
       :definitions="{
         beautify: { tip: '格式化代码', label: '格式化', handler: beautify },
@@ -284,7 +285,9 @@ function removeFormat() {
 </script>
 
 <style scoped lang="scss">
-:deep(.q-editor__content) {
-  @import '../assets/style/read';
+.common {
+  :deep(.q-editor__content) {
+    @import '../assets/style/read';
+  }
 }
 </style>
