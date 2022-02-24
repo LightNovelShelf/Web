@@ -73,9 +73,9 @@
               <!-- 没有选中时展示当前项标题 -->
               <q-item-section v-else
                 ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
-                  contextBook.Title
+                  contextMenuShelfItemTitle
                 }}</q-tooltip
-                ><div class="max-len-text">{{ contextBook.Title }}</div></q-item-section
+                ><div class="max-len-text">{{ contextMenuShelfItemTitle }}</div></q-item-section
               >
             </q-item>
 
@@ -252,9 +252,35 @@ const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const folderSelectorVisible = ref(false)
 /** 文件夹选择器model值 */
 const selectorValue = ref<string | QSelectorOption | null>(null)
-/** 右键菜单触发的book数据 */
-const contextBookID = ref<number>(-1)
-const contextBook = computed(() => bookListStore.getBook(contextBookID.value))
+/** 右键菜单触发的Item ID */
+const contextMenuShelfItemID = ref<number | string>(-1)
+const contextMenuShelfItem = computed<ShelfTypes.ShelfFolderItem | BookInList | null>(() => {
+  const { value: id } = contextMenuShelfItemID
+
+  if (!id || id < 0) {
+    return null
+  }
+
+  const shelfItem = shelfStore.shelfInMap.get(id)!
+
+  if (shelfItem.type === ShelfTypes.ShelfItemTypeEnum.BOOK) {
+    return bookListStore.getBook(+id)
+  }
+
+  return shelfItem
+})
+const contextMenuShelfItemTitle = computed(() => {
+  if (selected.value.size) {
+    return `已选${selected.value.size}项`
+  }
+
+  // 正常不会走到这个逻辑，这个分支只是make ts happy
+  if (!contextMenuShelfItem.value) {
+    return 'unknown'
+  }
+
+  return 'type' in contextMenuShelfItem.value ? contextMenuShelfItem.value.title : contextMenuShelfItem.value.Title
+})
 /** 文件夹选项 */
 const folderOptions = computed<QSelectorOption[]>(() => {
   const realFolders = shelfStore.folders
@@ -505,13 +531,14 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
   }
 }
 
-/** 备好右键菜单数据（展示用的书籍数据） */
+/** 备好右键菜单数据（菜单中展示对应书籍的某些元数据） */
 function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
-  if (item.type === ShelfTypes.ShelfItemTypeEnum.BOOK) {
-    /** 设置好ID后让vue自己监听数据数据请求情况 */
-    contextBookID.value = item.id
-    /** 触发一次书籍数据检查 */
-    bookListStore.queryBooks({ ids: [item.id] })
+  if (!selected.value.size) {
+    /** 设置好ID后让 vue.computed 自己监听数据数据请求情况 */
+    contextMenuShelfItemID.value = item.id
+  } else {
+    /** 如果有已选的，置为-1，让菜单信息获取逻辑知道不需要特意去获取 */
+    contextMenuShelfItemID.value = -1
   }
 }
 
