@@ -38,15 +38,15 @@ export class SignalrInspector {
       let lastRecord: RecordItem | null = null
       this.records.forEach((record) => {
         if (lastRecord) {
-          console.log(`--->`, `${record.when - lastRecord.when}ms`)
+          console.log('--->', `${record.when - lastRecord.when}ms`)
         }
 
         if (record.addition) {
-          const { message, ...rest } = record.addition
+          const { message, data } = record.addition
           const groupName = message ? `${record.type}: ${message}` : `${record.type}`
 
           console.groupCollapsed(groupName)
-          console.log(rest)
+          console.log(data)
           console.groupEnd()
         } else {
           console.log(`${record.type}`)
