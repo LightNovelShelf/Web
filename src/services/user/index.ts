@@ -94,37 +94,41 @@ export async function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT
   return requestWithSignalr('SaveBookShelf', json)
 }
 
-/** 取用户书架信息 */
-export async function getBookShelf() {
-  const res = await requestWithSignalr<{
-    data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
-    /** @legacy 历史数据可能没有ver这个键值 */
-    ver?: SHELF_STRUCT_VER
-  }>('GetBookShelf')
+// /** 取用户书架信息 */
+// export async function getBookShelf() {
+//   const res = await requestWithSignalr<{
+//     data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
+//     /** @legacy 历史数据可能没有ver这个键值 */
+//     ver?: SHELF_STRUCT_VER
+//   }>('GetBookShelf')
 
-  return res
+//   return res
 
-  // return import('./mock.json') as unknown as Promise<{
-  //   data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
-  //   /** @legacy 历史数据可能没有ver这个键值 */
-  //   ver?: SHELF_STRUCT_VER
-  // }>
-}
+//   // return import('./mock.json') as unknown as Promise<{
+//   //   data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
+//   //   /** @legacy 历史数据可能没有ver这个键值 */
+//   //   ver?: SHELF_STRUCT_VER
+//   // }>
+// }
 
 /** 取用户书架二进制信息 */
 export async function getBookShelfBinaryGzip() {
-  return requestWithSignalr('GetBookShelfBinaryGzip')
+  return requestWithSignalr<{
+    data: (ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[]
+    /** @legacy 历史数据可能没有ver这个键值 */
+    ver?: SHELF_STRUCT_VER
+  }>('GetBookShelfBinaryGzip')
 }
 
-/** 取用户书架二进制信息 */
-export async function getBookShelfBinaryBrotli() {
-  return requestWithSignalr('GetBookShelfBinaryBrotli')
-}
+// /** 取用户书架二进制信息 */
+// export async function getBookShelfBinaryBrotli() {
+//   return requestWithSignalr('GetBookShelfBinaryBrotli')
+// }
 
-/** 取用户书架二进制信息 */
-export async function getBookShelfBinaryDeflate() {
-  return requestWithSignalr('GetBookShelfBinaryDeflate')
-}
+// /** 取用户书架二进制信息 */
+// export async function getBookShelfBinaryDeflate() {
+//   return requestWithSignalr('GetBookShelfBinaryDeflate')
+// }
 
 /** 清空用户历史记录 */
 export async function clearHistory() {
