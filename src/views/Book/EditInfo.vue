@@ -18,16 +18,7 @@
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
-          <q-editor
-            :toolbar="[
-              ['left', 'center', 'right', 'justify'],
-              ['bold', 'italic', 'underline', 'strike'],
-              ['undo', 'redo'],
-              ['viewsource']
-            ]"
-            v-model="book['Introduction']"
-            min-height="5rem"
-          />
+          <html-editor v-model:html="book['Introduction']" mode="simple" />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
       </q-grid-item>
@@ -64,6 +55,7 @@ import { getBookEditInfo, editBook } from '@/services/book'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { useQuasar } from 'quasar'
+import { HtmlEditor } from '@/components'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)

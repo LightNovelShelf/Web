@@ -20,28 +20,36 @@ export const useSettingStore = defineStore('app.setting', {
       showButton: true,
       tapToScroll: false,
       hideFullScreen: false
+    },
+    editorSetting: {
+      mode: 'html' as 'html' | 'markdown'
     }
   }),
   actions: {
     async init() {
-      const readSetting = await userSettingDB.get('readSetting')
-      if (readSetting) {
-        Object.keys(readSetting).forEach((key) => {
-          this.readSetting[key] = readSetting[key]
-        })
-      }
-      const generalSetting = await userSettingDB.get('generalSetting')
-      if (generalSetting) {
-        Object.keys(generalSetting).forEach((key) => {
-          this.generalSetting[key] = generalSetting[key]
-        })
-      }
+      const p = []
+      const keys = ['readSetting', 'editorSetting', 'generalSetting']
+      keys.forEach((key) => {
+        p.push(
+          (async () => {
+            const setting = await userSettingDB.get(key)
+            if (setting) {
+              Object.keys(setting).forEach((_key) => {
+                this[key][_key] = setting[_key]
+              })
+            }
+          })()
+        )
+      })
+      await Promise.all(p)
     },
     async save() {
-      console.log('save')
-      const p1 = userSettingDB.set('readSetting', toRaw(this.readSetting))
-      const p2 = userSettingDB.set('generalSetting', toRaw(this.generalSetting))
-      await Promise.all([p1])
+      const p = []
+      const keys = ['readSetting', 'editorSetting', 'generalSetting']
+      keys.forEach((key) => {
+        p.push(userSettingDB.set(key, toRaw(this[key])))
+      })
+      await Promise.all(p)
       Dark.set(this.dark)
     }
   },

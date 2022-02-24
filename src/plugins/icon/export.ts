@@ -102,6 +102,8 @@ export {
   mdiSquareEditOutline,
   mdiWalletOutline,
   mdiAccountCog,
+  mdiPen,
+  mdiFuriganaHorizontal,
   mdiAccountSupervisor,
   mdiCalendarRangeOutline,
   mdiTicketConfirmation,
