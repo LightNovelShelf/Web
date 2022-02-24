@@ -143,7 +143,7 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
 
   // 处理请求本身就失败的情况（比如没授权）
   try {
-    inspector.add(inspector.TYPE_ENUM.SENT)
+    inspector.add(inspector.TYPE_ENUM.SENT, { data: data })
     const res = await (await getSignalr()).invoke(url, ...data)
     ;({ Success, Response, Status, Msg } = res)
 
