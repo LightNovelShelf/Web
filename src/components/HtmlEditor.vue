@@ -237,6 +237,7 @@ function sanitizeHtml(html: string) {
     /<p><figure>(.*?)<figcaption>.*?<\/figcaption><\/figure><\/p>/g,
     '<div class="illus duokan-image-single">$1</div>'
   )
+  // html = html.replace('<br>', '</p> <p>')
   return html
 }
 
@@ -291,7 +292,7 @@ function removeFormat() {
   }
 }
 
-.simple .md-preview {
+.md-preview {
   p {
     padding: unset;
     margin: 0 0 0.5em 0;
