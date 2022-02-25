@@ -1,12 +1,11 @@
 import { onActivated, onMounted, onDeactivated, Ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { safeCall } from '@/utils/safeCall'
 import { UseTimeoutFnAction } from '../useTimeoutFn'
 import { AnyFunc } from '@/types/utils'
 
 /** 请求初始化流程 */
 export function useInitRequest(
-  cb: UseTimeoutFnAction<[], Promise<void>>,
+  cb: UseTimeoutFnAction<[], Promise<void>> | AnyFunc,
   config?: {
     before?: AnyFunc
     after?: AnyFunc
@@ -19,7 +18,8 @@ export function useInitRequest(
   onMounted(async () => {
     first = false
     if (config?.before) config?.before()
-    await safeCall(cb.syncCall)()
+    if ('syncCall' in cb) await cb.syncCall()
+    else cb()
     if (config?.after) config?.after()
   })
 
@@ -27,7 +27,8 @@ export function useInitRequest(
   onActivated(async () => {
     if (first && (router.meta.reload || (config?.isActive ? !config?.isActive?.value : false))) {
       if (config?.before) config?.before()
-      await safeCall(cb)()
+      if ('syncCall' in cb) await cb()
+      else cb()
       if (config?.after) config?.after()
     }
   })

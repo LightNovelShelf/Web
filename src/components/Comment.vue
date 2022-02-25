@@ -25,7 +25,7 @@
         </q-item-section>
       </q-item>
 
-      <q-separator spaced />
+      <q-separator v-intersection="onVisible" spaced />
 
       <template v-if="!isActive">
         <div class="row flex-center">
@@ -213,17 +213,25 @@ const isActive = computed(
 const currentPage = ref(1)
 const inputComment = ref()
 const posting = ref(false)
-
+const needRequest = ref(false)
 const replyShow = ref(false)
 const inputReplyComment = ref()
-// const replying = ref(false)
 const parentId = ref<number>()
 const replyId = ref<number>()
 
-const request = useTimeoutFn(async () => {
+const request = async () => {
   comment.value = await getComment({ Type: props.type, Id: props.id, Page: currentPage.value })
   posting.value = false
-})
+}
+
+function onVisible(entry: IntersectionObserverEntry) {
+  if (entry.isIntersecting) {
+    if (needRequest.value) {
+      needRequest.value = false
+      request()
+    }
+  }
+}
 
 watch(() => currentPage.value, request)
 
@@ -238,7 +246,7 @@ const post = async () => {
     })
     posting.value = false
     inputComment.value = null
-    await request.syncCall()
+    await request()
   }
 }
 
@@ -263,7 +271,7 @@ const reply = async () => {
       type: 'positive'
     })
     inputReplyComment.value = null
-    await request.syncCall()
+    await request()
   }
 }
 
@@ -280,11 +288,16 @@ const _delete = async (id) => {
       timeout: 2000,
       type: 'positive'
     })
-    await request.syncCall()
+    await request()
   })
 }
 
-useInitRequest(request, { isActive })
+useInitRequest(
+  () => {
+    needRequest.value = true
+  },
+  { isActive }
+)
 </script>
 
 <style scoped lang="scss">
