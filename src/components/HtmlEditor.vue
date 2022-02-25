@@ -205,7 +205,9 @@ turndownService.keep(['ruby', 'rt'])
 
 // 第一次进来初始化
 const parseMarkDown = () => {
-  if (editorSetting.mode === 'markdown') markdownText.value = turndownService.turndown(htmlContent.value)
+  if (editorSetting.mode === 'markdown') {
+    markdownText.value = turndownService.turndown(htmlContent.value).replace(/^ {2}$/gm, '<br>')
+  }
 }
 parseMarkDown()
 watch(
