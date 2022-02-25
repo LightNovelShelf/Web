@@ -184,7 +184,7 @@ const mdRubyHandler = () => {
     : '<ruby>被注音文字<rt>注音内容</rt></ruby>'
 
   const prefixStr = textarea.value.substring(0, endPoint)
-  const suffixStr = textarea.value.substring(endPoint + (selection?.length || 0))
+  const suffixStr = textarea.value.substring(endPoint + (selection?.toString().length || 0))
 
   markdownText.value = `${prefixStr}${rubyStr}${suffixStr}`
 
