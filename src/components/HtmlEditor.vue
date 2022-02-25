@@ -249,11 +249,7 @@ const onHtmlChanged = (html: string) => {
   isChange.value = true
   emit('update:html', html)
 }
-watch(editorSetting, (newValue) => {
-  if (newValue.mode === 'markdown') {
-    markdownText.value = turndownService.turndown(htmlContent.value)
-  }
-})
+watch(editorSetting, parseMarkDown)
 
 function beautify() {
   htmlContent.value = prettier.format(htmlContent.value, {
