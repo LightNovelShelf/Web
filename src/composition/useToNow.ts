@@ -32,8 +32,7 @@ useTickSource(() => {
 export function useToNow(date: ComputedRef<Date | DateTime>, notNegative = true, locale?: string): Ref<string> {
   const dateObj = computed(() => parseTime(date.value))
   return computed(() => {
-    const str = toNow(dateObj.value, baseTime.value, locale)
-    return notNegative && str.includes('后') ? '刚刚' : str
+    return toNow(dateObj.value, { base: baseTime.value, locale, notNegative: true })
   })
 }
 

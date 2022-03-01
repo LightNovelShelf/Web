@@ -6,7 +6,7 @@ import { produce } from 'immer'
 import { isEqual } from 'lodash-es'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
-import { getBookShelfBinaryGzip, saveBookShelf } from '@/services/user'
+import { getBookShelfBinary, saveBookShelf } from '@/services/user'
 
 export enum ShelfBranch {
   main = 'main',
@@ -219,7 +219,7 @@ const shelfStore = defineStore('app.shelf', {
 
     /** 从服务器同步 */
     async syncFromRemote() {
-      const serve = await getBookShelfBinaryGzip()
+      const serve = await getBookShelfBinary()
       let shelf: ShelfItem[]
 
       if (serve.ver !== SHELF_STRUCT_VER.LATEST) {

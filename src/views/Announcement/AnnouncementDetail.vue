@@ -2,7 +2,9 @@
   <div class="title mx-auto">
     <q-card>
       <q-card-section>
-        <div v-if="isActive" class="text-h6">[{{ announcement.Create }}] {{ announcement.Title }}</div>
+        <div v-if="isActive" class="text-h6">
+          [{{ announcement.Create.toFormat('yyyy-MM-dd') }}] {{ announcement.Title }}
+        </div>
       </q-card-section>
 
       <q-separator />

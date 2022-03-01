@@ -12,7 +12,7 @@ export function getOnlineInfo() {
 }
 
 export function getAnnouncementList(request: GetAnnouncementList.Request) {
-  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementList', request)
+  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementListBinary', request)
 }
 
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
