@@ -77,7 +77,9 @@
                   clickable
                   v-ripple
                 >
-                  <q-item-section>[{{ announcement.Create }}] {{ announcement.Title }}</q-item-section>
+                  <q-item-section>
+                    [{{ announcement.Create.toFormat('yyyy-MM-dd') }}] {{ announcement.Title }}
+                  </q-item-section>
                 </q-item>
               </q-list>
               <div v-else class="row flex-center" style="height: 240px">
@@ -160,7 +162,7 @@
 
 <script lang="tsx" setup>
 import { defineComponent, ref, computed } from 'vue'
-import BookCard from '@/components/BookCard'
+import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/plugins/quasar/components/'
 import { OnlineInfo } from '@/services/context/type'
 import { getOnlineInfo, getAnnouncementList, getBanInfoList } from '@/services/context'

@@ -6,7 +6,7 @@ export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */
 export function getBookList(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookList', param)
+  return requestWithSignalr<Types.GetBookListRes>('GetBookListBinary', param)
 }
 /** 获取书籍信息 */
 export function getBookInfo(bid: number) {
@@ -34,11 +34,11 @@ export function getBookListByIds(ids: number[]) {
 getBookListByIds.MAX_CONCURRENT = 24
 /** 取最新的6本书，无需登录 */
 export function getLatestBookList() {
-  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookList')
+  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookListBinary')
 }
 /** 取最近的排行榜 */
 export function getRank(days: number) {
-  return requestWithSignalr<Types.BookInList[]>('GetRank', days)
+  return requestWithSignalr<Types.BookInList[]>('GetRankBinary', days)
 }
 /** 编辑书籍信息 */
 export function editBook(request: Types.EditBookRequest) {

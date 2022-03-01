@@ -20,7 +20,9 @@
         v-ripple
       >
         <q-item-section>
-          <q-item-label class="text-subtitle1">[{{ announcement.Create }}] {{ announcement.Title }}</q-item-label>
+          <q-item-label class="text-subtitle1">
+            [{{ announcement.Create.toFormat('yyyy-MM-dd') }}] {{ announcement.Title }}
+          </q-item-label>
           <q-item-label caption>
             {{ announcement.PreviewContent }}
           </q-item-label>

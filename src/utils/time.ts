@@ -18,6 +18,25 @@ export function parseTime(date: Date | DateTime | string): DateTime {
 }
 
 /** 获取时间相对目前的文案描述 */
-export function toNow(date: Date | DateTime, base?: DateTime, locale?: string): string {
-  return parseTime(date).toRelative({ locale, base }) ?? 'invalid_date'
+export function toNow(
+  date: Date | DateTime,
+  {
+    base,
+    locale,
+    notNegative = true
+  }: {
+    base?: DateTime
+    locale?: string
+    notNegative?: boolean
+  }
+): string {
+  let result = parseTime(date).toRelative({ base, locale })
+  if (result) {
+    if (notNegative && result.includes('后')) {
+      result = '刚刚'
+    }
+  } else {
+    return 'invalid_date'
+  }
+  return result
 }

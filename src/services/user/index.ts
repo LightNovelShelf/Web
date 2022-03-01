@@ -112,23 +112,13 @@ export async function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT
 // }
 
 /** 取用户书架二进制信息 */
-export async function getBookShelfBinaryGzip() {
+export async function getBookShelfBinary() {
   return requestWithSignalr<{
     data: (ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[]
     /** @legacy 历史数据可能没有ver这个键值 */
     ver?: SHELF_STRUCT_VER
-  }>('GetBookShelfBinaryGzip')
+  }>('GetBookShelfBinary')
 }
-
-// /** 取用户书架二进制信息 */
-// export async function getBookShelfBinaryBrotli() {
-//   return requestWithSignalr('GetBookShelfBinaryBrotli')
-// }
-
-// /** 取用户书架二进制信息 */
-// export async function getBookShelfBinaryDeflate() {
-//   return requestWithSignalr('GetBookShelfBinaryDeflate')
-// }
 
 /** 清空用户历史记录 */
 export async function clearHistory() {
