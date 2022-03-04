@@ -41,7 +41,7 @@ module.exports = {
       runtimeCaching: [
         {
           urlPattern: /.*\.(woff2|woff|ttf)/,
-          handler: 'StaleWhileRevalidate',
+          handler: 'CacheFirst',
           options: {
             cacheName: 'font-cache',
             cacheableResponse: {
