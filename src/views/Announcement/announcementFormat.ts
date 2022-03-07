@@ -16,7 +16,7 @@ export interface Announcement {
 function getPreview(html: string): string {
   let div = document.createElement('div')
   div.innerHTML = sanitizerHtml(html)
-  const text = div.textContent
+  const text = div.textContent.trim()
   div = null
   return text.length > 50 ? text.substring(0, 50) + '...' : text
 }
