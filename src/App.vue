@@ -44,16 +44,13 @@ const style = document.createElement('style')
 style.type = 'text/css'
 style.id = 'read_style'
 document.head.append(style)
-watch(
-  () => appStore.user?.Font,
-  () => {
-    let fontUrl = appStore.user?.Font
-    if (fontUrl) {
-      if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
-      style.innerHTML = `@font-face{font-family:read;src:url(${fontUrl});}`
-    }
+watchEffect(() => {
+  let fontUrl = appStore.user?.Font
+  if (fontUrl) {
+    if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
+    style.innerHTML = `@font-face{font-family:read;src:url(${fontUrl});}`
   }
-)
+})
 
 useServerNotify('OnMessage', (message: string) => {
   $q.notify({
