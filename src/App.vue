@@ -50,7 +50,7 @@ watch(
     let fontUrl = appStore.user?.Font
     if (fontUrl) {
       if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
-      style.innerHTML = `@font-face{font-family:read;src:url(${fontUrl});}`
+      style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
     }
   }
 )
