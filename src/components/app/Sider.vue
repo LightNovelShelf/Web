@@ -7,7 +7,7 @@
     :width="240"
     :breakpoint="siderBreakpoint"
   >
-    <q-scroll-area class="fit">
+    <q-scroll-area style="height: calc(100% - 48px); width: 100%">
       <q-list padding>
         <template v-for="option in menuOptions" :key="option.key">
           <q-separator class="q-my-md" v-if="option.label === 'separator'" />
