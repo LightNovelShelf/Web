@@ -189,18 +189,5 @@ watch(visible, (newVisible) => {
   flex-direction: column;
   max-width: 900px;
   margin: 12px auto 0 auto;
-
-  .card {
-    background: #fff;
-    border-radius: 4px;
-
-    .avatar-item {
-      color: $grey-7;
-    }
-
-    .label-item {
-      color: $grey-9;
-    }
-  }
 }
 </style>
