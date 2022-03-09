@@ -189,5 +189,9 @@ watch(visible, (newVisible) => {
   flex-direction: column;
   max-width: 900px;
   margin: 12px auto 0 auto;
+
+  .card {
+    border-radius: 4px;
+  }
 }
 </style>
