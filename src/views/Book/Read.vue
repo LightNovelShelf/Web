@@ -1,5 +1,6 @@
+/* eslint-disable vue/no-parsing-error */
 <template>
-  <div class="q-mx-auto container read-page" :style="{ '--width': settingStore['buildReaderWidth'] }">
+  <div class="q-mx-auto container read-page" :style="['--width:' + settingStore['buildReaderWidth']]">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -213,12 +214,17 @@ const bgStyle = computed(() => ({
       : 'initial',
   backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
 }))
-const readStyle = computed(() => ({
-  fontSize: readSetting.fontSize + 'px',
-  textAlign: readSetting.justify ? 'justify' : 'initial',
-  color:
-    readSetting.bgType === 'custom' ? (colors.brightness(readSetting.customColor) < 128 ? '#fff' : '#000') : 'inherit'
-}))
+
+//改用StyleValue
+const readStyle = computed(() => [
+  'fontSize:' + readSetting.fontSize + 'px',
+  'textAlign:' + readSetting.justify ? 'justify' : 'initial',
+  'color:' + readSetting.bgType === 'custom'
+    ? colors.brightness(readSetting.customColor) < 128
+      ? '#fff'
+      : '#000'
+    : 'inherit'
+])
 
 const router = useRouter()
 const next = debounce(() => {
@@ -316,6 +322,7 @@ watch(
     await getContent()
   }
 )
+
 // 如果章节变了，重新观察dom记录阅读记录
 watch(
   () => chapter.value?.Id,
