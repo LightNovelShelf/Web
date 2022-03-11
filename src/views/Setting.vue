@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md" :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`">
     <div class="q-gutter-y-md">
       <q-tabs dense v-model="tab" class="text-teal">
         <template v-for="option in tabOptions" :key="option.key">
@@ -10,13 +10,21 @@
         <q-tab-panel name="Setting" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'">
           <div class="q-pa-md">
             <div class="q-gutter-sm light-radio">
-              <div>网站模式</div>
+              <div class="text-subtitle1">网站模式</div>
               <q-radio v-model="dark" val="false" label="明亮" />
               <q-radio v-model="dark" val="true" label="夜间" />
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
-            <div class="q-gutter-sm light-radio">
-              <div>其他选项</div>
+            <q-separator />
+            <div class="q-gutter-sm light-radio q-mt-md">
+              <div class="text-subtitle1">设置页宽度</div>
+              <q-radio v-model="generalSetting.globalWidth" :val="100" label="全宽" />
+              <q-radio v-model="generalSetting.globalWidth" :val="75" label="75%" />
+              <q-radio v-model="generalSetting.globalWidth" :val="50" label="50%" />
+            </div>
+            <q-separator />
+            <div class="q-gutter-sm light-radio q-mt-md">
+              <div class="text-subtitle1">其他选项</div>
               <q-toggle v-model="generalSetting.enableBlurHash" label="打开书籍封面自定义占位符" />
             </div>
           </div>
@@ -25,7 +33,7 @@
         <q-tab-panel name="Read" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'">
           <div class="q-pa-md">
             <div class="q-gutter-sm bg-radio">
-              <div>阅读背景</div>
+              <div class="text-subtitle1">阅读背景</div>
               <q-radio v-model="readSetting.bgType" val="none" label="无" />
               <q-radio v-model="readSetting.bgType" val="paper" label="纸质" />
               <q-radio v-model="readSetting.bgType" val="custom" label="自定义颜色" />
@@ -38,14 +46,14 @@
             />
             <q-separator />
             <div class="q-gutter-sm q-mt-md">
-              <div>文字转换</div>
+              <div class="text-subtitle1">文字转换</div>
               <q-radio v-model="readSetting.convert" :val="null" label="无" />
               <q-radio v-model="readSetting.convert" val="t2s" label="简化" />
               <q-radio v-model="readSetting.convert" val="s2t" label="繁化" />
             </div>
             <q-separator />
             <div class="q-gutter-sm q-mt-md">
-              <div>其他选项</div>
+              <div class="text-subtitle1">其他选项</div>
               <q-toggle v-model="readSetting.justify" label="两端对齐" />
               <q-toggle
                 v-model="readSetting.showButton"
@@ -56,12 +64,12 @@
             </div>
             <q-separator />
             <div class="q-gutter-sm q-mt-md">
-              <div>字体大小</div>
+              <div class="text-subtitle1">字体大小</div>
               <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
             </div>
             <q-separator />
             <div class="q-gutter-sm q-mt-md">
-              <div>阅读页宽度（设为 0 时为全屏，只在大屏幕下生效）</div>
+              <div class="text-subtitle1">阅读页宽度（设为 0 时为全屏，只在大屏幕下生效）</div>
               <div style="max-width: 150px">
                 <q-input v-model.number="readSetting.readPageWidth" type="number" dense outlined>
                   <template v-slot:append>
@@ -76,7 +84,7 @@
         <q-tab-panel name="Edit" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'">
           <div class="q-pa-md">
             <div class="q-gutter-sm">
-              <div>编辑器</div>
+              <div class="text-subtitle1">编辑器</div>
               <q-btn-toggle
                 v-model="editorSetting.mode"
                 toggle-color="primary"

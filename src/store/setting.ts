@@ -8,7 +8,8 @@ export const useSettingStore = defineStore('app.setting', {
     isInit: true,
     dark: Dark.get() + '', // dark 设置不保存到服务器
     generalSetting: {
-      enableBlurHash: true
+      enableBlurHash: true,
+      globalWidth: 100
     },
     readSetting: {
       fontSize: 16,
@@ -57,6 +58,9 @@ export const useSettingStore = defineStore('app.setting', {
     buildReaderWidth(): string {
       if (this.readSetting.readPageWidth === 0) return '100%'
       return this.readSetting.readPageWidth + 'px'
+    },
+    getGlobalWidth(): string {
+      return this.generalSetting.globalWidth + '%'
     }
   }
 })
