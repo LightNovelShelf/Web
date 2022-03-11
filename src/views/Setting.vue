@@ -7,12 +7,12 @@
         </template>
       </q-tabs>
       <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="Setting">
+        <q-tab-panel name="Setting" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'">
           <div class="q-pa-md">
             <div class="q-gutter-sm light-radio">
               <div>网站模式</div>
-              <q-radio v-model="dark" :val="false" label="明亮" />
-              <q-radio v-model="dark" :val="true" label="夜间" />
+              <q-radio v-model="dark" val="false" label="明亮" />
+              <q-radio v-model="dark" val="true" label="夜间" />
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
             <div class="q-gutter-sm light-radio">
@@ -22,7 +22,7 @@
           </div>
         </q-tab-panel>
 
-        <q-tab-panel name="Read">
+        <q-tab-panel name="Read" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'">
           <div class="q-pa-md">
             <div class="q-gutter-sm bg-radio">
               <div>阅读背景</div>
@@ -36,13 +36,15 @@
               v-model="readSetting.customColor"
               class="my-picker"
             />
-            <div class="q-gutter-sm">
+            <q-separator />
+            <div class="q-gutter-sm q-mt-md">
               <div>文字转换</div>
               <q-radio v-model="readSetting.convert" :val="null" label="无" />
               <q-radio v-model="readSetting.convert" val="t2s" label="简化" />
               <q-radio v-model="readSetting.convert" val="s2t" label="繁化" />
             </div>
-            <div>
+            <q-separator />
+            <div class="q-gutter-sm q-mt-md">
               <div>其他选项</div>
               <q-toggle v-model="readSetting.justify" label="两端对齐" />
               <q-toggle
@@ -52,11 +54,13 @@
               <q-toggle v-model="readSetting.tapToScroll" label="点击边缘滚动页面" />
               <q-toggle v-model="readSetting.hideFullScreen" label="隐藏全屏按钮" />
             </div>
-            <div>
+            <q-separator />
+            <div class="q-gutter-sm q-mt-md">
               <div>字体大小</div>
               <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
             </div>
-            <div class="q-gutter-sm">
+            <q-separator />
+            <div class="q-gutter-sm q-mt-md">
               <div>阅读页宽度（设为 0 时为全屏，只在大屏幕下生效）</div>
               <div style="max-width: 150px">
                 <q-input v-model.number="readSetting.readPageWidth" type="number" dense outlined>
@@ -69,7 +73,7 @@
           </div>
         </q-tab-panel>
 
-        <q-tab-panel name="Edit">
+        <q-tab-panel name="Edit" :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'">
           <div class="q-pa-md">
             <div class="q-gutter-sm">
               <div>编辑器</div>
@@ -124,7 +128,11 @@ const { readSetting, generalSetting, editorSetting } = settingStore
 let tab = ref('Setting')
 
 watch(dark, (newDark) => {
-  Dark.set(newDark)
+  if (newDark === 'auto') {
+    Dark.set(newDark)
+  } else {
+    Dark.set(newDark === 'true')
+  }
   settingStore.save()
 })
 
