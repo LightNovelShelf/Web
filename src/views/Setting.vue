@@ -42,7 +42,7 @@
               style="max-width: 200px"
               v-if="readSetting.bgType === 'custom'"
               v-model="readSetting.customColor"
-              class="my-picker"
+              class="my-picker q-mt-md"
             />
             <q-separator />
             <div class="q-gutter-sm q-mt-md">
@@ -69,9 +69,22 @@
             </div>
             <q-separator />
             <div class="q-gutter-sm q-mt-md">
-              <div class="text-subtitle1">阅读页宽度（设为 0 时为全屏，只在大屏幕下生效）</div>
+              <div class="text-subtitle1"
+                >阅读页宽度{{ readSetting.widthType === 'custom' ? '（设为 0 时为全屏，只在大屏幕下生效）' : '' }}</div
+              >
+              <q-radio v-model="readSetting.widthType" val="full" label="全屏" />
+              <q-radio v-model="readSetting.widthType" val="medium" label="中" />
+              <q-radio v-model="readSetting.widthType" val="small" label="小" />
+              <q-radio v-model="readSetting.widthType" val="custom" label="自定义" />
               <div style="max-width: 150px">
-                <q-input v-model.number="readSetting.readPageWidth" type="number" dense outlined>
+                <q-input
+                  v-model="readSetting.readPageWidth"
+                  type="number"
+                  dense
+                  outlined
+                  v-if="readSetting.widthType === 'custom'"
+                  class="q-mt-md"
+                >
                   <template v-slot:append>
                     <div>px</div>
                   </template>
