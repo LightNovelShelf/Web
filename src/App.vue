@@ -31,29 +31,17 @@ const appStore = useAppStore()
 const settingStore = useSettingStore()
 settingStore.init()
 
-const getUser = async () => {
-  const token = await longTermToken.get()
-  if (token) {
-    appStore.user = await getMyInfo()
-  }
-}
-getUser()
-
 // 字体设置
 const style = document.createElement('style')
 style.type = 'text/css'
 style.id = 'read_style'
 document.head.append(style)
-watch(
-  () => appStore.user?.Font,
-  () => {
-    let fontUrl = appStore.user?.Font
-    if (fontUrl) {
-      if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
-      style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
-    }
+useServerNotify('OnFontChange', (fontUrl: string) => {
+  if (fontUrl) {
+    if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
+    style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
   }
-)
+})
 
 useServerNotify('OnMessage', (message: string) => {
   $q.notify({
@@ -64,6 +52,14 @@ useServerNotify('OnMessage', (message: string) => {
     actions: [{ label: '关闭', color: 'white', handler: NOOP }]
   })
 })
+
+const getUser = async () => {
+  const token = await longTermToken.get()
+  if (token) {
+    appStore.user = await getMyInfo()
+  }
+}
+getUser()
 
 let color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
 
