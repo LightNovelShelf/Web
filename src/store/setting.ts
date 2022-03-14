@@ -6,7 +6,7 @@ import { Dark } from '@/plugins/quasar/dark'
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({
     isInit: true,
-    dark: Dark.get() + '', // dark 设置不保存到服务器
+    dark: Dark.get(), // dark 设置不保存到服务器
     generalSetting: {
       enableBlurHash: true,
       globalWidth: 100
