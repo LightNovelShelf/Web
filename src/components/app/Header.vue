@@ -68,15 +68,30 @@
               </div>
 
               <div class="level-item">
-                <div class="row q-col-gutter-sm items-center">
-                  <div class="col level-item__bar--tag level-item__bar--now">lv0</div>
-                  <div class="col">
-                    <q-linear-progress size="xs" :value="0.3" />
+                <template v-if="user.Level === 6">
+                  <div class="row q-col-gutter-sm items-center">
+                    <div class="col level-item__bar--tag level-item__bar--now">lv6</div>
+                    <div class="col">
+                      <q-linear-progress size="xs" :value="1" />
+                    </div>
+                    <div class="col level-item__bar--tag level-item__bar--next">--</div>
                   </div>
-                  <div class="col level-item__bar--tag level-item__bar--next">lv1</div>
-                </div>
 
-                <div class="text-caption text-opacity level-item__text"> 当前经验0, 还需要114514经验升级到lv1 </div>
+                  <div class="text-caption text-opacity level-item__text"> 恭喜你已经是满级了 </div>
+                </template>
+                <template v-else>
+                  <div class="row q-col-gutter-sm items-center">
+                    <div class="col level-item__bar--tag level-item__bar--now">lv{{ user.Level }}</div>
+                    <div class="col">
+                      <q-linear-progress size="xs" :value="0.3" />
+                    </div>
+                    <div class="col level-item__bar--tag level-item__bar--next">lv{{ user.Level + 1 }}</div>
+                  </div>
+
+                  <div class="text-caption text-opacity level-item__text">
+                    当前经验0, 还需要114514经验升级到lv{{ user.Level + 1 }}
+                  </div>
+                </template>
               </div>
 
               <div class="counts-item">
