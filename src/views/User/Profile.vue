@@ -14,7 +14,9 @@
                 </q-avatar>
               </q-item-section>
               <q-item-section class="label-item">{{ option.label }}</q-item-section>
-              <q-item-section side v-if="!['Avatar'].includes(option.key)">{{ user?.[option.key] }}</q-item-section>
+              <q-item-section side v-if="!['Avatar'].includes(option.key)">
+                {{ option.value ? option.value(user) : user?.[option.key] }}
+              </q-item-section>
               <q-item-section side v-if="option.editable">
                 <q-icon size="18px" :name="icon.mdiChevronRight" />
               </q-item-section>
@@ -80,6 +82,7 @@ import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { setAvatar, getMyInfo } from '@/services/user'
 import { getErrMsg } from '@/utils/getErrMsg'
+import { parseTime } from '@/utils/time'
 const avatar = computed(() => appStore.avatar)
 
 defineComponent({ name: 'Profile' })
@@ -124,16 +127,19 @@ const profileListOptions: Array<Record<string, any>> = [
   {
     label: '用户组',
     key: 'UserGroup',
+    value: (u) => u?.Role.Name,
     icon: icon.mdiAccountSupervisor
   },
   {
     label: '积分',
     key: 'Point',
+    value: (u) => 0,
     icon: icon.mdiTicketConfirmation
   },
   {
     label: '注册时间',
     key: 'RegisterTime',
+    value: (u) => (u?.RegisterTime ? parseTime(u.RegisterTime).toFormat('yyyy-MM-dd') : null),
     icon: icon.mdiCalendarRangeOutline
   }
 ]

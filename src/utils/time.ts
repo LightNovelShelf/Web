@@ -20,16 +20,15 @@ export function parseTime(date: Date | DateTime | string): DateTime {
 /** 获取时间相对目前的文案描述 */
 export function toNow(
   date: Date | DateTime,
-  {
-    base,
-    locale,
-    notNegative = true
-  }: {
+  config: {
     base?: DateTime
     locale?: string
     notNegative?: boolean
+  } = {
+    notNegative: true
   }
 ): string {
+  const { base, locale, notNegative } = config
   let result = parseTime(date).toRelative({ base, locale })
   if (result) {
     if (notNegative && result.includes('后')) {
