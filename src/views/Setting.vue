@@ -11,8 +11,8 @@
           <div class="q-pa-md">
             <div class="q-gutter-sm light-radio">
               <div class="text-subtitle1">网站模式</div>
-              <q-radio v-model="dark" val="false" label="明亮" />
-              <q-radio v-model="dark" val="true" label="夜间" />
+              <q-radio v-model="dark" :val="false" label="明亮" />
+              <q-radio v-model="dark" :val="true" label="夜间" />
               <q-radio v-model="dark" val="auto" label="自动" />
             </div>
             <q-separator />
@@ -149,11 +149,7 @@ const { readSetting, generalSetting, editorSetting } = settingStore
 let tab = ref('Setting')
 
 watch(dark, (newDark) => {
-  if (newDark === 'auto') {
-    Dark.set(newDark)
-  } else {
-    Dark.set(newDark === 'true')
-  }
+  Dark.set(newDark)
   settingStore.save()
 })
 
