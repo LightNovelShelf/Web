@@ -5,7 +5,7 @@ const layoutStore = reactive({
   siderBreakpoint: 1023,
   headerHeight: 58,
   containerStyle: {
-    padding: '12px'
+    padding: '12px' //留给撑满的时候用
   }
 })
 

@@ -8,13 +8,15 @@ export const useSettingStore = defineStore('app.setting', {
     isInit: true,
     dark: Dark.get(), // dark 设置不保存到服务器
     generalSetting: {
-      enableBlurHash: true
+      enableBlurHash: true,
+      globalWidth: 100
     },
     readSetting: {
       fontSize: 16,
       bgType: 'none' as 'none' | 'paper' | 'custom',
       customColor: '#000000',
       convert: null as null | 't2s' | 's2t',
+      widthType: 'full' as 'full' | 'medium' | 'small' | 'custom',
       readPageWidth: 0,
       justify: false,
       showButton: true,
@@ -55,8 +57,13 @@ export const useSettingStore = defineStore('app.setting', {
   },
   getters: {
     buildReaderWidth(): string {
-      if (this.readSetting.readPageWidth === 0) return '100%'
+      if (this.readSetting.widthType === 'full') return '100%'
+      if (this.readSetting.widthType === 'medium') return '75%'
+      if (this.readSetting.widthType === 'small') return '50%'
       return this.readSetting.readPageWidth + 'px'
+    },
+    getGlobalWidth(): string {
+      return this.generalSetting.globalWidth + '%'
     }
   }
 })
