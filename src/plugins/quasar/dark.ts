@@ -4,12 +4,13 @@ const Key: string = (VUE_APP_NAME || 'eBook_Shelf') + '_Dark'
 export const Dark = {
   get(): 'auto' | boolean {
     const result = localStorage.getItem(Key)
-    if (result) {
-      if (result === 'true') return true
-      else if (result === 'false') return false
-      else return 'auto'
-    } else {
-      return 'auto'
+    switch (result) {
+      case 'true':
+        return true
+      case 'false':
+        return false
+      default:
+        return 'auto'
     }
   },
   set(value: 'auto' | boolean) {
