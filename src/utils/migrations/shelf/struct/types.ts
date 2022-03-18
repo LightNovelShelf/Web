@@ -1,4 +1,4 @@
-import type { BookServicesTypes } from '@/services/book'
+import type { BookServicesTypes } from 'src/services/book'
 
 /** 书架数据结构合并 */
 export namespace ShelfLegacyStruct {

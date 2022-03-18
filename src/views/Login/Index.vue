@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { app } from '@/app'
+import { app } from 'src/app'
 import { VueReCaptcha } from 'vue-recaptcha-v3'
 
 app.use(VueReCaptcha, {

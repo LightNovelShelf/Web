@@ -6,17 +6,17 @@
   </q-layout>
 </template>
 
-<script lang="tsx" setup>
-import { computed, defineComponent, watch, watchEffect } from 'vue'
-import { AppSider, AppHeader, AppContainer } from '@/components/app/index'
+<script lang="ts" setup>
+import { computed, defineComponent, watchEffect } from 'vue'
+import { AppSider, AppHeader, AppContainer } from 'src/components/app/index'
 import { useQuasar } from 'quasar'
-import { useServerNotify } from '@/services/utils/useServerNotify'
-import sanitizerHtml from '@/utils/sanitizeHtml'
-import { useSettingStore } from '@/store/setting'
-import { useAppStore } from '@/store'
-import { longTermToken } from '@/utils/session'
-import { getMyInfo } from '@/services/user'
-import { NOOP } from '@/const/empty'
+import { useServerNotify } from 'src/services/utils/useServerNotify'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
+import { useSettingStore } from 'src/stores/setting'
+import { useAppStore } from 'src/stores'
+import { longTermToken } from 'src/utils/session'
+import { getMyInfo } from 'src/services/user'
+import { NOOP } from 'src/const/empty'
 
 defineComponent({ AppSider, AppHeader, AppContainer })
 
@@ -65,7 +65,7 @@ let color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
 
 watchEffect(() => {
   let metaThemeColor = document.querySelector('meta[name=theme-color]')
-  metaThemeColor.setAttribute('content', color.value)
+  metaThemeColor?.setAttribute('content', color.value)
 })
 </script>
 

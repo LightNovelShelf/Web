@@ -28,15 +28,15 @@
 
 <script lang="ts" setup>
 import { computed, defineComponent, ref } from 'vue'
-import { Comment } from '@/components/'
-import { getAnnouncementDetail } from '@/services/context'
-import sanitizerHtml from '@/utils/sanitizeHtml'
-import type { Announcement } from '@/views/Announcement/announcementFormat'
-import { announcementFormat } from '@/views/Announcement/announcementFormat'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { CommentType } from '@/services/comment/types'
-import { useAppStore } from '@/store'
+import { Comment } from 'src/components/'
+import { getAnnouncementDetail } from 'src/services/context'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
+import type { Announcement } from 'src/views/Announcement/announcementFormat'
+import { announcementFormat } from 'src/views/Announcement/announcementFormat'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { CommentType } from 'src/services/comment/types'
+import { useAppStore } from 'src/stores'
 
 defineComponent({ Comment })
 

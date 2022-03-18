@@ -38,11 +38,11 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, ref, reactive, watch } from 'vue'
-import { getBookList } from '@/services/book'
-import { icon } from '@/plugins/icon'
-import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import BookCard from '@/components/BookCard.vue'
-import { BookInList } from '@/services/book/types'
+import { getBookList } from 'src/services/book'
+import { icon } from 'assets/icon'
+import { QGrid, QGridItem } from 'src/components/grid'
+import BookCard from 'src/components/BookCard.vue'
+import { BookInList } from 'src/services/book/types'
 import { useRouter } from 'vue-router'
 
 defineComponent({ QGrid, QGridItem, BookCard })

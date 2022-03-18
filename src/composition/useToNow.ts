@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { computed, ComputedRef, ref, Ref } from 'vue'
-import { parseTime, toNow } from '@/utils/time'
-import { useTickSource } from '@/composition/useTickSource'
+import { parseTime, toNow } from 'src/utils/time'
+import { useTickSource } from 'src/composition/useTickSource'
 
 const baseTime = ref(DateTime.now())
 useTickSource(() => {

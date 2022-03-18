@@ -1,4 +1,4 @@
-import { AnyFunc } from '@/types/utils'
+import { AnyFunc } from 'src/types/utils'
 import { ref, Ref } from 'vue'
 
 export interface UseFnLoadingReturn<P extends any[] = any[], R = any> extends AnyFunc<P, R> {

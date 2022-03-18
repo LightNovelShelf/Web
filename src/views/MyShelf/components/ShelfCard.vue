@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ShelfItem, ShelfItemTypeEnum } from '@/types/shelf'
+import { ShelfItem, ShelfItemTypeEnum } from 'src/types/shelf'
 import ShelfFolder from './ShelfFolder.vue'
 import ShelfBook from './ShelfBook.vue'
 

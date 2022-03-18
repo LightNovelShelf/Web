@@ -1,29 +1,10 @@
 {
+  "extends": "@quasar/app-webpack/tsconfig-preset",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "jsx": "preserve",
-    // 这里不需要 tsc 进行代码降级兼容,所以也不需要 importHelpers 了
-    // "importHelpers": true,
-    "strict": false,
-    // 检查空调用、空取值
-    // strictNullChecks开了后，JB家IDE无法在vue template中识别类型
-    // "strictNullChecks": true,
-    // 简化Object.keys等的调用
-    // "noImplicitAny": false,
-    // 简化this使用
-    // "noImplicitThis": false,
-    // 默认输出 "use strict"; 屏蔽js的奇怪历史行为
-    "alwaysStrict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
-  "exclude": ["node_modules"]
+    "lib": ["ESNext", "DOM"],
+    "jsx": "preserve",
+    "strict": false,
+    "alwaysStrict": true
+  }
 }

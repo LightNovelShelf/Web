@@ -32,13 +32,13 @@
 
 <script lang="ts" setup>
 import { computed, ref, toRaw } from 'vue'
-import { icon } from '@/plugins/icon'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { getErrMsg } from '@/utils/getErrMsg'
+import { icon } from 'assets/icon'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { getErrMsg } from 'src/utils/getErrMsg'
 import { useQuasar } from 'quasar'
-import { getChapterEditInfo, editChapterContent } from '@/services/chapter'
-import { HtmlEditor } from '@/components'
+import { getChapterEditInfo, editChapterContent } from 'src/services/chapter'
+import { HtmlEditor } from 'src/components'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)

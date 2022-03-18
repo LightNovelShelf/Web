@@ -46,13 +46,13 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useToNow } from '@/composition/useToNow'
-import { ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum } from '@/types/shelf'
-import { useShelfStore } from '@/store/shelf'
-import { useBookListStore } from '@/store/bookListData'
-import { BookInList } from '@/services/book/types'
-import BlurHash from '@/components/BlurHash.vue'
-import { useSettingStore } from '@/store/setting'
+import { useToNow } from 'src/composition/useToNow'
+import { ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum } from 'src/types/shelf'
+import { useShelfStore } from 'stores/shelf'
+import { useBookListStore } from 'stores/bookListData'
+import { BookInList } from 'src/services/book/types'
+import BlurHash from 'src/components/BlurHash.vue'
+import { useSettingStore } from 'stores/setting'
 
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()
@@ -86,7 +86,7 @@ function queryItem(entry: IntersectionObserverEntry) {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/style/mixin';
+@import 'src/css/mixin';
 
 .book-cover {
   position: relative;

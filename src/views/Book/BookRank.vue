@@ -22,13 +22,13 @@
 <script lang="ts" setup>
 import { ref, computed, watch, defineComponent } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
-import BookCard from '@/components/BookCard.vue'
-import { getRank } from '@/services/book'
+import BookCard from 'src/components/BookCard.vue'
+import { getRank } from 'src/services/book'
 import { useQuasar } from 'quasar'
-import { BookInList } from '@/services/book/types'
-import { NOOP } from '@/const/empty'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { BookInList } from 'src/services/book/types'
+import { NOOP } from 'src/const/empty'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
 const props = defineProps<{ type: 'daily' | 'weekly' | 'monthly' }>()
 

@@ -1,29 +1,41 @@
-# The next version for [LightNovelShelf](https://www.acgdmzy.com/)
-## Project setup
-```
+# LightNovelShelf App (light_novel_shelf)
+
+A Online Novel Reading Project
+
+## Install the dependencies
+```bash
+yarn
+# or
 npm install
 ```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
+### Start the app in development mode (hot-code reloading, error reporting, etc.)
+```bash
+quasar dev
 ```
 
-### Lints and fixes files
-```
+
+### Lint the files
+```bash
+yarn lint
+# or
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
 
-### 感谢 [JetBrains](https://www.jetbrains.com/?from=LightNovelShelf) 为开源项目提供免费的全家桶授权
+### Format the files
+```bash
+yarn format
+# or
+npm run format
+```
 
-> 本项目使用了免费的[WebStorm](https://www.jetbrains.com/webstorm/)开发环境
 
-[<img src="./.github/webstorm.svg" width="200"/>](https://www.jetbrains.com/?from=LightNovelShelf)
+
+### Build the app for production
+```bash
+quasar build
+```
+
+### Customize the configuration
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).

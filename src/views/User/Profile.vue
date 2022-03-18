@@ -76,13 +76,13 @@
 
 <script setup lang="ts">
 import { computed, defineComponent, ref, watch } from 'vue'
-import { icon } from '@/plugins/icon'
-import { useAppStore } from '@/store'
+import { icon } from 'assets/icon'
+import { useAppStore } from 'src/stores'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { setAvatar, getMyInfo } from '@/services/user'
-import { getErrMsg } from '@/utils/getErrMsg'
-import { parseTime } from '@/utils/time'
+import { setAvatar, getMyInfo } from 'src/services/user'
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { parseTime } from 'src/utils/time'
 const avatar = computed(() => appStore.avatar)
 
 defineComponent({ name: 'Profile' })
@@ -188,7 +188,7 @@ watch(visible, (newVisible) => {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/styles/quasar.variables';
+@import 'src/css/quasar.variables';
 
 .list-card {
   display: flex;

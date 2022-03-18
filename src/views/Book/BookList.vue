@@ -38,15 +38,15 @@
 <script lang="ts" setup>
 import { ref, computed, watch, defineComponent } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
-import BookCard from '@/components/BookCard.vue'
+import BookCard from 'src/components/BookCard.vue'
 import { useQuasar } from 'quasar'
-import { icon } from '@/plugins/icon'
-import { getBookList } from '@/services/book'
-import { BookInList } from '@/services/book/types'
-import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { NOOP } from '@/const/empty'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { icon } from 'assets/icon'
+import { getBookList } from 'src/services/book'
+import { BookInList } from 'src/services/book/types'
+import { QGrid, QGridItem } from 'src/components/grid'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { NOOP } from 'src/const/empty'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
 defineComponent({ QGrid, QGridItem })
 const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
