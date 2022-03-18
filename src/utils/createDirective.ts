@@ -1,4 +1,4 @@
-import { AnyFunc, AnyVoidFunc } from '@/types/utils'
+import { AnyFunc, AnyVoidFunc } from 'src/types/utils'
 import { Directive } from 'vue'
 
 /**

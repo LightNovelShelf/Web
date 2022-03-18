@@ -1,4 +1,4 @@
-import { RateLimitQueue } from '@/utils/rateLimitQueue'
+import { RateLimitQueue } from 'src/utils/rateLimitQueue'
 
 /**
  * 速度限制队列

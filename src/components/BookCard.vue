@@ -46,11 +46,11 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useToNow } from '@/composition/useToNow'
-import { BookInList } from '@/services/book/types'
+import { useToNow } from 'src/composition/useToNow'
+import { BookInList } from 'src/services/book/types'
 import { useQuasar } from 'quasar'
-import BlurHash from '@/components/BlurHash.vue'
-import { useSettingStore } from '@/store/setting'
+import BlurHash from 'src/components/BlurHash.vue'
+import { useSettingStore } from 'stores/setting'
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
@@ -65,7 +65,7 @@ function onIntersection(entry: IntersectionObserverEntry) {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/style/mixin';
+@import 'src/css/mixin';
 
 .book-cover {
   position: relative;

@@ -42,7 +42,7 @@
         :toolbars="mdToolBar"
       >
         <template #defToolbars>
-          <md-editor.NormalToolbar title="插入注音" @click="mdRubyHandler">
+          <MdEditor.NormalToolbar title="插入注音" @click="mdRubyHandler">
             <template #trigger>
               <svg class="md-icon" aria-hidden="true">
                 <path
@@ -50,7 +50,7 @@
                 />
               </svg>
             </template>
-          </md-editor.NormalToolbar>
+          </MdEditor.NormalToolbar>
         </template>
       </md-editor>
     </div>
@@ -62,11 +62,11 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useQuasar, debounce } from 'quasar'
 import prettier from 'prettier/esm/standalone.mjs'
 import parserHtml from 'prettier/esm/parser-html.mjs'
-import { useSettingStore } from '@/store/setting'
-import bbCodeParser from '@/utils/bbcode/simple'
+import { useSettingStore } from 'stores/setting'
+import bbCodeParser from 'src/utils/bbcode/simple'
 import TurndownService from 'turndown'
-import MdEditor from 'md-editor-v3'
-import { icon } from '@/plugins/icon'
+import MdEditor, { ToolbarNames } from 'md-editor-v3'
+import { icon } from 'assets/icon'
 import 'md-editor-v3/lib/style.css'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
@@ -129,7 +129,7 @@ const toolbar = computed(() => {
     return CommonToolbar
   }
 })
-const mdToolBar = [
+const mdToolBar: ToolbarNames[] = [
   'bold',
   'underline',
   'italic',
@@ -286,7 +286,7 @@ function removeFormat() {
 .common {
   .q-editor__content,
   .md-preview {
-    @import '../assets/style/read';
+    @import 'src/css/read';
   }
 }
 

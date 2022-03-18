@@ -160,17 +160,17 @@
   </div>
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { defineComponent, ref, computed } from 'vue'
-import BookCard from '@/components/BookCard.vue'
-import { QGrid, QGridItem } from '@/plugins/quasar/components/'
-import { OnlineInfo } from '@/services/context/type'
-import { getOnlineInfo, getAnnouncementList, getBanInfoList } from '@/services/context'
+import BookCard from 'src/components/BookCard.vue'
+import { QGrid, QGridItem } from 'src/components/grid/'
+import { OnlineInfo } from 'src/services/context/type'
+import { getOnlineInfo, getAnnouncementList, getBanInfoList } from 'src/services/context'
 import { announcementListFormat } from './Announcement/announcementFormat'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { getLatestBookList } from '@/services/book'
-import { BookInList } from '@/services/book/types'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { getLatestBookList } from 'src/services/book'
+import { BookInList } from 'src/services/book/types'
 
 defineComponent({ QGridItem, QGrid, BookCard })
 

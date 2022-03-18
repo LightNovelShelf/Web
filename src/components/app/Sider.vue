@@ -49,9 +49,9 @@
   </q-drawer>
 </template>
 
-<script lang="tsx" setup>
-import { icon } from '@/plugins/icon'
-import { connectState } from '@/services/utils'
+<script lang="ts" setup>
+import { icon } from 'assets/icon'
+import { connectState } from 'src/services/utils'
 import { useLayout } from './useLayout'
 import { HubConnectionState } from '@microsoft/signalr'
 

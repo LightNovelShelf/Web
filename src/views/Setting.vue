@@ -116,9 +116,9 @@
 
 <script lang="ts" setup>
 import { watch, defineComponent, ref, onActivated } from 'vue'
-import { icon } from '@/plugins/icon'
+import { icon } from 'assets/icon'
 import { Dark } from 'quasar'
-import { useSettingStore } from '@/store/setting'
+import { useSettingStore } from 'stores/setting'
 import { storeToRefs } from 'pinia'
 
 const tabOptions: Array<Record<string, any>> = [
@@ -158,7 +158,7 @@ watch([readSetting, generalSetting, editorSetting], settingStore.save)
 
 <style lang="scss">
 .preview {
-  @import 'src/styles/quasar.variables';
+  @import 'src/css/quasar.variables';
 
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);

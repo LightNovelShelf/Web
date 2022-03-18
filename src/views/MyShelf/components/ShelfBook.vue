@@ -3,9 +3,9 @@
 </template>
 
 <script lang="ts" setup>
-import BookCard from '@/components/BookCard.vue'
-import { useBookListStore } from '@/store/bookListData'
-import { ShelfBookItem } from '@/types/shelf'
+import BookCard from 'src/components/BookCard.vue'
+import { useBookListStore } from 'stores/bookListData'
+import { ShelfBookItem } from 'src/types/shelf'
 import { computed } from 'vue'
 
 const props = defineProps<{ item: ShelfBookItem }>()

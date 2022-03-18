@@ -3,7 +3,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
+import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
 import { useQuasar } from 'quasar'
 
 /** 监听鉴权失败消息 */

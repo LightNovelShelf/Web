@@ -1,4 +1,4 @@
-import { createDirective } from '@/utils/createDirective'
+import { createDirective } from 'src/utils/createDirective'
 
 /**
  * 长按

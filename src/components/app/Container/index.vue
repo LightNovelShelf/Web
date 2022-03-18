@@ -18,7 +18,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue'
 import AuthenticationGuard from './AuthenticationGuard.vue'
-import { useLayout } from '@/components/app/useLayout'
+import { useLayout } from 'src/components/app/useLayout'
 
 export default defineComponent({
   components: { AuthenticationGuard },

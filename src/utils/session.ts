@@ -1,5 +1,5 @@
-import { NOOP } from '@/const/empty'
-import { userAuthenticationDB } from '@/utils/storage/db'
+import { NOOP } from 'src/const/empty'
+import { userAuthenticationDB } from 'src/utils/storage/db'
 
 class TokenStorage {
   private readonly INIT_SOURCE = ''
