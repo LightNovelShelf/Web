@@ -22,12 +22,7 @@
         </q-toolbar-title>
       </div>
 
-      <q-input placeholder="搜索" dark dense standout v-model="searchKey" class="q-ml-md" @keyup.enter="search">
-        <template v-slot:prepend>
-          <q-icon v-if="searchKey === ''" :name="icon.mdiMagnify" />
-          <q-icon v-else :name="icon.mdiClose" class="cursor-pointer" @click="searchKey = ''" />
-        </template>
-      </q-input>
+      <search-input v-model="searchKey" @search="search" />
 
       <q-space />
 
@@ -178,6 +173,7 @@ import { longTermToken, sessionToken } from '@/utils/session'
 import { useQuasar } from 'quasar'
 import { rebootSignalr } from '@/services/internal/request'
 import { useRouter } from 'vue-router'
+import SearchInput from '../SearchInput.vue'
 
 defineComponent({ name: 'Header' })
 
