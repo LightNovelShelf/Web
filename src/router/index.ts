@@ -128,6 +128,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/search/:keyWords?',
     name: 'Search',
     props: true,
+    meta: { hideSearchBar: true },
     component: () => import('../views/Search.vue')
   },
   {

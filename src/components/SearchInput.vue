@@ -1,10 +1,5 @@
 <template>
   <q-input
-    placeholder="搜索"
-    dark
-    dense
-    standout
-    class="q-ml-md"
     :model-value="keyword"
     @update:model-value="syncHandle"
     @keyup.enter="searchHandle()"
@@ -21,6 +16,7 @@
       no-parent-event
       v-model="visible"
       :offset="[0, 2]"
+      :max-width="props.maxWidth"
       :style="{
         width: searchBarWidth,
         maxWidth: props.maxWidth
