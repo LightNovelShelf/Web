@@ -38,14 +38,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, reactive, watch } from 'vue'
+import { defineComponent, ref, reactive, watch } from 'vue'
 import { getBookList } from 'src/services/book'
 import { icon } from 'assets/icon'
 import { QGrid, QGridItem } from 'src/components/grid'
 import BookCard from 'src/components/BookCard.vue'
 import { BookInList } from 'src/services/book/types'
 import { useRouter } from 'vue-router'
-import SearchInput from '@/components/SearchInput.vue'
+import SearchInput from 'src/components/SearchInput.vue'
 
 defineComponent({ QGrid, QGridItem, BookCard })
 const props = defineProps<{ keyWords: string }>()
