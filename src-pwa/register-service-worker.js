@@ -1,3 +1,4 @@
+import { Notify } from 'quasar'
 import { register } from 'register-service-worker'
 
 // The ready(), registered(), cached(), updatefound() and updated()
@@ -11,31 +12,33 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   // registrationOptions: { scope: './' },
 
-  ready (/* registration */) {
-    // console.log('Service worker is active.')
+  ready() {
+    console.log(
+      'App is being served from cache by a service worker.\n' + 'For more details, visit https://goo.gl/AFskqB'
+    )
   },
-
-  registered (/* registration */) {
-    // console.log('Service worker has been registered.')
+  registered() {
+    console.log('Service worker has been registered.')
   },
-
-  cached (/* registration */) {
-    // console.log('Content has been cached for offline use.')
+  cached() {
+    console.log('Content has been cached for offline use.')
   },
-
-  updatefound (/* registration */) {
-    // console.log('New content is downloading.')
+  updatefound() {
+    console.log('New content is downloading.')
   },
-
-  updated (/* registration */) {
-    // console.log('New content is available; please refresh.')
+  updated() {
+    console.log('New content is available; please refresh.')
+    Notify.create({
+      message: '有新内容可用了，请刷新或重新打开网页',
+      position: 'bottom',
+      timeout: 0,
+      type: 'positive'
+    })
   },
-
-  offline () {
-    // console.log('No internet connection found. App is running in offline mode.')
+  offline() {
+    console.log('No internet connection found. App is running in offline mode.')
   },
-
-  error (/* err */) {
-    // console.error('Error during service worker registration:', err)
+  error(error) {
+    console.error('Error during service worker registration:', error)
   }
 })
