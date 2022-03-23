@@ -170,7 +170,7 @@
 <script lang="ts" setup>
 import { computed, defineComponent, ref } from 'vue'
 import { icon } from 'assets/icon'
-import { useAppStore } from 'src/stores'
+import { useAppStore } from 'stores/app'
 import { useLayout } from './useLayout'
 import { storeToRefs } from 'pinia'
 import { useMedia } from 'src/composition/useMedia'

@@ -36,7 +36,7 @@ import { announcementFormat } from 'src/views/Announcement/announcementFormat'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { CommentType } from 'src/services/comment/types'
-import { useAppStore } from 'src/stores'
+import { useAppStore } from 'stores/app'
 
 defineComponent({ Comment })
 
