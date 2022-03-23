@@ -44,7 +44,7 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-webpack/boot-files
-    boot: ['quasar', 'v-viewer'],
+    boot: ['app', 'quasar', 'v-viewer'],
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
     css: ['app.scss'],
@@ -168,15 +168,41 @@ module.exports = configure(function (ctx) {
     // https://v2.quasar.dev/quasar-cli-webpack/developing-pwa/configuring-pwa
     pwa: {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {}, // only for GenerateSW
+      workboxOptions: {
+        navigateFallback: 'index.html',
+        skipWaiting: true, // 跳过等待
+        clientsClaim: true, // 让sw立即接管网页,
+        runtimeCaching: [
+          {
+            urlPattern: /.*\.(woff2|woff|ttf)/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'font-cache',
+              cacheableResponse: {
+                statuses: [200]
+              }
+            }
+          },
+          {
+            urlPattern: /.*\/img\/icons\/.*/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              cacheableResponse: {
+                statuses: [200]
+              }
+            }
+          }
+        ]
+      }, // only for GenerateSW
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode
       chainWebpackCustomSW(/* chain */) {},
 
       manifest: {
-        name: 'LightNovelShelf App',
-        short_name: 'LightNovelShelf App',
+        name: '轻书架',
+        short_name: '轻书架',
         description: '',
         display: 'standalone',
         orientation: 'portrait',
@@ -184,31 +210,16 @@ module.exports = configure(function (ctx) {
         theme_color: '#027be3',
         icons: [
           {
-            src: 'icons/icon-128x128.png',
-            sizes: '128x128',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/icon-192x192.png',
+            src: 'img/icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-256x256.png',
-            sizes: '256x256',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/icon-384x384.png',
-            sizes: '384x384',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/icon-512x512.png',
+            src: 'img/icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           }
-        ]
+        ] // 急需一个新Icon
       }
     },
 

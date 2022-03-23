@@ -11,7 +11,7 @@
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "echo \"No test specified\" && exit 0"
+    "inspect": "quasar inspect > debug/webpack.config.txt"
   },
   "dependencies": {
     "@mdi/js": "^6.5.95",
