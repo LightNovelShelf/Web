@@ -31,18 +31,6 @@ const appStore = useAppStore()
 const settingStore = useSettingStore()
 settingStore.init()
 
-// 字体设置
-const style = document.createElement('style')
-style.type = 'text/css'
-style.id = 'read_style'
-document.head.append(style)
-useServerNotify('OnFontChange', (fontUrl: string) => {
-  if (fontUrl) {
-    if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
-    style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
-  }
-})
-
 useServerNotify('OnMessage', (message: string) => {
   $q.notify({
     position: 'top',
