@@ -11,6 +11,20 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const { configure } = require('quasar/wrappers')
+const { ProvidePlugin, DefinePlugin } = require('webpack')
+
+/** DefinePlugin要求 */
+function getEnvForDefinePlugin() {
+  return Object.keys(process.env).reduce((obj, key) => {
+    // 只导入VUE开头的系统变量，导入全部变量可能会有重名危险导致全局未定义变量逃过检查
+    if (key.indexOf('VUE_') === 0) {
+      obj[key] = JSON.stringify(process.env[key])
+    }
+    return obj
+  }, {})
+}
+
+const __DEV__ = process.env.NODE_ENV === 'development'
 
 module.exports = configure(function (ctx) {
   return {
@@ -30,7 +44,7 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-webpack/boot-files
-    boot: ['quasar', 'pinia', 'v-viewer'],
+    boot: ['quasar', 'v-viewer'],
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
     css: ['app.scss'],
@@ -78,6 +92,13 @@ module.exports = configure(function (ctx) {
           util: require.resolve('util/'),
           process: require.resolve('process/browser')
         })
+        chain.plugin('process').use(new ProvidePlugin({ process: 'process' }))
+        chain.plugin('env').use(
+          new DefinePlugin({
+            ...getEnvForDefinePlugin(),
+            __DEV__: JSON.stringify(__DEV__)
+          })
+        )
       },
       env: {
         ...require('dotenv').config().parsed,

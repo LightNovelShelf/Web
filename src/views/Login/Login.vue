@@ -55,7 +55,7 @@ import { sha256 } from 'src/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router'
-import { useAppStore } from 'src/stores'
+import { useAppStore } from 'stores/app'
 
 const $q = useQuasar()
 const appStore = useAppStore()

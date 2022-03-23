@@ -192,7 +192,7 @@ import { postComment, replyComment, getComment, deleteComment } from 'src/servic
 import { CommentType, GetComment } from 'src/services/comment/types'
 import { baseTime } from 'src/composition/useToNow'
 import { toNow } from 'src/utils/time'
-import { useAppStore } from 'src/stores'
+import { useAppStore } from 'stores/app'
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
