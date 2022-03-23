@@ -3,7 +3,8 @@
   <q-infinite-scroll @load="requestBook" :offset="100" ref="scroll">
     <div class="q-gutter-y-md">
       <div class="row flex-center">
-        <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" />
+        <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
+        <search-input outlined dense v-model="searchKey" @search="search" />
       </div>
       <div class="q-gutter-y-md">
         <q-tabs dense v-model="tab" class="text-teal">
@@ -44,6 +45,7 @@ import { QGrid, QGridItem } from '@/plugins/quasar/components'
 import BookCard from '@/components/BookCard.vue'
 import { BookInList } from '@/services/book/types'
 import { useRouter } from 'vue-router'
+import SearchInput from '@/components/SearchInput.vue'
 
 defineComponent({ QGrid, QGridItem, BookCard })
 const props = defineProps<{ keyWords: string }>()
