@@ -184,7 +184,7 @@ module.exports = configure(function (ctx) {
             }
           },
           {
-            urlPattern: /.*\/img\/icons\/.*/,
+            urlPattern: /.*\/icons\/.*/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'image-cache',
