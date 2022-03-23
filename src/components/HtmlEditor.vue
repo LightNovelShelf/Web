@@ -60,8 +60,8 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useQuasar, debounce } from 'quasar'
-import prettier from 'prettier/esm/standalone.mjs'
-import parserHtml from 'prettier/esm/parser-html.mjs'
+import prettier from 'prettier/standalone'
+import parserHtml from 'prettier/parser-html'
 import { useSettingStore } from 'stores/setting'
 import bbCodeParser from 'src/utils/bbcode/simple'
 import TurndownService from 'turndown'
