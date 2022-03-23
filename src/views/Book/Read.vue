@@ -361,6 +361,22 @@ onActivated(async () => {
   }
 })
 
+// 字体设置
+const style = document.createElement('style')
+style.type = 'text/css'
+style.id = 'read_style'
+document.head.append(style)
+watch(
+  () => chapter.value?.Font,
+  () => {
+    let fontUrl = chapter.value?.Font
+    if (fontUrl) {
+      if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
+      style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
+    }
+  }
+)
+
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
 const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 </script>
