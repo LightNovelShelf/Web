@@ -22,12 +22,16 @@
         </q-toolbar-title>
       </div>
 
-      <q-input placeholder="搜索" dark dense standout v-model="searchKey" class="q-ml-md" @keyup.enter="search">
-        <template v-slot:prepend>
-          <q-icon v-if="searchKey === ''" :name="icon.mdiMagnify" />
-          <q-icon v-else :name="icon.mdiClose" class="cursor-pointer" @click="searchKey = ''" />
-        </template>
-      </q-input>
+      <search-input
+        v-show="!hideSearchBar"
+        placeholder="搜索"
+        dark
+        dense
+        standout
+        class="q-ml-md"
+        v-model="searchKey"
+        @search="search"
+      />
 
       <q-space />
 
@@ -177,9 +181,14 @@ import { useMedia } from 'src/composition/useMedia'
 import { longTermToken, sessionToken } from 'src/utils/session'
 import { useQuasar } from 'quasar'
 import { rebootSignalr } from 'src/services/internal/request'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import SearchInput from '../SearchInput.vue'
 
 defineComponent({ name: 'Header' })
+
+const route = useRoute()
+
+const hideSearchBar = computed(() => route.meta.hideSearchBar)
 
 const $q = useQuasar()
 const appStore = useAppStore()
