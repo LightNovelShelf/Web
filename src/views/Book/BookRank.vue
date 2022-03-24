@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 import BookCard from 'src/components/BookCard.vue'
 import { getRank } from 'src/services/book'
@@ -29,6 +29,7 @@ import { BookInList } from 'src/services/book/types'
 import { NOOP } from 'src/const/empty'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { QGrid, QGridItem } from 'src/components/grid'
 
 const props = defineProps<{ type: 'daily' | 'weekly' | 'monthly' }>()
 

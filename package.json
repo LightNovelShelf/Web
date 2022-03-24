@@ -2,7 +2,7 @@
   "name": "light_novel_shelf",
   "version": "0.0.1",
   "description": "A Online Novel Reading Project",
-  "productName": "LightNovelShelf App",
+  "productName": "轻书架",
   "author": "wuyu8512 <wuyu8512@gmail.com>",
   "private": false,
   "scripts": {
