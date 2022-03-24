@@ -9,6 +9,9 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
+    "build:android": "quasar build -m capacitor -T android",
+    "build:ios": "quasar build -m capacitor -T ios",
+    "build:electron": "quasar build -m electron",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "inspect": "quasar inspect > debug/webpack.config.txt"
@@ -50,6 +53,7 @@
     "@typescript-eslint/parser": "^5.10.0",
     "dotenv": "^16.0.0",
     "electron": "^17.2.0",
+    "electron-packager": "^15.2.0",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^8.5.0",
