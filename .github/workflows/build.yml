@@ -1,0 +1,36 @@
+name: Build CI For Electron & Android
+
+on:
+  push:
+    branches: [ quasar-cli ]
+  pull_request:
+    branches: [ quasar-cli ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 设置 JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: 设置 Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - name: 构建 Electron
+        run: npm run build:electron
+
+      - name: 构建 Android
+        run: npm run build:android
