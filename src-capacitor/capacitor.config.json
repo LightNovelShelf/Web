@@ -1,0 +1,7 @@
+{
+  "appId": "app.lightnovel.android",
+  "appName": "轻书架",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www"
+}
