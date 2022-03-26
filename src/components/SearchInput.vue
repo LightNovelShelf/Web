@@ -36,10 +36,12 @@
 <script lang="ts" setup>
 import { useMergeState } from '@/composition/useMergeState'
 import { computed, ref, toRefs } from 'vue'
-const props = withDefaults(defineProps<{ modelValue?: string; maxWidth?: string }>(), {
-  modelValue: '',
-  maxWidth: '600px'
-})
+const props = withDefaults(
+  defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),
+  {
+    modelValue: ''
+  }
+)
 const emits = defineEmits<{ (e: 'search', val: string): void; (e: 'update:modelValue', val: string): void }>()
 
 const inputEleRef = ref<HTMLInputElement | null>(null)
@@ -57,11 +59,11 @@ const [keyword] = useMergeState(toRefs(props).modelValue)
 const visible = ref(false)
 
 const searchBarWidth = computed(() => {
-  return visible.value ? '40vw' : 'auto'
+  return props.width(visible.value)
 })
 
 function syncHandle(evt: string | number | null) {
-  if (evt && typeof evt === 'string') {
+  if (typeof evt === 'string') {
     emits('update:modelValue', evt)
     keyword.value = evt
   }
