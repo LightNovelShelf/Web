@@ -15,6 +15,7 @@
     "@microsoft/signalr": "^6.0.2",
     "@microsoft/signalr-protocol-msgpack": "^6.0.2",
     "@quasar/extras": "^1.12.5",
+    "@vueuse/core": "^8.2.0",
     "blurhash": "^1.1.4",
     "core-js": "^3.21.0",
     "dompurify": "^2.3.5",
