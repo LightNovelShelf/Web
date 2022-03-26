@@ -1,29 +1,49 @@
-# The next version for [LightNovelShelf](https://www.acgdmzy.com/)
-## Project setup
-```
+# 轻书架 (light_novel_shelf)
+
+A Online Novel Reading Project
+
+## Install the dependencies
+
+```bash
+yarn
+# or
 npm install
 ```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
+### Start the app in development mode (hot-code reloading, error reporting, etc.)
+
+```bash
+quasar dev
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+### Lint the files
 
-### Lints and fixes files
-```
+```bash
+yarn lint
+# or
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Format the files
 
-### 感谢 [JetBrains](https://www.jetbrains.com/?from=LightNovelShelf) 为开源项目提供免费的全家桶授权
+```bash
+yarn format
+# or
+npm run format
+```
 
-> 本项目使用了免费的[WebStorm](https://www.jetbrains.com/webstorm/)开发环境
+### Build the app for production
 
-[<img src="./.github/webstorm.svg" width="200"/>](https://www.jetbrains.com/?from=LightNovelShelf)
+```bash
+quasar build
+```
+
+### Customize the configuration
+
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
+
+### Install electron behind proxy
+
+`cross-env ELECTRON_GET_USE_PROXY=1 GLOBAL_AGENT_HTTPS_PROXY=http://127.0.0.1:114514 npm ci`
+
+See [Advanced Installation Instructions](https://www.electronjs.org/docs/latest/tutorial/installation/#proxies).

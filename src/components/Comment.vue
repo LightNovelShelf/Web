@@ -188,17 +188,17 @@
 </template>
 
 <script lang="ts" setup>
-import { postComment, replyComment, getComment, deleteComment } from '@/services/comment'
-import { CommentType, GetComment } from '@/services/comment/types'
-import { baseTime } from '@/composition/useToNow'
-import { toNow } from '@/utils/time'
-import { useAppStore } from '@/store'
+import { postComment, replyComment, getComment, deleteComment } from 'src/services/comment'
+import { CommentType, GetComment } from 'src/services/comment/types'
+import { baseTime } from 'src/composition/useToNow'
+import { toNow } from 'src/utils/time'
+import { useAppStore } from 'stores/app'
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useQuasar } from 'quasar'
-import { icon } from '@/plugins/icon'
+import { icon } from 'assets/icon'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()

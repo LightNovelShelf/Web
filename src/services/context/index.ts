@@ -1,6 +1,6 @@
-import { requestWithSignalr } from '@/services/internal/request'
-import { Card } from '@/types/collaborator'
-import { GetAnnouncementDetail, GetAnnouncementList, OnlineInfo } from '@/services/context/type'
+import { requestWithSignalr } from 'src/services/internal/request'
+import { Card } from 'src/types/collaborator'
+import { GetAnnouncementDetail, GetAnnouncementList, OnlineInfo } from 'src/services/context/type'
 
 /** 获取贡献者列表 */
 export function getCollaboratorList() {

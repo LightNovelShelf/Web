@@ -1,6 +1,6 @@
 import { DB } from './base'
 
-import type { ShelfItem } from '@/types/shelf'
+import type { ShelfItem } from 'src/types/shelf'
 
 export const shelfDB = new DB<ShelfItem>('USER_SHELF', '用于储存用户书架数据')
 /**

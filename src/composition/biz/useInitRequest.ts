@@ -1,7 +1,7 @@
 import { onActivated, onMounted, onDeactivated, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { UseTimeoutFnAction } from '../useTimeoutFn'
-import { AnyFunc } from '@/types/utils'
+import { AnyFunc } from 'src/types/utils'
 
 /** 请求初始化流程 */
 export function useInitRequest(

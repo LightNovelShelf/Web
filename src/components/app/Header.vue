@@ -173,17 +173,17 @@
   </q-header>
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { computed, defineComponent, ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
-import { icon } from '@/plugins/icon'
-import { useAppStore } from '@/store'
+import { icon } from 'assets/icon'
+import { useAppStore } from 'stores/app'
 import { useLayout } from './useLayout'
 import { storeToRefs } from 'pinia'
-import { useMedia } from '@/composition/useMedia'
-import { longTermToken, sessionToken } from '@/utils/session'
+import { useMedia } from 'src/composition/useMedia'
+import { longTermToken, sessionToken } from 'src/utils/session'
 import { useQuasar } from 'quasar'
-import { rebootSignalr } from '@/services/internal/request'
+import { rebootSignalr } from 'src/services/internal/request'
 import { useRoute, useRouter } from 'vue-router'
 import SearchInput from '../SearchInput.vue'
 
@@ -264,7 +264,7 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/styles/quasar.variables';
+@import 'src/css/quasar.variables';
 
 .avatar-popover {
   .avatar-panel-popover {

@@ -1,4 +1,4 @@
-import type { AnyAsyncFunc, AnyVoidFunc } from '@/types/utils'
+import type { AnyAsyncFunc, AnyVoidFunc } from 'src/types/utils'
 // import { sleep } from './sleep'
 
 const now = performance.now.bind(performance) || Date.now.bind(Date)

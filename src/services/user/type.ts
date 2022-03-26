@@ -1,4 +1,4 @@
-import type { ShelfBookItem, ShelfFolderItem, ShelfItem } from '@/types/shelf'
+import type { ShelfBookItem, ShelfFolderItem, ShelfItem } from 'src/types/shelf'
 
 export namespace Login {
   export interface Param {

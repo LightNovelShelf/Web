@@ -4,7 +4,7 @@
     <div class="q-gutter-y-md">
       <div class="row flex-center">
         <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
-        <search-input outlined dense :width="searchInputWidth" max-width="600px" v-model="searchKey" @search="search" />
+        <search-input outlined dense v-model="searchKey" @search="search" />
       </div>
       <div class="q-gutter-y-md">
         <q-tabs dense v-model="tab" class="text-teal">
@@ -39,28 +39,19 @@
 
 <script setup lang="ts">
 import { defineComponent, ref, reactive, watch } from 'vue'
-import { getBookList } from '@/services/book'
-import { icon } from '@/plugins/icon'
-import { QGrid, QGridItem } from '@/plugins/quasar/components'
-import BookCard from '@/components/BookCard.vue'
-import { BookInList } from '@/services/book/types'
+import { getBookList } from 'src/services/book'
+import { icon } from 'assets/icon'
+import { QGrid, QGridItem } from 'src/components/grid'
+import BookCard from 'src/components/BookCard.vue'
+import { BookInList } from 'src/services/book/types'
 import { useRouter } from 'vue-router'
-import SearchInput from '@/components/SearchInput.vue'
-
-/** 移除精确搜索的双引号 */
-function getTrimedKeyword(str: string) {
-  return str.replace(/^"(.+)"$/, '$1')
-}
+import SearchInput from 'src/components/SearchInput.vue'
 
 defineComponent({ QGrid, QGridItem, BookCard })
 const props = defineProps<{ keyWords: string }>()
 const router = useRouter()
 const scroll = ref()
-
-const searchKey = ref(getTrimedKeyword(props.keyWords))
-const searchInputWidth = () => {
-  return '60vw'
-}
+const searchKey = ref(props.keyWords)
 const requestBook = async (index, done) => {
   let res = await getBookList({ Page: index, Size: 24, KeyWords: props.keyWords })
   bookData.push(...res.Data)
@@ -73,7 +64,7 @@ function search() {
 watch(
   () => props.keyWords,
   () => {
-    searchKey.value = getTrimedKeyword(props.keyWords)
+    searchKey.value = props.keyWords
     scroll.value.reset()
     scroll.value.resume()
     scroll.value.poll()

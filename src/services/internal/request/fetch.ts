@@ -1,9 +1,9 @@
-import { RequestConfig } from '@/services/types'
-import { getErrMsg } from '@/utils/getErrMsg'
+import { RequestConfig } from 'src/services/types'
+import { getErrMsg } from 'src/utils/getErrMsg'
 import { stringifyQuery } from 'vue-router'
-import { ServerError } from '@/services/internal/ServerError'
-import { RequestMethod } from '@/services/types'
-import { sessionToken } from '@/utils/session'
+import { ServerError } from 'src/services/internal/ServerError'
+import { RequestMethod } from 'src/services/types'
+import { sessionToken } from 'src/utils/session'
 import { createRequestQueue } from './createRequestQueue'
 
 async function requestWithFetch<Res = unknown, Data = any>(

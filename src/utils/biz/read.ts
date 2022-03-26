@@ -1,7 +1,7 @@
 import { debounce } from 'quasar'
-import { saveReadPosition } from '@/services/book'
+import { saveReadPosition } from 'src/services/book'
 import { Ref } from 'vue'
-import { userReadPositionDB } from '@/utils/storage/db'
+import { userReadPositionDB } from 'src/utils/storage/db'
 
 function findElementNode(node: Node): Element {
   // @ts-ignore

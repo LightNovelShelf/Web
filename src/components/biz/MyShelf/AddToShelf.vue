@@ -10,13 +10,13 @@ export default {}
 <script lang="ts" setup>
 // 加入书架按钮
 import { computed, ref } from 'vue'
-import { mdiHeartOutline, mdiHeartRemoveOutline } from '@/plugins/icon/export'
+import { mdiHeartOutline, mdiHeartRemoveOutline } from 'assets/icon/export'
 import { useQuasar } from 'quasar'
-import { AnyVoidFunc } from '@/types/utils'
-import type { BookServicesTypes } from '@/services/book'
-import { useShelfStore } from '@/store/shelf'
-import { getErrMsg } from '@/utils/getErrMsg'
-import { connectState } from '@/services/utils'
+import { AnyVoidFunc } from 'src/types/utils'
+import type { BookServicesTypes } from 'src/services/book'
+import { useShelfStore } from 'stores/shelf'
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { connectState } from 'src/services/utils'
 import { HubConnectionState } from '@microsoft/signalr'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()

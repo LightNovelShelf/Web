@@ -1,4 +1,4 @@
-import { requestWithSignalr } from '@/services/internal/request'
+import { requestWithSignalr } from 'src/services/internal/request'
 import { CommentType, GetComment, PostComment } from './types'
 
 /** 评论 */

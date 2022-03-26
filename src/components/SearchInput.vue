@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useMergeState } from '@/composition/useMergeState'
+import { useMergeState } from 'src/composition/useMergeState'
 import { computed, ref, toRefs } from 'vue'
 const props = withDefaults(
   defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),
@@ -51,7 +51,7 @@ const [keyword] = useMergeState(toRefs(props).modelValue)
 /**
  * 理想弹层交互
  * 1. input focus的时候展开弹层
- * 2. 展开状态下再次点击input不会收起弹层（quasr会触发收起操作）
+ * 2. 展开状态下再次点击input不会收起弹层（quasar会触发收起操作）
  * 3. 点击了弹层的某一项会收起弹层
  * 4. 点击空白处会收起弹层（input blur不等于点击空白处，有可能是点击了弹层某个不是选项的位置）
  */

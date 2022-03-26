@@ -1,8 +1,8 @@
-import { useToNow } from '@/composition/useToNow'
+import { useToNow } from 'src/composition/useToNow'
 import { computed, Ref } from 'vue'
-import sanitizerHtml from '@/utils/sanitizeHtml'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { DateTime } from 'luxon'
-import { parseTime } from '@/utils/time'
+import { parseTime } from 'src/utils/time'
 
 export interface Announcement {
   Id: number

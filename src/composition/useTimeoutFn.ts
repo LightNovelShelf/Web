@@ -1,5 +1,5 @@
-import { NOOP } from '@/const/empty'
-import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from '@/types/utils'
+import { NOOP } from 'src/const/empty'
+import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from 'src/types/utils'
 import { computed, onDeactivated, onUnmounted, Ref, ref } from 'vue'
 import { useLoadingFn } from './useFnLoading'
 
