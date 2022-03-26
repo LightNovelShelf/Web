@@ -47,11 +47,17 @@ import { BookInList } from '@/services/book/types'
 import { useRouter } from 'vue-router'
 import SearchInput from '@/components/SearchInput.vue'
 
+/** 移除精确搜索的双引号 */
+function getTrimedKeyword(str: string) {
+  return str.replace(/^"(.+)"$/, '$1')
+}
+
 defineComponent({ QGrid, QGridItem, BookCard })
 const props = defineProps<{ keyWords: string }>()
 const router = useRouter()
 const scroll = ref()
-const searchKey = ref(props.keyWords)
+
+const searchKey = ref(getTrimedKeyword(props.keyWords))
 const searchInputWidth = () => {
   return '60vw'
 }
@@ -67,7 +73,7 @@ function search() {
 watch(
   () => props.keyWords,
   () => {
-    searchKey.value = props.keyWords
+    searchKey.value = getTrimedKeyword(props.keyWords)
     scroll.value.reset()
     scroll.value.resume()
     scroll.value.poll()
