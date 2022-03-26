@@ -30,6 +30,8 @@
         standout
         class="q-ml-md"
         v-model="searchKey"
+        :width="searchInputWidth"
+        max-width="unset"
         @search="search"
       />
 
@@ -173,6 +175,7 @@
 
 <script lang="tsx" setup>
 import { computed, defineComponent, ref } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import { icon } from '@/plugins/icon'
 import { useAppStore } from '@/store'
 import { useLayout } from './useLayout'
@@ -201,6 +204,15 @@ const reveal = useMedia(
   window.innerWidth <= siderBreakpoint.value
 )
 const router = useRouter()
+
+const { width } = useWindowSize()
+const isWideScreen = computed(() => width.value > 768)
+const searchInputWidth = computed(() => {
+  if (isWideScreen.value) {
+    return (visible: boolean) => (visible ? '40vw' : 'auto')
+  }
+  return (visible: boolean) => '50vw'
+})
 
 const userInfoMenuOptions: Array<Record<string, any>> = [
   {
