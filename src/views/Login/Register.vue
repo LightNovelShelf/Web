@@ -74,15 +74,15 @@
 </template>
 
 <script lang="ts" setup>
-import { icon } from '@/plugins/icon'
+import { icon } from 'assets/icon'
 import { ref } from 'vue'
 import { useReCaptcha } from 'vue-recaptcha-v3'
-import { login, register, resetPassword, sendRegisterEmail } from '@/services/user'
-import { sha256 } from '@/utils/hash'
+import { login, register, resetPassword, sendRegisterEmail } from 'src/services/user'
+import { sha256 } from 'src/utils/hash'
 import { useQuasar } from 'quasar'
-import { getErrMsg } from '@/utils/getErrMsg'
+import { getErrMsg } from 'src/utils/getErrMsg'
 import { useRouter } from 'vue-router'
-import { useAppStore } from '@/store'
+import { useAppStore } from 'stores/app'
 
 const $q = useQuasar()
 const appStore = useAppStore()

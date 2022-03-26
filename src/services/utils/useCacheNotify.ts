@@ -1,4 +1,4 @@
-import { lastResponseCache } from '@/services/internal/request/signalr/cache'
+import { lastResponseCache } from 'src/services/internal/request/signalr/cache'
 import { watch } from 'vue'
 
 /** 监听cache使用情况 */

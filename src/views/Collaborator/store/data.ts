@@ -1,4 +1,4 @@
-import { Card } from '@/types/collaborator'
+import { Card } from 'src/types/collaborator'
 import { nanoid } from 'nanoid'
 
 const imgs: string[] = [

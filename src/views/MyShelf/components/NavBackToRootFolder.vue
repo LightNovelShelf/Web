@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { mdiReply } from '@/plugins/icon/export'
+import { mdiReply } from 'assets/icon/export'
 </script>
 
 <style lang="scss" scoped>

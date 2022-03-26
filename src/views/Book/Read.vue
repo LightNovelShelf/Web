@@ -112,21 +112,21 @@
   </div>
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { computed, defineComponent, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue'
-import { getChapterContent } from '@/services/chapter'
+import { getChapterContent } from 'src/services/chapter'
 import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
-import sanitizerHtml from '@/utils/sanitizeHtml'
-import { syncReading, scrollToHistory, loadHistory } from '@/utils/biz/read'
-import { useLayout } from '@/components/app/useLayout'
-import { useSettingStore } from '@/store/setting'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useAppStore } from '@/store'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
+import { syncReading, scrollToHistory, loadHistory } from 'src/utils/biz/read'
+import { useLayout } from 'src/components/app/useLayout'
+import { useSettingStore } from 'stores/setting'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useAppStore } from 'stores/app'
 import { useRouter } from 'vue-router'
-import { icon } from '@/plugins/icon'
-import { getErrMsg } from '@/utils/getErrMsg'
-import { delay } from '@/utils/delay'
-import { NOOP } from '@/const/empty'
+import { icon } from 'assets/icon'
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { delay } from 'src/utils/delay'
+import { NOOP } from 'src/const/empty'
 
 const props = defineProps<{
   bid: string
@@ -408,7 +408,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
     user-select: none;
   }
 
-  @import '../../assets/style/read';
+  @import 'src/css/read';
 
   font-family: read, sans-serif !important;
 
@@ -419,7 +419,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 /*居中功能*/
 .read-page {
-  @import '../../styles/quasar.variables';
+  @import 'src/css/quasar.variables';
 
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);

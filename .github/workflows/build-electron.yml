@@ -1,0 +1,37 @@
+name: Build CI For Electron
+
+on:
+  push:
+    branches: [ quasar-cli ]
+  pull_request:
+    branches: [ quasar-cli ]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        os-version: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm i
+
+      - name: 构建 Electron
+        run: npm run build:electron
+
+      - name: 上传构建文件
+        uses: actions/upload-artifact@v3.0.0
+        with:
+          name: ${{ matrix.os-version }}
+          path: ./dist/electron/轻书架*

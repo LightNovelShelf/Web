@@ -1,17 +1,17 @@
-<script lang="tsx">
+<script lang="ts">
 export default {
   name: 'CollaboratorList'
 }
 </script>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { ref } from 'vue'
 import CardItem from './components/Card.vue'
-import { useResizeObserver } from '@/composition/useResizeObserver'
-import { debounceInFrame } from '@/utils/debounceInFrame'
-import { useMasonry } from '@/composition/useMasonry'
-import { getCollaboratorList } from '@/services/context'
-import { Card } from '@/types/collaborator'
+import { useResizeObserver } from 'src/composition/useResizeObserver'
+import { debounceInFrame } from 'src/utils/debounceInFrame'
+import { useMasonry } from 'src/composition/useMasonry'
+import { getCollaboratorList } from 'src/services/context'
+import { Card } from 'src/types/collaborator'
 
 /** 数据源 */
 const collaborators = ref<Card[]>([])

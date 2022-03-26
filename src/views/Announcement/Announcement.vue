@@ -42,9 +42,9 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import { getAnnouncementList } from '@/services/context'
+import { getAnnouncementList } from 'src/services/context'
 import { announcementListFormat, Announcement } from './announcementFormat'
-import { icon } from '@/plugins/icon'
+import { icon } from 'assets/icon'
 
 let announcementList = reactive<Announcement[]>([])
 let size = 24
