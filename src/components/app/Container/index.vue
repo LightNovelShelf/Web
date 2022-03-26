@@ -1,7 +1,7 @@
 <template>
   <q-page-container>
     <div :style="containerStyle">
-      <router-view v-slot="{ Component }" style="margin: auto">
+      <router-view v-slot="{ Component }">
         <template v-if="Component">
           <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
           <keep-alive :exclude="['CollaboratorList']">
