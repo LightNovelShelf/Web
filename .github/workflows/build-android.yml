@@ -2,9 +2,9 @@ name: Build CI For Android
 
 on:
   push:
-    branches: [ quasar-cli ]
+    branches: [ master ]
   pull_request:
-    branches: [ quasar-cli ]
+    branches: [ master ]
 
 jobs:
   build:
