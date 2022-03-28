@@ -40,20 +40,22 @@ const reLayoutHandle = debounceInFrame(layout)
 useResizeObserver(wrapNodeRef, reLayoutHandle)
 </script>
 <template>
-  <!-- collaborator 宽随父容器 -->
-  <div class="wrap" ref="wrapNodeRef">
-    <!-- collaborator_list 宽随子元素 -->
-    <div class="list" ref="masonryNodeRef">
-      <card-item
-        v-for="item in collaborators"
-        :key="item.Id"
-        class="js-masonry-item"
-        :data="item"
-        @resize="reLayoutHandle"
-      />
+  <q-page padding>
+    <!-- collaborator 宽随父容器 -->
+    <div class="wrap" ref="wrapNodeRef">
+      <!-- collaborator_list 宽随子元素 -->
+      <div class="list" ref="masonryNodeRef">
+        <card-item
+          v-for="item in collaborators"
+          :key="item.Id"
+          class="js-masonry-item"
+          :data="item"
+          @resize="reLayoutHandle"
+        />
+      </div>
+      <q-inner-loading :showing="loading" label="请等待..." label-class="text-teal" label-style="font-size: 1.1em" />
     </div>
-    <q-inner-loading :showing="loading" label="请等待..." label-class="text-teal" label-style="font-size: 1.1em" />
-  </div>
+  </q-page>
 </template>
 <style lang="scss" scoped>
 .wrap {

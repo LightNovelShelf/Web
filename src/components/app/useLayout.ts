@@ -3,10 +3,7 @@ import { inject, computed, reactive, toRefs } from 'vue'
 const layoutStore = reactive({
   siderShow: false,
   siderBreakpoint: 1023,
-  headerHeight: 58,
-  containerStyle: {
-    padding: '12px' //留给撑满的时候用
-  }
+  headerHeight: 58
 })
 
 export const useLayout = () => {

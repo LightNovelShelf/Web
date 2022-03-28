@@ -1,42 +1,44 @@
 <template>
-  <!-- 滚动加载 -->
-  <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll" :disable="history.length === 0">
-    <div class="q-gutter-y-md">
-      <q-tabs dense v-model="tab" class="text-teal">
-        <template v-for="option in tabOptions" :key="option.key">
-          <q-tab :name="option.name" :icon="option.icon" :label="option.label" :disable="option.disable" />
-        </template>
-      </q-tabs>
-      <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="Novel">
-          <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
-            <q-grid-item v-for="book in bookData" :key="book['Id']">
-              <book-card :book="book"></book-card>
-            </q-grid-item>
-          </q-grid>
-        </q-tab-panel>
-        <q-tab-panel name="Thread"></q-tab-panel>
-      </q-tab-panels>
-    </div>
-    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-btn round color="primary" size="md" :icon="icon.mdiDelete" @click="showConfirm = true" />
-    </q-page-sticky>
-    <q-dialog v-model="showConfirm">
-      <q-card style="min-width: 200px">
-        <q-card-section class="row items-center">是否清空阅读历史</q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="清空" color="primary" v-close-popup @click="confirmClear" />
-          <q-btn flat label="取消" color="primary" v-close-popup @click="showConfirm = false" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <template v-slot:loading>
-      <div class="row justify-center q-my-md">
-        <q-spinner-dots color="primary" size="40px" />
+  <q-page padding>
+    <!-- 滚动加载 -->
+    <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll" :disable="history.length === 0">
+      <div class="q-gutter-y-md">
+        <q-tabs dense v-model="tab" class="text-teal">
+          <template v-for="option in tabOptions" :key="option.key">
+            <q-tab :name="option.name" :icon="option.icon" :label="option.label" :disable="option.disable" />
+          </template>
+        </q-tabs>
+        <q-tab-panels v-model="tab" animated>
+          <q-tab-panel name="Novel">
+            <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
+              <q-grid-item v-for="book in bookData" :key="book['Id']">
+                <book-card :book="book"></book-card>
+              </q-grid-item>
+            </q-grid>
+          </q-tab-panel>
+          <q-tab-panel name="Thread"></q-tab-panel>
+        </q-tab-panels>
       </div>
-    </template>
-  </q-infinite-scroll>
+      <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
+        <q-btn round color="primary" size="md" :icon="icon.mdiDelete" @click="showConfirm = true" />
+      </q-page-sticky>
+      <q-dialog v-model="showConfirm">
+        <q-card style="min-width: 200px">
+          <q-card-section class="row items-center">是否清空阅读历史</q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="清空" color="primary" v-close-popup @click="confirmClear" />
+            <q-btn flat label="取消" color="primary" v-close-popup @click="showConfirm = false" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+    </q-infinite-scroll>
+  </q-page>
 </template>
 
 <script setup lang="ts">

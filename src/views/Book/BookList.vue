@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 1920px" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="mx-auto">
     <q-select
       :disable="loading"
       emit-value
@@ -32,7 +32,7 @@
         :input="!$q.screen.gt.sm"
       />
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>

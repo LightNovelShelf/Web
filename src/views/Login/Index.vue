@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page padding>
     <router-view />
 
     <div class="absolute-bottom-right">
@@ -8,7 +8,7 @@
       &
       <a target="_blank" href="https://policies.google.com/terms">服务条款</a>
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>

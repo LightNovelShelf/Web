@@ -1,5 +1,5 @@
 <template>
-  <div class="title mx-auto">
+  <q-page padding class="title mx-auto">
     <q-card>
       <q-card-section>
         <div v-if="isActive" class="text-h6">
@@ -23,11 +23,11 @@
     </q-card>
 
     <comment v-if="user" style="margin-top: 12px" :type="CommentType.Announcement" :id="_id" />
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Comment } from 'src/components/'
 import { getAnnouncementDetail } from 'src/services/context'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
@@ -37,8 +37,6 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { CommentType } from 'src/services/comment/types'
 import { useAppStore } from 'stores/app'
-
-defineComponent({ Comment })
 
 const props = defineProps<{ id: string | number }>()
 const _id = computed(() => ~~(props.id || '1'))

@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 1920px" class="flex-align-center flex fit">
+  <q-page padding style="max-width: 1920px" class="flex-align-center flex fit">
     <q-grid v-if="isActive" x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
       <q-grid-item>
         <div class="q-gutter-sm">
@@ -43,7 +43,7 @@
         </q-fab-action>
       </q-fab>
     </q-page-sticky>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>

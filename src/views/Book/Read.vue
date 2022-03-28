@@ -1,6 +1,6 @@
 /* eslint-disable vue/no-parsing-error */
 <template>
-  <div class="q-mx-auto container read-page" :style="['--width:' + settingStore['buildReaderWidth']]">
+  <q-page padding class="q-mx-auto container read-page" :style="['--width:' + settingStore['buildReaderWidth']]">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -109,7 +109,7 @@
     <div class="v-viewer" ref="viewerRef" v-viewer>
       <img :src="showImage.src" :alt="showImage.alt" />
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>
