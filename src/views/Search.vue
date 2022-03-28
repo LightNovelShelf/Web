@@ -1,40 +1,49 @@
 <template>
-  <!-- todo 不懂他为什么不能放在q-tab-panel里面 -->
-  <q-infinite-scroll @load="requestBook" :offset="100" ref="scroll">
-    <div class="q-gutter-y-md">
-      <div class="row flex-center">
-        <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
-        <search-input outlined dense :width="searchInputWidth" max-width="600px" v-model="searchKey" @search="search" />
-      </div>
+  <q-page padding>
+    <!-- todo 不懂他为什么不能放在q-tab-panel里面 -->
+    <q-infinite-scroll @load="requestBook" :offset="100" ref="scroll">
       <div class="q-gutter-y-md">
-        <q-tabs dense v-model="tab" class="text-teal">
-          <template v-for="option in tabOptions" :key="option.key">
-            <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
-          </template>
-        </q-tabs>
-        <q-tab-panels v-model="tab" animated>
-          <q-tab-panel name="Book">
-            <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-              <q-grid-item v-for="book in bookData" :key="book['Id']">
-                <book-card :book="book"></book-card>
-              </q-grid-item>
-            </q-grid>
-          </q-tab-panel>
+        <div class="row flex-center">
+          <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
+          <search-input
+            outlined
+            dense
+            :width="searchInputWidth"
+            max-width="600px"
+            v-model="searchKey"
+            @search="search"
+          />
+        </div>
+        <div class="q-gutter-y-md">
+          <q-tabs dense v-model="tab" class="text-teal">
+            <template v-for="option in tabOptions" :key="option.key">
+              <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
+            </template>
+          </q-tabs>
+          <q-tab-panels v-model="tab" animated>
+            <q-tab-panel name="Book">
+              <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
+                <q-grid-item v-for="book in bookData" :key="book['Id']">
+                  <book-card :book="book"></book-card>
+                </q-grid-item>
+              </q-grid>
+            </q-tab-panel>
 
-          <q-tab-panel name="Form">
-            <div class="q-pa-md">
-              <div>Form</div>
-            </div>
-          </q-tab-panel>
-        </q-tab-panels>
+            <q-tab-panel name="Form">
+              <div class="q-pa-md">
+                <div>Form</div>
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
+        </div>
       </div>
-    </div>
-    <template v-slot:loading>
-      <div class="row justify-center q-my-md">
-        <q-spinner-dots color="primary" size="40px" />
-      </div>
-    </template>
-  </q-infinite-scroll>
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+    </q-infinite-scroll>
+  </q-page>
 </template>
 
 <script setup lang="ts">

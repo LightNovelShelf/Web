@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page padding>
     <div class="list-card" style="max-width: 900px">
       <div class="q-gutter-md">
         <div class="h2 title"> 个人资料 </div>
@@ -71,7 +71,7 @@
         </q-form>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -194,7 +194,7 @@ watch(visible, (newVisible) => {
   display: flex;
   flex-direction: column;
   max-width: 900px;
-  margin: 12px auto 0 auto;
+  margin: 0 auto;
 
   .card {
     border-radius: 4px;

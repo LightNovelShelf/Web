@@ -1,43 +1,45 @@
 <template>
-  <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
-    <q-list bordered separator class="rounded-borders title mx-auto">
-      <q-item>
-        <q-item-section class="text-h6">
-          <div class="row flex-center">
-            <div class="text-h6">公告列表</div>
-            <q-space />
-            <div class="text-subtitle2">
-              <q-btn @click="updateAnnouncement" round flat :icon="icon.mdiRefresh" />
+  <q-page padding>
+    <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
+      <q-list bordered separator class="rounded-borders title mx-auto">
+        <q-item>
+          <q-item-section class="text-h6">
+            <div class="row flex-center">
+              <div class="text-h6">公告列表</div>
+              <q-space />
+              <div class="text-subtitle2">
+                <q-btn @click="updateAnnouncement" round flat :icon="icon.mdiRefresh" />
+              </div>
             </div>
-          </div>
-        </q-item-section>
-      </q-item>
-      <q-item
-        v-for="(announcement, index) in announcementList"
-        :key="index"
-        :to="{ name: 'AnnouncementDetail', params: { id: announcement.Id } }"
-        clickable
-        v-ripple
-      >
-        <q-item-section>
-          <q-item-label class="text-subtitle1">
-            [{{ announcement.Create.toFormat('yyyy-MM-dd') }}] {{ announcement.Title }}
-          </q-item-label>
-          <q-item-label caption>
-            {{ announcement.PreviewContent }}
-          </q-item-label>
-        </q-item-section>
-        <q-item-section side top>
-          <q-item-label caption>{{ announcement.Before }}</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
-    <template v-slot:loading>
-      <div class="row justify-center q-my-md">
-        <q-spinner-dots color="primary" size="40px" />
-      </div>
-    </template>
-  </q-infinite-scroll>
+          </q-item-section>
+        </q-item>
+        <q-item
+          v-for="(announcement, index) in announcementList"
+          :key="index"
+          :to="{ name: 'AnnouncementDetail', params: { id: announcement.Id } }"
+          clickable
+          v-ripple
+        >
+          <q-item-section>
+            <q-item-label class="text-subtitle1">
+              [{{ announcement.Create.toFormat('yyyy-MM-dd') }}] {{ announcement.Title }}
+            </q-item-label>
+            <q-item-label caption>
+              {{ announcement.PreviewContent }}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side top>
+            <q-item-label caption>{{ announcement.Before }}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+    </q-infinite-scroll>
+  </q-page>
 </template>
 
 <script lang="ts" setup>

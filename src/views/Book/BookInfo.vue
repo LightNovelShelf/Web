@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page padding>
     <q-card>
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
@@ -98,7 +98,7 @@
       </q-card-section>
     </q-card>
     <comment style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>

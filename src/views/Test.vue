@@ -1,17 +1,19 @@
 <template>
-  <q-list bordered separator class="rounded-borders title mx-auto">
-    <q-item>
-      <q-item-section class="text-h6">网站支持度测试</q-item-section>
-    </q-item>
-    <q-item v-for="(data, index) in option" :key="index">
-      <q-item-section>
-        <q-item-label class="text-subtitle1">{{ data.name }}</q-item-label>
-      </q-item-section>
-      <q-item-section side>
-        <q-item-label>{{ data.func() }}</q-item-label>
-      </q-item-section>
-    </q-item>
-  </q-list>
+  <q-page padding>
+    <q-list bordered separator class="rounded-borders title mx-auto">
+      <q-item>
+        <q-item-section class="text-h6">网站支持度测试</q-item-section>
+      </q-item>
+      <q-item v-for="(data, index) in option" :key="index">
+        <q-item-section>
+          <q-item-label class="text-subtitle1">{{ data.name }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-item-label>{{ data.func() }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </q-page>
 </template>
 
 <script lang="ts" setup>

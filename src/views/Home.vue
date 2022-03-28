@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 1920px" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="mx-auto">
     <q-grid x-gap="12" y-gap="8" cols="2" sm="1" xs="1">
       <q-grid-item>
         <q-card>
@@ -157,12 +157,12 @@
     <div ref="viewerRef" v-viewer="{ navbar: true, rebuild: true }" v-show="false">
       <img v-for="img in banImages" :key="img" :src="img" alt="" />
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts" setup>
-import { defineComponent, ref, computed } from 'vue'
-import BookCard from 'src/components/BookCard.vue'
+import { ref, computed } from 'vue'
+import BookCard from 'components/BookCard.vue'
 import { QGrid, QGridItem } from 'src/components/grid/'
 import { OnlineInfo } from 'src/services/context/type'
 import { getOnlineInfo, getAnnouncementList, getBanInfoList } from 'src/services/context'
@@ -171,8 +171,6 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { getLatestBookList } from 'src/services/book'
 import { BookInList } from 'src/services/book/types'
-
-defineComponent({ QGridItem, QGrid, BookCard })
 
 const onlineInfo = ref<OnlineInfo>()
 const announcementList = ref<any[]>()
