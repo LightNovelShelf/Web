@@ -32,19 +32,28 @@ export function getBookListByIds(ids: number[]) {
 }
 /** 最大并行数量 */
 getBookListByIds.MAX_CONCURRENT = 24
+
 /** 取最新的6本书，无需登录 */
 export function getLatestBookList() {
   return requestWithSignalr<Types.GetBookListRes>('GetLatestBookListBinary')
 }
+
 /** 取最近的排行榜 */
 export function getRank(days: number) {
   return requestWithSignalr<Types.BookInList[]>('GetRankBinary', days)
 }
+
 /** 编辑书籍信息 */
 export function editBook(request: Types.EditBookRequest) {
   return requestWithSignalr('EditBook', request)
 }
+
 /** 取编辑用的书籍信息 */
 export function getBookEditInfo(bid: number) {
   return requestWithSignalr('GetBookEditInfo', bid)
+}
+
+/** 删除书籍 */
+export function deleteBook(bid: number) {
+  return requestWithSignalr('DeleteBook', bid)
 }

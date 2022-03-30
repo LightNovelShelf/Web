@@ -92,6 +92,8 @@ module.exports = configure(function (ctx) {
         )
       },
       env: {
+        ...require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}.local` }).parsed,
+        ...require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` }).parsed,
         ...require('dotenv').config().parsed,
         __DEV__: process.env.NODE_ENV === 'development'
       }
