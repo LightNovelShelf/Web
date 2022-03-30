@@ -1,5 +1,5 @@
 <template>
-  <q-page style="max-width: 1920px" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="mx-auto">
     <q-select
       :disable="loading"
       emit-value
