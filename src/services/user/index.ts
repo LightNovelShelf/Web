@@ -129,3 +129,8 @@ export async function clearHistory() {
 export async function setAvatar(url: string) {
   return requestWithSignalr('SetAvatar', url)
 }
+
+/** 取用户书籍 */
+export async function getMyBooks(req: Types.GetMyBooks.Request) {
+  return requestWithSignalr<Types.GetMyBooks.Response>('GetMyBooksBinary', req)
+}
