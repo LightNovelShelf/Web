@@ -224,7 +224,7 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
   {
     label: '发布管理',
     key: 'Contribution',
-    route: '',
+    route: 'UserPublish',
     icon: icon.mdiAccountCog
   },
   {

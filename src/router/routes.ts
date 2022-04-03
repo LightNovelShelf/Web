@@ -79,6 +79,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/User/Profile.vue')
   },
   {
+    path: '/user/publish',
+    name: 'UserPublish',
+    component: () => import('../views/User/Publish.vue')
+  },
+  {
     path: '/test',
     name: 'Test',
     meta: { requiresAuth: false },
