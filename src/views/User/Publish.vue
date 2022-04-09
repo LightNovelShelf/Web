@@ -13,12 +13,12 @@
           </div>
 
           <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-            <q-grid-item v-for="book in bookData" :key="book['Id']">
+            <q-grid-item v-for="(book, index) in bookData" :key="book['Id']">
               <div class="q-gutter-sm">
                 <book-card :book="book"></book-card>
                 <div>
                   <div class="flex q-gutter-sm">
-                    <q-btn dense color="negative" class="flex-space">删除</q-btn>
+                    <q-btn dense color="negative" class="flex-space" @click="delBook(book['Id'], index)">删除</q-btn>
                     <q-btn dense color="primary" class="flex-space">管理</q-btn>
                   </div>
                 </div>
@@ -54,16 +54,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, computed, watch, defineComponent, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
 import BookCard from 'src/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from 'assets/icon'
 import { getMyBooks } from 'src/services/user'
+import { deleteBook } from 'src/services/book'
 import { BookInList } from 'src/services/book/types'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { getErrMsg } from 'src/utils/getErrMsg'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -107,6 +109,29 @@ const request = useTimeoutFn(function (page = currentPage.value) {
     _page.value = serverData.Page
   })
 })
+function delBook(bid: number, index: number) {
+  $q.dialog({
+    title: '提示',
+    message: '你确定要删除吗？',
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    try {
+      await deleteBook(bid)
+
+      $q.notify({
+        type: 'positive',
+        message: '删除成功'
+      })
+      bookData.value.splice(index, 1)
+    } catch (e) {
+      $q.notify({
+        type: 'negative',
+        message: getErrMsg(e)
+      })
+    }
+  })
+}
 
 const loading = request.loading
 
