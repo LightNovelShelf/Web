@@ -5,8 +5,6 @@
         <q-card>
           <q-responsive :ratio="2 / 3">
             <div class="books-group">
-              <!-- <shelf-item-thumb v-for="item in limitedBooks" :key="item.id" :item="item" /> -->
-
               <q-img
                 class="books-group-cover"
                 v-for="item in limitedBooks"
@@ -18,10 +16,6 @@
                   <blur-hash :blurhash="item.Placeholder" />
                 </template>
               </q-img>
-              <!-- <div v-else-if="item.type === ShelfItemTypeEnum.FOLDER"
-                  ><q-icon size="24px" :name="mdiFolderHeartOutline"
-                /></div> -->
-              <!-- <template v-else /> -->
             </div>
           </q-responsive>
         </q-card>
@@ -36,7 +30,7 @@
       </div>
     </div>
 
-    <div class="text-grey-7" style="display: flex; padding: 0 4px">
+    <div class="text-grey-7" style="display: flex; padding: 0 4px; font-size: 12px">
       <div> </div>
       <div class="flex-space"></div>
       <div>{{ updateTime }}</div>
