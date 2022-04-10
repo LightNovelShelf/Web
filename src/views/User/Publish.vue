@@ -254,6 +254,7 @@ useInitRequest(request)
   }
 }
 .create-book-dialog {
-  min-width: 500px;
+  width: 500px;
+  max-width: 90vw;
 }
 </style>
