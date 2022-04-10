@@ -67,7 +67,12 @@
               />
               <q-input label="标题" :rules="[(val) => !!val || '必填项目']" v-model="createBookData.Title" />
               <q-input label="作者" :rules="[(val) => !!val || '必填项目']" v-model="createBookData.Author" />
-              <q-input label="简介" :rules="[(val) => !!val || '必填项目']" type="textarea" v-model="introduction" />
+              <q-input
+                label="简介"
+                :rules="[(val) => !!val || '必填项目']"
+                type="textarea"
+                v-model="createBookData.Introduction"
+              />
               <q-input
                 label="章节数量(请预估所需要的章节数量，暂时无法改动)"
                 type="number"
@@ -159,8 +164,6 @@ const categoryOptions = ref([
     value: 6
   }
 ])
-const introduction = ref('')
-const _introduction = computed(() => introduction.value.replace(/^([\s\S]*?)$/gm, '<p>$1</p>'))
 const createBookData = reactive<QuickCreateBook.Request>({
   Cover: '',
   Title: '',
@@ -211,10 +214,13 @@ function delBook(bid: number, index: number) {
 }
 async function createBook() {
   try {
-    const bid = await quickCreateBook({
+    const request = {
       ...createBookData,
-      Introduction: _introduction.value
-    })
+      Count: ~~createBookData.Count,
+      Introduction: createBookData.Introduction.replace(/^([\s\S]*?)$/gm, '<p>$1</p>')
+    }
+    console.log(request)
+    const bid = await quickCreateBook(request)
     $q.notify({
       type: 'positive',
       message: '创建成功'
