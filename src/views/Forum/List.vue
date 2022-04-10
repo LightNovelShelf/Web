@@ -1,5 +1,7 @@
 <template>
-  <div>公告</div>
+  <q-page>
+    <div> 公告 </div>
+  </q-page>
 </template>
 
 <script setup lang="ts"></script>

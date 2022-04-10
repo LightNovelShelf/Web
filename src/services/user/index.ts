@@ -5,6 +5,7 @@ import * as Types from './type'
 import { RequestMethod } from 'src/services/types'
 import type { ShelfItem, SHELF_STRUCT_VER } from 'src/types/shelf'
 import type { ShelfLegacyStruct } from 'src/utils/migrations/shelf/struct/types'
+import { QuickCreateBook } from './type'
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
@@ -133,4 +134,9 @@ export async function setAvatar(url: string) {
 /** 取用户书籍 */
 export async function getMyBooks(req: Types.GetMyBooks.Request) {
   return requestWithSignalr<Types.GetMyBooks.Response>('GetMyBooksBinary', req)
+}
+
+/** 快速新建书籍，返回新建的书籍id */
+export async function quickCreateBook(req: Types.QuickCreateBook.Request) {
+  return requestWithSignalr<Types.QuickCreateBook.Response>('QuickCreateBook', req)
 }
