@@ -24,3 +24,16 @@ export namespace GetMyBooks {
   export type Request = GetBookListRequest
   export type Response = GetBookListRes
 }
+
+export namespace QuickCreateBook {
+  export interface Request {
+    Title: string
+    Author: string
+    // 章节数量
+    Count: number
+    Cover: string
+    Introduction: string
+    CategoryId: number
+  }
+  export type Response = number
+}

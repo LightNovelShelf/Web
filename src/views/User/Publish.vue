@@ -9,7 +9,7 @@
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="Book">
           <div class="text-right">
-            <q-btn color="primary"> 发布新书 </q-btn>
+            <q-btn color="primary" @click="createBookShow = true"> 发布新书 </q-btn>
           </div>
 
           <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
@@ -50,22 +50,62 @@
         </q-tab-panel>
       </q-tab-panels>
     </div>
+
+    <q-dialog v-model="createBookShow">
+      <q-card class="create-book-dialog">
+        <q-card-section>
+          <div class="text-h6">创建书籍</div>
+        </q-card-section>
+
+        <q-form @submit="createBook">
+          <q-card-section style="padding-top: 0">
+            <div class="q-gutter-sm">
+              <q-input
+                label="封面链接"
+                :rules="[(val) => val.startsWith('https://') || '必须是一个https链接']"
+                v-model="createBookData.Cover"
+              />
+              <q-input label="标题" :rules="[(val) => !!val || '必填项目']" v-model="createBookData.Title" />
+              <q-input label="作者" :rules="[(val) => !!val || '必填项目']" v-model="createBookData.Author" />
+              <q-input label="简介" :rules="[(val) => !!val || '必填项目']" type="textarea" v-model="introduction" />
+              <q-input
+                label="章节数量(请预估所需要的章节数量，暂时无法改动)"
+                type="number"
+                v-model="createBookData.Count"
+              />
+              <q-select
+                map-options
+                emit-value
+                v-model="createBookData.CategoryId"
+                :options="categoryOptions"
+                label="分类"
+              />
+            </div>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn type="submit" flat label="创建" color="primary" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, defineComponent, toRaw } from 'vue'
+import { ref, computed, watch, defineComponent, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import BookCard from 'src/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from 'assets/icon'
-import { getMyBooks } from 'src/services/user'
+import { getMyBooks, quickCreateBook } from 'src/services/user'
 import { deleteBook } from 'src/services/book'
 import { BookInList } from 'src/services/book/types'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { getErrMsg } from 'src/utils/getErrMsg'
+import { QuickCreateBook } from 'src/services/user/type'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -92,6 +132,43 @@ const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
 const pageData = ref({ totalPage: 1 })
 const _page = ref(1)
+const createBookShow = ref(false)
+const categoryOptions = ref([
+  {
+    label: '录入完成',
+    value: 1
+  },
+  {
+    label: '翻译完成',
+    value: 2
+  },
+  {
+    label: '录入中',
+    value: 4
+  },
+  {
+    label: '翻译中',
+    value: 3
+  },
+  {
+    label: '转载',
+    value: 5
+  },
+  {
+    label: '日文原版',
+    value: 6
+  }
+])
+const introduction = ref('')
+const _introduction = computed(() => introduction.value.replace(/^([\s\S]*?)$/gm, '<p>$1</p>'))
+const createBookData = reactive<QuickCreateBook.Request>({
+  Cover: '',
+  Title: '',
+  Count: 10,
+  Author: '',
+  Introduction: '',
+  CategoryId: 1
+})
 
 const currentPage = computed({
   get() {
@@ -132,6 +209,26 @@ function delBook(bid: number, index: number) {
     }
   })
 }
+async function createBook() {
+  try {
+    const bid = await quickCreateBook({
+      ...createBookData,
+      Introduction: _introduction.value
+    })
+    $q.notify({
+      type: 'positive',
+      message: '创建成功'
+    })
+    createBookShow.value = false
+    await router.push({ name: 'BookInfo', params: { bid } })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e)
+    })
+    throw e
+  }
+}
 
 const loading = request.loading
 
@@ -150,5 +247,8 @@ useInitRequest(request)
   :deep(.q-btn) {
     min-width: 34px !important;
   }
+}
+.create-book-dialog {
+  min-width: 500px;
 }
 </style>
