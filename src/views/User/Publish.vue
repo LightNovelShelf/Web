@@ -219,7 +219,6 @@ async function createBook() {
       Count: ~~createBookData.Count,
       Introduction: createBookData.Introduction.replace(/^([\s\S]*?)$/gm, '<p>$1</p>')
     }
-    console.log(request)
     const bid = await quickCreateBook(request)
     $q.notify({
       type: 'positive',
