@@ -37,6 +37,8 @@
         editorId="md-introduction"
         :onHtmlChanged="onHtmlChanged"
         :sanitize="sanitizeHtml"
+        :markedImage="markedImage"
+        :onUploadImg="onUploadImg"
         style="display: flex !important; height: calc(100vh - 180px)"
         :theme="$q.dark.isActive ? 'dark' : 'light'"
         :toolbars="mdToolBar"
@@ -81,6 +83,8 @@ const htmlContent = computed<string>({
     emit('update:html', html)
   }
 })
+const settingStore = useSettingStore()
+const { editorSetting } = settingStore
 
 const SimpleToolbar = [
   ['left', 'center', 'right', 'justify'],
@@ -129,6 +133,57 @@ const toolbar = computed(() => {
     return CommonToolbar
   }
 })
+
+const chapter = ref<any>()
+const editorRef = ref()
+const BBCodePopup = ref(false)
+const BBCodeTextarea = ref('')
+// BBCode 弹窗
+const ShowBBCodePopup = () => {
+  BBCodePopup.value = true
+}
+const BBCodeTransForm = () => {
+  let arr = bbCodeParser.parse(BBCodeTextarea.value).split('\n')
+  arr = arr.map((o: string) => {
+    if (o.substring(0, 4) !== '<div') {
+      o = '<p>' + o + '</p>'
+    }
+    return o
+  })
+  htmlContent.value = arr.join('')
+  BBCodeTextarea.value = ''
+}
+function removeFormat() {
+  editorRef.value.runCmd('removeFormat')
+  nextTick(() => {
+    htmlContent.value = htmlContent.value.replaceAll('style=""', '')
+    htmlContent.value = htmlContent.value.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
+  })
+}
+const clearHtml = debounce(function clearHtml(html: string) {
+  if (html.indexOf('MsoNormal') !== -1) {
+    console.log('本次可能从word粘贴内容')
+    const el = editorRef.value.getContentEl() as Element
+    el.querySelectorAll('.MsoNormal').forEach((item) => {
+      item.classList.remove('MsoNormal')
+      if (item.classList.length === 0) item.removeAttribute('class')
+    })
+    emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
+  }
+}, 100)
+function beautify() {
+  htmlContent.value = prettier.format(htmlContent.value, {
+    parser: 'html',
+    plugins: [parserHtml]
+  })
+}
+const htmlRubyHandler = () => {
+  const selection = window.getSelection()?.toString()
+  if (!selection) return
+  const rubyStr = `<ruby>${selection}<rt>注音内容</rt></ruby>`
+  editorRef.value.runCmd('insertHTML', rubyStr)
+}
+
 const mdToolBar: ToolbarNames[] = [
   'bold',
   'underline',
@@ -145,6 +200,7 @@ const mdToolBar: ToolbarNames[] = [
   'codeRow',
   'code',
   'link',
+  'image',
   'table',
   'mermaid',
   'katex',
@@ -160,16 +216,9 @@ const mdToolBar: ToolbarNames[] = [
   'htmlPreview',
   'catalog'
 ]
-
-const chapter = ref<any>()
-const editorRef = ref()
-const BBCodePopup = ref(false)
-const BBCodeTextarea = ref('')
-const settingStore = useSettingStore()
-const { editorSetting } = settingStore
 const turndownService = new TurndownService()
+turndownService.keep(['ruby', 'rt'])
 const markdownText = ref('')
-
 const mdRubyHandler = () => {
   const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
   const selection = window.getSelection()
@@ -193,15 +242,21 @@ const mdRubyHandler = () => {
     textarea.focus()
   }, 0)
 }
-
-const htmlRubyHandler = () => {
-  const selection = window.getSelection()?.toString()
-  if (!selection) return
-  const rubyStr = `<ruby>${selection}<rt>注音内容</rt></ruby>`
-  editorRef.value.runCmd('insertHTML', rubyStr)
+function markedImage(href: string, title: string, desc: string) {
+  return `<div class="illus duokan-image-single"><img src="${href}" alt="${title || ''}"></div>`
 }
-
-turndownService.keep(['ruby', 'rt'])
+function sanitizeHtml(html: string) {
+  // 这里可以对markdown生成的代码进行一些自定义
+  return html
+}
+async function onUploadImg(files: FileList, callback: (urls: string[]) => void) {
+  $q.notify({
+    position: 'bottom',
+    html: true,
+    message: '暂时不支持上传图片，请使用链接',
+    timeout: 2500
+  })
+}
 
 // 第一次进来初始化
 const parseMarkDown = () => {
@@ -222,27 +277,6 @@ watch(
   }
 )
 
-const clearHtml = debounce(function clearHtml(html: string) {
-  if (html.indexOf('MsoNormal') !== -1) {
-    console.log('本次可能从word粘贴内容')
-    const el = editorRef.value.getContentEl() as Element
-    el.querySelectorAll('.MsoNormal').forEach((item) => {
-      item.classList.remove('MsoNormal')
-      if (item.classList.length === 0) item.removeAttribute('class')
-    })
-    emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
-  }
-}, 100)
-function sanitizeHtml(html: string) {
-  // 对markdown生成的代码进行一些自定义
-  html = html.replace(
-    /<p><figure>(.*?)<figcaption>.*?<\/figcaption><\/figure><\/p>/g,
-    '<div class="illus duokan-image-single">$1</div>'
-  )
-  // html = html.replace('<br>', '</p> <p>')
-  return html
-}
-
 const isChange = ref(false)
 const onHtmlChanged = (html: string) => {
   // MarkDown模式下不需要清理代码
@@ -250,41 +284,11 @@ const onHtmlChanged = (html: string) => {
   emit('update:html', html)
 }
 watch(editorSetting, parseMarkDown)
-
-function beautify() {
-  htmlContent.value = prettier.format(htmlContent.value, {
-    parser: 'html',
-    plugins: [parserHtml]
-  })
-}
-// BBCode 弹窗
-const ShowBBCodePopup = () => {
-  BBCodePopup.value = true
-}
-const BBCodeTransForm = () => {
-  let arr = bbCodeParser.parse(BBCodeTextarea.value).split('\n')
-  arr = arr.map((o: string) => {
-    if (o.substring(0, 4) !== '<div') {
-      o = '<p>' + o + '</p>'
-    }
-    return o
-  })
-  htmlContent.value = arr.join('')
-  BBCodeTextarea.value = ''
-}
-
-function removeFormat() {
-  editorRef.value.runCmd('removeFormat')
-  nextTick(() => {
-    htmlContent.value = htmlContent.value.replaceAll('style=""', '')
-    htmlContent.value = htmlContent.value.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
-  })
-}
 </script>
 
 <style lang="scss">
 .common {
-  .q-editor__content,
+  .q-editor--default .q-editor__content,
   .md-preview {
     @import 'src/css/read';
   }
