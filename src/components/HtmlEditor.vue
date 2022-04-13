@@ -7,21 +7,30 @@
       :toolbar="toolbar"
       v-model="htmlContent"
       :definitions="{
-        beautify: { tip: '格式化代码', label: '格式化', handler: beautify },
         bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
         removeFormat: { handler: removeFormat },
-        ruby: { tip: '插入注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler }
+        ruby: { tip: '插入注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler },
+        code: { tip: '输入源代码', icon: icon.mdiCodeTags, handler: showInputCode }
       }"
       min-height="5rem"
     />
+
     <q-dialog v-model="BBCodePopup">
-      <q-card style="min-width: 800px">
+      <q-card style="width: 800px; max-width: 90vw">
         <q-card-section>
           <div class="text-h6">输入BBCode</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="BBCodeTextarea" autofocus filled type="textarea" @keyup.enter="BBCodePopup = false" />
+          <q-input
+            dense
+            input-class="edit-input"
+            v-model="BBCodeTextarea"
+            autofocus
+            outlined
+            autogrow
+            type="textarea"
+          />
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
@@ -30,6 +39,32 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="inputCodeShow">
+      <q-card style="width: 800px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">输入HTML代码</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            dense
+            v-model="htmlCodeTextarea"
+            input-class="edit-input"
+            autofocus
+            outlined
+            autogrow
+            type="textarea"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="取消" v-close-popup />
+          <q-btn flat label="确认输入" v-close-popup @click="htmlContent = htmlCodeTextarea" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <div>
       <md-editor
         v-if="editorSetting.mode === 'markdown'"
@@ -90,7 +125,7 @@ const SimpleToolbar = [
   ['left', 'center', 'right', 'justify'],
   ['bold', 'italic', 'underline', 'strike'],
   ['undo', 'redo'],
-  ['removeFormat', 'beautify', 'viewsource']
+  ['removeFormat', 'code']
 ]
 const CommonToolbar = [
   [
@@ -124,7 +159,7 @@ const CommonToolbar = [
   ],
   ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
   ['undo', 'redo'],
-  ['viewsource', 'bbcode', 'beautify']
+  ['code', 'bbcode']
 ]
 const toolbar = computed(() => {
   if (props.mode === 'simple') {
@@ -136,6 +171,8 @@ const toolbar = computed(() => {
 
 const chapter = ref<any>()
 const editorRef = ref()
+const inputCodeShow = ref(false)
+const htmlCodeTextarea = ref('')
 const BBCodePopup = ref(false)
 const BBCodeTextarea = ref('')
 // BBCode 弹窗
@@ -171,17 +208,18 @@ const clearHtml = debounce(function clearHtml(html: string) {
     emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
   }
 }, 100)
-function beautify() {
-  htmlContent.value = prettier.format(htmlContent.value, {
-    parser: 'html',
-    plugins: [parserHtml]
-  })
-}
 const htmlRubyHandler = () => {
   const selection = window.getSelection()?.toString()
   if (!selection) return
   const rubyStr = `<ruby>${selection}<rt>注音内容</rt></ruby>`
   editorRef.value.runCmd('insertHTML', rubyStr)
+}
+function showInputCode() {
+  htmlCodeTextarea.value = prettier.format(htmlContent.value, {
+    parser: 'html',
+    plugins: [parserHtml]
+  })
+  inputCodeShow.value = true
 }
 
 const mdToolBar: ToolbarNames[] = [
@@ -299,5 +337,11 @@ watch(editorSetting, parseMarkDown)
     padding: unset;
     margin: 0 0 0.5em 0;
   }
+}
+</style>
+
+<style lang="scss">
+.edit-input {
+  max-height: calc(100vh - 200px);
 }
 </style>
