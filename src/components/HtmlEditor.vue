@@ -281,11 +281,11 @@ const mdRubyHandler = () => {
   }, 0)
 }
 function markedImage(href: string, title: string, desc: string) {
-  return `<div class="illus duokan-image-single"><img src="${href}" alt="${title || ''}"></div>`
+  return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
 }
 function sanitizeHtml(html: string) {
   // 这里可以对markdown生成的代码进行一些自定义
-  return html
+  return html.replace(/<p>(<div class="illus duokan-image-single">.*?<\/div>)<\/p>/gi, '$1')
 }
 async function onUploadImg(files: FileList, callback: (urls: string[]) => void) {
   $q.notify({
@@ -342,6 +342,6 @@ watch(editorSetting, parseMarkDown)
 
 <style lang="scss">
 .edit-input {
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 250px);
 }
 </style>
