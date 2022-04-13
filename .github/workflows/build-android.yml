@@ -44,5 +44,5 @@ jobs:
       - name: 上传 Apk
         uses: actions/upload-artifact@v3.0.0
         with:
-          name: app-release-unsigned.apk
+          name: app-release-unsigned
           path: ./dist/capacitor/android/apk/release/app-release-unsigned.apk
