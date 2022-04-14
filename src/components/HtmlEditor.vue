@@ -241,13 +241,9 @@ const mdToolBar: ToolbarNames[] = [
   'unorderedList',
   'orderedList',
   '-',
-  'codeRow',
-  'code',
   'link',
   'image',
   'table',
-  'mermaid',
-  'katex',
   0,
   '-',
   'revoke',
@@ -291,7 +287,9 @@ function markedImage(href: string, title: string, desc: string) {
 }
 function sanitizeHtml(html: string) {
   // 这里可以对markdown生成的代码进行一些自定义
-  return html.replace(/<p>(<div class="illus duokan-image-single">.*?<\/div>)<\/p>/gi, '$1')
+  html = html.replace(/<p>(<div class="illus duokan-image-single">.*?<\/div>)<\/p>/gi, '$1')
+  return html
+  // return `<div class="md-editor">${html}</div>`
 }
 async function onUploadImg(files: FileList, callback: (urls: string[]) => void) {
   $q.notify({
