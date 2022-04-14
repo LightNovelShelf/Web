@@ -24,7 +24,7 @@ export const useSettingStore = defineStore('app.setting', {
       hideFullScreen: false
     },
     editorSetting: {
-      mode: 'html' as 'html' | 'markdown'
+      mode: 'markdown' as 'html' | 'markdown'
     }
   }),
   actions: {
