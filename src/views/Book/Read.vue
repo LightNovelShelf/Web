@@ -1,4 +1,3 @@
-/* eslint-disable vue/no-parsing-error */
 <template>
   <q-page padding class="q-mx-auto container read-page" :style="['--width:' + settingStore['buildReaderWidth']]">
     <div v-if="loading">
@@ -410,7 +409,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
   @import 'src/css/read';
 
-  font-family: read, sans-serif !important;
+  font-family: read, sans-serif;
 
   * {
     line-break: anywhere;
