@@ -13,7 +13,8 @@
         code: { tip: '输入源代码', icon: icon.mdiCodeTags, handler: showInputCode }
       }"
       min-height="5rem"
-    />
+    >
+    </q-editor>
 
     <q-dialog v-model="BBCodePopup">
       <q-card style="width: 800px; max-width: 90vw">
@@ -138,7 +139,7 @@ const CommonToolbar = [
     }
   ],
   ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript', 'ruby'],
-  ['token', 'hr', 'link', 'custom_btn'],
+  ['hr', 'link', 'image'],
   ['fullscreen'],
   [
     {
@@ -215,10 +216,15 @@ const htmlRubyHandler = () => {
   editorRef.value.runCmd('insertHTML', rubyStr)
 }
 function showInputCode() {
-  htmlCodeTextarea.value = prettier.format(htmlContent.value, {
-    parser: 'html',
-    plugins: [parserHtml]
-  })
+  try {
+    htmlCodeTextarea.value = prettier.format(htmlContent.value, {
+      parser: 'html',
+      plugins: [parserHtml]
+    })
+  } catch (e) {
+    htmlCodeTextarea.value = htmlContent.value
+  }
+
   inputCodeShow.value = true
 }
 
