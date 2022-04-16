@@ -97,16 +97,9 @@
         </q-list>
       </q-card-section>
     </q-card>
-    <comment class="comment" style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
+    <comment v-intersection="commentBeShown" class="comment" style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
     <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <div class="column">
-        <div class="col">
-          <q-btn class="col" round size="md" color="accent" :icon="icon.mdiArrowUp" @click="upScrollClick"/>
-        </div>
-        <div class="col">
-            <q-btn class="col" round size="md" color="accent" :icon="icon.mdiArrowDown" @click="downScrollClick"/>
-        </div>
-      </div>
+      <q-btn class="col" round size="md" color="accent" :icon="scrollIcon" @click="scrollClick"/>
     </q-page-sticky>
   </q-page>
 </template>
@@ -205,6 +198,8 @@ const lastReadTitle = computed(() => {
 function dateFormat(time: Date) {
   return DateTime.fromJSDate(time).toFormat('yyyy-MM-dd hh:mm')
 }
+
+
 function upScrollClick(event: any) {
  let el = document.getElementsByClassName('bookinfo-card')[0]
  let target = scroll.getScrollTarget(el)
@@ -218,6 +213,18 @@ function downScrollClick(event: any) {
   let offset = el.offsetTop
   let duration = 100
   scroll.setVerticalScrollPosition(target, offset, duration)
+}
+const scrollClick = ref(downScrollClick)
+const scrollIcon = ref(icon.mdiArrowDown)
+function commentBeShown(entries) {
+  if (entries.isIntersecting) { // 显示评论
+    scrollIcon.value = icon.mdiArrowUp
+    scrollClick.value = upScrollClick
+  }
+  else {
+    scrollIcon.value = icon.mdiArrowDown
+    scrollClick.value = downScrollClick
+  }
 }
 </script>
 
