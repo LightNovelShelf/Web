@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-card>
+    <q-card  class="bookinfo-card">
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
@@ -97,7 +97,17 @@
         </q-list>
       </q-card-section>
     </q-card>
-    <comment style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
+    <comment class="comment" style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
+    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
+      <div class="column">
+        <div class="col">
+          <q-btn class="col" round size="md" color="accent" :icon="icon.mdiArrowUp" @click="upScrollClick"/>
+        </div>
+        <div class="col">
+            <q-btn class="col" round size="md" color="accent" :icon="icon.mdiArrowDown" @click="downScrollClick"/>
+        </div>
+      </div>
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -124,6 +134,7 @@ import { CommentType } from 'src/services/comment/types'
 import { userReadPositionDB } from 'src/utils/storage/db'
 import BlurHash from 'src/components/BlurHash.vue'
 import { useSettingStore } from 'stores/setting'
+import { scroll } from 'quasar'
 
 const props = defineProps<{ bid: string }>()
 
@@ -132,6 +143,7 @@ const { generalSetting } = settingStore // 引入setting用于控制图片自定
 const $q = useQuasar()
 const router = useRouter()
 const appStore = useAppStore()
+const fabPos = ref([18, 18])
 let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 let _bid = computed(() => ~~(props.bid || '1'))
 // 每次从服务器获取数据时，更新此字段，每次进入页面时，从缓存读取本数据
@@ -192,6 +204,20 @@ const lastReadTitle = computed(() => {
 })
 function dateFormat(time: Date) {
   return DateTime.fromJSDate(time).toFormat('yyyy-MM-dd hh:mm')
+}
+function upScrollClick(event: any) {
+ let el = document.getElementsByClassName('bookinfo-card')[0]
+ let target = scroll.getScrollTarget(el)
+  let offset = el.offsetTop
+  let duration = 100
+  scroll.setVerticalScrollPosition(target, offset, duration)
+}
+function downScrollClick(event: any) {
+  let el = document.getElementsByClassName('comment')[0]
+  let target = scroll.getScrollTarget(el)
+  let offset = el.offsetTop
+  let duration = 100
+  scroll.setVerticalScrollPosition(target, offset, duration)
 }
 </script>
 
