@@ -214,16 +214,12 @@ const bgStyle = computed(() => ({
   backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
 }))
 
-//改用StyleValue
-const readStyle = computed(() => [
-  'fontSize:' + readSetting.fontSize + 'px',
-  'textAlign:' + readSetting.justify ? 'justify' : 'initial',
-  'color:' + readSetting.bgType === 'custom'
-    ? colors.brightness(readSetting.customColor) < 128
-      ? '#fff'
-      : '#000'
-    : 'inherit'
-])
+const readStyle = computed(() => ({
+  fontSize: readSetting.fontSize + 'px',
+  textAlign: readSetting.justify ? 'justify' : 'initial',
+  color:
+    readSetting.bgType === 'custom' ? (colors.brightness(readSetting.customColor) < 128 ? '#fff' : '#000') : 'inherit'
+}))
 
 const router = useRouter()
 const next = debounce(() => {
@@ -409,7 +405,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
   @import 'src/css/read';
 
-  font-family: read, sans-serif;
+  font-family: read, sans-serif !important;
 
   * {
     line-break: anywhere;
