@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-card  class="bookinfo-card">
+    <q-card class="bookinfo-card">
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
@@ -97,9 +97,15 @@
         </q-list>
       </q-card-section>
     </q-card>
-    <comment v-intersection="commentBeShown" class="comment" style="margin-top: 12px" :type="CommentType.Book" :id="_bid" />
+    <comment
+      v-intersection="commentBeShown"
+      class="comment"
+      style="margin-top: 12px"
+      :type="CommentType.Book"
+      :id="_bid"
+    />
     <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-btn class="col" round size="md" color="accent" :icon="scrollIcon" @click="scrollClick"/>
+      <q-btn class="col" round size="md" color="accent" :icon="scrollIcon" @click="scrollClick" />
     </q-page-sticky>
   </q-page>
 </template>
@@ -199,32 +205,25 @@ function dateFormat(time: Date) {
   return DateTime.fromJSDate(time).toFormat('yyyy-MM-dd hh:mm')
 }
 
-
+const commentShow = ref(false)
 function upScrollClick(event: any) {
- let el = document.getElementsByClassName('bookinfo-card')[0]
- let target = scroll.getScrollTarget(el)
-  let offset = el.offsetTop
-  let duration = 100
-  scroll.setVerticalScrollPosition(target, offset, duration)
-}
-function downScrollClick(event: any) {
-  let el = document.getElementsByClassName('comment')[0]
+  let el = document.getElementsByClassName('bookinfo-card')[0] as HTMLElement
   let target = scroll.getScrollTarget(el)
   let offset = el.offsetTop
   let duration = 100
   scroll.setVerticalScrollPosition(target, offset, duration)
 }
-const scrollClick = ref(downScrollClick)
-const scrollIcon = ref(icon.mdiArrowDown)
+function downScrollClick(event: any) {
+  let el = document.getElementsByClassName('comment')[0] as HTMLElement
+  let target = scroll.getScrollTarget(el)
+  let offset = el.offsetTop
+  let duration = 100
+  scroll.setVerticalScrollPosition(target, offset, duration)
+}
+const scrollClick = computed(() => (commentShow.value ? upScrollClick : downScrollClick))
+const scrollIcon = computed(() => (commentShow.value ? icon.mdiArrowUp : icon.mdiArrowDown))
 function commentBeShown(entries) {
-  if (entries.isIntersecting) { // 显示评论
-    scrollIcon.value = icon.mdiArrowUp
-    scrollClick.value = upScrollClick
-  }
-  else {
-    scrollIcon.value = icon.mdiArrowDown
-    scrollClick.value = downScrollClick
-  }
+  commentShow.value = entries.isIntersecting
 }
 </script>
 
