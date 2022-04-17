@@ -125,7 +125,7 @@ import type { BookServicesTypes } from 'src/services/book'
 import { useAppStore } from 'stores/app'
 import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
-import { useQuasar } from 'quasar'
+import { useQuasar, scroll } from 'quasar'
 import AddToShelf from 'src/components/biz/MyShelf/AddToShelf.vue'
 import { BookInList } from 'src/services/book/types'
 import { DateTime } from 'luxon'
@@ -133,7 +133,6 @@ import { CommentType } from 'src/services/comment/types'
 import { userReadPositionDB } from 'src/utils/storage/db'
 import BlurHash from 'src/components/BlurHash.vue'
 import { useSettingStore } from 'stores/setting'
-import { scroll } from 'quasar'
 
 const props = defineProps<{ bid: string }>()
 
