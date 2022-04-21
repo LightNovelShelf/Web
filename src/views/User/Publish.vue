@@ -99,7 +99,7 @@
     <q-dialog v-model="uploadBookShow">
       <q-uploader
         :factory="factoryFn"
-        :filter="checkFileType"
+        :filter="checkFile"
         label="上传列表(.epub)"
         multiple
         batch
@@ -251,8 +251,8 @@ async function createBook() {
   }
 }
 
-function checkFileType(files) {
-  return files.filter((file) => ['application/pdf+epub', 'application/zip+epub'].includes(file.type))
+function checkFile(files: File[]) {
+  return files.filter((file) => file.name.endsWith('.epub'))
 }
 function factoryFn(file) {
   return new Promise(async (resolve, reject) => {
