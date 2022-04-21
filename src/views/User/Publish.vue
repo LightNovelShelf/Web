@@ -8,7 +8,8 @@
       </q-tabs>
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="Book">
-          <div class="text-right">
+          <div class="text-right q-gutter-x-sm">
+            <q-btn color="primary" @click="uploadBookShow = true"> 上传书籍 </q-btn>
             <q-btn color="primary" @click="createBookShow = true"> 发布新书 </q-btn>
           </div>
 
@@ -94,6 +95,17 @@
         </q-form>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="uploadBookShow">
+      <q-uploader
+        :factory="factoryFn"
+        :filter="checkFileType"
+        label="上传列表(.epub)"
+        multiple
+        batch
+        style="max-width: 500px"
+      />
+    </q-dialog>
   </q-page>
 </template>
 
@@ -103,7 +115,7 @@ import { useRouter } from 'vue-router'
 import BookCard from 'src/components/BookCard.vue'
 import { useQuasar } from 'quasar'
 import { icon } from 'assets/icon'
-import { getMyBooks, quickCreateBook } from 'src/services/user'
+import { getMyBooks, quickCreateBook, refreshToken } from 'src/services/user'
 import { deleteBook } from 'src/services/book'
 import { BookInList } from 'src/services/book/types'
 import { QGrid, QGridItem } from 'src/components/grid'
@@ -111,6 +123,9 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { QuickCreateBook } from 'src/services/user/type'
+import { longTermToken, sessionToken } from 'src/utils/session'
+import { PATH } from 'src/services/path'
+import { ServerError } from 'src/services/internal/ServerError'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -138,6 +153,7 @@ const bookData = ref<BookInList[]>([])
 const pageData = ref({ totalPage: 1 })
 const _page = ref(1)
 const createBookShow = ref(false)
+const uploadBookShow = ref(false)
 const categoryOptions = ref([
   {
     label: '录入完成',
@@ -235,8 +251,37 @@ async function createBook() {
   }
 }
 
-const loading = request.loading
+function checkFileType(files) {
+  return files.filter((file) => ['application/pdf+epub', 'application/zip+epub'].includes(file.type))
+}
+function factoryFn(file) {
+  return new Promise(async (resolve, reject) => {
+    let token = sessionToken.get()
+    if (!token) {
+      // 如果没有,查询是否有 longTermToken
+      const _token = await longTermToken.get()
+      // 如果有, 用它来换取会话token
+      if (_token) {
+        try {
+          token = await refreshToken('' + _token)
+        } catch (error) {
+          // -100 token失效, 404 token不存在
+          if (error instanceof ServerError && [-100, 404].includes(error.status)) {
+            await longTermToken.set('')
+          }
+        }
+      }
+    }
 
+    resolve({
+      url: PATH.USER_UPLOAD_BOOK,
+      method: 'POST',
+      headers: [{ name: 'Authorization', value: `Bearer ${token}` }]
+    })
+  })
+}
+
+const loading = request.loading
 watch(request.loading, (nextLoading) => {
   $q.loadingBar.stop()
   if (nextLoading) {

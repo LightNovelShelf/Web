@@ -33,7 +33,8 @@ export const PATH = {
   USER_SEND_RESET_EMAIL: `${HOST}/api/user/send_reset_email`,
   USER_SEND_REGISTER_EMAIL: `${HOST}/api/user/send_register_email`,
   USER_RESET_PASSWORD: `${HOST}/api/user/reset_password`,
-  USER_REGISTER: `${HOST}/api/user/register`
+  USER_REGISTER: `${HOST}/api/user/register`,
+  USER_UPLOAD_BOOK: `${HOST}/api/user/upload_book`
   /** ----- end user ----- */
 
   /** ----- book ----- */
