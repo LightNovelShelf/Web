@@ -133,11 +133,11 @@ export default {
     icon: 'mdi-play'
   },
   uploader: {
-    done: 'mdi-check',
-    clear: 'mdi-close',
-    add: 'mdi-plus-box',
-    upload: 'mdi-cloud-upload',
-    removeQueue: 'mdi-notification-clear-all',
-    removeUploaded: 'mdi-check-all'
+    done: icon.mdiCheck,
+    clear: icon.mdiClose,
+    add: icon.mdiPlusBox,
+    upload: icon.mdiCloudUpload,
+    removeQueue: icon.mdiNotificationClearAll,
+    removeUploaded: icon.mdiCheckAll
   }
 }

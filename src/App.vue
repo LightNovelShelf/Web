@@ -41,6 +41,28 @@ useServerNotify('OnMessage', (message: string) => {
   })
 })
 
+useServerNotify('OnError', (message: string) => {
+  $q.notify({
+    position: 'top',
+    html: true,
+    type: 'negative',
+    message: sanitizerHtml(message),
+    timeout: 5000,
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+  })
+})
+
+useServerNotify('OnSuccess', (message: string) => {
+  $q.notify({
+    position: 'top',
+    html: true,
+    type: 'positive',
+    message: sanitizerHtml(message),
+    timeout: 5000,
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+  })
+})
+
 const getUser = async () => {
   const token = await longTermToken.get()
   if (token) {

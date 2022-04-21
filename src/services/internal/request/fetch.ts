@@ -41,8 +41,13 @@ async function requestWithFetch<Res = unknown, Data = any>(
       break
     }
     case RequestMethod.POST: {
-      headers.append('Content-Type', 'application/json')
-      fetchOpt.body = JSON.stringify(options.payload)
+      if (options.payload instanceof FormData) {
+        headers.append('Content-Type', 'multipart/form-data')
+        fetchOpt.body = options.payload
+      } else {
+        headers.append('Content-Type', 'application/json')
+        fetchOpt.body = JSON.stringify(options.payload)
+      }
       break
     }
     default: {
@@ -58,7 +63,6 @@ async function requestWithFetch<Res = unknown, Data = any>(
 
   const token = sessionToken.get()
   if (token) {
-    /** @todo 目前的fetch都是无授权的, 稍后才知道真的token header是什么 */
     fetchOpt.headers.append('Authentication', `Bearer ${token}`)
   }
 

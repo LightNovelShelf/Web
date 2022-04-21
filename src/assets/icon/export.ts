@@ -108,5 +108,10 @@ export {
   mdiCalendarRangeOutline,
   mdiTicketConfirmation,
   mdiLinkVariant,
-  mdiCalendarAccount
+  mdiCalendarAccount,
+  mdiCheck,
+  mdiPlusBox,
+  mdiCloudUpload,
+  mdiNotificationClearAll,
+  mdiCheckAll
 } from '@mdi/js'
