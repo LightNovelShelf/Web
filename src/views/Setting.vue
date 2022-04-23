@@ -17,6 +17,11 @@
             </div>
             <q-separator />
             <div class="q-gutter-xs light-radio q-mt-md">
+              <div class="text-subtitle1">书籍列表</div>
+              <q-toggle v-model="generalSetting.ignoreJapanese" label="隐藏日版" />
+            </div>
+            <q-separator />
+            <div class="q-gutter-xs light-radio q-mt-md">
               <div class="text-subtitle1">设置页宽度</div>
               <q-radio v-model="generalSetting.globalWidth" :val="100" label="全宽" />
               <q-radio v-model="generalSetting.globalWidth" :val="75" label="75%" />
