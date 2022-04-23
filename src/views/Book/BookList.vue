@@ -47,6 +47,7 @@ import { QGrid, QGridItem } from 'src/components/grid'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { NOOP } from 'src/const/empty'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useSettingStore } from 'stores/setting'
 
 defineComponent({ QGrid, QGridItem })
 const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
@@ -88,11 +89,15 @@ const order = computed({
   }
 })
 
+const settingStore = useSettingStore()
+const { generalSetting } = settingStore
 const request = useTimeoutFn(function (page = currentPage.value, order = props.order) {
-  return getBookList({ Page: page, Order: order, Size: 24 }).then((serverData) => {
-    bookData.value = serverData.Data
-    pageData.value.totalPage = serverData.TotalPages
-  })
+  return getBookList({ Page: page, Order: order, Size: 24, IgnoreJapanese: generalSetting.ignoreJapanese }).then(
+    (serverData) => {
+      bookData.value = serverData.Data
+      pageData.value.totalPage = serverData.TotalPages
+    }
+  )
 })
 
 const loading = request.loading

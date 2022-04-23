@@ -53,6 +53,7 @@ export interface GetBookListRequest {
   Size: number
   KeyWords?: string
   Order?: 'new' | 'view' | 'latest'
+  IgnoreJapanese?: boolean
 }
 
 export interface SaveReadPositionRequest {

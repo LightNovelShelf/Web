@@ -9,7 +9,8 @@ export const useSettingStore = defineStore('app.setting', {
     dark: Dark.get(), // dark 设置不保存到服务器
     generalSetting: {
       enableBlurHash: true,
-      globalWidth: 100
+      globalWidth: 100,
+      ignoreJapanese: false
     },
     readSetting: {
       fontSize: 16,
