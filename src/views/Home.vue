@@ -49,7 +49,7 @@
                 <div class="text-h6">{{ onlineInfo.DayRegister }}</div>
               </div>
               <div class="col-3">
-                <div class="text-opacity">最高纪录</div>
+                <div class="text-opacity">最高在线</div>
                 <div class="text-h6">{{ onlineInfo.MaxOnline }}</div>
               </div>
             </div>
