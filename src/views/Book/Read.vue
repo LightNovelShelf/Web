@@ -112,7 +112,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { getChapterContent } from 'src/services/chapter'
 import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
@@ -299,6 +310,39 @@ function manageKeydown(event: KeyboardEvent) {
   }
 }
 
+function makeUrl(link: string) {
+  try {
+    // normal link
+    if (/^https?:\/\//.test(link)) return new URL(link, location.origin)
+    if (/^\/\//.test(link)) return new URL(`https:${link}`, location.origin)
+    // origin ex. www.lightnovel.app
+    if (/^[a-z0-9-]+([.][a-z0-9-]+)+$/.test(link)) return new URL(`https://${link}`, location.origin)
+    // same site
+    if (/^\//.test(link) && router.resolve(link).matched.length !== 0) return new URL(link, location.origin)
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+function readerHandleLinkClick(e: MouseEvent) {
+  if (!chapterRef.value) return
+  if (!chapterRef.value.contains(<Node>e.target)) return
+  let a = null
+  for (let ele = <Node>e.target; ele !== chapterRef.value && !a; ele = ele.parentNode) {
+    if (ele.nodeName === 'A') a = ele
+  }
+  if (!a) return
+
+  e.preventDefault()
+  const url = makeUrl(a.getAttribute('href'))
+  if (!url) return
+
+  if (location.origin === url.origin) router.push(url.pathname)
+  else window.open(url)
+}
+
 onActivated(() => {
   document.addEventListener('click', globalCancelShowing)
   document.addEventListener('keydown', manageKeydown)
@@ -308,7 +352,13 @@ onDeactivated(() => {
   document.removeEventListener('keydown', manageKeydown)
 })
 
-onMounted(getContent.syncCall)
+onMounted(() => {
+  getContent.syncCall()
+  document.body.addEventListener('click', readerHandleLinkClick)
+})
+onUnmounted(() => {
+  document.body.removeEventListener('click', readerHandleLinkClick)
+})
 watch(
   () => [bid.value, sortNum.value],
   async () => {
