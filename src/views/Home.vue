@@ -36,15 +36,19 @@
           </div>
           <q-card-section v-else style="padding-top: 0">
             <div class="content row full-width">
-              <div class="col-4">
+              <div class="col-3">
                 <div class="text-opacity">当前在线</div>
                 <div class="text-h6">{{ onlineInfo.OnlineCount }}</div>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <div class="text-opacity">今日总数</div>
                 <div class="text-h6">{{ onlineInfo.DayCount }}</div>
               </div>
-              <div class="col-4">
+              <div class="col-3">
+                <div class="text-opacity">今日注册</div>
+                <div class="text-h6">{{ onlineInfo.DayRegister }}</div>
+              </div>
+              <div class="col-3">
                 <div class="text-opacity">最高纪录</div>
                 <div class="text-h6">{{ onlineInfo.MaxOnline }}</div>
               </div>

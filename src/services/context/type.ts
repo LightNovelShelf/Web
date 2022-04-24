@@ -4,6 +4,7 @@ export interface OnlineInfo {
   OnlineCount: number
   MaxOnline: number
   DayCount: number
+  DayRegister: number
 }
 
 export interface Announcement {
