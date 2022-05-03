@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mx-auto container read-page" :style="['--width:' + settingStore['buildReaderWidth']]">
+  <q-page padding class="q-mx-auto container">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -10,14 +10,16 @@
     </div>
     <div v-else>
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
-      <div
-        ref="chapterRef"
-        class="read"
-        v-html="chapterContent"
-        style="position: relative; z-index: 1"
-        :style="readStyle"
-        @click="manageScrollClick"
-      />
+      <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
+        <div
+          ref="chapterRef"
+          class="read"
+          v-html="chapterContent"
+          style="position: relative; z-index: 1"
+          :style="readStyle"
+          @click="manageScrollClick"
+        />
+      </div>
       <q-tooltip
         :target="comment.target"
         v-html="comment.content"
@@ -26,7 +28,11 @@
         no-parent-event
         :max-width="$q.platform.is.mobile ? '90%' : '100%'"
       />
-      <div v-if="readSetting['showButton']" class="row justify-between q-gutter-md" style="margin-top: 24px; clear: both;">
+      <div
+        v-if="readSetting['showButton']"
+        class="row justify-between q-gutter-md"
+        style="margin-top: 24px; clear: both"
+      >
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
         <q-btn @click="back" class="flex-space">目录</q-btn>
         <q-btn @click="next" class="flex-space">下一章</q-btn>
