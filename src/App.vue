@@ -7,7 +7,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, watchEffect } from 'vue'
 import { AppSider, AppHeader, AppContainer } from 'src/components/app/index'
 import { useQuasar } from 'quasar'
 import { useServerNotify } from 'src/services/utils/useServerNotify'
@@ -17,8 +16,6 @@ import { useAppStore } from 'stores/app'
 import { longTermToken } from 'src/utils/session'
 import { getMyInfo } from 'src/services/user'
 import { NOOP } from 'src/const/empty'
-
-defineComponent({ AppSider, AppHeader, AppContainer })
 
 const $q = useQuasar()
 $q.loadingBar.setDefaults({

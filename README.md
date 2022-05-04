@@ -2,12 +2,22 @@
 
 A Online Novel Reading Project
 
+## node version manager
+
+[nvm-windows](https://github.com/coreybutler/nvm-windows) for window, [nvm](https://github.com/nvm-sh/nvm) for \*nix
+
+> use [nvm-window@1.1.7](https://github.com/coreybutler/nvm-windows/releases/tag/1.1.7) or [do this after install](https://github.com/coreybutler/nvm-windows/wiki/Common-Issues#permissions-exit-1-exit-5-access-denied-exit-145)
+
+> github issue: [exit status 1: Access is denied](https://github.com/coreybutler/nvm-windows/issues/717)
+
+### switch node version
+
+`nvm on` on window and `nvm use` on \*nix
+
 ## Install the dependencies
 
 ```bash
-yarn
-# or
-npm install
+npm ci
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
@@ -19,16 +29,12 @@ quasar dev
 ### Lint the files
 
 ```bash
-yarn lint
-# or
 npm run lint
 ```
 
 ### Format the files
 
 ```bash
-yarn format
-# or
 npm run format
 ```
 
