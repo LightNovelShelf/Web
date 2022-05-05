@@ -5,6 +5,7 @@
     "lib": ["ESNext", "DOM"],
     "jsx": "preserve",
     "strict": false,
-    "alwaysStrict": true
+    "alwaysStrict": true,
+    "types": ["unplugin-icons/types/vue"]
   }
 }
