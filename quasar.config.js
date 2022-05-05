@@ -12,6 +12,9 @@
 
 const { configure } = require('quasar/wrappers')
 const { ProvidePlugin, DefinePlugin } = require('webpack')
+const AutoImportPlugin = require('unplugin-auto-import/webpack')
+const ComponentsPlugin = require('unplugin-vue-components/webpack')
+const IconsPlugin = require('unplugin-icons/webpack')
 
 /** DefinePlugin要求 */
 function getEnvForDefinePlugin() {
@@ -89,6 +92,30 @@ module.exports = configure(function (ctx) {
             ...getEnvForDefinePlugin(),
             __DEV__: JSON.stringify(__DEV__)
           })
+        )
+
+        // 添加 unplugin 相关插件
+        chain.plugin('unplugin-auto-import').use(
+          AutoImportPlugin({
+            imports: ['vue','vue-router'],
+            dts: 'auto-imports.d.ts',
+            eslintrc: {
+              enabled: true,
+              filepath: '.eslintrc-auto-import.json', 
+              globalsPropValue: 'readonly'
+            },
+          }),
+        )
+        chain.plugin('unplugin-vue-components').use(
+          ComponentsPlugin({
+            // 禁止自动resolve本地的组件，避免cr时每读一个组件都要先翻dts查组件是哪里来的
+            dirs: [],
+            // resolvers: [],
+            dts: 'components.d.ts',
+          }),
+        )
+        chain.plugin('unplugin-icons').use(
+          IconsPlugin({ compiler: 'vue3', scale: 1 }),
         )
       },
       env: {
