@@ -188,8 +188,6 @@ watch(visible, (newVisible) => {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
 .list-card {
   display: flex;
   flex-direction: column;

@@ -470,8 +470,6 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 /*居中功能*/
 .read-page {
-  @import 'src/css/quasar.variables';
-
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
     max-width: 100%;

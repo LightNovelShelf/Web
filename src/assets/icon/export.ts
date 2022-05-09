@@ -113,5 +113,10 @@ export {
   mdiPlusBox,
   mdiCloudUpload,
   mdiNotificationClearAll,
-  mdiCheckAll
+  mdiCheckAll,
+  mdiGoogleController,
+  mdiWeb,
+  mdiVideo,
+  mdiImage,
+  mdiStar
 } from '@mdi/js'

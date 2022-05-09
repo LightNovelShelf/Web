@@ -264,8 +264,6 @@ function logout() {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
 .avatar-popover {
   .avatar-panel-popover {
     width: 300px;

@@ -161,10 +161,8 @@ watch(dark, (newDark) => {
 watch([readSetting, generalSetting, editorSetting], settingStore.save)
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .preview {
-  @import 'src/css/quasar.variables';
-
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
     max-width: 100%;
