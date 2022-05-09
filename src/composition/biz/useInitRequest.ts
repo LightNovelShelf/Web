@@ -1,5 +1,5 @@
 import { onActivated, onMounted, onDeactivated, Ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { UseTimeoutFnAction } from '../useTimeoutFn'
 import { AnyFunc } from 'src/types/utils'
 
@@ -10,6 +10,7 @@ export function useInitRequest(
     before?: AnyFunc
     after?: AnyFunc
     isActive?: Ref<boolean>
+    onlyRouteEnter?: boolean
   }
 ) {
   let first = true
@@ -33,5 +34,9 @@ export function useInitRequest(
     }
   })
 
-  onDeactivated(() => (first = true))
+  if (config?.onlyRouteEnter) {
+    onBeforeRouteLeave(() => (first = true))
+  } else {
+    onDeactivated(() => (first = true))
+  }
 }

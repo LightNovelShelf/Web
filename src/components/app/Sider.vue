@@ -13,7 +13,7 @@
           <q-separator class="q-my-md" v-if="option.label === 'separator'" />
 
           <q-item
-            :to="(option.disabled ?? true) && option.route ? { name: option.route, params: option.params } : null"
+            :to="!(option.disabled ?? false) && option.route ? { name: option.route, params: option.params } : null"
             :disable="option.disabled"
             v-ripple="option.disabled ? !option.disabled : true"
             clickable
@@ -106,7 +106,7 @@ const menuOptions: Array<Record<string, any>> = [
   {
     label: '社区',
     key: 'Community',
-    route: 'Community',
+    route: 'ForumList',
     disabled: true,
     icon: icon.mdiForum
   },

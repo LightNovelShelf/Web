@@ -49,7 +49,7 @@ $tooltip-mobile-fontsize: 10px !default;
 }
 
 div.q-tab-panels {
-    background-color: unset;
+    background-color: inherit;
 
     .q-tab-panel {
         padding: 0;
