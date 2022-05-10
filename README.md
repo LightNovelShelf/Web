@@ -44,6 +44,10 @@ npm run format
 quasar build
 ```
 
+### icon
+
+[Icônes](https://icones.js.org/)
+
 ### Customize the configuration
 
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
