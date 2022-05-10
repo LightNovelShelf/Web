@@ -15,6 +15,7 @@ const { ProvidePlugin, DefinePlugin } = require('webpack')
 const AutoImportPlugin = require('unplugin-auto-import/webpack')
 const ComponentsPlugin = require('unplugin-vue-components/webpack')
 const IconsPlugin = require('unplugin-icons/webpack')
+const IconsResolver = require('unplugin-icons/resolver')
 
 /** DefinePlugin要求 */
 function getEnvForDefinePlugin() {
@@ -97,11 +98,11 @@ module.exports = configure(function (ctx) {
         // 添加 unplugin 相关插件
         chain.plugin('unplugin-auto-import').use(
           AutoImportPlugin({
-            imports: ['vue','vue-router'],
+            imports: ['vue', 'vue-router'],
             dts: 'auto-imports.d.ts',
             eslintrc: {
               enabled: true,
-              filepath: '.eslintrc-auto-import.json', 
+              filepath: '.eslintrc-auto-import.json',
               globalsPropValue: 'readonly'
             },
           }),
@@ -112,10 +113,16 @@ module.exports = configure(function (ctx) {
             dirs: [],
             // resolvers: [],
             dts: 'components.d.ts',
+            resolvers: [
+              IconsResolver({}),
+            ],
           }),
         )
         chain.plugin('unplugin-icons').use(
-          IconsPlugin({ compiler: 'vue3', scale: 1 }),
+          IconsPlugin({
+            compiler: 'vue3',
+            scale: 1,
+          }),
         )
       },
       env: {
@@ -177,7 +184,7 @@ module.exports = configure(function (ctx) {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       // Tell browser when a file from the server should expire from cache (in ms)
 
-      chainWebpackWebserver(/* chain */) {},
+      chainWebpackWebserver(/* chain */) { /** */ },
 
       middlewares: [
         ctx.prod ? 'compression' : '',
@@ -218,7 +225,7 @@ module.exports = configure(function (ctx) {
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode
-      chainWebpackCustomSW(/* chain */) {},
+      chainWebpackCustomSW(/* chain */) { /**  */ },
 
       manifest: {
         name: '轻书架',
