@@ -37,7 +37,7 @@ module.exports = {
     // https://github.com/prettier/eslint-config-prettier#installation
     // usage with Prettier, provided by 'eslint-config-prettier'.
     'prettier',
-    
+
     // https://github.com/antfu/unplugin-auto-import#eslint---eslintno-undef
     // unplugin-auto-import
     './.eslintrc-auto-import.json'
@@ -71,8 +71,10 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    // console/debugger的策略应该反过来：开发时允许但是warning；打包时就不需要警告了，因为压缩会清掉相关调用
+    'no-console': process.env.NODE_ENV !== 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV !== 'production' ? 'warn' : 'off',
+
     'no-unused-vars': 0,
     'no-unused-labels': 0,
     'vue/multi-word-component-names': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
@@ -85,6 +87,8 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 0,
     // 因为jetbrains不支持 export * from './some' 这种语法的依赖解析，所以就用namespace来组织了
     '@typescript-eslint/no-namespace': 0,
+    // 太烦了，要求组件名称/所在文件（夹）一定是多个单词组成；目前还没找到行之有效的命名方式，先关掉了
+    'vue/multi-word-component-names': 0,
     quotes: [1, 'single'],
     semi: [1, 'never']
   }
