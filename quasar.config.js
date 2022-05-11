@@ -8,14 +8,16 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 const { configure } = require('quasar/wrappers')
 const { ProvidePlugin, DefinePlugin } = require('webpack')
 const AutoImportPlugin = require('unplugin-auto-import/webpack')
 const ComponentsPlugin = require('unplugin-vue-components/webpack')
 const IconsPlugin = require('unplugin-icons/webpack')
 const IconsResolver = require('unplugin-icons/resolver')
+const { configEnv } = require('./config/env.js')
+
+// 配置一次env并记录env对象
+const env = configEnv()
 
 /** DefinePlugin要求 */
 function getEnvForDefinePlugin() {
@@ -79,6 +81,18 @@ module.exports = configure(function (ctx) {
       // Options below are automatically set depending on the env, set them if you want to override
       // extractCSS: false,
 
+      uglifyOptions: {
+        compress: {
+          /** 生产包移除console */
+          drop_console: true
+        }
+      },
+
+      analyze: !!process.env.ANALYZE && {
+        analyzerMode: 'static',
+        generateStatsFile: true
+      },
+
       // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
       chainWebpack(chain) {
@@ -97,15 +111,17 @@ module.exports = configure(function (ctx) {
 
         // 添加 unplugin 相关插件
         chain.plugin('unplugin-auto-import').use(
+          /** @link https://github.com/antfu/unplugin-auto-import/blob/main/src/types.ts#L74 */
           AutoImportPlugin({
-            imports: ['vue', 'vue-router'],
+            /** @url https://github.com/antfu/unplugin-auto-import/blob/main/src/presets/index.ts#L38 */
+            imports: ['vue', 'vue-router', 'pinia'],
             dts: 'auto-imports.d.ts',
             eslintrc: {
               enabled: true,
               filepath: '.eslintrc-auto-import.json',
               globalsPropValue: 'readonly'
-            },
-          }),
+            }
+          })
         )
         chain.plugin('unplugin-vue-components').use(
           ComponentsPlugin({
@@ -113,22 +129,18 @@ module.exports = configure(function (ctx) {
             dirs: [],
             // resolvers: [],
             dts: 'components.d.ts',
-            resolvers: [
-              IconsResolver({}),
-            ],
-          }),
+            resolvers: [IconsResolver({})]
+          })
         )
         chain.plugin('unplugin-icons').use(
           IconsPlugin({
             compiler: 'vue3',
-            scale: 1,
-          }),
+            scale: 1
+          })
         )
       },
       env: {
-        ...require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}.local` }).parsed,
-        ...require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` }).parsed,
-        ...require('dotenv').config().parsed,
+        ...env,
         __DEV__: process.env.NODE_ENV === 'development'
       }
     },
@@ -184,7 +196,9 @@ module.exports = configure(function (ctx) {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       // Tell browser when a file from the server should expire from cache (in ms)
 
-      chainWebpackWebserver(/* chain */) { /** */ },
+      chainWebpackWebserver(/* chain */) {
+        /** */
+      },
 
       middlewares: [
         ctx.prod ? 'compression' : '',
@@ -225,7 +239,9 @@ module.exports = configure(function (ctx) {
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode
-      chainWebpackCustomSW(/* chain */) { /**  */ },
+      chainWebpackCustomSW(/* chain */) {
+        /**  */
+      },
 
       manifest: {
         name: '轻书架',
