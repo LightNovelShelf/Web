@@ -7,12 +7,28 @@
         </template>
       </q-tabs>
       <q-tab-panels keep-alive v-model="tab" animated>
-        <q-tab-panel name="WebSite">
-          <forum-list :type="ForumType.Website" />
+        <q-tab-panel name="Star">
+          <forum-list :type="ForumType.Anime" />
         </q-tab-panel>
 
         <q-tab-panel name="Anime">
           <forum-list :type="ForumType.Anime" />
+        </q-tab-panel>
+
+        <q-tab-panel name="Comic">
+          <forum-list :type="ForumType.Anime" />
+        </q-tab-panel>
+
+        <q-tab-panel name="Game">
+          <forum-list :type="ForumType.Anime" />
+        </q-tab-panel>
+
+        <q-tab-panel name="Novel">
+          <forum-list :type="ForumType.Anime" />
+        </q-tab-panel>
+
+        <q-tab-panel name="WebSite">
+          <forum-list :type="ForumType.Website" />
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -20,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import ForumList from 'src/views/Forum/components/ForumList.vue'
+import ForumList from 'src/views/Forum/List/components/ForumList.vue'
 import { icon } from 'assets/icon'
 import { ForumType } from 'src/services/forum/types'
 
@@ -30,7 +46,7 @@ const tabOptions: Array<Record<string, any>> = [
     key: 'Star',
     label: '收藏',
     icon: icon.mdiStar,
-    disable: false
+    disable: true
   },
   {
     name: 'Anime',
