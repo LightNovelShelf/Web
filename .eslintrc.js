@@ -37,7 +37,7 @@ module.exports = {
     // https://github.com/prettier/eslint-config-prettier#installation
     // usage with Prettier, provided by 'eslint-config-prettier'.
     'prettier',
-    
+
     // https://github.com/antfu/unplugin-auto-import#eslint---eslintno-undef
     // unplugin-auto-import
     './.eslintrc-auto-import.json'
@@ -71,7 +71,7 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-console': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-unused-vars': 0,
     'no-unused-labels': 0,

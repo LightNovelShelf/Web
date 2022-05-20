@@ -9,7 +9,9 @@
                 <div class="absolute-bottom bottom-shadow">
                   <div class="row">
                     <div class="row flex-align-center q-gutter-xs">
-                      <i-mdi-heart style="font-size: 24px" />
+                      <q-icon size="24px">
+                        <i-mdi-heart />
+                      </q-icon>
                       <span>{{ book.Likes }}</span>
                     </div>
                     <q-space />
@@ -233,6 +235,9 @@ function commentBeShown(entries) {
   padding-top: 6px;
   :deep(p) {
     margin: 0;
+  }
+  :deep(img) {
+    max-width: 100%;
   }
 }
 
