@@ -8,11 +8,11 @@ declare module '@vue/runtime-core' {
     IFaSolidThumbtack: typeof import('~icons/fa-solid/thumbtack')['default']
     IMdiChartPie: typeof import('~icons/mdi/chart-pie')['default']
     IMdiComment: typeof import('~icons/mdi/comment')['default']
-    IMdiCommentMultiple: typeof import('~icons/mdi/comment-multiple')['default']
     IMdiEye: typeof import('~icons/mdi/eye')['default']
     IMdiFire: typeof import('~icons/mdi/fire')['default']
     IMdiHeart: typeof import('~icons/mdi/heart')['default']
     IMdiLock: typeof import('~icons/mdi/lock')['default']
+    IMdiReply: typeof import('~icons/mdi/reply')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
