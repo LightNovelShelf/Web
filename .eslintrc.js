@@ -85,6 +85,8 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 0,
     // 因为jetbrains不支持 export * from './some' 这种语法的依赖解析，所以就用namespace来组织了
     '@typescript-eslint/no-namespace': 0,
+    // 太烦了，要求组件名称/所在文件（夹）一定是多个单词组成；目前还没找到行之有效的命名方式，先关掉了
+    'vue/multi-word-component-names': 0,
     quotes: [1, 'single'],
     semi: [1, 'never']
   }

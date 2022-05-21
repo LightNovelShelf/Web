@@ -32,7 +32,7 @@
         :class="editMode ? 'sortable-list-in-edit-mode' : ''"
       >
         <!-- 如果有父层文件夹，显示返回卡片 -->
-        <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-root-folder /></q-grid-item>
+        <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-parent-folder /></q-grid-item>
 
         <!-- 渲染书架列表内容 -->
         <q-grid-item v-for="item in shelfData" :key="item.id" @click.capture="listItemClickHandle(item, $event)">
@@ -216,7 +216,7 @@ import { mdiCheckCircle, mdiCheckboxBlankCircleOutline, mdiFolderOpen, mdiDragVa
 import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from 'stores/shelf'
 import { RouteLocationNormalizedLoaded, useRoute, useRouter } from 'vue-router'
 import RenameDialog from './components/RenameDialog.vue'
-import NavBackToRootFolder from './components/NavBackToRootFolder.vue'
+import NavBackToParentFolder from './components/NavBackToParentFolder.vue'
 import { useIsActivated } from 'src/composition/useIsActivated'
 import { ALL_VALUE } from 'src/const'
 import { parseTime } from 'src/utils/time'

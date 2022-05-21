@@ -54,7 +54,6 @@ export {
   mdiAccount,
   mdiCloseCircle,
   mdiFolderOpen,
-  mdiReply,
   mdiFormatListBulleted,
   mdiDelete,
   mdiFullscreen,
