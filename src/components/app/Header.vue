@@ -119,7 +119,6 @@
 
               <div class="link-item">
                 <template v-for="option in userInfoMenuOptions" :key="option.key">
-                  <!-- TODO: 需要解决点击路由时，相应 menu 会被一直激活 -->
                   <q-item
                     clickable
                     v-ripple

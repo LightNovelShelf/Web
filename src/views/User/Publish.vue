@@ -178,6 +178,10 @@ const categoryOptions = ref([
   {
     label: '日文原版',
     value: 6
+  },
+  {
+    label: '原创',
+    value: 7
   }
 ])
 const createBookData = reactive<QuickCreateBook.Request>({

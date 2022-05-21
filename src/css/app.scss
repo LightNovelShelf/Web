@@ -1,15 +1,11 @@
 // app global css in SCSS form
 
-html {
-    overflow-y: scroll;
-}
-
-body {
-    overflow: hidden;
-}
-
 @media only screen and (min-device-width: 600px) {
     html {
+        overflow-y: overlay;
+    }
+
+    body.q-body--force-scrollbar-y{
         overflow-y: overlay;
     }
 

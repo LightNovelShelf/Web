@@ -16,3 +16,10 @@ export namespace GetForumList {
   }
   export type Response = ListResult<any>
 }
+
+export namespace GetForumInfo {
+  export interface Request {
+    Id: number
+  }
+  export type Response = any
+}
