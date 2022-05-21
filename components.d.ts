@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     IMdiFire: typeof import('~icons/mdi/fire')['default']
     IMdiHeart: typeof import('~icons/mdi/heart')['default']
     IMdiLock: typeof import('~icons/mdi/lock')['default']
+    IMdiReply: typeof import('~icons/mdi/reply')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
