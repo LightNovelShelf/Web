@@ -118,5 +118,6 @@ export {
   mdiWeb,
   mdiVideo,
   mdiImage,
-  mdiStar
+  mdiStar,
+  mdiCommentMultiple
 } from '@mdi/js'

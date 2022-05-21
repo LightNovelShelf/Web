@@ -71,10 +71,8 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    // console/debugger的策略应该反过来：开发时允许但是warning；打包时就不需要警告了，因为压缩会清掉相关调用
-    'no-console': process.env.NODE_ENV !== 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV !== 'production' ? 'warn' : 'off',
-
+    'no-console': 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-unused-vars': 0,
     'no-unused-labels': 0,
     'vue/multi-word-component-names': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

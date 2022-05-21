@@ -352,19 +352,18 @@ function readerHandleLinkClick(e: MouseEvent) {
 onActivated(() => {
   document.addEventListener('click', globalCancelShowing)
   document.addEventListener('keydown', manageKeydown)
+  document.body.addEventListener('click', readerHandleLinkClick)
 })
 onDeactivated(() => {
   document.removeEventListener('click', globalCancelShowing)
   document.removeEventListener('keydown', manageKeydown)
+  document.body.removeEventListener('click', readerHandleLinkClick)
 })
 
 onMounted(() => {
   getContent.syncCall()
-  document.body.addEventListener('click', readerHandleLinkClick)
 })
-onUnmounted(() => {
-  document.body.removeEventListener('click', readerHandleLinkClick)
-})
+
 watch(
   () => [bid.value, sortNum.value],
   async () => {

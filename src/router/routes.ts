@@ -136,7 +136,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/forum/list',
     name: 'ForumList',
     props: true,
-    component: () => import('../views/Forum/List.vue')
+    component: () => import('../views/Forum/List/index.vue')
+  },
+  {
+    path: '/forum/:id',
+    name: 'Forum',
+    props: true,
+    component: () => import('../views/Forum/index.vue')
   }
 ]
 
