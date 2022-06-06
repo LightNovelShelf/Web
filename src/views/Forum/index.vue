@@ -67,7 +67,7 @@
                     <div class="flex">
                       <div class="text-h6 col-grow">{{ index }} 贴子标题</div>
                       <div class="text-bold flex flex-center">
-                        <q-badge color="blue" style="line-height: 1.5">精华</q-badge>
+                        <q-badge color="blue" style="line-height: 1.5">置顶</q-badge>
                       </div>
                     </div>
 
@@ -214,15 +214,15 @@ const _id = computed(() => ~~props.id || 1)
 const order = ref('latest')
 const options = [
   {
-    label: '最近更新',
+    label: '最新评论',
     value: 'latest'
   },
   {
-    label: '上架时间',
+    label: '最新发布',
     value: 'new'
   },
   {
-    label: '总点击量',
+    label: '点击排行',
     value: 'view'
   }
 ]
