@@ -199,6 +199,7 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useQuasar } from 'quasar'
 import { icon } from 'assets/icon'
+import { getErrMsg } from 'src/utils/getErrMsg'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
@@ -238,12 +239,20 @@ watch(() => currentPage.value, request)
 const post = async () => {
   if (inputComment.value) {
     posting.value = true
-    await postComment({ Type: props.type, Id: props.id, Content: inputComment.value })
-    $q.notify({
-      message: '评论成功',
-      timeout: 2000,
-      type: 'positive'
-    })
+    try {
+      await postComment({ Type: props.type, Id: props.id, Content: inputComment.value })
+      $q.notify({
+        message: '评论成功',
+        timeout: 2000,
+        type: 'positive'
+      })
+    } catch (error) {
+      $q.notify({
+        message: getErrMsg(error),
+        color: 'negative',
+        timeout: 1500
+      })
+    }
     posting.value = false
     inputComment.value = null
     await request()
@@ -258,18 +267,26 @@ const showReply = async (_parentId: number, _replyId?: number) => {
 
 const reply = async () => {
   if (inputReplyComment.value) {
-    await replyComment({
-      Type: props.type,
-      Id: props.id,
-      Content: inputReplyComment.value,
-      ReplyId: replyId.value || null,
-      ParentId: parentId.value
-    })
-    $q.notify({
-      message: '评论成功',
-      timeout: 2000,
-      type: 'positive'
-    })
+    try {
+      await replyComment({
+        Type: props.type,
+        Id: props.id,
+        Content: inputReplyComment.value,
+        ReplyId: replyId.value || null,
+        ParentId: parentId.value
+      })
+      $q.notify({
+        message: '评论成功',
+        timeout: 2000,
+        type: 'positive'
+      })
+    } catch (error) {
+      $q.notify({
+        message: getErrMsg(error),
+        color: 'negative',
+        timeout: 1500
+      })
+    }
     inputReplyComment.value = null
     await request()
   }
