@@ -6,7 +6,7 @@
         <!-- 占高度用的div -->
         <div class="actions-wrap-placeholder"></div>
         <!-- 实际展示的block -->
-        <div class="actions-wrap bg-grey-1" :class="editMode && 'actions-wrap-visible'">
+        <div :class="getClass()">
           <div style="flex-grow: 1" />
           <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
           <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
@@ -603,6 +603,20 @@ const createSortable = (el: HTMLElement) => {
       syncSortInfoToDraft({ oldIndex, newIndex })
     }
   })
+}
+
+function getClass():string {
+  let cls = ''
+  cls += 'actions-wrap'
+  if (editMode.value) {
+    cls += ' actions-wrap-visible'
+  }
+  if ($.dark.isActive) {
+    cls += ' bg-grey-10'
+  } else {
+    cls += ' bg-grey-1'
+  }
+  return cls
 }
 
 /** 监听路由 修改 parentFolders 值 */
