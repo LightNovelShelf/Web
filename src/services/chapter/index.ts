@@ -14,3 +14,11 @@ export function editChapterContent(request: Types.EditChapterContentRequest) {
 export function getChapterEditInfo(request: Types.EditChapterContentRequest) {
   return requestWithSignalr('GetChapterEditInfo', request)
 }
+
+export function createNewChapter(request: Types.EditChapterContentRequest) {
+  return requestWithSignalr('CreateNewChapter', request)
+}
+
+export function deleteChapter(request: Types.DeleteChapterRequest) {
+  return requestWithSignalr('DeleteChapter', request)
+}
