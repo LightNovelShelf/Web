@@ -10,3 +10,8 @@ export interface EditChapterContentRequest {
   Content?: string
   Title?: string
 }
+
+export interface DeleteChapterRequest {
+  BookId: number
+  SortNum: number
+}

@@ -37,7 +37,7 @@
                 :ratio="3"
                 no-spinner
                 no-native-menu
-                src="https://img.lightnovel.app:45220/images/2022/05/10/bf70ac850f76303772b615e37d11e481d9646967.jpg"
+                src="https://img.lightnovel.app/images/2022/05/10/bf70ac850f76303772b615e37d11e481d9646967.jpg"
               >
                 <div class="absolute-full text-subtitle2">
                   <div class="q-gutter-y-sm text-center">
