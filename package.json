@@ -44,7 +44,8 @@
     "v-viewer": "^3.0.10",
     "vue": "^3.2.31",
     "vue-recaptcha-v3": "^2.0.1",
-    "vue-router": "^4.0.15"
+    "vue-router": "^4.0.15",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@iconify/json": "^2.1.39",
