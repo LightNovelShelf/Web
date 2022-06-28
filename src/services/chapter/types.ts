@@ -15,3 +15,9 @@ export interface DeleteChapterRequest {
   BookId: number
   SortNum: number
 }
+
+export interface ChangeChapterSortRequest {
+  BookId: number
+  OldSortNum: number
+  NewSortNum: number
+}

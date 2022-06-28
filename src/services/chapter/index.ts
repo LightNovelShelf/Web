@@ -22,3 +22,7 @@ export function createNewChapter(request: Types.EditChapterContentRequest) {
 export function deleteChapter(request: Types.DeleteChapterRequest) {
   return requestWithSignalr('DeleteChapter', request)
 }
+
+export function changeChapterSort(request: Types.ChangeChapterSortRequest) {
+  return requestWithSignalr('ChangeChapterSort', request)
+}
