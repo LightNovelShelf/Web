@@ -84,6 +84,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/User/Publish.vue')
   },
   {
+    path: '/user/bookEditor/:bookId',
+    name: 'UserBookEditor',
+    props: true,
+    component: () => import('../views/User/BookEditor.vue')
+  },
+  {
     path: '/test',
     name: 'Test',
     meta: { requiresAuth: false },

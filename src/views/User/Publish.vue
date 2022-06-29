@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1920px" class="mx-auto">
+  <q-page padding :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`" class="mx-auto">
     <div class="q-gutter-y-md">
       <q-tabs dense v-model="tab" class="text-teal">
         <template v-for="option in tabOptions" :key="option.key">
@@ -20,7 +20,7 @@
                 <div>
                   <div class="flex q-gutter-sm">
                     <q-btn dense color="negative" class="flex-space" @click="delBook(book['Id'], index)">删除</q-btn>
-                    <q-btn dense color="primary" class="flex-space">管理</q-btn>
+                    <q-btn dense color="primary" class="flex-space" :to="{name:'UserBookEditor',params:{bookId:book['Id']}}">管理</q-btn>
                   </div>
                 </div>
               </div>
@@ -126,6 +126,7 @@ import { QuickCreateBook } from 'src/services/user/type'
 import { longTermToken, sessionToken } from 'src/utils/session'
 import { PATH } from 'src/services/path'
 import { ServerError } from 'src/services/internal/ServerError'
+import { useSettingStore } from '../../stores/setting'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -154,6 +155,7 @@ const pageData = ref({ totalPage: 1 })
 const _page = ref(1)
 const createBookShow = ref(false)
 const uploadBookShow = ref(false)
+const settingStore = useSettingStore()
 const categoryOptions = ref([
   {
     label: '录入完成',
