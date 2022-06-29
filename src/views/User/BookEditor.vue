@@ -59,13 +59,13 @@
         fab
         :icon="icon.mdiContentSave"
         color="secondary"
-        :disable="!isActive || draggingFab || !chapterLoaded"
+        :disable="getSaveState()"
         v-touch-pan.prevent.mouse="moveFab"
         @click="save()"
       ></q-btn>
     </q-page-sticky>
   </q-page>
-  <q-drawer v-model="show" side="right" bordered :width="240" :breakpoint="siderBreakpoint">
+  <q-drawer v-if="route.name==='UserBookEditor'" v-model="show" side="right" bordered :width="240" :breakpoint="siderBreakpoint">
     <q-scroll-area class="fit">
       <q-item clickable v-ripple :active="currentChapter === -1" @click="currentChapter = -1">
         <q-item-section> 信息 </q-item-section>
@@ -97,7 +97,7 @@
       <q-separator class="q-my-sm" />
       <q-item>
         <q-item-section>
-          <q-btn color="secondary" @click.prevent="addChapter()" :disable="!isActive || draggingFab || !chapterLoaded">
+          <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()">
             新增
           </q-btn>
         </q-item-section>
@@ -131,6 +131,7 @@ const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
 const props = defineProps<{ bookId: string }>()
 const $q = useQuasar()
+const route = useRoute()
 
 let show = ref(false)
 show.value = siderShow.value
@@ -157,12 +158,22 @@ let creatingChapterContent = reactive({
 })
 
 watch(currentChapter, async () => {
-  if (currentChapter.value === -1) return
   chapterLoaded.value = false
+  if (currentChapter.value === -1) return
   chapter.value = { Title: '加载中...', Content: '加载中...' }
   chapter.value = await getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value })
   chapterLoaded.value = true
 })
+
+function getSaveState(): boolean {
+  if (isActive.value && !draggingFab.value) {
+    if (currentChapter.value === -1 || chapterLoaded.value) {
+      return false
+    }
+    return true
+  }
+  return true
+}
 
 async function save() {
   if (creatingChapter.value) {
