@@ -28,6 +28,7 @@
       </div>
 
       <div v-else-if="creatingChapter">
+        <q-btn :icon="icon.mdiClose" @click.prevent="creatingChapter = false">关闭</q-btn>
         <q-input label="标题" v-model="creatingChapterContent.title" />
         <div class="text-opacity">内容</div>
         <html-editor v-model:html="creatingChapterContent.html" mode="common" />
@@ -72,13 +73,21 @@
         <q-item-section> 信息 </q-item-section>
       </q-item>
       <q-separator class="q-my-sm" />
-      <Draggable v-model="showChapters" :animation="100" item-key="id" class="list-group" ghost-class="ghost">
+      <Draggable
+        v-model="showChapters"
+        :animation="100"
+        item-key="id"
+        class="list-group"
+        ghost-class="ghost"
+        @change="handleChange"
+      >
         <template #item="{ element }">
           <q-item
             clickable
             v-ripple
             @click="currentChapter = element.id + 1"
             :active="currentChapter - 1 === element.id"
+            :disable="disableDrawer"
           >
             <q-item-section>{{ element.value }}</q-item-section>
             <q-item-section side>
@@ -109,7 +118,7 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useQuasar } from 'quasar'
 import { HtmlEditor } from 'src/components'
-import { editChapterContent, getChapterEditInfo } from 'src/services/chapter'
+import { changeChapterSort, editChapterContent, getChapterEditInfo } from 'src/services/chapter'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
 import { createNewChapter, deleteChapter } from '../../services/chapter/index'
@@ -126,6 +135,7 @@ show.value = siderShow.value
 let options = ref([])
 // 只要数据中的id和props不同，就当在加载
 let isActive = computed(() => book.value?.Id === _bid.value)
+let disableDrawer = ref(false)
 let fabPos = ref([18, 18])
 let draggingFab = ref(false)
 let book = ref<any>()
@@ -138,7 +148,7 @@ let chapter = ref<any>(undefined)
 let chapterLoaded = ref(true)
 let creatingChapter = ref(false)
 let creatingChapterContent = reactive({
-  sortNum: 1,
+  sortNum: '',
   title: '',
   html: ''
 })
@@ -152,31 +162,7 @@ watch(currentChapter, async () => {
 
 async function save() {
   if (creatingChapter.value) {
-    try {
-      await createNewChapter({
-        BookId: _bid.value,
-        SortNum: creatingChapterContent.sortNum,
-        Content: creatingChapterContent.html,
-        Title: creatingChapterContent.title
-      })
-      $q.notify({
-        type: 'positive',
-        message: '新增成功'
-      })
-      chapters.value.splice(creatingChapterContent.sortNum - 1, 0, creatingChapterContent.title)
-      showChapters.value = chapters.value.map((v, i) => {
-        return {
-          id: i,
-          value: v
-        }
-      })
-    } catch (e) {
-      $q.notify({
-        type: 'negative',
-        message: getErrMsg(e)
-      })
-    }
-    creatingChapter.value = false
+    await createChapter()
     return
   }
   if (currentChapter.value === -1) {
@@ -282,6 +268,76 @@ async function delChapter(sortNum: number) {
       })
     }
   })
+}
+
+async function createChapter() {
+  try {
+    await createNewChapter({
+      BookId: _bid.value,
+      SortNum: Number.parseInt(creatingChapterContent.sortNum),
+      Content: creatingChapterContent.html,
+      Title: creatingChapterContent.title
+    })
+    $q.notify({
+      type: 'positive',
+      message: '新增成功'
+    })
+    chapters.value.splice(Number.parseInt(creatingChapterContent.sortNum) - 1, 0, creatingChapterContent.title)
+    showChapters.value = chapters.value.map((v, i) => {
+      return {
+        id: i,
+        value: v
+      }
+    })
+    creatingChapter.value = false
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e)
+    })
+  }
+}
+
+async function handleChange(evt) {
+  disableDrawer.value = true
+  const moved = evt.moved
+  const { oldIndex, newIndex } = moved
+  let oldSort,
+    newSort = -1
+  if (<number>oldIndex + 1 !== chapters.value.length) {
+    oldSort = oldIndex + 1
+  } else {
+    oldSort = 0
+  }
+  if (<number>newIndex + 1 !== chapters.value.length) {
+    newSort = newIndex + 1
+  } else {
+    newSort = 0
+  }
+
+  try {
+    await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
+    const data = (await getBookEditInfo(_bid.value)) as any
+    chapters.value = <string[]>data.Book.Chapters
+    showChapters.value = chapters.value.map((v, i) => {
+      return {
+        id: i,
+        value: v
+      }
+    })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e)
+    })[(chapters.value[oldIndex], chapters.value[newIndex])] = [chapters.value[newIndex], chapters.value[oldIndex]]
+    showChapters.value = chapters.value.map((v, i) => {
+      return {
+        id: i,
+        value: v
+      }
+    })
+  }
+  disableDrawer.value = false
 }
 
 function moveFab(ev) {
