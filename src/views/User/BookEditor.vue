@@ -89,9 +89,9 @@
             :active="currentChapter - 1 === element.id"
             :disable="disableDrawer"
           >
-            <q-item-section>{{ element.value }}</q-item-section>
+            <q-item-section>{{ element.value+'val:'+element.id }}</q-item-section>
             <q-item-section side>
-              <q-btn @click.prevent="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
+              <q-btn flat round @click.prevent="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
             </q-item-section>
           </q-item>
         </template>
@@ -118,10 +118,15 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useQuasar } from 'quasar'
 import { HtmlEditor } from 'src/components'
-import { changeChapterSort, editChapterContent, getChapterEditInfo } from 'src/services/chapter'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
-import { createNewChapter, deleteChapter } from '../../services/chapter/index'
+import {
+  createNewChapter,
+  deleteChapter,
+  changeChapterSort,
+  editChapterContent,
+  getChapterEditInfo
+} from '../../services/chapter/index'
 
 const settingStore = useSettingStore()
 const layout = useLayout()
