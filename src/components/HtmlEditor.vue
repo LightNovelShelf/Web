@@ -311,7 +311,7 @@ watch(
   () => props.html,
   () => {
     if (!isChange.value) {
-      console.log('change')
+      //console.log('change')
       parseMarkDown()
     } else {
       isChange.value = false
