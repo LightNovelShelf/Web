@@ -27,7 +27,7 @@
         </q-grid>
       </div>
 
-      <div v-else-if="creatingChapter">
+      <div v-else-if="creatingChapter" class="q-gutter-md">
         <q-btn :icon="icon.mdiClose" @click.prevent="creatingChapter = false">关闭</q-btn>
         <q-input label="标题" v-model="creatingChapterContent.title" />
         <div class="text-opacity">内容</div>
@@ -35,19 +35,17 @@
       </div>
 
       <div v-else>
-        <div v-if="chapterLoaded">
+        <div class="q-gutter-md">
           <q-input label="标题" v-model="chapter['Title']" />
           <div class="text-opacity">内容</div>
           <html-editor v-model:html="chapter['Content']" mode="common" />
         </div>
-        <div v-else class="absolute-full">
-          <q-inner-loading
-            :showing="!chapterLoaded"
-            label="加载中..."
-            label-class="text-teal"
-            label-style="font-size: 1.1em"
-          />
-        </div>
+        <q-inner-loading
+          :showing="!chapterLoaded"
+          label="加载中..."
+          label-class="text-teal"
+          label-style="font-size: 1.1em"
+        />
       </div>
     </div>
     <div v-else class="absolute-full">
@@ -149,7 +147,7 @@ let chapters = ref([] as string[])
 let showChapters = ref([])
 let _bid = computed(() => ~~(props.bookId || '1'))
 let currentChapter = ref(-1)
-let chapter = ref<any>(undefined)
+let chapter = ref<any>({ Title: '加载中...', Content: '加载中...' })
 let chapterLoaded = ref(true)
 let creatingChapter = ref(false)
 let creatingChapterContent = reactive({
@@ -161,6 +159,7 @@ let creatingChapterContent = reactive({
 watch(currentChapter, async () => {
   if (currentChapter.value === -1) return
   chapterLoaded.value = false
+  chapter.value = { Title: '加载中...', Content: '加载中...' }
   chapter.value = await getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value })
   chapterLoaded.value = true
 })
