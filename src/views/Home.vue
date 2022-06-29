@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1920px" class="mx-auto">
+  <q-page padding :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`" class="mx-auto">
     <q-grid x-gap="12" y-gap="8" cols="2" sm="1" xs="1">
       <q-grid-item>
         <q-card>
@@ -175,6 +175,7 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { getLatestBookList } from 'src/services/book'
 import { BookInList } from 'src/services/book/types'
+import { useSettingStore } from 'src/stores/setting'
 
 const onlineInfo = ref<OnlineInfo>()
 const announcementList = ref<any[]>()
@@ -182,6 +183,7 @@ const bookData = ref<BookInList[]>()
 const banList = ref<any[]>()
 const banImages = ref<string[]>()
 const viewerRef = ref<any>()
+const settingStore = useSettingStore()
 const getInfo = useTimeoutFn(async () => {
   // 这样可以使Signalr在一个ws消息中并发调用
   let p1 = getOnlineInfo().then((res) => (onlineInfo.value = res))
