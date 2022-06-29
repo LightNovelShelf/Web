@@ -377,7 +377,26 @@ const request = useTimeoutFn(async () => {
   })
   book.value = data.Book
 })
-useInitRequest(request, { isActive })
+
+const refresh = () => {
+  //在路由回退到不同书籍后重新加载数据
+  chapterLoaded.value = false
+  chapter.value = { Title: '加载中...', Content: '加载中...' }
+  if (currentChapter.value !== -1) {
+    if (chapters.value.length >= currentChapter.value) {
+      getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value }).then((value) => {
+        chapter.value = value
+        chapterLoaded.value = true
+      })
+    } else {
+      //if cannot back to the same chapter in previous book, change to information page.
+      currentChapter.value = -1
+    }
+  }
+  creatingChapterContent = { title: '', html: '', sortNum: '' }
+}
+
+useInitRequest(request, { after: refresh, isActive })
 </script>
 
 <style lang="scss" scoped></style>
