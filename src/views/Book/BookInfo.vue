@@ -173,6 +173,7 @@ const startRead = async () => {
   if (position.value?.xPath) {
     sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.value.cid) + 1
   }
+  if (sortNum == 0) sortNum = 1
   await router.push({ name: 'Read', params: { bid: _bid.value, sortNum: sortNum } })
 }
 
@@ -198,7 +199,7 @@ const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
 const lastReadTitle = computed(() => {
   if (position && position.value?.cid) {
     let chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)
-    return chap.Title
+    return chap?.Title
   }
   return '暂无'
 })
