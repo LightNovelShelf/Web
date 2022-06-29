@@ -27,7 +27,7 @@
         </q-grid>
       </div>
 
-      <div v-else-if="creatingChapter" class="q-gutter-md">
+      <div v-else-if="creatingChapter" class="q-gutter-sm">
         <q-btn :icon="icon.mdiClose" @click.prevent="creatingChapter = false">关闭</q-btn>
         <q-input label="标题" v-model="creatingChapterContent.title" />
         <div class="text-opacity">内容</div>
@@ -35,7 +35,7 @@
       </div>
 
       <div v-else>
-        <div class="q-gutter-md">
+        <div class="q-gutter-sm">
           <q-input label="标题" v-model="chapter['Title']" />
           <div class="text-opacity">内容</div>
           <html-editor v-model:html="chapter['Content']" mode="common" />
@@ -108,7 +108,7 @@
 
 <script lang="ts" setup>
 import { useLayout } from 'src/components/app/useLayout'
-import { useSettingStore } from '../../stores/setting'
+import { useSettingStore } from 'stores/setting'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { icon } from 'assets/icon'
 import { BookServicesTypes, editBook, getBookEditInfo } from 'src/services/book'
@@ -124,7 +124,7 @@ import {
   changeChapterSort,
   editChapterContent,
   getChapterEditInfo
-} from '../../services/chapter/index'
+} from 'src/services/chapter'
 
 const settingStore = useSettingStore()
 const layout = useLayout()
