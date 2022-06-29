@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1080px;" class="mx-auto">
+  <q-page padding style="max-width: 1920px;" class="mx-auto">
     <q-grid x-gap="12" y-gap="8" cols="2" sm="1" xs="1">
       <q-grid-item>
         <q-card>
