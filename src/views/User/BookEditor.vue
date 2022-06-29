@@ -96,7 +96,7 @@
           >
             <q-item-section>{{ element.value }}</q-item-section>
             <q-item-section side>
-              <q-btn flat round @click.prevent="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
+              <q-btn flat round @click.stop="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
             </q-item-section>
           </q-item>
         </template>
@@ -291,9 +291,9 @@ async function delChapter(sortNum: number) {
 
 async function createChapter() {
   try {
-    let sort = ~~(creatingChapterContent.sortNum)
-    let emptyHtml = creatingChapterContent.html === ''
-    let emptyTitle = creatingChapterContent.title === ''
+    let sort = ~~creatingChapterContent.sortNum
+    let emptyHtml = !creatingChapterContent.html
+    let emptyTitle = !creatingChapterContent.title
 
     if (emptyHtml || emptyTitle) {
       $q.dialog({
@@ -317,10 +317,13 @@ async function createChapter() {
       type: 'positive',
       message: '新增成功'
     })
+
     if (sort === 0) {
       chapters.value.push(creatingChapterContent.title)
+      currentChapter.value = chapters.value.length
     } else {
       chapters.value.splice(sort - 1, 0, creatingChapterContent.title)
+      currentChapter.value = sort
     }
 
     showChapters.value = chapters.value.map((v, i) => {
