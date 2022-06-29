@@ -89,7 +89,7 @@
             :active="currentChapter - 1 === element.id"
             :disable="disableDrawer"
           >
-            <q-item-section>{{ element.value+'val:'+element.id }}</q-item-section>
+            <q-item-section>{{ element.value }}</q-item-section>
             <q-item-section side>
               <q-btn flat round @click.prevent="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
             </q-item-section>
@@ -231,7 +231,7 @@ async function addChapter() {
     cancel: true,
     persistent: true,
     prompt: {
-      label: '从1开始，0在最后',
+      label: '从1开始，0在最后（留空则在最后插入）',
       model: '',
       type: 'number'
     }
@@ -277,9 +277,13 @@ async function delChapter(sortNum: number) {
 
 async function createChapter() {
   try {
+    let sort = Number.parseInt(creatingChapterContent.sortNum)
+    if (sort === NaN) {
+      sort = 0
+    }
     await createNewChapter({
       BookId: _bid.value,
-      SortNum: Number.parseInt(creatingChapterContent.sortNum),
+      SortNum: sort,
       Content: creatingChapterContent.html,
       Title: creatingChapterContent.title
     })
@@ -287,7 +291,12 @@ async function createChapter() {
       type: 'positive',
       message: '新增成功'
     })
-    chapters.value.splice(Number.parseInt(creatingChapterContent.sortNum) - 1, 0, creatingChapterContent.title)
+    if (sort === 0) {
+      chapters.value.push(creatingChapterContent.title)
+    } else {
+      chapters.value.splice(sort - 1, 0, creatingChapterContent.title)
+    }
+
     showChapters.value = chapters.value.map((v, i) => {
       return {
         id: i,
