@@ -359,7 +359,7 @@ function moveFab(ev) {
 }
 
 const request = useTimeoutFn(async () => {
-  //去他妈的AnyScript，懒得改类型了
+  // fucking AnyScript
   const data = (await getBookEditInfo(_bid.value)) as any
   bookInfo.value = data
   options.value = data.Categories.map((item) => {
@@ -379,17 +379,24 @@ const request = useTimeoutFn(async () => {
 })
 
 const refresh = () => {
-  //在路由回退到不同书籍后重新加载数据
+  // refresh page data when back to another book.
   chapterLoaded.value = false
   chapter.value = { Title: '加载中...', Content: '加载中...' }
   if (currentChapter.value !== -1) {
     if (chapters.value.length >= currentChapter.value) {
-      getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value }).then((value) => {
-        chapter.value = value
-        chapterLoaded.value = true
-      })
+      getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value })
+        .then((value) => {
+          chapter.value = value
+          chapterLoaded.value = true
+        })
+        .catch((e) => {
+          $q.notify({
+            type: 'negative',
+            message: getErrMsg(e)
+          })
+        })
     } else {
-      //if cannot back to the same chapter in previous book, change to information page.
+      // if cannot back to the same chapter in previous book, change to information page.
       currentChapter.value = -1
     }
   }
