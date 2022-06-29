@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1080px;" class="mx-auto">
+  <q-page padding style="max-width: 1080px" class="mx-auto">
     <div v-if="isActive">
       <div v-if="currentChapter === -1 && !creatingChapter">
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
@@ -330,15 +330,15 @@ async function handleChange(evt) {
   }
 
   try {
-    await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
-    const data = (await getBookEditInfo(_bid.value)) as any
-    chapters.value = <string[]>data.Book.Chapters
+    const changedList = await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
+    chapters.value = <string[]>changedList
     showChapters.value = chapters.value.map((v, i) => {
       return {
         id: i,
         value: v
       }
     })
+    currentChapter.value = newSort
   } catch (e) {
     $q.notify({
       type: 'negative',
