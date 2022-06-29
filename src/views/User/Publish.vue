@@ -1,5 +1,5 @@
 <template>
-  <q-page padding :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="mx-auto">
     <div class="q-gutter-y-md">
       <q-tabs dense v-model="tab" class="text-teal">
         <template v-for="option in tabOptions" :key="option.key">
