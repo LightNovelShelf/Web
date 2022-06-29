@@ -65,7 +65,14 @@
       ></q-btn>
     </q-page-sticky>
   </q-page>
-  <q-drawer v-if="route.name==='UserBookEditor'" v-model="show" side="right" bordered :width="240" :breakpoint="siderBreakpoint">
+  <q-drawer
+    v-if="route.name === 'UserBookEditor'"
+    v-model="show"
+    side="right"
+    bordered
+    :width="240"
+    :breakpoint="siderBreakpoint"
+  >
     <q-scroll-area class="fit">
       <q-item clickable v-ripple :active="currentChapter === -1" @click="currentChapter = -1">
         <q-item-section> 信息 </q-item-section>
@@ -97,9 +104,7 @@
       <q-separator class="q-my-sm" />
       <q-item>
         <q-item-section>
-          <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()">
-            新增
-          </q-btn>
+          <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()"> 新增 </q-btn>
         </q-item-section>
       </q-item>
     </q-scroll-area>
@@ -259,7 +264,6 @@ async function delChapter(sortNum: number) {
     persistent: true
   }).onOk(async () => {
     try {
-      if (sortNum === chapters.value.length) sortNum = 0
       await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
       chapters.value.splice(sortNum - 1, 1)
       showChapters.value = chapters.value.map((v, i) => {
@@ -287,10 +291,22 @@ async function delChapter(sortNum: number) {
 
 async function createChapter() {
   try {
-    let sort = Number.parseInt(creatingChapterContent.sortNum)
-    if (sort === NaN) {
-      sort = 0
+    let sort = ~~(creatingChapterContent.sortNum)
+    let emptyHtml = creatingChapterContent.html === ''
+    let emptyTitle = creatingChapterContent.title === ''
+
+    if (emptyHtml || emptyTitle) {
+      $q.dialog({
+        title: '警告',
+        message: `你的标题或内容为空，将使用默认值初始化：${emptyTitle && '<br/>章节名：新章节'}${
+          emptyHtml && '<br/>内容：轻书架'
+        }`,
+        html: true
+      })
+      creatingChapterContent.html = '轻书架'
+      creatingChapterContent.title = '新章节'
     }
+
     await createNewChapter({
       BookId: _bid.value,
       SortNum: sort,
@@ -314,6 +330,9 @@ async function createChapter() {
       }
     })
     creatingChapter.value = false
+    creatingChapterContent.title = ''
+    creatingChapterContent.html = ''
+    creatingChapterContent.sortNum = ''
   } catch (e) {
     $q.notify({
       type: 'negative',
@@ -326,18 +345,8 @@ async function handleChange(evt) {
   disableDrawer.value = true
   const moved = evt.moved
   const { oldIndex, newIndex } = moved
-  let oldSort,
-    newSort = -1
-  if (<number>oldIndex + 1 !== chapters.value.length) {
-    oldSort = oldIndex + 1
-  } else {
-    oldSort = 0
-  }
-  if (<number>newIndex + 1 !== chapters.value.length) {
-    newSort = newIndex + 1
-  } else {
-    newSort = 0
-  }
+  let oldSort = oldIndex + 1
+  let newSort = newIndex + 1
 
   try {
     const changedList = await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
@@ -411,7 +420,9 @@ const refresh = () => {
       currentChapter.value = -1
     }
   }
-  creatingChapterContent = { title: '', html: '', sortNum: '' }
+  creatingChapterContent.title = ''
+  creatingChapterContent.html = ''
+  creatingChapterContent.sortNum = ''
 }
 
 useInitRequest(request, { after: refresh, isActive })
