@@ -1,5 +1,5 @@
 <template>
-  <q-page padding :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`" class="mx-auto">
+  <q-page padding style="max-width: 1080px;" class="mx-auto">
     <div v-if="isActive">
       <div v-if="currentChapter === -1 && !creatingChapter">
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
