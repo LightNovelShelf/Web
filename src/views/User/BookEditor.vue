@@ -45,7 +45,7 @@
                       (val <= appStore.user.InteriorLevel && val >= 0) ||
                       `输入的等级需大于0且小于${appStore.user.InteriorLevel}`
                   ]"
-                  style="max-width: 200px;"
+                  style="max-width: 200px"
                 >
                   <template v-slot:append>
                     <q-icon :name="icon.mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
@@ -149,7 +149,7 @@
           >
             <q-item-section>{{ element.Title }}</q-item-section>
             <q-item-section side>
-              <q-btn flat round @click.prevent="delChapter(element.Sort + 1)" :icon="icon.mdiDelete"></q-btn>
+              <q-btn flat round @click.stop="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
             </q-item-section>
           </q-item>
         </template>
@@ -212,8 +212,7 @@ let _bid = computed(() => ~~(props.bookId || '1'))
 let currentChapter = ref(-1)
 let _cid = computed(() => {
   if (currentChapter.value <= 0) {
-    currentChapter.value
-    return
+    return currentChapter.value
   }
   return chapters.value[currentChapter.value - 1].Id
 })
@@ -245,18 +244,28 @@ interface BookSetting {
 
 watch(_cid, async () => {
   chapterLoaded.value = false
-  if (_cid.value <= 0) return
+  if (_cid.value <= 0) {
+    chapterLoaded.value = true
+    return
+  }
   chapter.value = { Title: '加载中...', Content: '加载中...' }
   chapter.value = await getChapterEditInfo({ BookId: _bid.value, Cid: _cid.value })
   chapterLoaded.value = true
 })
 
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
-}
-
-//#region book
+watch(
+  chapters,
+  () => {
+    showChapters.value = chapters.value.map((v, i) => {
+      return {
+        Id: v.Id,
+        Title: v.Title,
+        Sort: i
+      }
+    })
+  },
+  { deep: true }
+)
 
 function getSaveState(): boolean {
   if (isActive.value && !draggingFab.value) {
@@ -264,6 +273,13 @@ function getSaveState(): boolean {
   }
   return true
 }
+
+function moveFab(ev) {
+  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
+  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
+}
+
+//#region book
 
 async function save() {
   if (creatingChapter.value) {
@@ -369,7 +385,7 @@ async function delChapter(sortNum: number) {
         }
       })
       currentChapter.value -= 1
-      if (currentChapter.value === 0) {
+      if (currentChapter.value <= 0) {
         currentChapter.value = -1
       }
       $q.notify({
@@ -388,8 +404,8 @@ async function delChapter(sortNum: number) {
 async function createChapter() {
   try {
     let sort = ~~creatingChapterContent.sortNum
-    let emptyHtml = creatingChapterContent.html === ''
-    let emptyTitle = creatingChapterContent.title === ''
+    let emptyHtml = !creatingChapterContent.html
+    let emptyTitle = !creatingChapterContent.title
 
     if (emptyHtml || emptyTitle) {
       $q.dialog({
