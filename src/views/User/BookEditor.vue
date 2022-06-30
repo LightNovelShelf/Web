@@ -2,29 +2,59 @@
   <q-page padding style="max-width: 1920px" class="mx-auto">
     <div v-if="isActive">
       <div v-if="currentChapter === -1 && !creatingChapter">
-        <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
-          <q-grid-item>
-            <div class="q-gutter-sm">
-              <div class="text-opacity">封面预览</div>
-              <q-card>
-                <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3" />
-                <q-responsive v-else :ratio="2 / 3">
-                  <q-skeleton class="fit" square />
-                </q-responsive>
-              </q-card>
+        <q-tab-panels v-model="tab" animated transition-prev="jump-up" transition-next="jump-down">
+          <q-tab-panel name="information">
+            <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2" class="q-pa-sm">
+              <q-grid-item>
+                <div class="q-gutter-sm">
+                  <div class="text-opacity">封面预览</div>
+                  <q-card>
+                    <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3" />
+                    <q-responsive v-else :ratio="2 / 3">
+                      <q-skeleton class="fit" square />
+                    </q-responsive>
+                  </q-card>
+                </div>
+              </q-grid-item>
+              <q-grid-item span="2" xs="1" sm="1" md="1">
+                <div class="q-gutter-sm">
+                  <q-input label="封面地址" placeholder="https://" v-model="book['Cover']" />
+                  <q-input label="书名" v-model="book['Title']" />
+                  <q-input label="作者" v-model="book['Author']" />
+                  <div class="text-opacity">简介</div>
+                  <html-editor v-model:html="book['Introduction']" mode="simple" />
+                  <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
+                </div>
+              </q-grid-item>
+            </q-grid>
+          </q-tab-panel>
+          <q-tab-panel name="setting">
+            <div class="q-pa-md">
+              <div class="q-gutter-xs light-radio q-mt-md q-pb-md q-px-sm">
+                <div class="text-subtitle1">书籍等级</div>
+                <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
+              </div>
+              <div class="q-gutter-xs light-radio q-mt-md q-pb-md q-px-sm" v-if="appStore.user.InteriorLevel > 0">
+                <div class="text-subtitle1">书籍内部等级</div>
+                <q-input
+                  v-model.number="bookSetting['InteriorLevel']"
+                  type="number"
+                  filled
+                  :rules="[
+                    (val) =>
+                      (val <= appStore.user.InteriorLevel && val >= 0) ||
+                      `输入的等级需大于0且小于${appStore.user.InteriorLevel}`
+                  ]"
+                  style="max-width: 200px;"
+                >
+                  <template v-slot:append>
+                    <q-icon :name="icon.mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
+                  </template>
+                </q-input>
+              </div>
             </div>
-          </q-grid-item>
-          <q-grid-item span="2" xs="1" sm="1" md="1">
-            <div class="q-gutter-sm">
-              <q-input label="封面地址" placeholder="https://" v-model="book['Cover']" />
-              <q-input label="书名" v-model="book['Title']" />
-              <q-input label="作者" v-model="book['Author']" />
-              <div class="text-opacity">简介</div>
-              <html-editor v-model:html="book['Introduction']" mode="simple" />
-              <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
-            </div>
-          </q-grid-item>
-        </q-grid>
+          </q-tab-panel>
+        </q-tab-panels>
       </div>
 
       <div v-else-if="creatingChapter" class="q-gutter-sm">
@@ -74,14 +104,37 @@
     :breakpoint="siderBreakpoint"
   >
     <q-scroll-area class="fit">
-      <q-item clickable v-ripple :active="currentChapter === -1" @click="currentChapter = -1">
+      <q-item
+        clickable
+        v-ripple
+        :active="currentChapter === -1 && tab === 'information'"
+        @click="
+          () => {
+            currentChapter = -1
+            tab = 'information'
+          }
+        "
+      >
         <q-item-section> 信息 </q-item-section>
+      </q-item>
+      <q-item
+        clickable
+        v-ripple
+        :active="currentChapter === -1 && tab === 'setting'"
+        @click="
+          () => {
+            currentChapter = -1
+            tab = 'setting'
+          }
+        "
+      >
+        <q-item-section> 设置 </q-item-section>
       </q-item>
       <q-separator class="q-my-sm" />
       <Draggable
         v-model="showChapters"
         :animation="100"
-        item-key="id"
+        item-key="Id"
         class="list-group"
         ghost-class="ghost"
         @change="handleChange"
@@ -90,13 +143,13 @@
           <q-item
             clickable
             v-ripple
-            @click="currentChapter = element.id + 1"
-            :active="currentChapter - 1 === element.id"
+            @click="currentChapter = element.Sort + 1"
+            :active="currentChapter - 1 === element.Sort"
             :disable="disableDrawer"
           >
-            <q-item-section>{{ element.value }}</q-item-section>
+            <q-item-section>{{ element.Title }}</q-item-section>
             <q-item-section side>
-              <q-btn flat round @click.prevent="delChapter(element.id + 1)" :icon="icon.mdiDelete"></q-btn>
+              <q-btn flat round @click.prevent="delChapter(element.Sort + 1)" :icon="icon.mdiDelete"></q-btn>
             </q-item-section>
           </q-item>
         </template>
@@ -113,7 +166,6 @@
 
 <script lang="ts" setup>
 import { useLayout } from 'src/components/app/useLayout'
-import { useSettingStore } from 'stores/setting'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { icon } from 'assets/icon'
 import { BookServicesTypes, editBook, getBookEditInfo } from 'src/services/book'
@@ -123,6 +175,8 @@ import { useQuasar } from 'quasar'
 import { HtmlEditor } from 'src/components'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
+import { setBookSetting, getBookSetting } from '../../services/book/index'
+import { useAppStore } from '../../stores/app'
 import {
   createNewChapter,
   deleteChapter,
@@ -131,12 +185,14 @@ import {
   getChapterEditInfo
 } from 'src/services/chapter'
 
-const settingStore = useSettingStore()
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
 const props = defineProps<{ bookId: string }>()
 const $q = useQuasar()
 const route = useRoute()
+const appStore = useAppStore()
+
+//#region refs
 
 let show = ref(false)
 show.value = siderShow.value
@@ -149,10 +205,18 @@ let fabPos = ref([18, 18])
 let draggingFab = ref(false)
 let book = ref<any>()
 let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
-let chapters = ref([] as string[])
-let showChapters = ref([])
+let chapters = ref([] as ChapterInfo[])
+let showChapters = ref([] as ShowChapterInfo[])
 let _bid = computed(() => ~~(props.bookId || '1'))
+// currentChapter is the index of selected element. *NOT* Id.
 let currentChapter = ref(-1)
+let _cid = computed(() => {
+  if (currentChapter.value <= 0) {
+    currentChapter.value
+    return
+  }
+  return chapters.value[currentChapter.value - 1].Id
+})
 let chapter = ref<any>({ Title: '加载中...', Content: '加载中...' })
 let chapterLoaded = ref(true)
 let creatingChapter = ref(false)
@@ -161,21 +225,42 @@ let creatingChapterContent = reactive({
   title: '',
   html: ''
 })
+let tab = ref('information')
+let bookSetting = reactive({} as BookSetting)
+//#endregion
 
-watch(currentChapter, async () => {
+interface ChapterInfo {
+  Id?: number
+  Title?: string
+}
+
+interface ShowChapterInfo extends ChapterInfo {
+  Sort: number
+}
+
+interface BookSetting {
+  Level?: number
+  InteriorLevel?: number
+}
+
+watch(_cid, async () => {
   chapterLoaded.value = false
-  if (currentChapter.value === -1) return
+  if (_cid.value <= 0) return
   chapter.value = { Title: '加载中...', Content: '加载中...' }
-  chapter.value = await getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value })
+  chapter.value = await getChapterEditInfo({ BookId: _bid.value, Cid: _cid.value })
   chapterLoaded.value = true
 })
 
+function moveFab(ev) {
+  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
+  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
+}
+
+//#region book
+
 function getSaveState(): boolean {
   if (isActive.value && !draggingFab.value) {
-    if (currentChapter.value === -1 || chapterLoaded.value) {
-      return false
-    }
-    return true
+    return !(currentChapter.value === -1 || chapterLoaded.value)
   }
   return true
 }
@@ -186,12 +271,22 @@ async function save() {
     return
   }
   if (currentChapter.value === -1) {
-    await saveInfo()
-    return
+    if (tab.value === 'information') {
+      await saveInfo()
+      return
+    }
+    if (tab.value === 'setting') {
+      await saveSetting()
+      return
+    }
   } else {
     await saveChapter()
     return
   }
+}
+
+async function saveSetting() {
+  await setBookSetting({ Bid: _bid.value, Settings: toRaw(bookSetting) })
 }
 
 async function saveInfo() {
@@ -264,12 +359,13 @@ async function delChapter(sortNum: number) {
     persistent: true
   }).onOk(async () => {
     try {
-      await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
-      chapters.value.splice(sortNum - 1, 1)
+      const resp: ChapterInfo[] = <any>await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
+      chapters.value = resp
       showChapters.value = chapters.value.map((v, i) => {
         return {
-          id: i,
-          value: v
+          Id: v.Id,
+          Title: v.Title,
+          Sort: i
         }
       })
       currentChapter.value -= 1
@@ -291,7 +387,7 @@ async function delChapter(sortNum: number) {
 
 async function createChapter() {
   try {
-    let sort = ~~(creatingChapterContent.sortNum)
+    let sort = ~~creatingChapterContent.sortNum
     let emptyHtml = creatingChapterContent.html === ''
     let emptyTitle = creatingChapterContent.title === ''
 
@@ -301,38 +397,42 @@ async function createChapter() {
         message: `你的标题或内容为空，将使用默认值初始化：${emptyTitle && '<br/>章节名：新章节'}${
           emptyHtml && '<br/>内容：轻书架'
         }`,
-        html: true
+        html: true,
+        persistent: true,
+        cancel: true
+      }).onOk(async () => {
+        creatingChapterContent.html = '轻书架'
+        creatingChapterContent.title = '新章节'
+        await inner()
       })
-      creatingChapterContent.html = '轻书架'
-      creatingChapterContent.title = '新章节'
-    }
-
-    await createNewChapter({
-      BookId: _bid.value,
-      SortNum: sort,
-      Content: creatingChapterContent.html,
-      Title: creatingChapterContent.title
-    })
-    $q.notify({
-      type: 'positive',
-      message: '新增成功'
-    })
-    if (sort === 0) {
-      chapters.value.push(creatingChapterContent.title)
     } else {
-      chapters.value.splice(sort - 1, 0, creatingChapterContent.title)
+      await inner()
     }
 
-    showChapters.value = chapters.value.map((v, i) => {
-      return {
-        id: i,
-        value: v
-      }
-    })
-    creatingChapter.value = false
-    creatingChapterContent.title = ''
-    creatingChapterContent.html = ''
-    creatingChapterContent.sortNum = ''
+    async function inner() {
+      const resp: ChapterInfo[] = <any>await createNewChapter({
+        BookId: _bid.value,
+        SortNum: sort,
+        Content: creatingChapterContent.html,
+        Title: creatingChapterContent.title
+      })
+      $q.notify({
+        type: 'positive',
+        message: '新增成功'
+      })
+      chapters.value = resp
+      showChapters.value = chapters.value.map((v, i) => {
+        return {
+          Id: v.Id,
+          Title: v.Title,
+          Sort: i
+        }
+      })
+      creatingChapter.value = false
+      creatingChapterContent.title = ''
+      creatingChapterContent.html = ''
+      creatingChapterContent.sortNum = ''
+    }
   } catch (e) {
     $q.notify({
       type: 'negative',
@@ -340,6 +440,8 @@ async function createChapter() {
     })
   }
 }
+
+//#endregion
 
 async function handleChange(evt) {
   disableDrawer.value = true
@@ -350,11 +452,12 @@ async function handleChange(evt) {
 
   try {
     const changedList = await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
-    chapters.value = <string[]>changedList
+    chapters.value = <ChapterInfo[]>changedList
     showChapters.value = chapters.value.map((v, i) => {
       return {
-        id: i,
-        value: v
+        Id: v.Id,
+        Title: v.Title,
+        Sort: i
       }
     })
     currentChapter.value = newSort
@@ -362,20 +465,22 @@ async function handleChange(evt) {
     $q.notify({
       type: 'negative',
       message: getErrMsg(e)
-    })[(chapters.value[oldIndex], chapters.value[newIndex])] = [chapters.value[newIndex], chapters.value[oldIndex]]
+    })
+
+    // exchange index
+    let old = chapters.value[oldIndex]
+    chapters.value[oldIndex] = chapters.value[newIndex]
+    chapters.value[newIndex] = old
+
     showChapters.value = chapters.value.map((v, i) => {
       return {
-        id: i,
-        value: v
+        Id: v.Id,
+        Title: v.Title,
+        Sort: i
       }
     })
   }
   disableDrawer.value = false
-}
-
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
 }
 
 const request = useTimeoutFn(async () => {
@@ -388,14 +493,18 @@ const request = useTimeoutFn(async () => {
       value: item.Id
     }
   })
-  chapters.value = <string[]>data.Book.Chapters
+  chapters.value = <ChapterInfo[]>data.Book.Chapters
   showChapters.value = chapters.value.map((v, i) => {
     return {
-      id: i,
-      value: v
+      Id: v.Id,
+      Title: v.Title,
+      Sort: i
     }
   })
   book.value = data.Book
+  const setting = (await getBookSetting(_bid.value)) as Record<string, any>
+  bookSetting.Level = setting.Level
+  bookSetting.InteriorLevel = setting.InteriorLevel
 })
 
 const refresh = () => {
@@ -424,7 +533,6 @@ const refresh = () => {
   creatingChapterContent.html = ''
   creatingChapterContent.sortNum = ''
 }
-
 useInitRequest(request, { after: refresh, isActive })
 </script>
 
