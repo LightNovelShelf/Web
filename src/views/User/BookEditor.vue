@@ -28,28 +28,34 @@
           </q-grid>
         </q-tab-panel>
         <q-tab-panel name="setting">
-          <div class="q-pa-md">
-            <div class="q-gutter-xs light-radio q-mt-md q-pb-md q-px-sm">
-              <div class="text-subtitle1">书籍等级</div>
-              <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
+          <div class="q-gutter-md">
+            <div>
+              <div class="q-gutter-sm light-radio">
+                <div class="text-subtitle1">书籍等级</div>
+                <div class="q-px-md">
+                  <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
+                </div>
+              </div>
             </div>
-            <div class="q-gutter-xs light-radio q-mt-md q-pb-md q-px-sm" v-if="appStore.user.InteriorLevel > 0">
-              <div class="text-subtitle1">书籍内部等级</div>
-              <q-input
-                v-model.number="bookSetting['InteriorLevel']"
-                type="number"
-                filled
-                :rules="[
-                  (val) =>
-                    (val <= appStore.user.InteriorLevel && val >= 0) ||
-                    `输入的等级需大于0且小于${appStore.user.InteriorLevel}`
-                ]"
-                style="max-width: 200px"
-              >
-                <template v-slot:append>
-                  <q-icon :name="icon.mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
-                </template>
-              </q-input>
+            <div v-if="appStore.user.InteriorLevel > 0">
+              <div class="q-gutter-sm light-radio">
+                <div class="text-subtitle1">书籍内部等级</div>
+                <q-input
+                  v-model.number="bookSetting['InteriorLevel']"
+                  type="number"
+                  filled
+                  :rules="[
+                    (val) =>
+                      (val <= appStore.user.InteriorLevel && val >= 0) ||
+                      `输入的等级需大于0且小于${appStore.user.InteriorLevel}`
+                  ]"
+                  style="max-width: 200px"
+                >
+                  <template v-slot:append>
+                    <q-icon :name="icon.mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
+                  </template>
+                </q-input>
+              </div>
             </div>
           </div>
         </q-tab-panel>
@@ -62,7 +68,6 @@
         </q-tab-panel>
         <q-tab-panel name="new">
           <div class="q-gutter-sm">
-            <q-btn :icon="icon.mdiClose" @click.prevent="creatingChapter = false">关闭</q-btn>
             <q-input label="标题" v-model="creatingChapterContent.title" />
             <div class="text-opacity">内容</div>
             <html-editor v-model:html="creatingChapterContent.html" mode="common" />
@@ -158,8 +163,8 @@ import { useQuasar } from 'quasar'
 import { HtmlEditor } from 'src/components'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
-import { setBookSetting, getBookSetting } from '../../services/book/index'
-import { useAppStore } from '../../stores/app'
+import { setBookSetting, getBookSetting } from 'src/services/book'
+import { useAppStore } from 'stores/app'
 import {
   createNewChapter,
   deleteChapter,
@@ -193,7 +198,6 @@ let _bid = computed(() => ~~(props.bookId || '1'))
 let _cid = ref(-1)
 let chapter = ref<any>({ Title: '加载中...', Content: '加载中...' })
 let chapterLoaded = ref(true)
-let creatingChapter = ref(false)
 let creatingChapterContent = reactive({
   sortNum: '',
   title: '',
@@ -242,16 +246,19 @@ function moveFab(ev) {
 //#region book
 
 async function save() {
-  if (creatingChapter.value) {
-    await createChapter()
-    return
-  }
-  if (tab.value === 'information') {
-    await saveInfo()
-  } else if (tab.value === 'setting') {
-    await saveSetting()
-  } else {
-    await saveChapter()
+  switch (tab.value) {
+    case 'new':
+      await createChapter()
+      break
+    case 'information':
+      await saveInfo()
+      break
+    case 'setting':
+      await saveSetting()
+      break
+    case 'chapter':
+      await saveChapter()
+      break
   }
 }
 
@@ -327,7 +334,6 @@ async function addChapter() {
       type: 'number'
     }
   }).onOk((data) => {
-    creatingChapter.value = true
     creatingChapterContent.sortNum = data
     tab.value = 'new'
   })
@@ -393,7 +399,6 @@ async function createChapter() {
         message: '新增成功'
       })
       chapters.value = resp
-      creatingChapter.value = false
       creatingChapterContent.title = ''
       creatingChapterContent.html = ''
       creatingChapterContent.sortNum = ''
