@@ -75,7 +75,7 @@
                 v-model="createBookData.Introduction"
               />
               <q-input
-                label="章节数量(请预估所需要的章节数量，暂时无法改动)"
+                label="章节数量(请预估所需要的章节数量)"
                 type="number"
                 v-model="createBookData.Count"
               />

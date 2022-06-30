@@ -71,3 +71,8 @@ export interface EditBookRequest {
   // 分类ID
   CategoryId: number
 }
+
+export interface SetBookSetting {
+  Bid: number
+  Settings: Record<string, any>
+}
