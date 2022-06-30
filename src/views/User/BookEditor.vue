@@ -256,7 +256,18 @@ async function save() {
 }
 
 async function saveSetting() {
-  await setBookSetting({ Bid: _bid.value, Settings: toRaw(bookSetting) })
+  try {
+    await setBookSetting({ Bid: _bid.value, Settings: toRaw(bookSetting) })
+    $q.notify({
+      type: 'positive',
+      message: '设置成功'
+    })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e)
+    })
+  }
 }
 
 async function saveInfo() {
