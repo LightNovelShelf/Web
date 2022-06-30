@@ -377,13 +377,6 @@ async function delChapter(sortNum: number) {
     try {
       const resp: ChapterInfo[] = <any>await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
       chapters.value = resp
-      showChapters.value = chapters.value.map((v, i) => {
-        return {
-          Id: v.Id,
-          Title: v.Title,
-          Sort: i
-        }
-      })
       currentChapter.value -= 1
       if (currentChapter.value <= 0) {
         currentChapter.value = -1
@@ -437,13 +430,6 @@ async function createChapter() {
         message: '新增成功'
       })
       chapters.value = resp
-      showChapters.value = chapters.value.map((v, i) => {
-        return {
-          Id: v.Id,
-          Title: v.Title,
-          Sort: i
-        }
-      })
       creatingChapter.value = false
       creatingChapterContent.title = ''
       creatingChapterContent.html = ''
@@ -469,13 +455,6 @@ async function handleChange(evt) {
   try {
     const changedList = await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
     chapters.value = <ChapterInfo[]>changedList
-    showChapters.value = chapters.value.map((v, i) => {
-      return {
-        Id: v.Id,
-        Title: v.Title,
-        Sort: i
-      }
-    })
     currentChapter.value = newSort
   } catch (e) {
     $q.notify({
@@ -487,14 +466,6 @@ async function handleChange(evt) {
     let old = chapters.value[oldIndex]
     chapters.value[oldIndex] = chapters.value[newIndex]
     chapters.value[newIndex] = old
-
-    showChapters.value = chapters.value.map((v, i) => {
-      return {
-        Id: v.Id,
-        Title: v.Title,
-        Sort: i
-      }
-    })
   }
   disableDrawer.value = false
 }
