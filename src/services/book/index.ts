@@ -57,3 +57,12 @@ export function getBookEditInfo(bid: number) {
 export function deleteBook(bid: number) {
   return requestWithSignalr('DeleteBook', bid)
 }
+
+/** 设置书籍 */
+export function setBookSetting(request: Types.SetBookSetting) {
+  return requestWithSignalr('SetBookSetting', request)
+}
+
+export function getBookSetting(request: number) {
+  return requestWithSignalr('GetBookSetting', request)
+}
