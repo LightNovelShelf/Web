@@ -169,13 +169,22 @@ watch(currentChapter, async () => {
   chapter.value = await getChapterEditInfo({ BookId: _bid.value, SortNum: currentChapter.value })
   chapterLoaded.value = true
 })
+watch(
+  chapters,
+  () => {
+    showChapters.value = chapters.value.map((v, i) => {
+      return {
+        id: i,
+        value: v
+      }
+    })
+  },
+  { deep: true }
+)
 
 function getSaveState(): boolean {
   if (isActive.value && !draggingFab.value) {
-    if (currentChapter.value === -1 || chapterLoaded.value) {
-      return false
-    }
-    return true
+    return !(currentChapter.value === -1 || chapterLoaded.value)
   }
   return true
 }
@@ -266,14 +275,8 @@ async function delChapter(sortNum: number) {
     try {
       await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
       chapters.value.splice(sortNum - 1, 1)
-      showChapters.value = chapters.value.map((v, i) => {
-        return {
-          id: i,
-          value: v
-        }
-      })
       currentChapter.value -= 1
-      if (currentChapter.value === 0) {
+      if (currentChapter.value <= 0) {
         currentChapter.value = -1
       }
       $q.notify({
@@ -326,12 +329,6 @@ async function createChapter() {
       currentChapter.value = sort
     }
 
-    showChapters.value = chapters.value.map((v, i) => {
-      return {
-        id: i,
-        value: v
-      }
-    })
     creatingChapter.value = false
     creatingChapterContent.title = ''
     creatingChapterContent.html = ''
@@ -354,24 +351,12 @@ async function handleChange(evt) {
   try {
     const changedList = await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
     chapters.value = <string[]>changedList
-    showChapters.value = chapters.value.map((v, i) => {
-      return {
-        id: i,
-        value: v
-      }
-    })
     currentChapter.value = newSort
   } catch (e) {
     $q.notify({
       type: 'negative',
       message: getErrMsg(e)
     })[(chapters.value[oldIndex], chapters.value[newIndex])] = [chapters.value[newIndex], chapters.value[oldIndex]]
-    showChapters.value = chapters.value.map((v, i) => {
-      return {
-        id: i,
-        value: v
-      }
-    })
   }
   disableDrawer.value = false
 }
