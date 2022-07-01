@@ -3,7 +3,7 @@
     <div v-if="isActive">
       <q-tab-panels v-model="tab">
         <q-tab-panel name="information">
-          <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2" class="q-pa-sm">
+          <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
             <q-grid-item>
               <div class="q-gutter-sm">
                 <div class="text-opacity">封面预览</div>
