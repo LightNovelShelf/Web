@@ -22,12 +22,13 @@
       </div>
       <q-tooltip
         :target="comment.target"
-        v-html="comment.content"
         class="note-style"
         v-model="comment.showing"
         no-parent-event
         :max-width="$q.platform.is.mobile ? '90%' : '100%'"
-      />
+      >
+        <div v-html="comment.content" />
+      </q-tooltip>
       <div
         v-if="readSetting['showButton']"
         class="row justify-between q-gutter-md"

@@ -1,13 +1,13 @@
 <template>
   <q-layout view="hHh LpR fFf" :class="$q.dark.isActive ? '' : 'bg-grey-1'">
     <app-header />
-    <app-sider />
+    <app-side />
     <app-container />
   </q-layout>
 </template>
 
 <script lang="ts" setup>
-import { AppSider, AppHeader, AppContainer } from 'src/components/app/index'
+import { AppSide, AppHeader, AppContainer } from 'src/components/app/index'
 import { useQuasar } from 'quasar'
 import { useServerNotify } from 'src/services/utils/useServerNotify'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
