@@ -431,10 +431,9 @@ async function handleChange(evt) {
       message: getErrMsg(e)
     })
 
-    // exchange index
-    let old = chapters.value[oldIndex]
-    chapters.value[oldIndex] = chapters.value[newIndex]
-    chapters.value[newIndex] = old
+    const tempValue = chapters.value[newIndex]
+    chapters.value.splice(newIndex, 1)
+    chapters.value.splice(oldIndex - 1 >= 0 ? oldIndex : 0, 0, tempValue)
   }
   disableDrawer.value = false
 }
