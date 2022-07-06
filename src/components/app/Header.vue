@@ -186,8 +186,6 @@ import { rebootSignalr } from 'src/services/internal/request'
 import { useRoute, useRouter } from 'vue-router'
 import SearchInput from '../SearchInput.vue'
 
-defineComponent({ name: 'Header' })
-
 const route = useRoute()
 
 const hideSearchBar = computed(() => route.meta.hideSearchBar)
