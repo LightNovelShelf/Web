@@ -5,7 +5,11 @@
         <div class="q-gutter-sm">
           <div class="text-opacity">封面预览</div>
           <q-card>
-            <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3" />
+            <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3">
+              <template v-if="book?.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
+                <blur-hash :blurhash="book.Placeholder" />
+              </template>
+            </q-img>
             <q-responsive v-else :ratio="2 / 3">
               <q-skeleton class="fit" square />
             </q-responsive>
@@ -55,7 +59,8 @@ import { getBookEditInfo, editBook } from 'src/services/book'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { useQuasar } from 'quasar'
-import { HtmlEditor } from 'src/components'
+import { HtmlEditor, BlurHash } from 'src/components'
+import { useSettingStore } from 'stores/setting'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)
@@ -64,6 +69,9 @@ const fabPos = ref([18, 18])
 const draggingFab = ref(false)
 const options = ref([])
 const isActive = computed(() => book.value?.Id === bid.value)
+
+const settingStore = useSettingStore()
+const { generalSetting } = settingStore
 
 const request = useTimeoutFn(async () => {
   const data = (await getBookEditInfo(bid.value)) as any

@@ -8,7 +8,11 @@
               <div class="q-gutter-sm">
                 <div class="text-opacity">封面预览</div>
                 <q-card>
-                  <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3" />
+                  <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3">
+                    <template v-if="book?.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
+                      <blur-hash :blurhash="book.Placeholder" />
+                    </template>
+                  </q-img>
                   <q-responsive v-else :ratio="2 / 3">
                     <q-skeleton class="fit" square />
                   </q-responsive>
@@ -160,7 +164,7 @@ import { BookServicesTypes, editBook, getBookEditInfo } from 'src/services/book'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useQuasar } from 'quasar'
-import { HtmlEditor } from 'src/components'
+import { HtmlEditor, BlurHash } from 'src/components'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
 import { setBookSetting, getBookSetting } from 'src/services/book'
@@ -172,6 +176,10 @@ import {
   editChapterContent,
   getChapterEditInfo
 } from 'src/services/chapter'
+import { useSettingStore } from 'stores/setting'
+
+const settingStore = useSettingStore()
+const { generalSetting } = settingStore
 
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
@@ -465,7 +473,7 @@ const refresh = () => {
   creatingChapterContent.html = ''
   creatingChapterContent.sortNum = ''
 }
-useInitRequest(request, { after: refresh, isActive })
+useInitRequest(request, { before: refresh, isActive })
 </script>
 
 <style lang="scss" scoped></style>
