@@ -327,7 +327,17 @@ async function saveChapter() {
         type: 'negative',
         message: getErrMsg(e)
       })
+      return
     }
+
+    let newChapters = chapters.value.map((c) => {
+      if (c.Id == _cid.value) {
+        return { Id: c.Id, Title: chapter.value.Title } as ChapterInfo
+      }
+
+      return c
+    })
+    chapters.value = newChapters
   })
 }
 
