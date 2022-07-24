@@ -64,9 +64,10 @@ const searchBarWidth = computed(() => {
 // 在某次框架更新中，onblur事件比click触发早了，需要手动跳转
 function onBlur(evt) {
   //onBlur时调用handle
-  if (evt.relatedTarget === null) return
-  if (evt.relatedTarget.id === 'exact') {
-    searchHandle(true)
+  if (evt.relatedTarget !== null) {
+    if (evt.relatedTarget.id === 'exact') {
+      searchHandle(true)
+    }
   }
   visible.value = false
 }
