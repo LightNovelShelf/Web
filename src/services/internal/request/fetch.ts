@@ -5,11 +5,13 @@ import { ServerError } from 'src/services/internal/ServerError'
 import { RequestMethod } from 'src/services/types'
 import { sessionToken } from 'src/utils/session'
 import { createRequestQueue } from './createRequestQueue'
+import { getVisitorId } from './getVisitorId'
 
 async function requestWithFetch<Res = unknown, Data = any>(
   url: string,
   options: RequestConfig<Data> = {}
 ): Promise<Res> {
+  const visitorId = await getVisitorId
   // 补全默认值; 项目里绝大部分接口都是POST接口所以默认post了
   options.method = options.method ?? RequestMethod.POST
 
@@ -18,6 +20,7 @@ async function requestWithFetch<Res = unknown, Data = any>(
   }
   const headers = new Headers()
   headers.append('Accept', 'application/json')
+  headers.append('id', visitorId)
 
   // 简化payload声明
   // get就只有param（浏览器发出请求时也会忽略get请求的body）

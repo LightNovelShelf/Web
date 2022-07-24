@@ -17,6 +17,7 @@
     "inspect": "quasar inspect > debug/webpack.config.txt"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^3.3.3",
     "@mdi/js": "^6.9.96",
     "@microsoft/signalr": "^6.0.6",
     "@microsoft/signalr-protocol-msgpack": "^6.0.6",

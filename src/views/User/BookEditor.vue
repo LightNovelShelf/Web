@@ -160,19 +160,18 @@
 import { useLayout } from 'src/components/app/useLayout'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { icon } from 'assets/icon'
-import { BookServicesTypes, editBook, getBookEditInfo } from 'src/services/book'
+import { BookServicesTypes, editBook, getBookEditInfo, getBookSetting, setBookSetting } from 'src/services/book'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useQuasar } from 'quasar'
-import { HtmlEditor, BlurHash } from 'src/components'
+import { BlurHash, HtmlEditor } from 'src/components'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
-import { setBookSetting, getBookSetting } from 'src/services/book'
 import { useAppStore } from 'stores/app'
 import {
+  changeChapterSort,
   createNewChapter,
   deleteChapter,
-  changeChapterSort,
   editChapterContent,
   getChapterEditInfo
 } from 'src/services/chapter'
@@ -330,14 +329,13 @@ async function saveChapter() {
       return
     }
 
-    let newChapters = chapters.value.map((c) => {
+    chapters.value = chapters.value.map((c) => {
       if (c.Id == _cid.value) {
         return { Id: c.Id, Title: chapter.value.Title } as ChapterInfo
       }
 
       return c
     })
-    chapters.value = newChapters
   })
 }
 
