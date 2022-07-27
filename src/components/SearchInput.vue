@@ -5,7 +5,7 @@
     @keyup.enter="searchHandle()"
     @click="visible = true"
     @focus="visible = true"
-    @blur="visible = false"
+    @blur="onBlur"
     ref="inputEleRef"
     :style="{ flexBasis: searchBarWidth, maxWidth: props.maxWidth }"
   >
@@ -23,7 +23,7 @@
       }"
     >
       <q-list v-show="!!keyword">
-        <q-item clickable v-close-popup @click="searchHandle(true)">
+        <q-item id="exact" clickable>
           <q-item-section>
             <div class="ellipsis full-width">精确搜索: {{ keyword }}</div>
           </q-item-section>
@@ -47,7 +47,6 @@ const emits = defineEmits<{ (e: 'search', val: string): void; (e: 'update:modelV
 const inputEleRef = ref<HTMLInputElement | null>(null)
 
 const [keyword] = useMergeState(toRefs(props).modelValue)
-
 /**
  * 理想弹层交互
  * 1. input focus的时候展开弹层
@@ -61,6 +60,17 @@ const visible = ref(false)
 const searchBarWidth = computed(() => {
   return props.width(visible.value)
 })
+
+// 在某次框架更新中，onblur事件比click触发早了，需要手动跳转
+function onBlur(evt) {
+  //onBlur时调用handle
+  if (evt.relatedTarget !== null) {
+    if (evt.relatedTarget.id === 'exact') {
+      searchHandle(true)
+    }
+  }
+  visible.value = false
+}
 
 function syncHandle(evt: string | number | null) {
   if (typeof evt === 'string') {
