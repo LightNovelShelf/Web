@@ -228,6 +228,17 @@ function showInputCode() {
   inputCodeShow.value = true
 }
 
+MdEditor.config({
+  markedRenderer(renderer) {
+    renderer.image = (href: string, title: string, desc: string) => {
+      return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
+    }
+    renderer.heading = (text, level, raw, s, index) => {
+      return `<h${level} id="heading-${index}">${text}</h${level}>`
+    }
+    return renderer
+  }
+})
 const mdToolBar: ToolbarNames[] = [
   'bold',
   'underline',
@@ -281,9 +292,6 @@ const mdRubyHandler = () => {
     textarea.setSelectionRange(endPoint, rubyStr.length + endPoint)
     textarea.focus()
   }, 0)
-}
-function markedImage(href: string, title: string, desc: string) {
-  return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
 }
 function sanitizeHtml(html: string) {
   // 这里可以对markdown生成的代码进行一些自定义
