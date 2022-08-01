@@ -336,14 +336,23 @@ function makeUrl(link: string) {
 function readerHandleLinkClick(e: MouseEvent) {
   if (!chapterRef.value) return
   if (!chapterRef.value.contains(<Node>e.target)) return
-  let a = null
+  let a:HTMLElement = null
   for (let ele = <Node>e.target; ele !== chapterRef.value && !a; ele = ele.parentNode) {
-    if (ele.nodeName === 'A') a = ele
+    if (ele.nodeName === 'A') a = <HTMLElement>ele
   }
   if (!a) return
 
   e.preventDefault()
-  const url = makeUrl(a.getAttribute('href'))
+  const href = a.getAttribute('href')
+
+  // if href is id
+  if (href.startsWith('#')) {
+    let target = document.getElementById(href.replace('#',''))
+    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
+    return
+  }
+  
+  const url = makeUrl(href)
   if (!url) return
 
   if (location.origin === url.origin) router.push(url.pathname)
