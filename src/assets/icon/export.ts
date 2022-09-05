@@ -113,7 +113,7 @@ export {
   mdiCloudUpload,
   mdiNotificationClearAll,
   mdiCheckAll,
-  mdiGoogleController,
+  mdiController,
   mdiWeb,
   mdiVideo,
   mdiImage,

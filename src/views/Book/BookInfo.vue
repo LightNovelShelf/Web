@@ -64,7 +64,7 @@
 
               <div class="row q-gutter-md" v-if="isActive">
                 <add-to-shelf :book="bookInList" />
-                <q-btn color="primary" @click="startRead">继续阅读</q-btn>
+                <q-btn color="primary" @click="startRead">{{ position ? '继续阅读' : '开始阅读' }}</q-btn>
                 <q-btn v-if="book.CanEdit" color="red" :to="{ name: 'EditBook', param: { bid: bid } }">快速编辑</q-btn>
               </div>
             </div>
@@ -184,6 +184,7 @@ useInitRequest(getInfo, { isActive })
 // 读取历史
 onActivated(async () => {
   position.value = await loadHistory(appStore.userId, _bid.value)
+  console.log('position', position.value)
 })
 
 const book = computed(() => bookInfo.value?.Book)
