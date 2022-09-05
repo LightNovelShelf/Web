@@ -12,7 +12,7 @@ export default function sanitizerHtml(content: string, tag = 'div') {
     if (sanitizer.sanitizeFor) {
       return sanitizer.sanitizeFor(tag, content).innerHTML
     } else {
-      const element = document.createElement('div')
+      const element = document.createElement(tag)
       element.setHTML(content, { sanitizer: sanitizer })
       return element.innerHTML
     }
