@@ -6,7 +6,7 @@
     :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'"
     :width="240"
     :breakpoint="siderBreakpoint"
-    :behavior="['Forum'].includes(route.name) ? 'mobile' : 'default'"
+    :behavior="['Forum'].includes(currentRouteName()) ? 'mobile' : 'default'"
   >
     <q-scroll-area class="fit">
       <q-list padding>
@@ -28,10 +28,11 @@
             </q-item-section>
           </q-item>
         </template>
-      </q-list>
-    </q-scroll-area>
-
-    <div class="absolute-bottom row flex-center" style="bottom: 24px">
+      </q-list> 
+      
+      <div class="temp-box" />
+      
+      <div class="absolute-bottom row flex-center" style="bottom: 24px;">
       <div class="row flex-align-center">
         <q-icon
           left
@@ -47,6 +48,7 @@
         <span v-else>当前离线，等待连接</span>
       </div>
     </div>
+    </q-scroll-area>
   </q-drawer>
 </template>
 
@@ -151,7 +153,22 @@ const menuOptions: Array<Record<string, any>> = [
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
 
-const route = useRoute()
+const currentRouteName = () => {
+  const routeName = useRoute().name
+
+  if (typeof routeName === 'string') {
+    return routeName
+  } else if (typeof routeName === 'symbol') {
+    // TODO
+    return ''
+  } else {
+    return ''
+  }
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+  .temp-box {
+    height: 50px;
+  }
+</style>
