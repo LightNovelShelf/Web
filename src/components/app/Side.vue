@@ -55,9 +55,6 @@ import { icon } from 'assets/icon'
 import { connectState } from 'src/services/utils'
 import { useLayout } from './useLayout'
 import { HubConnectionState } from '@microsoft/signalr'
-import router from 'src/router'
-import { type } from 'os'
-import { route } from 'quasar/wrappers'
 
 const menuOptions: Array<Record<string, any>> = [
   {
