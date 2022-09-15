@@ -28,10 +28,11 @@
             </q-item-section>
           </q-item>
         </template>
-      </q-list>
-    </q-scroll-area>
-
-    <div class="absolute-bottom row flex-center" style="bottom: 24px">
+      </q-list> 
+      
+      <div class="temp-box" />
+      
+      <div class="absolute-bottom row flex-center" style="bottom: 24px;">
       <div class="row flex-align-center">
         <q-icon
           left
@@ -47,6 +48,7 @@
         <span v-else>当前离线，等待连接</span>
       </div>
     </div>
+    </q-scroll-area>
   </q-drawer>
 </template>
 
@@ -165,4 +167,8 @@ const currentRouteName = () => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+  .temp-box {
+    height: 50px;
+  }
+</style>
