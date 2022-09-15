@@ -6,7 +6,7 @@
     :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'"
     :width="240"
     :breakpoint="siderBreakpoint"
-    :behavior="['Forum'].includes(route.name) ? 'mobile' : 'default'"
+    :behavior="['Forum'].includes(currentRouteName()) ? 'mobile' : 'default'"
   >
     <q-scroll-area class="fit">
       <q-list padding>
@@ -55,6 +55,9 @@ import { icon } from 'assets/icon'
 import { connectState } from 'src/services/utils'
 import { useLayout } from './useLayout'
 import { HubConnectionState } from '@microsoft/signalr'
+import router from 'src/router'
+import { type } from 'os'
+import { route } from 'quasar/wrappers'
 
 const menuOptions: Array<Record<string, any>> = [
   {
@@ -151,7 +154,18 @@ const menuOptions: Array<Record<string, any>> = [
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
 
-const route = useRoute()
+const currentRouteName = () => {
+  const routeName = useRoute().name
+
+  if (typeof routeName === 'string') {
+    return routeName
+  } else if (typeof routeName === 'symbol') {
+    // TODO
+    return ''
+  } else {
+    return ''
+  }
+}
 </script>
 
 <style scoped></style>
