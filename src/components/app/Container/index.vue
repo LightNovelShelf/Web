@@ -3,7 +3,7 @@
     <router-view v-slot="{ Component }">
       <template v-if="Component">
         <!-- TODO 想加个q-transition--fade，但测试下来有点问题 -->
-        <keep-alive :exclude="['CollaboratorList']">
+        <keep-alive>
           <component :is="Component"></component>
         </keep-alive>
       </template>
