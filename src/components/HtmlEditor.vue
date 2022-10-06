@@ -106,10 +106,11 @@ import TurndownService from 'turndown'
 import MdEditor, { ToolbarNames } from 'md-editor-v3'
 import { icon } from 'assets/icon'
 import 'md-editor-v3/lib/style.css'
+import { SaveManager } from 'src/utils/SaveManager'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
-const emit = defineEmits(['update:html'])
+const emit = defineEmits(['update:html', 'save'])
 const htmlContent = computed<string>({
   get() {
     return props.html
@@ -334,6 +335,11 @@ const onHtmlChanged = (html: string) => {
   emit('update:html', html)
 }
 watch(editorSetting, parseMarkDown)
+
+onDeactivated(() => SaveManager.instance.remove())
+onUnmounted(() => SaveManager.instance.remove())
+onActivated(() => { SaveManager.instance.useSave(() => { emit('save') }) })
+onMounted(() => { SaveManager.instance.useSave(() => { emit('save') }) })
 </script>
 
 <style lang="scss">

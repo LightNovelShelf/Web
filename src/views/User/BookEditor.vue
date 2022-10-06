@@ -25,56 +25,50 @@
                 <q-input label="书名" v-model="book['Title']" />
                 <q-input label="作者" v-model="book['Author']" />
                 <div class="text-opacity">简介</div>
-                <html-editor v-model:html="book['Introduction']" mode="simple" />
+                <html-editor v-model:html="book['Introduction']" mode="simple" @save="!getSaveState() && save()" />
                 <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
-              </div>
-            </q-grid-item>
-          </q-grid>
-        </q-tab-panel>
-        <q-tab-panel name="setting">
-          <div class="q-gutter-md">
-            <div>
-              <div class="q-gutter-sm light-radio">
-                <div class="text-subtitle1">书籍等级</div>
-                <div class="q-px-md">
-                  <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
                 </div>
-              </div>
-            </div>
-            <div v-if="appStore.user.InteriorLevel > 0">
-              <div class="q-gutter-sm light-radio">
-                <div class="text-subtitle1">书籍内部等级</div>
-                <q-input
-                  v-model.number="bookSetting['InteriorLevel']"
-                  type="number"
-                  filled
-                  :rules="[
-                    (val) =>
-                      (val <= appStore.user.InteriorLevel && val >= 0) ||
-                      `输入的等级需大于0且小于${appStore.user.InteriorLevel}`
-                  ]"
-                  style="max-width: 200px"
-                >
-                  <template v-slot:append>
-                    <q-icon :name="icon.mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
-                  </template>
-                </q-input>
-              </div>
-            </div>
-          </div>
-        </q-tab-panel>
-        <q-tab-panel name="chapter">
-          <div class="q-gutter-sm">
-            <q-input label="标题" v-model="chapter['Title']" />
-            <div class="text-opacity">内容</div>
-            <html-editor v-model:html="chapter['Content']" mode="common" />
-          </div>
-        </q-tab-panel>
-        <q-tab-panel name="new">
-          <div class="q-gutter-sm">
-            <q-input label="标题" v-model="creatingChapterContent.title" />
-            <div class="text-opacity">内容</div>
-            <html-editor v-model:html="creatingChapterContent.html" mode="common" />
+                </q-grid-item>
+                </q-grid>
+                </q-tab-panel>
+                <q-tab-panel name="setting">
+                  <div class="q-gutter-md">
+                    <div>
+                      <div class="q-gutter-sm light-radio">
+                        <div class="text-subtitle1">书籍等级</div>
+                        <div class="q-px-md">
+                          <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="appStore.user.InteriorLevel > 0">
+                      <div class="q-gutter-sm light-radio">
+                        <div class="text-subtitle1">书籍内部等级</div>
+                        <q-input v-model.number="bookSetting['InteriorLevel']" type="number" filled :rules="[
+                                    (val) =>
+                                      (val <= appStore.user.InteriorLevel && val >= 0) ||
+                                      `输入的等级需大于0且小于${appStore.user.InteriorLevel}`
+                                  ]" style="max-width: 200px">
+                          <template v-slot:append>
+                            <q-icon :name="icon.mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
+                          </template>
+                        </q-input>
+                      </div>
+                    </div>
+                  </div>
+                </q-tab-panel>
+                <q-tab-panel name="chapter">
+                  <div class="q-gutter-sm">
+                    <q-input label="标题" v-model="chapter['Title']" />
+                    <div class="text-opacity">内容</div>
+                    <html-editor v-model:html="chapter['Content']" mode="common" @save="!getSaveState() && save()" />
+                  </div>
+                </q-tab-panel>
+                <q-tab-panel name="new">
+                  <div class="q-gutter-sm">
+                    <q-input label="标题" v-model="creatingChapterContent.title" />
+                    <div class="text-opacity">内容</div>
+                    <html-editor v-model:html="creatingChapterContent.html" mode="common" @save="!getSaveState() && save()" />
           </div>
         </q-tab-panel>
       </q-tab-panels>
