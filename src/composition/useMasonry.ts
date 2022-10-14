@@ -1,5 +1,5 @@
 import { onMounted, onBeforeUnmount, ref, Ref } from 'vue'
-import MiniMasonry from 'src/utils/minimasonry'
+import MiniMasonry from 'minimasonry'
 
 export interface UseMasonryAction {
   layout: () => void

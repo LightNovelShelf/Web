@@ -7,6 +7,8 @@ declare module '*.vue' {
   export default component
 }
 
+declare module 'minimasonry'
+
 // 资源文件
 declare module '*.svg'
 declare module '*.png'
