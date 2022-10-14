@@ -11,24 +11,8 @@
     <div v-else>
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
       <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
-        <div
-          ref="chapterRef"
-          class="read"
-          v-html="chapterContent"
-          style="position: relative; z-index: 1"
-          :style="readStyle"
-          @click="manageScrollClick"
-        />
+        <html-reader :html="chapterContent" :style="readStyle" ref="readerRef"></html-reader>
       </div>
-      <q-tooltip
-        :target="comment.target"
-        class="note-style"
-        v-model="comment.showing"
-        no-parent-event
-        :max-width="$q.platform.is.mobile ? '90%' : '100%'"
-      >
-        <div v-html="comment.content" />
-      </q-tooltip>
       <div
         v-if="readSetting['showButton']"
         class="row justify-between q-gutter-md"
@@ -144,6 +128,7 @@ import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { delay } from 'src/utils/delay'
 import { NOOP } from 'src/const/empty'
+import HtmlReader from 'src/components/HtmlReader.vue'
 
 const props = defineProps<{
   bid: string
@@ -156,7 +141,7 @@ const sortNum = computed(() => ~~(props.sortNum || '1'))
 
 const $q = useQuasar()
 const chapter = ref<any>()
-const chapterRef = ref<HTMLElement>()
+const readerRef = ref(null)
 const viewerRef = ref<HTMLElement>()
 const comment = reactive({
   target: '',
@@ -198,7 +183,7 @@ const getContent = useTimeoutFn(async () => {
       if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
         await delay(200)
         await nextTick(() => {
-          scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+          scrollToHistory(readerRef.value.contentRef, res.ReadPosition.XPath, headerOffset)
         })
       }
     })().then(NOOP)
@@ -269,44 +254,6 @@ function back() {
   router.push({ name: 'BookInfo', params: { id: bid.value } })
 }
 
-function previewImg(event) {
-  showImage.src = event.target.src
-  showImage.alt = event.target.alt
-  // @ts-ignore
-  viewerRef.value.$viewer.show()
-  event.stopPropagation()
-  globalCancelShowing(event)
-}
-
-function showComment(event: MouseEvent, html: string, id: string) {
-  event.stopPropagation()
-  if (comment.target !== `#${id}`) {
-    comment.target = `#${id}`
-    comment.content = html
-  }
-  if (!comment.showing) {
-    comment.showing = true
-  }
-}
-
-function globalCancelShowing(event: any) {
-  if (!event.target.hasAttribute('global-cancel')) {
-    comment.showing = false
-  }
-}
-
-function manageScrollClick(event: any) {
-  // @ts-ignore
-  if (readSetting.tapToScroll && !viewerRef.value.$viewer.isShown) {
-    let h = window.innerHeight
-    if (event.y < 0.25 * h || event.y > 0.75 * h) {
-      let target = scroll.getScrollTarget(chapterRef.value)
-      let offset = scroll.getVerticalScrollPosition(target)
-      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
-    }
-  }
-}
-
 function manageKeydown(event: KeyboardEvent) {
   // @ts-ignore
   if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
@@ -317,57 +264,11 @@ function manageKeydown(event: KeyboardEvent) {
   }
 }
 
-function makeUrl(link: string) {
-  try {
-    // normal link
-    if (/^https?:\/\//.test(link)) return new URL(link, location.origin)
-    if (/^\/\//.test(link)) return new URL(`https:${link}`, location.origin)
-    // origin ex. www.lightnovel.app
-    if (/^[a-z0-9-]+([.][a-z0-9-]+)+$/.test(link)) return new URL(`https://${link}`, location.origin)
-    // same site
-    if (/^\//.test(link) && router.resolve(link).matched.length !== 0) return new URL(link, location.origin)
-  } catch {
-    return null
-  }
-
-  return null
-}
-
-function readerHandleLinkClick(e: MouseEvent) {
-  if (!chapterRef.value) return
-  if (!chapterRef.value.contains(<Node>e.target)) return
-  let a:HTMLElement = null
-  for (let ele = <Node>e.target; ele !== chapterRef.value && !a; ele = ele.parentNode) {
-    if (ele.nodeName === 'A') a = <HTMLElement>ele
-  }
-  if (!a) return
-
-  e.preventDefault()
-  const href = a.getAttribute('href')
-
-  // if href is id
-  if (href.startsWith('#')) {
-    let target = document.getElementById(href.replace('#',''))
-    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
-    return
-  }
-  
-  const url = makeUrl(href)
-  if (!url) return
-
-  if (location.origin === url.origin) router.push(url.pathname)
-  else window.open(url)
-}
-
 onActivated(() => {
-  document.addEventListener('click', globalCancelShowing)
   document.addEventListener('keydown', manageKeydown)
-  document.body.addEventListener('click', readerHandleLinkClick)
 })
 onDeactivated(() => {
-  document.removeEventListener('click', globalCancelShowing)
   document.removeEventListener('keydown', manageKeydown)
-  document.body.removeEventListener('click', readerHandleLinkClick)
 })
 
 onMounted(() => {
@@ -388,36 +289,16 @@ watch(
   () => chapter.value?.Id,
   () => {
     nextTick(async () => {
-      chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
-        element.onclick = previewImg
-      })
-
-      chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
-        const id = element.getAttribute('href').replace('#', '')
-        //获取注释内容
-        const commentElement = document.getElementById(id)
-        const content = commentElement.innerHTML
-        // 隐藏内容
-        commentElement.style.display = 'none'
-        element.removeAttribute('href')
-        element.id = `v-${id}`
-        element.setAttribute('global-cancel', 'true')
-        if ($q.platform.is.mobile) {
-          element.onclick = (event) => showComment(event, content, `v-${id}`)
-        } else {
-          element.onmouseenter = (event) => showComment(event, content, `v-${id}`)
-          element.onmouseleave = () => (comment.showing = false)
-        }
-      })
-      await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
+      await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
     })
   }
 )
+
 onActivated(async () => {
   if (sortNum.value === chapter.value?.SortNum) {
     let position = await loadHistory(userId.value, bid.value)
     // todo 这里有bug，浏览器前进按钮行为很奇怪
-    if (position && position.cid === cid.value) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
+    if (position && position.cid === cid.value) scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
   }
 })
 
