@@ -2,10 +2,6 @@
     <div>
         <div ref="contentRef" class="read" v-html="props.html" style="position: relative; z-index: 1"
             @click="manageScrollClick" />
-        <q-tooltip :target="comment.target" class="note-style" v-model="comment.showing" no-parent-event
-            :max-width="$q.platform.is.mobile ? '90%' : '100%'">
-            <div v-html="comment.content" />
-        </q-tooltip>
         <div class="v-viewer" ref="viewerRef" v-viewer>
             <img :src="showImage.src" :alt="showImage.alt" />
         </div>
@@ -30,12 +26,7 @@ const showImage = reactive({
     src: null,
     alt: ''
 })
-const comment = reactive({
-    target: '',
-    content: '',
-    showing: false
-})
-
+const emits = defineEmits(['previewImg'])
 
 function manageScrollClick(event: any) {
     // @ts-ignore
@@ -78,6 +69,7 @@ function readerHandleLinkClick(e: MouseEvent) {
     const href = a.getAttribute('href')
 
     // if href is id
+    if (href === null) return
     if (href.startsWith('#')) {
         const target = document.getElementById(href.replace('#', ''))
         document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
@@ -97,59 +89,22 @@ function previewImg(event) {
     // @ts-ignore
     viewerRef.value.$viewer.show()
     event.stopPropagation()
-    globalCancelShowing(event)
-}
-
-function globalCancelShowing(event: any) {
-    if (!event.target.hasAttribute('global-cancel')) {
-        comment.showing = false
-    }
-}
-
-function showComment(event: MouseEvent, html: string, id: string) {
-    event.stopPropagation()
-    if (comment.target !== `#${id}`) {
-        comment.target = `#${id}`
-        comment.content = html
-    }
-    if (!comment.showing) {
-        comment.showing = true
-    }
+    emits('previewImg', event)
 }
 
 onMounted(() => {
     contentRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
         element.onclick = previewImg
     })
-    contentRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
-        const id = element.getAttribute('href').replace('#', '')
-        //获取注释内容
-        const commentElement = document.getElementById(id)
-        const content = commentElement.innerHTML
-        // 隐藏内容
-        commentElement.style.display = 'none'
-        element.removeAttribute('href')
-        element.id = `v-${id}`
-        element.setAttribute('global-cancel', 'true')
-        if ($q.platform.is.mobile) {
-            element.onclick = (event) => showComment(event, content, `v-${id}`)
-        } else {
-            element.onmouseenter = (event) => showComment(event, content, `v-${id}`)
-            element.onmouseleave = () => (comment.showing = false)
-        }
-    })
-    document.addEventListener('click', globalCancelShowing)
     document.body.addEventListener('click', readerHandleLinkClick)
 })
 
 onActivated(() => {
-    document.addEventListener('click', globalCancelShowing)
     document.body.addEventListener('click', readerHandleLinkClick)
 })
 onDeactivated(() => {
-    document.removeEventListener('click', globalCancelShowing)
     document.body.removeEventListener('click', readerHandleLinkClick)
 })
 
-defineExpose({ contentRef })
+defineExpose({ contentRef, previewImg })
 </script>
