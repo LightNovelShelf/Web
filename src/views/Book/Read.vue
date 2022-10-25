@@ -11,24 +11,22 @@
     <div v-else>
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
       <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
-        <div
-          ref="chapterRef"
-          class="read"
-          v-html="chapterContent"
-          style="position: relative; z-index: 1"
+        <html-reader
+          :html="chapterContent"
           :style="readStyle"
-          @click="manageScrollClick"
-        />
+          ref="readerRef"
+          :previewImg="(e) => globalCancelShowing(e)"
+        ></html-reader>
+        <q-tooltip
+          :target="comment.target"
+          class="note-style"
+          v-model="comment.showing"
+          no-parent-event
+          :max-width="$q.platform.is.mobile ? '90%' : '100%'"
+        >
+          <div v-html="comment.content" />
+        </q-tooltip>
       </div>
-      <q-tooltip
-        :target="comment.target"
-        class="note-style"
-        v-model="comment.showing"
-        no-parent-event
-        :max-width="$q.platform.is.mobile ? '90%' : '100%'"
-      >
-        <div v-html="comment.content" />
-      </q-tooltip>
       <div
         v-if="readSetting['showButton']"
         class="row justify-between q-gutter-md"
@@ -111,10 +109,6 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-
-    <div class="v-viewer" ref="viewerRef" v-viewer>
-      <img :src="showImage.src" :alt="showImage.alt" />
-    </div>
   </q-page>
 </template>
 
@@ -144,6 +138,7 @@ import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { delay } from 'src/utils/delay'
 import { NOOP } from 'src/const/empty'
+import HtmlReader from 'components/html/HtmlReader.vue'
 
 const props = defineProps<{
   bid: string
@@ -156,7 +151,7 @@ const sortNum = computed(() => ~~(props.sortNum || '1'))
 
 const $q = useQuasar()
 const chapter = ref<any>()
-const chapterRef = ref<HTMLElement>()
+const readerRef = ref(null)
 const viewerRef = ref<HTMLElement>()
 const comment = reactive({
   target: '',
@@ -174,6 +169,8 @@ const showImage = reactive({
   src: null,
   alt: ''
 })
+const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
+const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
 function moveFab(ev) {
@@ -198,7 +195,7 @@ const getContent = useTimeoutFn(async () => {
       if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
         await delay(200)
         await nextTick(() => {
-          scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+          scrollToHistory(readerRef.value.contentRef, res.ReadPosition.XPath, headerOffset)
         })
       }
     })().then(NOOP)
@@ -269,13 +266,14 @@ function back() {
   router.push({ name: 'BookInfo', params: { id: bid.value } })
 }
 
-function previewImg(event) {
-  showImage.src = event.target.src
-  showImage.alt = event.target.alt
+function manageKeydown(event: KeyboardEvent) {
   // @ts-ignore
-  viewerRef.value.$viewer.show()
-  event.stopPropagation()
-  globalCancelShowing(event)
+  if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
+  if (event.code === 'ArrowRight') {
+    next()
+  } else if (event.code === 'ArrowLeft') {
+    prev()
+  }
 }
 
 function showComment(event: MouseEvent, html: string, id: string) {
@@ -295,79 +293,13 @@ function globalCancelShowing(event: any) {
   }
 }
 
-function manageScrollClick(event: any) {
-  // @ts-ignore
-  if (readSetting.tapToScroll && !viewerRef.value.$viewer.isShown) {
-    let h = window.innerHeight
-    if (event.y < 0.25 * h || event.y > 0.75 * h) {
-      let target = scroll.getScrollTarget(chapterRef.value)
-      let offset = scroll.getVerticalScrollPosition(target)
-      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
-    }
-  }
-}
-
-function manageKeydown(event: KeyboardEvent) {
-  // @ts-ignore
-  if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
-  if (event.code === 'ArrowRight') {
-    next()
-  } else if (event.code === 'ArrowLeft') {
-    prev()
-  }
-}
-
-function makeUrl(link: string) {
-  try {
-    // normal link
-    if (/^https?:\/\//.test(link)) return new URL(link, location.origin)
-    if (/^\/\//.test(link)) return new URL(`https:${link}`, location.origin)
-    // origin ex. www.lightnovel.app
-    if (/^[a-z0-9-]+([.][a-z0-9-]+)+$/.test(link)) return new URL(`https://${link}`, location.origin)
-    // same site
-    if (/^\//.test(link) && router.resolve(link).matched.length !== 0) return new URL(link, location.origin)
-  } catch {
-    return null
-  }
-
-  return null
-}
-
-function readerHandleLinkClick(e: MouseEvent) {
-  if (!chapterRef.value) return
-  if (!chapterRef.value.contains(<Node>e.target)) return
-  let a:HTMLElement = null
-  for (let ele = <Node>e.target; ele !== chapterRef.value && !a; ele = ele.parentNode) {
-    if (ele.nodeName === 'A') a = <HTMLElement>ele
-  }
-  if (!a) return
-
-  e.preventDefault()
-  const href = a.getAttribute('href')
-
-  // if href is id
-  if (href.startsWith('#')) {
-    let target = document.getElementById(href.replace('#',''))
-    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
-    return
-  }
-  
-  const url = makeUrl(href)
-  if (!url) return
-
-  if (location.origin === url.origin) router.push(url.pathname)
-  else window.open(url)
-}
-
 onActivated(() => {
-  document.addEventListener('click', globalCancelShowing)
   document.addEventListener('keydown', manageKeydown)
-  document.body.addEventListener('click', readerHandleLinkClick)
+  document.addEventListener('click', globalCancelShowing)
 })
 onDeactivated(() => {
   document.removeEventListener('click', globalCancelShowing)
   document.removeEventListener('keydown', manageKeydown)
-  document.body.removeEventListener('click', readerHandleLinkClick)
 })
 
 onMounted(() => {
@@ -383,16 +315,12 @@ watch(
   }
 )
 
-// 如果章节变了，重新观察dom记录阅读记录
+// 如果章节变了，重新观察dom记录阅读记录，处理注释
 watch(
   () => chapter.value?.Id,
   () => {
     nextTick(async () => {
-      chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
-        element.onclick = previewImg
-      })
-
-      chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
+      readerRef.value.contentRef.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
         const id = element.getAttribute('href').replace('#', '')
         //获取注释内容
         const commentElement = document.getElementById(id)
@@ -409,21 +337,23 @@ watch(
           element.onmouseleave = () => (comment.showing = false)
         }
       })
-      await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
+      document.addEventListener('click', globalCancelShowing)
+      await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
     })
   }
 )
+
 onActivated(async () => {
   if (sortNum.value === chapter.value?.SortNum) {
     let position = await loadHistory(userId.value, bid.value)
     // todo 这里有bug，浏览器前进按钮行为很奇怪
-    if (position && position.cid === cid.value) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
+    if (position && position.cid === cid.value)
+      scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
   }
 })
 
 // 字体设置
 const style = document.createElement('style')
-style.type = 'text/css'
 style.id = 'read_style'
 document.head.append(style)
 watch(
@@ -436,18 +366,11 @@ watch(
     }
   }
 )
-
-const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
-const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 </script>
 
 <style scoped lang="scss">
 .read-bg {
   z-index: 0;
-}
-
-.v-viewer {
-  display: none;
 }
 
 // 注释
@@ -456,6 +379,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
   line-break: anywhere;
   font-size: 1rem;
 }
+
 :global(.note-style ol) {
   list-style: none;
   margin: 0;

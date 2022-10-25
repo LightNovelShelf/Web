@@ -10,7 +10,7 @@
       <q-separator />
 
       <q-card-section>
-        <div v-if="isActive" v-html="sanitizerHtml(announcement.Content)"></div>
+        <html-reader v-if="isActive" :html="sanitizerHtml(announcement.Content)"></html-reader>
         <div v-else>
           <q-skeleton type="text" height="50px" width="50%" />
           <q-skeleton type="text" />
@@ -37,6 +37,7 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { CommentType } from 'src/services/comment/types'
 import { useAppStore } from 'stores/app'
+import HtmlReader from 'components/html/HtmlReader.vue'
 
 const props = defineProps<{ id: string | number }>()
 const _id = computed(() => ~~(props.id || '1'))
