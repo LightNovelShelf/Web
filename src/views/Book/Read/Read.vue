@@ -113,23 +113,12 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  computed,
-  defineComponent,
-  nextTick,
-  onActivated,
-  onDeactivated,
-  onMounted,
-  onUnmounted,
-  reactive,
-  ref,
-  watch
-} from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue'
 import { getChapterContent } from 'src/services/chapter'
-import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
+import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { syncReading, scrollToHistory, loadHistory } from 'src/utils/biz/read'
-import { useLayout } from 'src/components/app/useLayout'
+import { syncReading, scrollToHistory, loadHistory } from './history'
+import { useLayout } from 'components/app/useLayout'
 import { useSettingStore } from 'stores/setting'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useAppStore } from 'stores/app'
@@ -165,10 +154,6 @@ const appStore = useAppStore()
 const settingStore = useSettingStore()
 const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
-const showImage = reactive({
-  src: null,
-  alt: ''
-})
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
 const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 const fabPos = ref([18, 18])
@@ -343,14 +328,14 @@ watch(
   }
 )
 
-onActivated(async () => {
-  if (sortNum.value === chapter.value?.SortNum) {
-    let position = await loadHistory(userId.value, bid.value)
-    // todo 这里有bug，浏览器前进按钮行为很奇怪
-    if (position && position.cid === cid.value)
-      scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
-  }
-})
+// onActivated(async () => {
+//   if (sortNum.value === chapter.value?.SortNum) {
+//     let position = await loadHistory(userId.value, bid.value)
+//     // todo 这里有bug，浏览器前进按钮行为很奇怪
+//     if (position && position.cid === cid.value)
+//       scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+//   }
+// })
 
 // 字体设置
 const style = document.createElement('style')
@@ -392,7 +377,7 @@ watch(
     user-select: none;
   }
 
-  @import 'src/css/read';
+  @import '../../../css/read';
 
   font-family: read, sans-serif !important;
 
