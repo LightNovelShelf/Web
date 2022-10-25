@@ -37,7 +37,7 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { CommentType } from 'src/services/comment/types'
 import { useAppStore } from 'stores/app'
-import HtmlReader from 'src/components/HtmlReader.vue'
+import HtmlReader from 'components/html/HtmlReader.vue'
 
 const props = defineProps<{ id: string | number }>()
 const _id = computed(() => ~~(props.id || '1'))

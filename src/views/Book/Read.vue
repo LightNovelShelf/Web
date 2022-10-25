@@ -11,15 +11,27 @@
     <div v-else>
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
       <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
-        <html-reader :html="chapterContent" :style="readStyle" ref="readerRef"
-          :previewImg="(e) => globalCancelShowing(e)"></html-reader>
-        <q-tooltip :target="comment.target" class="note-style" v-model="comment.showing" no-parent-event
-          :max-width="$q.platform.is.mobile ? '90%' : '100%'">
+        <html-reader
+          :html="chapterContent"
+          :style="readStyle"
+          ref="readerRef"
+          :previewImg="(e) => globalCancelShowing(e)"
+        ></html-reader>
+        <q-tooltip
+          :target="comment.target"
+          class="note-style"
+          v-model="comment.showing"
+          no-parent-event
+          :max-width="$q.platform.is.mobile ? '90%' : '100%'"
+        >
           <div v-html="comment.content" />
         </q-tooltip>
       </div>
-      <div v-if="readSetting['showButton']" class="row justify-between q-gutter-md"
-        style="margin-top: 24px; clear: both">
+      <div
+        v-if="readSetting['showButton']"
+        class="row justify-between q-gutter-md"
+        style="margin-top: 24px; clear: both"
+      >
         <q-btn @click="prev" class="flex-space">上一章</q-btn>
         <q-btn @click="back" class="flex-space">目录</q-btn>
         <q-btn @click="next" class="flex-space">下一章</q-btn>
@@ -27,7 +39,13 @@
     </div>
 
     <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-fab :icon="icon.mdiPlus" direction="up" color="accent" :disable="draggingFab" v-touch-pan.prevent.mouse="moveFab">
+      <q-fab
+        :icon="icon.mdiPlus"
+        direction="up"
+        color="accent"
+        :disable="draggingFab"
+        v-touch-pan.prevent.mouse="moveFab"
+      >
         <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowRight" :disable="draggingFab">
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             下一章
@@ -38,19 +56,34 @@
             上一章
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action @click="showCatalog = true" color="primary" :icon="icon.mdiFormatListBulleted" :disable="draggingFab">
+        <q-fab-action
+          @click="showCatalog = true"
+          color="primary"
+          :icon="icon.mdiFormatListBulleted"
+          :disable="draggingFab"
+        >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             目录
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action v-if="$q.fullscreen.isCapable && !readSetting['hideFullScreen']" @click="$q.fullscreen.toggle()"
-          color="primary" :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen" :disable="draggingFab">
+        <q-fab-action
+          v-if="$q.fullscreen.isCapable && !readSetting['hideFullScreen']"
+          @click="$q.fullscreen.toggle()"
+          color="primary"
+          :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen"
+          :disable="draggingFab"
+        >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             {{ $q.fullscreen.isActive ? '退出全屏' : '全屏' }}
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action v-if="chapter?.CanEdit" color="primary" :to="{ name: 'EditChapter', param: { bid, sortNum } }"
-          :icon="icon.mdiSquareEditOutline" :disable="draggingFab">
+        <q-fab-action
+          v-if="chapter?.CanEdit"
+          color="primary"
+          :to="{ name: 'EditChapter', param: { bid, sortNum } }"
+          :icon="icon.mdiSquareEditOutline"
+          :disable="draggingFab"
+        >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             快速编辑
           </q-tooltip>
@@ -63,8 +96,12 @@
         <q-card-section>
           <q-infinite-scroll style="max-height: 80vh">
             <q-list dense>
-              <q-item v-for="(item, index) in chapter['Chapters']" :key="index" replace
-                :to="{ name: 'Read', params: { bid, sortNum: index + 1 } }">
+              <q-item
+                v-for="(item, index) in chapter['Chapters']"
+                :key="index"
+                replace
+                :to="{ name: 'Read', params: { bid, sortNum: index + 1 } }"
+              >
                 <q-item-section>{{ item }}</q-item-section>
               </q-item>
             </q-list>
@@ -72,10 +109,6 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-
-    <div class="v-viewer" ref="viewerRef" v-viewer>
-      <img :src="showImage.src" :alt="showImage.alt" />
-    </div>
   </q-page>
 </template>
 
@@ -105,7 +138,7 @@ import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { delay } from 'src/utils/delay'
 import { NOOP } from 'src/const/empty'
-import HtmlReader from 'src/components/HtmlReader.vue'
+import HtmlReader from 'components/html/HtmlReader.vue'
 
 const props = defineProps<{
   bid: string
@@ -158,14 +191,14 @@ const getContent = useTimeoutFn(async () => {
       color: 'purple',
       timeout: 1500
     })
-      ; (async () => {
-        if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
-          await delay(200)
-          await nextTick(() => {
-            scrollToHistory(readerRef.value.contentRef, res.ReadPosition.XPath, headerOffset)
-          })
-        }
-      })().then(NOOP)
+    ;(async () => {
+      if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
+        await delay(200)
+        await nextTick(() => {
+          scrollToHistory(readerRef.value.contentRef, res.ReadPosition.XPath, headerOffset)
+        })
+      }
+    })().then(NOOP)
   } catch (error) {
     $q.notify({
       message: getErrMsg(error),
@@ -314,13 +347,13 @@ onActivated(async () => {
   if (sortNum.value === chapter.value?.SortNum) {
     let position = await loadHistory(userId.value, bid.value)
     // todo 这里有bug，浏览器前进按钮行为很奇怪
-    if (position && position.cid === cid.value) scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+    if (position && position.cid === cid.value)
+      scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
   }
 })
 
 // 字体设置
 const style = document.createElement('style')
-style.type = 'text/css'
 style.id = 'read_style'
 document.head.append(style)
 watch(
@@ -338,10 +371,6 @@ watch(
 <style scoped lang="scss">
 .read-bg {
   z-index: 0;
-}
-
-.v-viewer {
-  display: none;
 }
 
 // 注释
@@ -365,8 +394,7 @@ watch(
 
   @import 'src/css/read';
 
-  font-family: read,
-  sans-serif !important;
+  font-family: read, sans-serif !important;
 
   * {
     line-break: anywhere;

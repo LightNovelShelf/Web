@@ -340,7 +340,7 @@ watch(editorSetting, parseMarkDown)
 .common {
   .q-editor--default .q-editor__content,
   .md-preview {
-    @import 'src/css/read';
+    @import '../../css/read';
   }
 }
 
