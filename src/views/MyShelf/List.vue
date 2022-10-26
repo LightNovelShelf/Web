@@ -206,7 +206,7 @@
 
 <script lang="ts" setup>
 import { QGrid, QGridItem } from 'src/components/grid'
-import { computed, onBeforeUnmount, onDeactivated, ref, toRaw, watch } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import * as ShelfTypes from 'src/types/shelf'
 import { useForwardRef } from 'src/utils/useForwardRef'
 import Sortable from 'sortablejs'
@@ -461,7 +461,7 @@ async function folderSelectorSubmitHandle() {
     return
   }
 
-  let folderID = ''
+  let folderID
 
   /** 需要创建文件夹：值是字符串而不是option */
   if (typeof selectorValue.value === 'string') {
@@ -583,9 +583,7 @@ const createSortable = (el: HTMLElement) => {
     handle: '.js-drag-target',
     // 不能放在 no-drop 元素上
     onMove(evt) {
-      if (evt.related.className.includes('no-drop')) return false
-
-      return true
+      return !evt.related.className.includes('no-drop')
     },
     onEnd(evt) {
       // index 0 起步，但是在文件夹场景下第一个是返回上一层图标，需要处理
@@ -605,7 +603,7 @@ const createSortable = (el: HTMLElement) => {
   })
 }
 
-function getClass():string {
+function getClass(): string {
   let cls = ''
   cls += 'actions-wrap'
   if (editMode.value) {
@@ -657,7 +655,6 @@ onDeactivated(() => {
 // 顶部操作栏
 .actions-wrap-placeholder {
   height: 48px;
-  height: 48.1px;
 }
 .actions-wrap {
   display: flex;

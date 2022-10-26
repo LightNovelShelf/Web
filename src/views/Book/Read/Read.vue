@@ -40,20 +40,14 @@
       </div>
     </div>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-fab
-        :icon="icon.mdiPlus"
-        direction="up"
-        color="accent"
-        :disable="draggingFab"
-        v-touch-pan.prevent.mouse="moveFab"
-      >
-        <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowRight" :disable="draggingFab">
+    <drag-page-sticky v-slot="{ isDragging }">
+      <q-fab :icon="icon.mdiPlus" direction="up" color="accent" :disable="isDragging">
+        <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowRight" :disable="isDragging">
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             下一章
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action @click="prev" color="primary" :icon="icon.mdiArrowLeft" :disable="draggingFab">
+        <q-fab-action @click="prev" color="primary" :icon="icon.mdiArrowLeft" :disable="isDragging">
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             上一章
           </q-tooltip>
@@ -62,7 +56,7 @@
           @click="showCatalog = true"
           color="primary"
           :icon="icon.mdiFormatListBulleted"
-          :disable="draggingFab"
+          :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             目录
@@ -73,7 +67,7 @@
           @click="$q.fullscreen.toggle()"
           color="primary"
           :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen"
-          :disable="draggingFab"
+          :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             {{ $q.fullscreen.isActive ? '退出全屏' : '全屏' }}
@@ -84,14 +78,14 @@
           color="primary"
           :to="{ name: 'EditChapter', param: { bid, sortNum } }"
           :icon="icon.mdiSquareEditOutline"
-          :disable="draggingFab"
+          :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             快速编辑
           </q-tooltip>
         </q-fab-action>
       </q-fab>
-    </q-page-sticky>
+    </drag-page-sticky>
 
     <q-dialog v-model="showCatalog">
       <q-card style="min-width: 300px">
@@ -143,6 +137,7 @@ import { NOOP } from 'src/const/empty'
 import HtmlReader from 'components/html/HtmlReader.vue'
 import { PROVIDE } from 'src/const/provide'
 import { onClickOutside } from '@vueuse/core'
+import DragPageSticky from 'components/DragPageSticky.vue'
 
 const props = defineProps<{
   bid: string
@@ -173,13 +168,6 @@ const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
 const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
-const fabPos = ref([18, 18])
-const draggingFab = ref(false)
-
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
-}
 
 const getContent = useTimeoutFn(async () => {
   try {
@@ -342,6 +330,7 @@ function showNote(event: MouseEvent, html: string, id: string) {
   }
 }
 if ($q.platform.is.mobile) {
+  // 实际上是点不到 noteElement 里面的
   onClickOutside(noteElement, globalCancelShowing)
 }
 
