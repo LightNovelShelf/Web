@@ -654,7 +654,7 @@ onDeactivated(() => {
 <style lang="scss" scoped>
 // 顶部操作栏
 .actions-wrap-placeholder {
-  height: 48px;
+  height: 48.1px;
 }
 .actions-wrap {
   display: flex;
