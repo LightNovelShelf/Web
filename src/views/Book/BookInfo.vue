@@ -184,7 +184,6 @@ useInitRequest(getInfo, { isActive })
 // 读取历史
 onActivated(async () => {
   position.value = await loadHistory(appStore.userId, _bid.value)
-  console.log('position', position.value)
 })
 
 const book = computed(() => bookInfo.value?.Book)
@@ -209,14 +208,14 @@ function dateFormat(time: Date) {
 }
 
 const commentShow = ref(false)
-function upScrollClick(event: any) {
+function upScrollClick() {
   let el = document.getElementsByClassName('book-info-card')[0] as HTMLElement
   let target = scroll.getScrollTarget(el)
   let offset = el.offsetTop
   let duration = 100
   scroll.setVerticalScrollPosition(target, offset, duration)
 }
-function downScrollClick(event: any) {
+function downScrollClick() {
   let el = document.getElementsByClassName('comment')[0] as HTMLElement
   let target = scroll.getScrollTarget(el)
   let offset = el.offsetTop

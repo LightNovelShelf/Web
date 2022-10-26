@@ -14,17 +14,19 @@
         <html-reader
           :html="chapterContent"
           :style="readStyle"
+          style="position: relative; z-index: 1"
           ref="readerRef"
-          :previewImg="(e) => globalCancelShowing(e)"
+          class="read"
         ></html-reader>
         <q-tooltip
-          :target="comment.target"
+          :target="note.target"
           class="note-style"
-          v-model="comment.showing"
+          ref="noteElement"
+          v-model="note.showing"
           no-parent-event
           :max-width="$q.platform.is.mobile ? '90%' : '100%'"
         >
-          <div v-html="comment.content" />
+          <div v-html="note.content" />
         </q-tooltip>
       </div>
       <div
@@ -113,7 +115,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  inject,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { getChapterContent } from 'src/services/chapter'
 import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
@@ -128,6 +141,8 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import { delay } from 'src/utils/delay'
 import { NOOP } from 'src/const/empty'
 import HtmlReader from 'components/html/HtmlReader.vue'
+import { PROVIDE } from 'src/const/provide'
+import { onClickOutside } from '@vueuse/core'
 
 const props = defineProps<{
   bid: string
@@ -139,25 +154,28 @@ const bid = computed(() => ~~(props.bid || '1'))
 const sortNum = computed(() => ~~(props.sortNum || '1'))
 
 const $q = useQuasar()
+const layout = useLayout()
+const { headerOffset } = layout
+const appStore = useAppStore()
+const settingStore = useSettingStore()
+const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
+
 const chapter = ref<any>()
+const noteElement = ref()
 const readerRef = ref(null)
-const viewerRef = ref<HTMLElement>()
-const comment = reactive({
+const note = reactive({
   target: '',
   content: '',
   showing: false
 })
 const showCatalog = ref(false)
-const layout = useLayout()
-const { headerOffset } = layout
-const appStore = useAppStore()
-const settingStore = useSettingStore()
 const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
 const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 const fabPos = ref([18, 18])
 const draggingFab = ref(false)
+
 function moveFab(ev) {
   draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
   fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
@@ -246,14 +264,12 @@ const prev = debounce(() => {
     router.replace({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value - 1 } })
   }
 }, 300)
-
 function back() {
-  router.push({ name: 'BookInfo', params: { id: bid.value } })
+  router.push({ name: 'BookInfo', params: { bid: bid.value } })
 }
 
 function manageKeydown(event: KeyboardEvent) {
-  // @ts-ignore
-  if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
+  if (imagePreview.isShow) return // 显示图片时不予响应
   if (event.code === 'ArrowRight') {
     next()
   } else if (event.code === 'ArrowLeft') {
@@ -261,31 +277,24 @@ function manageKeydown(event: KeyboardEvent) {
   }
 }
 
-function showComment(event: MouseEvent, html: string, id: string) {
-  event.stopPropagation()
-  if (comment.target !== `#${id}`) {
-    comment.target = `#${id}`
-    comment.content = html
-  }
-  if (!comment.showing) {
-    comment.showing = true
-  }
-}
-
-function globalCancelShowing(event: any) {
-  if (!event.target.hasAttribute('global-cancel')) {
-    comment.showing = false
-  }
-}
-
 onActivated(() => {
   document.addEventListener('keydown', manageKeydown)
-  document.addEventListener('click', globalCancelShowing)
 })
 onDeactivated(() => {
-  document.removeEventListener('click', globalCancelShowing)
   document.removeEventListener('keydown', manageKeydown)
 })
+
+function showNote(event: MouseEvent, html: string, id: string) {
+  event.stopPropagation()
+  if (note.target !== `#${id}`) {
+    note.target = `#${id}`
+    note.content = html
+  }
+  if (!note.showing) {
+    note.showing = true
+  }
+}
+onClickOutside(noteElement, () => (note.showing = false))
 
 onMounted(() => {
   getContent.syncCall()
@@ -294,8 +303,8 @@ onMounted(() => {
 watch(
   () => [bid.value, sortNum.value],
   async () => {
-    comment.showing = false
-    comment.target = ''
+    note.showing = false
+    note.target = ''
     await getContent()
   }
 )
@@ -308,21 +317,19 @@ watch(
       readerRef.value.contentRef.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
         const id = element.getAttribute('href').replace('#', '')
         //获取注释内容
-        const commentElement = document.getElementById(id)
-        const content = commentElement.innerHTML
+        const noteElement = document.getElementById(id)
+        const content = noteElement.innerHTML
         // 隐藏内容
-        commentElement.style.display = 'none'
+        noteElement.style.display = 'none'
         element.removeAttribute('href')
         element.id = `v-${id}`
-        element.setAttribute('global-cancel', 'true')
         if ($q.platform.is.mobile) {
-          element.onclick = (event) => showComment(event, content, `v-${id}`)
+          element.onclick = (event) => showNote(event, content, `v-${id}`)
         } else {
-          element.onmouseenter = (event) => showComment(event, content, `v-${id}`)
-          element.onmouseleave = () => (comment.showing = false)
+          element.onmouseenter = (event) => showNote(event, content, `v-${id}`)
+          element.onmouseleave = () => (note.showing = false)
         }
       })
-      document.addEventListener('click', globalCancelShowing)
       await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
     })
   }

@@ -1,19 +1,10 @@
 <template>
-  <div>
-    <div
-      ref="contentRef"
-      class="read"
-      v-html="props.html"
-      style="position: relative; z-index: 1"
-      @click="manageScrollClick"
-    />
-    <div class="v-viewer" ref="viewerRef" v-viewer>
-      <img :src="showImage.src" :alt="showImage.alt" />
-    </div>
-  </div>
+  <div ref="contentRef" class='html-reader' v-html="props.html" @click="clickHandle" />
 </template>
 
 <script lang="ts" setup>
+import { inject } from 'vue'
+import { PROVIDE } from 'src/const/provide'
 import { scroll, useQuasar } from 'quasar'
 import { useSettingStore } from 'stores/setting'
 import { useLayout } from '../app/useLayout'
@@ -22,27 +13,54 @@ const $q = useQuasar()
 const router = useRouter()
 const layout = useLayout()
 const settingStore = useSettingStore()
+const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
+
 const { headerOffset } = layout
+const { readSetting } = settingStore
+
 const props = defineProps<{ html: string }>()
 const contentRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
-const { readSetting } = settingStore
-const showImage = reactive({
-  src: null,
-  alt: ''
-})
-const emits = defineEmits(['previewImg'])
 
-function manageScrollClick(event: any) {
-  // @ts-ignore
-  if (readSetting.tapToScroll && !viewerRef.value.$viewer.isShown) {
-    let h = window.innerHeight
-    if (event.y < 0.25 * h || event.y > 0.75 * h) {
-      let target = scroll.getScrollTarget(contentRef.value)
-      let offset = scroll.getVerticalScrollPosition(target)
-      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
-    }
+function getElement(event: Event) {
+  let target = <Node>event.target
+  if (target instanceof Element) return target
+  if (target.parentElement instanceof Element) return target.parentElement
+  return null
+}
+
+function clickHandle(event: Event) {
+  let target = getElement(event)
+  if (
+    target instanceof HTMLImageElement &&
+    (target.parentElement.classList.contains('duokan-image-single') ||
+      target.parentElement.classList.contains('image-preview'))
+  ) {
+    imagePreview.show(target.src, target.alt)
+  } else if (target instanceof HTMLAnchorElement) {
+    event.preventDefault()
+    readerHandleLinkClick(target)
+  } else {
+    manageScrollClick(event)
   }
+}
+
+function readerHandleLinkClick(a: HTMLAnchorElement) {
+  const href = a.getAttribute('href')
+
+  // if href is id
+  if (href === null) return
+  if (href.startsWith('#')) {
+    const target = document.getElementById(href.replace('#', ''))
+    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
+    return
+  }
+
+  const url = makeUrl(href)
+  if (!url) return
+
+  if (location.origin === url.origin) router.push(url.pathname)
+  else window.open(url)
 }
 
 function makeUrl(link: string) {
@@ -61,61 +79,19 @@ function makeUrl(link: string) {
   return null
 }
 
-function readerHandleLinkClick(e: MouseEvent) {
-  if (!contentRef.value) return
-  if (!contentRef.value.contains(<Node>e.target)) return
-  let a: HTMLElement = null
-  for (let ele = <Node>e.target; ele !== contentRef.value && !a; ele = ele.parentNode) {
-    if (ele.nodeName === 'A') a = <HTMLElement>ele
-  }
-  if (!a) return
-
-  e.preventDefault()
-  const href = a.getAttribute('href')
-
-  // if href is id
-  if (href === null) return
-  if (href.startsWith('#')) {
-    const target = document.getElementById(href.replace('#', ''))
-    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
-    return
-  }
-
-  const url = makeUrl(href)
-  if (!url) return
-
-  if (location.origin === url.origin) router.push(url.pathname)
-  else window.open(url)
-}
-
-function previewImg(event) {
-  showImage.src = event.target.src
-  showImage.alt = event.target.alt
+function manageScrollClick(event: any) {
   // @ts-ignore
-  viewerRef.value.$viewer.show()
-  event.stopPropagation()
-  emits('previewImg', event)
+  if (readSetting.tapToScroll && !imagePreview.isShow) {
+    let h = window.innerHeight
+    if (event.y < 0.25 * h || event.y > 0.75 * h) {
+      let target = scroll.getScrollTarget(contentRef.value)
+      let offset = scroll.getVerticalScrollPosition(target)
+      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
+    }
+  }
 }
 
-onMounted(() => {
-  contentRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
-    element.onclick = previewImg
-  })
-  document.body.addEventListener('click', readerHandleLinkClick)
-})
-
-onActivated(() => {
-  document.body.addEventListener('click', readerHandleLinkClick)
-})
-onDeactivated(() => {
-  document.body.removeEventListener('click', readerHandleLinkClick)
-})
-
-defineExpose({ contentRef, previewImg })
+defineExpose({ contentRef })
 </script>
 
-<style scoped lang="scss">
-.v-viewer {
-  display: none;
-}
-</style>
+<style scoped lang="scss"></style>
