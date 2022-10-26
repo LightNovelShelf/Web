@@ -284,18 +284,6 @@ onDeactivated(() => {
   document.removeEventListener('keydown', manageKeydown)
 })
 
-function showNote(event: MouseEvent, html: string, id: string) {
-  event.stopPropagation()
-  if (note.target !== `#${id}`) {
-    note.target = `#${id}`
-    note.content = html
-  }
-  if (!note.showing) {
-    note.showing = true
-  }
-}
-onClickOutside(noteElement, () => (note.showing = false))
-
 onMounted(() => {
   getContent.syncCall()
 })
@@ -322,6 +310,7 @@ watch(
         // 隐藏内容
         noteElement.style.display = 'none'
         element.removeAttribute('href')
+        element.setAttribute('global-cancel', 'true')
         element.id = `v-${id}`
         if ($q.platform.is.mobile) {
           element.onclick = (event) => showNote(event, content, `v-${id}`)
@@ -334,6 +323,27 @@ watch(
     })
   }
 )
+
+function globalCancelShowing(event: any) {
+  let target = event.target
+  if (!target.hasAttribute('global-cancel') && !target.parentElement.hasAttribute('global-cancel')) {
+    note.showing = false
+  }
+}
+
+function showNote(event: MouseEvent, html: string, id: string) {
+  event.stopPropagation()
+  if (note.target !== `#${id}`) {
+    note.target = `#${id}`
+    note.content = html
+  }
+  if (!note.showing) {
+    note.showing = true
+  }
+}
+if ($q.platform.is.mobile) {
+  onClickOutside(noteElement, globalCancelShowing)
+}
 
 // onActivated(async () => {
 //   if (sortNum.value === chapter.value?.SortNum) {
