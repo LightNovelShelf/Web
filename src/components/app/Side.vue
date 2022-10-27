@@ -28,26 +28,26 @@
             </q-item-section>
           </q-item>
         </template>
-      </q-list> 
-      
-      <div class="temp-box" />
-      
-      <div class="absolute-bottom row flex-center" style="bottom: 24px;">
-      <div class="row flex-align-center">
-        <q-icon
-          left
-          v-if="connectState === HubConnectionState.Connected"
-          color="positive"
-          size="24px"
-          :name="icon.mdiBroadcast"
-        />
-        <q-icon left v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
+      </q-list>
 
-        <span v-if="connectState === HubConnectionState.Connected">当前在线</span>
-        <span v-else-if="connectState === HubConnectionState.Reconnecting">正在尝试重新连接</span>
-        <span v-else>当前离线，等待连接</span>
+      <div class="temp-box" />
+
+      <div class="absolute-bottom row flex-center" style="bottom: 24px">
+        <div class="row flex-align-center">
+          <q-icon
+            left
+            v-if="connectState === HubConnectionState.Connected"
+            color="positive"
+            size="24px"
+            :name="icon.mdiBroadcast"
+          />
+          <q-icon left v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
+
+          <span v-if="connectState === HubConnectionState.Connected">当前在线</span>
+          <span v-else-if="connectState === HubConnectionState.Reconnecting">正在尝试重新连接</span>
+          <span v-else>当前离线，等待连接</span>
+        </div>
       </div>
-    </div>
     </q-scroll-area>
   </q-drawer>
 </template>
@@ -168,7 +168,7 @@ const currentRouteName = () => {
 </script>
 
 <style scoped>
-  .temp-box {
-    height: 50px;
-  }
+.temp-box {
+  height: 50px;
+}
 </style>

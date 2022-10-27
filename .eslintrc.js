@@ -75,7 +75,6 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-unused-vars': 0,
     'no-unused-labels': 0,
-    'vue/multi-word-component-names': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     '@typescript-eslint/no-unused-vars': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/no-explicit-any': 0,

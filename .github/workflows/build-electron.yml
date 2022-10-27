@@ -16,10 +16,10 @@ jobs:
     runs-on: ${{ matrix.os-version }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           cache: 'npm'
@@ -31,7 +31,7 @@ jobs:
         run: npm run build:electron
 
       - name: 上传构建文件
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os-version }}
           path: ./dist/electron/轻书架*

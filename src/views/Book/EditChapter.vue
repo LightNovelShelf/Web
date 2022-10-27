@@ -12,21 +12,15 @@
       <q-inner-loading :showing="!isActive" label="加载中..." label-class="text-teal" label-style="font-size: 1.1em" />
     </div>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos">
-      <q-fab
-        :icon="icon.mdiPlus"
-        direction="up"
-        color="accent"
-        :disable="draggingFab"
-        v-touch-pan.prevent.mouse="moveFab"
-      >
-        <q-fab-action color="primary" @click="save" :icon="icon.mdiContentSave" :disable="draggingFab">
+    <drag-page-sticky v-slot="{ isDragging }">
+      <q-fab :icon="icon.mdiPlus" direction="up" color="accent" :disable="isDragging">
+        <q-fab-action color="primary" @click="save" :icon="icon.mdiContentSave" :disable="isDragging">
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             保存
           </q-tooltip>
         </q-fab-action>
       </q-fab>
-    </q-page-sticky>
+    </drag-page-sticky>
   </q-page>
 </template>
 
@@ -39,24 +33,18 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import { useQuasar } from 'quasar'
 import { getChapterEditInfo, editChapterContent } from 'src/services/chapter'
 import { HtmlEditor } from 'src/components'
+import DragPageSticky from 'components/DragPageSticky.vue'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)
 const sortNum = computed(() => ~~props.sortNum)
 const chapter = ref<any>()
-const fabPos = ref([18, 18])
-const draggingFab = ref(false)
 
 const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.value?.SortNum === sortNum.value)
 
 const request = useTimeoutFn(async () => {
   chapter.value = await getChapterEditInfo({ BookId: bid.value, SortNum: sortNum.value })
 })
-
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
-}
 
 const $q = useQuasar()
 

@@ -60,7 +60,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/read/:bid/:sortNum',
     name: 'Read',
     props: true,
-    component: () => import('../views/Book/Read.vue')
+    component: () => import('../views/Book/Read/Read.vue')
   },
   {
     path: '/collaborator',

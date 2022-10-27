@@ -73,7 +73,6 @@
         editorId="md-introduction"
         :onHtmlChanged="onHtmlChanged"
         :sanitize="sanitizeHtml"
-        :markedImage="markedImage"
         :onUploadImg="onUploadImg"
         style="display: flex !important; height: calc(100vh - 180px)"
         :theme="$q.dark.isActive ? 'dark' : 'light'"
