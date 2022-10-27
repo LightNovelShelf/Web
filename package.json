@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A Online Novel Reading Project",
   "productName": "轻书架",
-  "author": "wuyu8512 <wuyu8512@gmail.com>",
+  "author": "wuyu8512 <https://github.com/wuyu8512>",
   "private": false,
   "scripts": {
     "dev": "quasar dev",
