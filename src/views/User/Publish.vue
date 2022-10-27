@@ -20,7 +20,14 @@
                 <div>
                   <div class="flex q-gutter-sm">
                     <q-btn dense color="negative" class="flex-space" @click="delBook(book['Id'], index)">删除</q-btn>
-                    <q-btn dense color="primary" class="flex-space" :to="{name:'UserBookEditor',params:{bookId:book['Id']}}">管理</q-btn>
+                    <q-btn
+                      dense
+                      color="primary"
+                      class="flex-space"
+                      :to="{ name: 'UserBookEditor', params: { bookId: book['Id'] } }"
+                    >
+                      管理
+                    </q-btn>
                   </div>
                 </div>
               </div>
@@ -74,11 +81,7 @@
                 type="textarea"
                 v-model="createBookData.Introduction"
               />
-              <q-input
-                label="章节数量(请预估所需要的章节数量)"
-                type="number"
-                v-model="createBookData.Count"
-              />
+              <q-input label="章节数量(请预估所需要的章节数量)" type="number" v-model="createBookData.Count" />
               <q-select
                 map-options
                 emit-value
@@ -126,7 +129,7 @@ import { QuickCreateBook } from 'src/services/user/type'
 import { longTermToken, sessionToken } from 'src/utils/session'
 import { PATH } from 'src/services/path'
 import { ServerError } from 'src/services/internal/ServerError'
-import { useSettingStore } from '../../stores/setting'
+import { useSettingStore } from 'stores/setting'
 
 defineComponent({ QGrid, QGridItem })
 

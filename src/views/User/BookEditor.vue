@@ -91,16 +91,9 @@
     <q-page-sticky position="top-right" :offset="[18, 18]" v-if="!siderShow">
       <q-btn fab :icon="icon.mdiArrowLeft" color="accent" @click="show = !show" />
     </q-page-sticky>
-    <q-page-sticky position="bottom-right" :offset="fabPos">
-      <q-btn
-        fab
-        :icon="icon.mdiContentSave"
-        color="secondary"
-        :disable="getSaveState()"
-        v-touch-pan.prevent.mouse="moveFab"
-        @click="save()"
-      ></q-btn>
-    </q-page-sticky>
+    <drag-page-sticky>
+      <q-btn fab :icon="icon.mdiContentSave" color="secondary" :disable="getSaveState()" @click="save()"></q-btn>
+    </drag-page-sticky>
   </q-page>
   <q-drawer
     v-if="route.name === 'UserBookEditor'"
@@ -176,6 +169,7 @@ import {
   getChapterEditInfo
 } from 'src/services/chapter'
 import { useSettingStore } from 'stores/setting'
+import DragPageSticky from 'components/DragPageSticky.vue'
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
@@ -196,8 +190,6 @@ let options = ref([])
 // 只要数据中的id和props不同，就当在加载
 let isActive = computed(() => book.value?.Id === _bid.value)
 let disableDrawer = ref(false)
-let fabPos = ref([18, 18])
-let draggingFab = ref(false)
 let book = ref<any>()
 let bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 let chapters = ref([] as ChapterInfo[])
@@ -239,15 +231,10 @@ watch(
 )
 
 function getSaveState(): boolean {
-  if (isActive.value && !draggingFab.value) {
+  if (isActive.value) {
     return !(tab.value !== 'chapter' || chapterLoaded.value)
   }
   return true
-}
-
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
 }
 
 //#region book
