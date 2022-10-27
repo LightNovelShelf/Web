@@ -18,7 +18,7 @@ jobs:
         run: chmod -R 755 ./src-capacitor/android/
 
       - name: 设置 JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
@@ -30,9 +30,9 @@ jobs:
         run: export PATH=$PATH:$ANDROID_SDK_ROOT/tools; PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '16.x'
           cache: 'npm'
 
       - name: 安装依赖
@@ -42,7 +42,7 @@ jobs:
         run: npm run build:android
 
       - name: 上传 Apk
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3
         with:
           name: app-release-unsigned
           path: ./dist/capacitor/android/apk/release/app-release-unsigned.apk

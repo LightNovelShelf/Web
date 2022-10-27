@@ -19,9 +19,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: 设置 Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '16.x'
           cache: 'npm'
 
       - name: 安装依赖
@@ -31,7 +31,7 @@ jobs:
         run: npm run build:electron
 
       - name: 上传构建文件
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os-version }}
           path: ./dist/electron/轻书架*
