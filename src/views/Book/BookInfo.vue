@@ -157,7 +157,7 @@ const getInfo = useTimeoutFn(async () => {
         cid: temp.Cid,
         xPath: temp.XPath
       }
-      await userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
+      userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
     }
   } catch (error) {
     $q.notify({
@@ -182,8 +182,8 @@ const isActive = computed(() => book.value?.Id === _bid.value)
 useInitRequest(getInfo, { isActive })
 
 // 读取历史
-onActivated(async () => {
-  position.value = await loadHistory(appStore.userId, _bid.value)
+onActivated(() => {
+  position.value = loadHistory(appStore.userId, _bid.value)
 })
 
 const book = computed(() => bookInfo.value?.Book)
