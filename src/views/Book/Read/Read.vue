@@ -334,14 +334,15 @@ if ($q.platform.is.mobile) {
   onClickOutside(noteElement, globalCancelShowing)
 }
 
-// onActivated(async () => {
-//   if (sortNum.value === chapter.value?.SortNum) {
-//     let position = await loadHistory(userId.value, bid.value)
-//     // todo 这里有bug，浏览器前进按钮行为很奇怪
-//     if (position && position.cid === cid.value)
-//       scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
-//   }
-// })
+onActivated(() => {
+  nextTick(async () => {
+    if (sortNum.value === chapter.value?.SortNum) {
+      let position = await loadHistory(userId.value, bid.value)
+      if (position && position.cid === cid.value)
+        scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+    }
+  })
+})
 
 // 字体设置
 const style = document.createElement('style')
