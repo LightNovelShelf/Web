@@ -46,6 +46,7 @@ function clickHandle(event: Event) {
 }
 
 function readerHandleLinkClick(a: HTMLAnchorElement) {
+  const anotherUrl = ['www.lightnovel.app', 'www.acgdmzy.com', 'next.acgdmzy.com']
   const href = a.getAttribute('href')
 
   // if href is id
@@ -58,8 +59,7 @@ function readerHandleLinkClick(a: HTMLAnchorElement) {
 
   const url = makeUrl(href)
   if (!url) return
-
-  if (location.origin === url.origin) router.push(url.pathname)
+  if (location.origin === url.origin || anotherUrl.indexOf(url.hostname) !== -1) router.push(url.pathname)
   else window.open(url)
 }
 
