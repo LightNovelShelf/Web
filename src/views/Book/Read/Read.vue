@@ -335,13 +335,16 @@ if ($q.platform.is.mobile) {
 }
 
 onActivated(() => {
-  nextTick(async () => {
-    if (sortNum.value === chapter.value?.SortNum) {
-      let position = await loadHistory(userId.value, bid.value)
-      if (position && position.cid === cid.value)
+  if (sortNum.value === chapter.value?.SortNum && bid.value === chapter.value?.BookId) {
+    let position = loadHistory(userId.value, bid.value)
+    if (position && position.cid === cid.value) {
+      if (position.top) {
+        document.scrollingElement.scrollTop = position.top
+      } else {
         scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+      }
     }
-  })
+  }
 })
 
 // 字体设置

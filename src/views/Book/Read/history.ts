@@ -44,9 +44,10 @@ export async function saveHistory(
     xpath: string
   }
 ) {
-  await userReadPositionDB.set(`${uid}_${BookId}`, {
+  userReadPositionDB.set(`${uid}_${BookId}`, {
     cid: bookParam.Id,
-    xPath: bookParam.xpath
+    xPath: bookParam.xpath,
+    top: document.scrollingElement.scrollTop
   })
   await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
 }
