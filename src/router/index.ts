@@ -43,10 +43,13 @@ export default route(function (/* { store, ssrContext } */) {
 
   const router = createRouter({
     scrollBehavior(to, from, savedPosition) {
-      if (savedPosition) {
-        return savedPosition
-      } else {
-        return { top: 0 }
+      // Read 页面的滚动历史由页面自己处理
+      if (to.name !== 'Read') {
+        if (savedPosition) {
+          return savedPosition
+        } else {
+          return { top: 0 }
+        }
       }
     },
     routes,
