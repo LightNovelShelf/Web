@@ -6,7 +6,12 @@
 
         <q-list class="card" bordered separator>
           <template v-for="option in profileListOptions" :key="option.key">
-            <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="option.onClick">
+            <q-item
+              clickable
+              v-ripple
+              active-class="bg-teal-1 text-grey-8"
+              @click="() => handleClick(option)"
+            >
               <q-item-section class="avatar-item" avatar>
                 <q-avatar>
                   <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
@@ -38,8 +43,9 @@
               emit-value
               map-options
               :options="[
-                { label: '普通URL', value: 0 },
-                { label: 'QQ头像', value: 1 }
+                { label: '普通 URL', value: 0 },
+                { label: 'QQ 头像', value: 1 },
+                { label: 'QQ 群头像', value: 2 }
               ]"
               @update:model-value="avatarUrl = ''"
             />
@@ -50,15 +56,16 @@
               dense
               v-model="avatarUrl"
               bottom-slots
-              :placeholder="urlType === 1 ? '请输入QQ号' : '请输入图片URL'"
+              :placeholder="urlType > 0 ? (urlType === 2 ? '请输入 QQ 群号' : '请输入 QQ 号') : '请输入图片URL'"
               :rules="
-                urlType === 1
-                  ? [(val) => qqReg.test(val) || '请输入正确的 QQ 号']
+                urlType > 0
+                  ? [(val) => qqReg.test(val) || (urlType === 2 ? '请输入正确的 QQ 群号' : '请输入正确的 QQ 号')]
                   : [(val) => httpsReg.test(val) || '请输入正确的图片URL']
               "
             >
               <template v-slot:hint>
                 <span v-if="urlType === 1">使用此功能会导致你的 QQ 号暴露，但可以实时同步你的 QQ 头像</span>
+                <span v-else-if="urlType === 2">使用此功能会导致你的 QQ 群号暴露，但可以实时同步 QQ 群头像</span>
                 <span v-else>图片 URL 仅支持 https</span>
               </template>
             </q-input>
@@ -83,6 +90,7 @@ import { useQuasar } from 'quasar'
 import { setAvatar, getMyInfo } from 'src/services/user'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
+import { AnyFunc } from '../../types/utils'
 const avatar = computed(() => appStore.avatar)
 
 defineComponent({ name: 'Profile' })
@@ -99,7 +107,9 @@ const avatarUrl = ref('')
 const httpsReg = /https:\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/
 const qqReg = /^[1-9]\d{4,}$/
 const qqAvatarReg = /https:\/\/q.qlogo.cn\/headimg_dl\?spec=100&dst_uin=/
+const qqGroupAvatarReg = /https:\/\/p.qlogo.cn\/gh\/([0-9]*)\/([0-9]*)\/100/
 const qqAvatarUrl = 'https://q.qlogo.cn/headimg_dl?spec=100&dst_uin='
+const qqGroupAvatarUrl = 'https://p.qlogo.cn/gh/{group_num}/{group_num}/100'
 const profileListOptions: Array<Record<string, any>> = [
   {
     label: '头像',
@@ -110,19 +120,22 @@ const profileListOptions: Array<Record<string, any>> = [
   {
     label: 'UID',
     key: 'Id',
-    icon: icon.mdiCalendarAccount
+    icon: icon.mdiCalendarAccount,
+    copiable: true
   },
   {
     label: '昵称',
     key: 'UserName',
-    icon: icon.mdiCalendarAccount
+    icon: icon.mdiCalendarAccount,
     // editable: true,
     // onClick: changeUsername
+    copiable: true
   },
   {
     label: 'Email',
     key: 'Email',
-    icon: icon.mdiEmail
+    icon: icon.mdiEmail,
+    copiable: true
   },
   {
     label: '用户组',
@@ -148,10 +161,15 @@ async function handleSubmit() {
   let avatarVal = ''
 
   // 图片输入类型
-  if (urlType.value === 0) {
-    avatarVal = avatarUrl.value
-  } else {
-    avatarVal = `${qqAvatarUrl}${avatarUrl.value}`
+  switch (urlType.value) {
+    case 0:
+      avatarVal = avatarUrl.value
+      break
+    case 1:
+      avatarVal = `${qqAvatarUrl}${avatarUrl.value}`
+      break
+    case 2:
+      avatarVal = qqGroupAvatarUrl.replaceAll('{group_num}', avatarUrl.value)
   }
 
   try {
@@ -171,11 +189,28 @@ async function handleSubmit() {
   }
 }
 
+async function handleClick(option:any) {
+  if (option.copiable) {
+    await navigator.clipboard.writeText(user.value?.[option.key])
+    $q.notify({
+      type: 'positive',
+      message: '已复制'
+    })
+  }
+
+  if (option.onClick !== undefined) {
+    option.onClick()
+  }
+}
+
 watch(visible, (newVisible) => {
   if (newVisible) {
     if (qqAvatarReg.test(avatar.value)) {
       urlType.value = 1
       avatarUrl.value = avatar.value.replace(qqAvatarUrl, '')
+    } else if (qqGroupAvatarReg.test(avatar.value)) {
+      urlType.value = 2
+      avatarUrl.value = qqGroupAvatarReg.exec(avatar.value)[1]
     } else {
       urlType.value = 0
       avatarUrl.value = avatar.value
