@@ -6,7 +6,12 @@
 
         <q-list class="card" bordered separator>
           <template v-for="option in profileListOptions" :key="option.key">
-            <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="option.onClick">
+            <q-item
+              clickable
+              v-ripple
+              active-class="bg-teal-1 text-grey-8"
+              @click="() => handleClick(option)"
+            >
               <q-item-section class="avatar-item" avatar>
                 <q-avatar>
                   <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
@@ -85,6 +90,7 @@ import { useQuasar } from 'quasar'
 import { setAvatar, getMyInfo } from 'src/services/user'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
+import { AnyFunc } from '../../types/utils'
 const avatar = computed(() => appStore.avatar)
 
 defineComponent({ name: 'Profile' })
@@ -115,13 +121,7 @@ const profileListOptions: Array<Record<string, any>> = [
     label: 'UID',
     key: 'Id',
     icon: icon.mdiCalendarAccount,
-    onClick: async () => {
-      await navigator.clipboard.writeText(user.value?.['Id'])
-      $q.notify({
-        type: 'positive',
-        message: '已复制'
-      })
-    }
+    copiable: true
   },
   {
     label: '昵称',
@@ -129,25 +129,13 @@ const profileListOptions: Array<Record<string, any>> = [
     icon: icon.mdiCalendarAccount,
     // editable: true,
     // onClick: changeUsername
-    onClick: async () => {
-      await navigator.clipboard.writeText(user.value?.['UserName'])
-      $q.notify({
-        type: 'positive',
-        message: '已复制'
-      })
-    }
+    copiable: true
   },
   {
     label: 'Email',
     key: 'Email',
     icon: icon.mdiEmail,
-    onClick: async () => {
-      await navigator.clipboard.writeText(user.value?.['Email'])
-      $q.notify({
-        type: 'positive',
-        message: '已复制'
-      })
-    }
+    copiable: true
   },
   {
     label: '用户组',
@@ -198,6 +186,20 @@ async function handleSubmit() {
       type: 'negative',
       message: getErrMsg(err)
     })
+  }
+}
+
+async function handleClick(option:any) {
+  if (option.copiable) {
+    await navigator.clipboard.writeText(user.value?.[option.key])
+    $q.notify({
+      type: 'positive',
+      message: '已复制'
+    })
+  }
+
+  if (option.onClick !== undefined) {
+    option.onClick()
   }
 }
 
