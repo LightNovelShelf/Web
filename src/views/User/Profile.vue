@@ -6,12 +6,7 @@
 
         <q-list class="card" bordered separator>
           <template v-for="option in profileListOptions" :key="option.key">
-            <q-item
-              clickable
-              v-ripple
-              active-class="bg-teal-1 text-grey-8"
-              @click="() => handleClick(option)"
-            >
+            <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="() => handleClick(option)">
               <q-item-section class="avatar-item" avatar>
                 <q-avatar>
                   <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
@@ -189,7 +184,7 @@ async function handleSubmit() {
   }
 }
 
-async function handleClick(option:any) {
+async function handleClick(option: any) {
   if (option.copiable) {
     await navigator.clipboard.writeText(user.value?.[option.key])
     $q.notify({
