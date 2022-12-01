@@ -124,7 +124,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, defineComponent, ref, onActivated } from 'vue'
+import { watch, ref } from 'vue'
 import { icon } from 'assets/icon'
 import { Dark } from 'quasar'
 import { useSettingStore } from 'stores/setting'
