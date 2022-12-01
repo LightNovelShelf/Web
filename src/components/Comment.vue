@@ -157,7 +157,7 @@
     </q-list>
 
     <q-dialog v-model="replyShow">
-      <q-card style="min-width: 300px">
+      <q-card style="width: 90vw; max-width: 400px">
         <q-card-section>
           <div class="text-h6">
             回复
@@ -174,7 +174,8 @@
             outlined
             type="textarea"
             clearable
-            :input-style="{ height: '100px' }"
+            autogrow
+            :input-style="{ minHeight: '100px', maxHeight: '60vh' }"
             v-model="inputReplyComment"
           />
         </q-card-section>
@@ -196,7 +197,6 @@ import { useAppStore } from 'stores/app'
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useQuasar } from 'quasar'
 import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
