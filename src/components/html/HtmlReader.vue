@@ -38,6 +38,12 @@ function clickHandle(event: Event) {
   ) {
     imagePreview.show(target.src, target.alt)
   } else if (target instanceof HTMLAnchorElement) {
+    const reservedWord = ['_self', '_blank', '_parent', '_top']
+    const protocol = ['file:', 'ftp:', 'mailto:']
+    if (reservedWord.indexOf(target.getAttribute('href')) !== -1) return
+    for (const p of protocol) {
+      if (target.getAttribute('href').startsWith(p)) return
+    }
     event.preventDefault()
     readerHandleLinkClick(target)
   } else {
@@ -51,7 +57,10 @@ function readerHandleLinkClick(a: HTMLAnchorElement) {
 
   // if href is id
   if (href === null) return
+  // 如果单独的一个#是回到顶部
+  // https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/a#attr-href
   if (href.startsWith('#')) {
+    if (href.length === 1 || href === '#top') scrollTo(0, 0)
     const target = document.getElementById(href.replace('#', ''))
     document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
     return
