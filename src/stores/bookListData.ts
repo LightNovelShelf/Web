@@ -33,6 +33,18 @@ class EMPTY_BOOK implements BookInList {
   // public readonly Placeholder = 'L06kq:ofjuoft7fRa|j@bFbGfQa}'
 }
 
+class INVALID_BOOK implements BookInList {
+  constructor(public readonly Id = -1) {}
+  public readonly Title = '无效书籍'
+  // public readonly Cover = '/img/bg-paper-dark.jpeg'
+  public readonly Cover = 'https://proxy.lightnovel.app/file/ddc5fbc993a81e7d25e77.png'
+  public readonly LastUpdateTime = new Date(1)
+  public readonly UserName = ''
+  public readonly Level = 0
+  public readonly InteriorLevel = 0
+  // public readonly Placeholder = 'L06kq:ofjuoft7fRa|j@bFbGfQa}'
+}
+
 /**
  * 书籍列表数据
  *
@@ -111,11 +123,14 @@ export const useBookListStore = defineStore('app.bookList', {
 
       // 发出请求
       const res = await Promise.all(booksGroups.map((books) => getBookListByIds(books)))
-      res.forEach((resList) => {
-        resList.forEach((item) => {
-          this.books.set(item.Id, item)
-        })
-      })
+      for (let i = 0; i < res.length; i++) {
+        const ids = booksGroups[i]
+        const books = res[i]
+        for (let j = 0; j < ids.length; j++) {
+          const book = books.find((b) => b.Id === ids[j]) ?? new INVALID_BOOK(ids[j])
+          this.books.set(book.Id, book)
+        }
+      }
     }
   }
 })
