@@ -111,16 +111,23 @@
                 <q-item clickable v-ripple>
                   <q-item-section> 日志2 </q-item-section>
                 </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 日志3 </q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 日志4 </q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 日志5 </q-item-section>
-                </q-item>
               </q-list>
+            </q-card>
+          </q-grid-item>
+
+          <q-grid-item>
+            <q-card>
+              <q-card-section>
+                <div class="row flex-center">
+                  <div class="text-h6">友情链接</div>
+                  <q-space />
+                </div>
+              </q-card-section>
+
+              <q-separator />
+              <q-card-section>
+                <p>如有意向交换站点链接，请联系&nbsp;<a href="mailto:admin@acgdmzy.com">admin@acgdmzy.com</a></p>
+              </q-card-section>
             </q-card>
           </q-grid-item>
 
