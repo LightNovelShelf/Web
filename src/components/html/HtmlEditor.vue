@@ -182,6 +182,7 @@ const ShowBBCodePopup = () => {
 const BBCodeTransForm = () => {
   let arr = bbCodeParser.parse(BBCodeTextarea.value).split('\n')
   arr = arr.map((o: string) => {
+    if (o === '') o = '<br />'
     if (!o.startsWith('<div') && !o.startsWith('<h')) {
       o = '<p>' + o + '</p>'
     }
