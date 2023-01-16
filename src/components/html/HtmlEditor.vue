@@ -339,15 +339,14 @@ watch(editorSetting, parseMarkDown)
 <style lang="scss">
 .common {
   .q-editor--default .q-editor__content,
-  .md-preview {
+  .md-editor-preview {
     @import '../../css/read';
   }
 }
 
-.md-preview {
+.md-editor-preview {
   p {
     padding: unset;
-    margin: 0 0 0.5em 0;
   }
 }
 </style>
