@@ -60,9 +60,7 @@
                   <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime, baseTime) }}</div>
                   <div>
                     <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
-                    <q-btn flat dense v-if="comment.Commentaries[`${item.Id}`].CanEdit" @click="_delete(item.Id)">
-                      删除
-                    </q-btn>
+                    <q-btn flat dense v-if="canEdit(item.Id)" @click="_delete(item.Id)"> 删除 </q-btn>
                   </div>
                 </div>
               </q-item-label>
@@ -111,14 +109,7 @@
                             <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime, baseTime) }}</div>
                             <div>
                               <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
-                              <q-btn
-                                flat
-                                dense
-                                v-if="comment.Commentaries[`${replyId}`].CanEdit"
-                                @click="_delete(replyId)"
-                              >
-                                删除
-                              </q-btn>
+                              <q-btn flat dense v-if="canEdit(replyId)" @click="_delete(replyId)"> 删除 </q-btn>
                             </div>
                           </div>
                         </q-item-label>
@@ -197,15 +188,34 @@ import { useAppStore } from 'stores/app'
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useQuasar } from 'quasar'
+import {
+  QAvatar,
+  QBtn,
+  QCard,
+  QCardActions,
+  QCardSection,
+  QDialog,
+  QInput,
+  QItem,
+  QItemLabel,
+  QItemSection,
+  QList,
+  QPagination,
+  QSeparator,
+  QSpinnerDots,
+  useQuasar
+} from 'quasar'
 import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
+import { BookServicesTypes } from 'src/services/book'
+import { getBookInfo } from '../services/book/index'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const comment = ref<GetComment.Response>()
+const bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 
 const isActive = computed(
   () => comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page
@@ -220,7 +230,13 @@ const inputReplyComment = ref()
 const parentId = ref<number>()
 const replyId = ref<number>()
 
+function canEdit(commentId: number) {
+  if (bookInfo.value.Book.User.Id === user.value.Id) return true
+  return comment.value.Commentaries[`${commentId}`].CanEdit
+}
+
 const request = async () => {
+  bookInfo.value = await getBookInfo(props.id)
   comment.value = await getComment({ Type: props.type, Id: props.id, Page: currentPage.value })
   posting.value = false
 }
