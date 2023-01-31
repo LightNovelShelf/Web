@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- todo 不懂他为什么不能放在q-tab-panel里面 -->
-    <q-infinite-scroll @load="requestBook" :offset="100" ref="scroll">
+    <q-infinite-scroll @load="requestBook" :offset="100" ref="scrollEleInstanceRef">
       <div class="q-gutter-y-md">
         <div class="row flex-center">
           <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
@@ -10,8 +10,8 @@
             dense
             :width="searchInputWidth"
             max-width="600px"
-            v-model="searchKey"
-            @search="search"
+            v-model="searchKeyInInput"
+            @search="onSearch"
           />
         </div>
         <div class="q-gutter-y-md">
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, reactive, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { getBookList } from 'src/services/book'
 import { icon } from 'src/assets/icon'
 import { QGrid, QGridItem } from 'components/grid'
@@ -56,38 +56,77 @@ import { BookInList } from 'src/services/book/types'
 import { useRouter } from 'vue-router'
 import SearchInput from 'components/SearchInput.vue'
 
+const router = useRouter()
+const route = useRoute()
+const scrollEleInstanceRef = ref<null | {
+  stop(): void
+  reset(): void
+  resume(): void
+  poll(): void
+}>(null)
+
 /** 移除精确搜索的双引号 */
 function getTrimmedKeyword(str: string) {
   return str.replace(/^"(.+)"$/, '$1')
 }
 
-defineComponent({ QGrid, QGridItem, BookCard })
-const props = defineProps<{ keyWords: string }>()
-const router = useRouter()
-const scroll = ref()
+/** 数组的最后一个，如果不是数组就返回输入值 */
+function last(param: string | string[]): string {
+  if (Array.isArray(param)) {
+    return param[param.length - 1]
+  }
 
-const searchKey = ref(getTrimmedKeyword(props.keyWords))
+  return param
+}
+
+/**
+ * 路由上指定的关键词
+ *
+ * @desc
+ * 这里就组装好数据是为了简化watch逻辑：keyword和extra变了都要初始化，
+ *
+ * 但初始化逻辑中体现不了对 exact 的使用，所以退而求其次放这里来了，简化维护是心智负担
+ */
+const searchKeyInRoute = computed(() => {
+  const keyword = last(route.params?.keyWords ?? '')
+  const exact = !!last(route.query?.exact ?? '')
+  return exact ? `"${keyword}"` : keyword
+})
+
+/** 仅用作search-input的受控记录 */
+const searchKeyInInput = ref('')
 const searchInputWidth = () => {
   return '60vw'
 }
-const requestBook = async (index, done) => {
-  let res = await getBookList({ Page: index, Size: 24, KeyWords: props.keyWords })
+const requestBook = async (index: number, done: (stop?: boolean) => void) => {
+  let res = await getBookList({ Page: index, Size: 24, KeyWords: searchKeyInRoute.value })
   bookData.push(...res.Data)
-  if (res.TotalPages === index || res.TotalPages === 0) scroll.value.stop()
+  if (res.TotalPages === index || res.TotalPages === 0) scrollEleInstanceRef.value.stop()
   else done()
 }
-function search() {
-  router.push({ name: 'Search', params: { keyWords: searchKey.value } })
+
+function onSearch(val: string, exact: boolean) {
+  router.push({ name: 'Search', params: { keyWords: val }, query: { exact: exact ? '1' : '' } })
 }
+
+// 同步路由的值到input中并触发容器初始化
 watch(
-  () => props.keyWords,
-  () => {
-    searchKey.value = getTrimmedKeyword(props.keyWords)
-    scroll.value.reset()
-    scroll.value.resume()
-    scroll.value.poll()
+  [searchKeyInRoute, scrollEleInstanceRef],
+  ([nextSearchKey, instance]) => {
+    if (!instance) {
+      return
+    }
+    searchKeyInInput.value = getTrimmedKeyword(nextSearchKey)
+
+    instance.reset()
+    instance.resume()
+    instance.poll()
+
+    // 数组在这重置还有一层用意：触发滚动容器回调；poll调用后理应就会触发回调，但实际情况并非如此
+    // TODO：探明滚动容器触发条件
     bookData.length = 0
-  }
+  },
+  { immediate: true }
 )
 const tabOptions: Array<Record<string, any>> = [
   {

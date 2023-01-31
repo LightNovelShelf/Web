@@ -32,7 +32,7 @@
         v-model="searchKey"
         :width="searchInputWidth"
         max-width="unset"
-        @search="search"
+        @search="onSearch"
       />
 
       <q-space />
@@ -238,8 +238,8 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
   }
 ]
 
-function search() {
-  router.push({ name: 'Search', params: { keyWords: searchKey.value } })
+function onSearch(keyWords: string, exact: boolean) {
+  router.push({ name: 'Search', params: { keyWords: keyWords }, query: { exact: exact ? '1' : '' } })
   searchKey.value = ''
 }
 function changAppName() {
