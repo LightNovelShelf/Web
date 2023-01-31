@@ -7,10 +7,7 @@ declare module '*.vue' {
   export default component
 }
 
-declare module 'minimasonry' {
-  const foo: any
-  export default foo
-}
+declare module 'minimasonry'
 
 // 资源文件
 declare module '*.svg'

@@ -34,24 +34,24 @@ $tooltip-mobile-fontsize: 10px !default;
 
 // 覆盖默认样式
 .q-notification {
-    transition: transform 0.5s, opacity 0.5s !important;
+  transition: transform 0.5s, opacity 0.5s !important;
 }
 
 .q-badge--floating {
-    // 从naive-ui里抄来的
-    right: unset !important;
-    left: 100% !important;
-    transform: translateX(-50%);
+  // 从naive-ui里抄来的
+  right: unset !important;
+  left: 100% !important;
+  transform: translateX(-50%);
 }
 
 .q-item__label--caption {
-    color: #757575 !important;
+  color: #757575 !important;
 }
 
 div.q-tab-panels {
-    background-color: inherit;
+  background-color: inherit;
 
-    .q-tab-panel {
-        padding: 0;
-    }
+  .q-tab-panel {
+    padding: 0;
+  }
 }

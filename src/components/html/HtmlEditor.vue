@@ -73,7 +73,6 @@
         editorId="md-introduction"
         :onHtmlChanged="onHtmlChanged"
         :sanitize="sanitizeHtml"
-        :markedImage="markedImage"
         :onUploadImg="onUploadImg"
         style="display: flex !important; height: calc(100vh - 180px)"
         :theme="$q.dark.isActive ? 'dark' : 'light'"
@@ -183,7 +182,8 @@ const ShowBBCodePopup = () => {
 const BBCodeTransForm = () => {
   let arr = bbCodeParser.parse(BBCodeTextarea.value).split('\n')
   arr = arr.map((o: string) => {
-    if (o.substring(0, 4) !== '<div') {
+    if (o === '') o = '<br />'
+    if (!o.startsWith('<div') && !o.startsWith('<h')) {
       o = '<p>' + o + '</p>'
     }
     return o
@@ -339,15 +339,14 @@ watch(editorSetting, parseMarkDown)
 <style lang="scss">
 .common {
   .q-editor--default .q-editor__content,
-  .md-preview {
-    @import 'src/css/read';
+  .md-editor-preview {
+    @import '../../css/read';
   }
 }
 
-.md-preview {
+.md-editor-preview {
   p {
     padding: unset;
-    margin: 0 0 0.5em 0;
   }
 }
 </style>

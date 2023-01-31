@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-card class="bookinfo-card">
+    <q-card class="book-info-card">
       <q-card-section>
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
@@ -120,7 +120,7 @@ import { Comment } from 'src/components/'
 import { getBookInfo } from 'src/services/book'
 import { useToNow } from 'src/composition/useToNow'
 import { QGrid, QGridItem } from 'src/components/grid'
-import { loadHistory } from 'src/utils/biz/read'
+import { loadHistory } from 'src/views/Book/Read/history'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import type { BookServicesTypes } from 'src/services/book'
@@ -157,7 +157,7 @@ const getInfo = useTimeoutFn(async () => {
         cid: temp.Cid,
         xPath: temp.XPath
       }
-      await userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
+      userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
     }
   } catch (error) {
     $q.notify({
@@ -182,9 +182,8 @@ const isActive = computed(() => book.value?.Id === _bid.value)
 useInitRequest(getInfo, { isActive })
 
 // 读取历史
-onActivated(async () => {
-  position.value = await loadHistory(appStore.userId, _bid.value)
-  console.log('position', position.value)
+onActivated(() => {
+  position.value = loadHistory(appStore.userId, _bid.value)
 })
 
 const book = computed(() => bookInfo.value?.Book)
@@ -209,14 +208,14 @@ function dateFormat(time: Date) {
 }
 
 const commentShow = ref(false)
-function upScrollClick(event: any) {
-  let el = document.getElementsByClassName('bookinfo-card')[0] as HTMLElement
+function upScrollClick() {
+  let el = document.getElementsByClassName('book-info-card')[0] as HTMLElement
   let target = scroll.getScrollTarget(el)
   let offset = el.offsetTop
   let duration = 100
   scroll.setVerticalScrollPosition(target, offset, duration)
 }
-function downScrollClick(event: any) {
+function downScrollClick() {
   let el = document.getElementsByClassName('comment')[0] as HTMLElement
   let target = scroll.getScrollTarget(el)
   let offset = el.offsetTop

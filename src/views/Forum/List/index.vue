@@ -66,7 +66,7 @@ const tabOptions: Array<Record<string, any>> = [
     name: 'Game',
     key: 'Game',
     label: '游戏',
-    icon: icon.mdiGoogleController,
+    icon: icon.mdiController,
     disable: false
   },
   {

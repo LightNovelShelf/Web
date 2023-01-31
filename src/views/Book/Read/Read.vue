@@ -11,24 +11,24 @@
     <div v-else>
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
       <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
-        <div
-          ref="chapterRef"
-          class="read"
-          v-html="chapterContent"
-          style="position: relative; z-index: 1"
+        <html-reader
+          :html="chapterContent"
           :style="readStyle"
-          @click="manageScrollClick"
-        />
+          style="position: relative; z-index: 1"
+          ref="readerRef"
+          class="read"
+        ></html-reader>
+        <q-tooltip
+          :target="note.target"
+          class="note-style"
+          ref="noteElement"
+          v-model="note.showing"
+          no-parent-event
+          :max-width="$q.platform.is.mobile ? '90%' : '100%'"
+        >
+          <div v-html="note.content" />
+        </q-tooltip>
       </div>
-      <q-tooltip
-        :target="comment.target"
-        class="note-style"
-        v-model="comment.showing"
-        no-parent-event
-        :max-width="$q.platform.is.mobile ? '90%' : '100%'"
-      >
-        <div v-html="comment.content" />
-      </q-tooltip>
       <div
         v-if="readSetting['showButton']"
         class="row justify-between q-gutter-md"
@@ -40,20 +40,14 @@
       </div>
     </div>
 
-    <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-fab
-        :icon="icon.mdiPlus"
-        direction="up"
-        color="accent"
-        :disable="draggingFab"
-        v-touch-pan.prevent.mouse="moveFab"
-      >
-        <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowRight" :disable="draggingFab">
+    <drag-page-sticky v-slot="{ isDragging }">
+      <q-fab :icon="icon.mdiPlus" direction="up" color="accent" :disable="isDragging">
+        <q-fab-action @click="next" color="primary" :icon="icon.mdiArrowRight" :disable="isDragging">
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             下一章
           </q-tooltip>
         </q-fab-action>
-        <q-fab-action @click="prev" color="primary" :icon="icon.mdiArrowLeft" :disable="draggingFab">
+        <q-fab-action @click="prev" color="primary" :icon="icon.mdiArrowLeft" :disable="isDragging">
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             上一章
           </q-tooltip>
@@ -62,7 +56,7 @@
           @click="showCatalog = true"
           color="primary"
           :icon="icon.mdiFormatListBulleted"
-          :disable="draggingFab"
+          :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             目录
@@ -73,7 +67,7 @@
           @click="$q.fullscreen.toggle()"
           color="primary"
           :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen"
-          :disable="draggingFab"
+          :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             {{ $q.fullscreen.isActive ? '退出全屏' : '全屏' }}
@@ -84,14 +78,14 @@
           color="primary"
           :to="{ name: 'EditChapter', param: { bid, sortNum } }"
           :icon="icon.mdiSquareEditOutline"
-          :disable="draggingFab"
+          :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             快速编辑
           </q-tooltip>
         </q-fab-action>
       </q-fab>
-    </q-page-sticky>
+    </drag-page-sticky>
 
     <q-dialog v-model="showCatalog">
       <q-card style="min-width: 300px">
@@ -111,10 +105,6 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-
-    <div class="v-viewer" ref="viewerRef" v-viewer>
-      <img :src="showImage.src" :alt="showImage.alt" />
-    </div>
   </q-page>
 </template>
 
@@ -122,20 +112,20 @@
 import {
   computed,
   defineComponent,
+  inject,
   nextTick,
   onActivated,
   onDeactivated,
   onMounted,
-  onUnmounted,
   reactive,
   ref,
   watch
 } from 'vue'
 import { getChapterContent } from 'src/services/chapter'
-import { useQuasar, Dark, colors, debounce, scroll } from 'quasar'
+import { useQuasar, Dark, colors, debounce } from 'quasar'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { syncReading, scrollToHistory, loadHistory } from 'src/utils/biz/read'
-import { useLayout } from 'src/components/app/useLayout'
+import { syncReading, scrollToHistory, loadHistory } from './history'
+import { useLayout } from 'components/app/useLayout'
 import { useSettingStore } from 'stores/setting'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useAppStore } from 'stores/app'
@@ -144,6 +134,10 @@ import { icon } from 'assets/icon'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { delay } from 'src/utils/delay'
 import { NOOP } from 'src/const/empty'
+import HtmlReader from 'components/html/HtmlReader.vue'
+import { PROVIDE } from 'src/const/provide'
+import { onClickOutside } from '@vueuse/core'
+import DragPageSticky from 'components/DragPageSticky.vue'
 
 const props = defineProps<{
   bid: string
@@ -155,31 +149,25 @@ const bid = computed(() => ~~(props.bid || '1'))
 const sortNum = computed(() => ~~(props.sortNum || '1'))
 
 const $q = useQuasar()
+const layout = useLayout()
+const { headerOffset } = layout
+const appStore = useAppStore()
+const settingStore = useSettingStore()
+const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
+
 const chapter = ref<any>()
-const chapterRef = ref<HTMLElement>()
-const viewerRef = ref<HTMLElement>()
-const comment = reactive({
+const noteElement = ref()
+const readerRef = ref(null)
+const note = reactive({
   target: '',
   content: '',
   showing: false
 })
 const showCatalog = ref(false)
-const layout = useLayout()
-const { headerOffset } = layout
-const appStore = useAppStore()
-const settingStore = useSettingStore()
 const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
-const showImage = reactive({
-  src: null,
-  alt: ''
-})
-const fabPos = ref([18, 18])
-const draggingFab = ref(false)
-function moveFab(ev) {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
-  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y]
-}
+const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
+const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 const getContent = useTimeoutFn(async () => {
   try {
@@ -198,7 +186,7 @@ const getContent = useTimeoutFn(async () => {
       if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
         await delay(200)
         await nextTick(() => {
-          scrollToHistory(chapterRef.value, res.ReadPosition.XPath, headerOffset)
+          scrollToHistory(readerRef.value.contentRef, res.ReadPosition.XPath, headerOffset)
         })
       }
     })().then(NOOP)
@@ -264,52 +252,12 @@ const prev = debounce(() => {
     router.replace({ name: 'Read', params: { bid: bid.value, sortNum: sortNum.value - 1 } })
   }
 }, 300)
-
 function back() {
-  router.push({ name: 'BookInfo', params: { id: bid.value } })
-}
-
-function previewImg(event) {
-  showImage.src = event.target.src
-  showImage.alt = event.target.alt
-  // @ts-ignore
-  viewerRef.value.$viewer.show()
-  event.stopPropagation()
-  globalCancelShowing(event)
-}
-
-function showComment(event: MouseEvent, html: string, id: string) {
-  event.stopPropagation()
-  if (comment.target !== `#${id}`) {
-    comment.target = `#${id}`
-    comment.content = html
-  }
-  if (!comment.showing) {
-    comment.showing = true
-  }
-}
-
-function globalCancelShowing(event: any) {
-  if (!event.target.hasAttribute('global-cancel')) {
-    comment.showing = false
-  }
-}
-
-function manageScrollClick(event: any) {
-  // @ts-ignore
-  if (readSetting.tapToScroll && !viewerRef.value.$viewer.isShown) {
-    let h = window.innerHeight
-    if (event.y < 0.25 * h || event.y > 0.75 * h) {
-      let target = scroll.getScrollTarget(chapterRef.value)
-      let offset = scroll.getVerticalScrollPosition(target)
-      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
-    }
-  }
+  router.push({ name: 'BookInfo', params: { bid: bid.value } })
 }
 
 function manageKeydown(event: KeyboardEvent) {
-  // @ts-ignore
-  if (viewerRef.value.$viewer.isShown) return // 显示图片时不予响应
+  if (imagePreview.isShow) return // 显示图片时不予响应
   if (event.code === 'ArrowRight') {
     next()
   } else if (event.code === 'ArrowLeft') {
@@ -317,57 +265,11 @@ function manageKeydown(event: KeyboardEvent) {
   }
 }
 
-function makeUrl(link: string) {
-  try {
-    // normal link
-    if (/^https?:\/\//.test(link)) return new URL(link, location.origin)
-    if (/^\/\//.test(link)) return new URL(`https:${link}`, location.origin)
-    // origin ex. www.lightnovel.app
-    if (/^[a-z0-9-]+([.][a-z0-9-]+)+$/.test(link)) return new URL(`https://${link}`, location.origin)
-    // same site
-    if (/^\//.test(link) && router.resolve(link).matched.length !== 0) return new URL(link, location.origin)
-  } catch {
-    return null
-  }
-
-  return null
-}
-
-function readerHandleLinkClick(e: MouseEvent) {
-  if (!chapterRef.value) return
-  if (!chapterRef.value.contains(<Node>e.target)) return
-  let a:HTMLElement = null
-  for (let ele = <Node>e.target; ele !== chapterRef.value && !a; ele = ele.parentNode) {
-    if (ele.nodeName === 'A') a = <HTMLElement>ele
-  }
-  if (!a) return
-
-  e.preventDefault()
-  const href = a.getAttribute('href')
-
-  // if href is id
-  if (href.startsWith('#')) {
-    let target = document.getElementById(href.replace('#',''))
-    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
-    return
-  }
-  
-  const url = makeUrl(href)
-  if (!url) return
-
-  if (location.origin === url.origin) router.push(url.pathname)
-  else window.open(url)
-}
-
 onActivated(() => {
-  document.addEventListener('click', globalCancelShowing)
   document.addEventListener('keydown', manageKeydown)
-  document.body.addEventListener('click', readerHandleLinkClick)
 })
 onDeactivated(() => {
-  document.removeEventListener('click', globalCancelShowing)
   document.removeEventListener('keydown', manageKeydown)
-  document.body.removeEventListener('click', readerHandleLinkClick)
 })
 
 onMounted(() => {
@@ -377,53 +279,76 @@ onMounted(() => {
 watch(
   () => [bid.value, sortNum.value],
   async () => {
-    comment.showing = false
-    comment.target = ''
+    note.showing = false
+    note.target = ''
     await getContent()
   }
 )
 
-// 如果章节变了，重新观察dom记录阅读记录
+// 如果章节变了，重新观察dom记录阅读记录，处理注释
 watch(
   () => chapter.value?.Id,
   () => {
     nextTick(async () => {
-      chapterRef.value.querySelectorAll('.duokan-image-single img').forEach((element: any) => {
-        element.onclick = previewImg
-      })
-
-      chapterRef.value.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
+      readerRef.value.contentRef.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
         const id = element.getAttribute('href').replace('#', '')
         //获取注释内容
-        const commentElement = document.getElementById(id)
-        const content = commentElement.innerHTML
+        const noteElement = document.getElementById(id)
+        const content = noteElement.innerHTML
         // 隐藏内容
-        commentElement.style.display = 'none'
+        noteElement.style.display = 'none'
         element.removeAttribute('href')
-        element.id = `v-${id}`
         element.setAttribute('global-cancel', 'true')
+        element.id = `v-${id}`
         if ($q.platform.is.mobile) {
-          element.onclick = (event) => showComment(event, content, `v-${id}`)
+          element.onclick = (event) => showNote(event, content, `v-${id}`)
         } else {
-          element.onmouseenter = (event) => showComment(event, content, `v-${id}`)
-          element.onmouseleave = () => (comment.showing = false)
+          element.onmouseenter = (event) => showNote(event, content, `v-${id}`)
+          element.onmouseleave = () => (note.showing = false)
         }
       })
-      await syncReading(chapterRef.value, userId, { BookId: bid, CId: cid }, headerOffset)
+      await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
     })
   }
 )
-onActivated(async () => {
-  if (sortNum.value === chapter.value?.SortNum) {
-    let position = await loadHistory(userId.value, bid.value)
-    // todo 这里有bug，浏览器前进按钮行为很奇怪
-    if (position && position.cid === cid.value) scrollToHistory(chapterRef.value, position.xPath, headerOffset)
+
+function globalCancelShowing(event: any) {
+  let target = event.target
+  if (!target.hasAttribute('global-cancel') && !target.parentElement.hasAttribute('global-cancel')) {
+    note.showing = false
+  }
+}
+
+function showNote(event: MouseEvent, html: string, id: string) {
+  event.stopPropagation()
+  if (note.target !== `#${id}`) {
+    note.target = `#${id}`
+    note.content = html
+  }
+  if (!note.showing) {
+    note.showing = true
+  }
+}
+if ($q.platform.is.mobile) {
+  // 实际上是点不到 noteElement 里面的
+  onClickOutside(noteElement, globalCancelShowing)
+}
+
+onActivated(() => {
+  if (sortNum.value === chapter.value?.SortNum && bid.value === chapter.value?.BookId) {
+    let position = loadHistory(userId.value, bid.value)
+    if (position && position.cid === cid.value) {
+      if (position.top) {
+        document.scrollingElement.scrollTop = position.top
+      } else {
+        scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+      }
+    }
   }
 })
 
 // 字体设置
 const style = document.createElement('style')
-style.type = 'text/css'
 style.id = 'read_style'
 document.head.append(style)
 watch(
@@ -436,18 +361,11 @@ watch(
     }
   }
 )
-
-const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
-const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 </script>
 
 <style scoped lang="scss">
 .read-bg {
   z-index: 0;
-}
-
-.v-viewer {
-  display: none;
 }
 
 // 注释
@@ -456,6 +374,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
   line-break: anywhere;
   font-size: 1rem;
 }
+
 :global(.note-style ol) {
   list-style: none;
   margin: 0;
@@ -468,7 +387,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
     user-select: none;
   }
 
-  @import 'src/css/read';
+  @import '../../../css/read';
 
   font-family: read, sans-serif !important;
 

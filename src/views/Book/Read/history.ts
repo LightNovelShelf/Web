@@ -44,9 +44,10 @@ export async function saveHistory(
     xpath: string
   }
 ) {
-  await userReadPositionDB.set(`${uid}_${BookId}`, {
+  userReadPositionDB.set(`${uid}_${BookId}`, {
     cid: bookParam.Id,
-    xPath: bookParam.xpath
+    xPath: bookParam.xpath,
+    top: document.scrollingElement.scrollTop
   })
   await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
 }
@@ -56,7 +57,6 @@ export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>
     let rst = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
     let target = rst.iterateNext() as HTMLElement
     if (target) {
-      // target.scrollIntoView()
       document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset.value
     }
   } catch (e) {

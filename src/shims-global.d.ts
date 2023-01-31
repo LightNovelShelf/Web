@@ -2,6 +2,9 @@ declare global {
   interface Window {
     Sanitizer: any
   }
+  interface Element {
+    setHTML: any
+  }
 }
 
 // extend global 需要 .d.ts 是一个module
