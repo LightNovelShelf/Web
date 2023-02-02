@@ -57,7 +57,13 @@ const { generalSetting } = settingStore // 引入setting用于控制图片自定
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const cover = computed(() => props.book.Cover)
-const updateTime = useToNow(computed(() => props.book.LastUpdateTime))
+const updateTime = computed(() => {
+  if (+props.book.LastUpdateTime <= 0) {
+    return ''
+  }
+
+  return useToNow(computed(() => props.book.LastUpdateTime)).value
+})
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting

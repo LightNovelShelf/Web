@@ -42,7 +42,10 @@ const props = withDefaults(
     modelValue: ''
   }
 )
-const emits = defineEmits<{ (e: 'search', val: string): void; (e: 'update:modelValue', val: string): void }>()
+const emits = defineEmits<{
+  (e: 'search', val: string, exact: boolean): void
+  (e: 'update:modelValue', val: string): void
+}>()
 
 const inputEleRef = ref<HTMLInputElement | null>(null)
 
@@ -80,10 +83,8 @@ function syncHandle(evt: string | number | null) {
 }
 
 function searchHandle(exact = false) {
-  const key = exact ? `"${keyword.value}"` : keyword.value
-
-  emits('update:modelValue', key)
-  emits('search', key)
+  emits('update:modelValue', keyword.value)
+  emits('search', keyword.value, !!exact)
 
   // 因为点menu的话一定会blur没法避免，所以这里统一blur（即使是按回车触发的search）
   inputEleRef.value?.blur()
