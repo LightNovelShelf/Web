@@ -26,7 +26,7 @@ class EMPTY_BOOK implements BookInList {
   public readonly Title = ''
   // public readonly Cover = '/img/bg-paper-dark.jpeg'
   public readonly Cover = ''
-  public readonly LastUpdateTime = new Date(1)
+  public readonly LastUpdateTime = new Date(-1)
   public readonly UserName = ''
   public readonly Level = 0
   public readonly InteriorLevel = 0
