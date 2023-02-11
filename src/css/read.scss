@@ -354,8 +354,8 @@ h3 {
 /*格校着重号*/
 .dot,
 .em-dot {
-  -webkit-text-emphasis-style: filled dot;
+  -webkit-text-emphasis-style: filled circle;
   -webkit-text-emphasis-position: under right;
-  text-emphasis: circle var(--dot-color);
+  text-emphasis: circle;
   text-emphasis-position: under right;
 }
