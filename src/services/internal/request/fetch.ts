@@ -66,7 +66,7 @@ async function requestWithFetch<Res = unknown, Data = any>(
 
   const token = sessionToken.get()
   if (token) {
-    fetchOpt.headers.append('Authentication', `Bearer ${token}`)
+    fetchOpt.headers.append('Authorization', `Bearer ${token}`)
   }
 
   const res = await fetch(url, fetchOpt)
