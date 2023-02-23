@@ -1,3 +1,5 @@
+import { mdiCircleOutline } from '@mdi/js'
+
 export {
   mdiMagnify,
   mdiArrowLeft,
@@ -118,5 +120,6 @@ export {
   mdiVideo,
   mdiImage,
   mdiStar,
-  mdiCommentMultiple
+  mdiCommentMultiple,
+  mdiCircleDouble
 } from '@mdi/js'
