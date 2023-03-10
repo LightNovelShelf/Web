@@ -1,6 +1,13 @@
 {
   "globals": {
+    "Component": "readonly",
+    "ComponentPublicInstance": "readonly",
+    "ComputedRef": "readonly",
     "EffectScope": "readonly",
+    "InjectionKey": "readonly",
+    "PropType": "readonly",
+    "Ref": "readonly",
+    "VNode": "readonly",
     "acceptHMRUpdate": "readonly",
     "computed": "readonly",
     "createApp": "readonly",
@@ -46,7 +53,6 @@
     "readonly": "readonly",
     "ref": "readonly",
     "resolveComponent": "readonly",
-    "resolveDirective": "readonly",
     "setActivePinia": "readonly",
     "setMapStoreSuffix": "readonly",
     "shallowReactive": "readonly",
