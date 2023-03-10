@@ -10,7 +10,8 @@
         bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
         removeFormat: { handler: removeFormat },
         ruby: { tip: '插入注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler },
-        code: { tip: '输入源代码', icon: icon.mdiCodeTags, handler: showInputCode }
+        code: { tip: '输入源代码', icon: icon.mdiCodeTags, handler: showInputCode },
+        dot: { tip: '插入着重号', icon: icon.mdiCircleDouble, handler: htmlDotHandler }
       }"
       min-height="5rem"
     >
@@ -81,9 +82,18 @@
         <template #defToolbars>
           <MdEditor.NormalToolbar title="插入注音" @click="mdRubyHandler">
             <template #trigger>
-              <svg class="md-icon" aria-hidden="true">
+              <svg class="md-editor-icon" aria-hidden="true">
                 <path
                   d="M8.5 2C7.12 2 6 3.12 6 4.5S7.12 7 8.5 7 11 5.88 11 4.5 9.88 2 8.5 2M15.5 2C14.12 2 13 3.12 13 4.5S14.12 7 15.5 7 18 5.88 18 4.5 16.88 2 15.5 2M11 8V10H5V12H14.95C14.53 13.13 13.5 14.5 12.16 15.67C11.12 14.74 10.35 13.82 9.82 13H7.5C8.08 14.25 9.13 15.62 10.62 16.96L6.55 20.22L5.76 20.84L7 22.41L7.8 21.78L12.17 18.28L16.55 21.78L17.33 22.41L18.58 20.84L17.8 20.22L13.73 16.97C15.34 15.5 16.7 13.85 17.07 12H19V10H13V8H11Z"
+                />
+              </svg>
+            </template>
+          </MdEditor.NormalToolbar>
+          <MdEditor.NormalToolbar title="插入着重号" @click="mdDotHandler">
+            <template #trigger>
+              <svg class="md-editor-icon" aria-hidden="true">
+                <path
+                  d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 2a8 8 0 0 1 8 8a8 8 0 0 1-8 8a8 8 0 0 1-8-8a8 8 0 0 1 8-8m0 2a6 6 0 0 0-6 6a6 6 0 0 0 6 6a6 6 0 0 0 6-6a6 6 0 0 0-6-6m0 2a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4Z"
                 />
               </svg>
             </template>
@@ -123,7 +133,7 @@ const { editorSetting } = settingStore
 
 const SimpleToolbar = [
   ['left', 'center', 'right', 'justify'],
-  ['bold', 'italic', 'underline', 'strike'],
+  ['bold', 'italic', 'underline', 'strike', 'dot'],
   ['undo', 'redo'],
   ['removeFormat', 'code']
 ]
@@ -137,7 +147,7 @@ const CommonToolbar = [
       options: ['left', 'center', 'right', 'justify']
     }
   ],
-  ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript', 'ruby'],
+  ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript', 'ruby', 'dot'],
   ['hr', 'link', 'image'],
   ['fullscreen'],
   [
@@ -215,6 +225,12 @@ const htmlRubyHandler = () => {
   const rubyStr = `<ruby>${selection}<rt>注音内容</rt></ruby>`
   editorRef.value.runCmd('insertHTML', rubyStr)
 }
+const htmlDotHandler = () => {
+  const selection = window.getSelection()?.toString()
+  if (!selection) return
+  const dotStr = `<span class="dot">${selection}</span>`
+  editorRef.value.runCmd('insertHTML', dotStr)
+}
 function showInputCode() {
   try {
     htmlCodeTextarea.value = prettier.format(htmlContent.value, {
@@ -256,6 +272,7 @@ const mdToolBar: ToolbarNames[] = [
   'image',
   'table',
   0,
+  1,
   '-',
   'revoke',
   'next',
@@ -290,6 +307,27 @@ const mdRubyHandler = () => {
 
   setTimeout(() => {
     textarea.setSelectionRange(endPoint, rubyStr.length + endPoint)
+    textarea.focus()
+  }, 0)
+}
+const mdDotHandler = () => {
+  const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
+  const selection = window.getSelection()
+  const endPoint = textarea.selectionStart
+
+  if (!selection.anchorNode.contains(textarea) || !selection.focusNode.contains(textarea)) {
+    return
+  }
+
+  const dotStr = selection ? `<span class="dot">${selection.toString()}</span>` : '<span class="dot">着重号</span>'
+
+  const prefixStr = textarea.value.substring(0, endPoint)
+  const suffixStr = textarea.value.substring(endPoint + (selection?.toString().length || 0))
+
+  markdownText.value = `${prefixStr}${dotStr}${suffixStr}`
+
+  setTimeout(() => {
+    textarea.setSelectionRange(endPoint, dotStr.length + endPoint)
     textarea.focus()
   }, 0)
 }
