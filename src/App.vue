@@ -16,6 +16,8 @@ import { useAppStore } from 'stores/app'
 import { longTermToken } from 'src/utils/session'
 import { getMyInfo } from 'src/services/user'
 import { NOOP } from 'src/const/empty'
+import { setApiServer, getApiserver } from 'src/services/apiServer'
+import { switchSignalr } from 'src/services/internal/request/signalr'
 
 const $q = useQuasar()
 $q.loadingBar.setDefaults({
@@ -26,7 +28,12 @@ $q.loadingBar.setDefaults({
 
 const appStore = useAppStore()
 const settingStore = useSettingStore()
-settingStore.init()
+settingStore.init().then(() => {
+  if (settingStore.generalSetting.api !== getApiserver()) {
+    setApiServer(settingStore.generalSetting.api)
+    switchSignalr()
+  }
+})
 
 useServerNotify('OnMessage', (message: string) => {
   $q.notify({

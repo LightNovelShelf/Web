@@ -1,3 +1,5 @@
+import { getApiHost } from 'src/services/apiServer'
+
 /**
  * 环境变量中的host
  *
@@ -5,7 +7,7 @@
  * @description
  * 以后可能还会把/api写入，但目前先这样
  */
-const HOST = VUE_APP_API_SERVER
+const HOST = getApiHost()
 
 /**
  * 路由表

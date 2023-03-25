@@ -10,7 +10,9 @@ export const useSettingStore = defineStore('app.setting', {
     generalSetting: {
       enableBlurHash: true,
       globalWidth: 100,
-      ignoreJapanese: false
+      ignoreJapanese: false,
+      api: VUE_APP_API_SERVER,
+      apiCollection: [VUE_APP_API_SERVER, 'https://api.lightnovel.life'] as string[]
     },
     readSetting: {
       fontSize: 16,

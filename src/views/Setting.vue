@@ -30,6 +30,11 @@
               </div>
               <q-separator />
               <div class="q-gutter-xs light-radio q-mt-md">
+                <div class="text-subtitle1">服务器节点</div>
+                <q-select filled v-model="generalSetting.api" :options="generalSetting.apiCollection" />
+              </div>
+              <q-separator />
+              <div class="q-gutter-xs light-radio q-mt-md">
                 <div class="text-subtitle1">其他选项</div>
                 <q-toggle v-model="generalSetting.enableBlurHash" label="打开书籍封面自定义占位符" />
               </div>
@@ -129,6 +134,8 @@ import { icon } from 'assets/icon'
 import { Dark } from 'quasar'
 import { useSettingStore } from 'stores/setting'
 import { storeToRefs } from 'pinia'
+import { setApiServer } from 'src/services/apiServer'
+import { switchSignalr } from 'src/services/internal/request/signalr'
 
 const tabOptions: Array<Record<string, any>> = [
   {
@@ -162,7 +169,11 @@ watch(dark, (newDark) => {
   settingStore.save()
 })
 
-watch([readSetting, generalSetting, editorSetting], settingStore.save)
+watch([readSetting, generalSetting, editorSetting], () => {
+  settingStore.save()
+  setApiServer(generalSetting.api)
+  switchSignalr()
+})
 </script>
 
 <style lang="scss" scoped>
