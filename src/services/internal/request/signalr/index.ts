@@ -13,7 +13,7 @@ import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
 import { RetryPolicy } from 'src/services/internal/request/signalr/RetryPolicy'
 import { createRequestQueue } from '../createRequestQueue'
 import { SignalrInspector } from './inspector'
-import { getApiserver } from 'src/services/apiServer'
+import { apiServer } from 'src/services/apiServer'
 
 /** 是否是未授权产生的signalr错误 */
 const IS_UN_AUTH_ERR = (err: unknown): boolean =>
@@ -27,7 +27,7 @@ const isStart = ref<boolean>(false)
 const setState = () => (connectState.value = hub.state)
 
 /** signalr 连接中心 */
-let hub: HubConnection = buildHub(getApiserver())
+let hub: HubConnection = buildHub(`${apiServer.value}/hub/api`)
 
 function buildHub(url: string) {
   const h = new HubConnectionBuilder()
@@ -102,7 +102,7 @@ export async function rebootSignalr() {
 
 export async function switchSignalr() {
   await hub.stop()
-  hub = buildHub(getApiserver())
+  hub = buildHub(`${apiServer.value}/hub/api`)
   clearInterval(lastReConnect.value)
   isStart.value = false
   await getSignalr()

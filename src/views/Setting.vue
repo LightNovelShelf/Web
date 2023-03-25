@@ -29,9 +29,9 @@
                 <q-radio v-model="generalSetting.globalWidth" :val="50" label="50%" />
               </div>
               <q-separator />
-              <div class="q-gutter-xs light-radio q-mt-md">
+              <div class="q-gutter-xs light-radio q-mt-md q-mb-sm">
                 <div class="text-subtitle1">服务器节点</div>
-                <q-select filled v-model="generalSetting.api" :options="generalSetting.apiCollection" />
+                <q-select emit-value map-options filled v-model="apiServer" :options="apiServerOptions" />
               </div>
               <q-separator />
               <div class="q-gutter-xs light-radio q-mt-md">
@@ -80,11 +80,9 @@
               </div>
               <q-separator />
               <div class="q-gutter-xs q-mt-md">
-                <div class="text-subtitle1"
-                  >阅读页宽度{{
-                    readSetting.widthType === 'custom' ? '（设为 0 时为全屏，只在大屏幕下生效）' : ''
-                  }}</div
-                >
+                <div class="text-subtitle1">
+                  阅读页宽度{{ readSetting.widthType === 'custom' ? '（设为 0 时为全屏，只在大屏幕下生效）' : '' }}
+                </div>
                 <q-radio v-model="readSetting.widthType" val="full" label="全屏" />
                 <q-radio v-model="readSetting.widthType" val="medium" label="中" />
                 <q-radio v-model="readSetting.widthType" val="small" label="小" />
@@ -134,7 +132,7 @@ import { icon } from 'assets/icon'
 import { Dark } from 'quasar'
 import { useSettingStore } from 'stores/setting'
 import { storeToRefs } from 'pinia'
-import { setApiServer } from 'src/services/apiServer'
+import { apiServer, apiServerOptions } from 'src/services/apiServer'
 import { switchSignalr } from 'src/services/internal/request/signalr'
 
 const tabOptions: Array<Record<string, any>> = [
@@ -169,11 +167,9 @@ watch(dark, (newDark) => {
   settingStore.save()
 })
 
-watch([readSetting, generalSetting, editorSetting], () => {
-  settingStore.save()
-  setApiServer(generalSetting.api)
-  switchSignalr()
-})
+watch(apiServer, switchSignalr)
+
+watch([readSetting, generalSetting, editorSetting], settingStore.save)
 </script>
 
 <style lang="scss" scoped>

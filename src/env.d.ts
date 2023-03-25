@@ -11,10 +11,6 @@ declare namespace NodeJS {
 /** 是否位于开发模式 */
 declare const __DEV__: boolean
 
-/** 源站地址 */
-declare const VUE_APP_SERVER: string
-/** API服务地址 */
-declare const VUE_APP_API_SERVER: string
 /** 人机检查密钥 */
 declare const VUE_CAPTCHA_SITE_KEY: string
 /** token有效期，ms；当前是30s */

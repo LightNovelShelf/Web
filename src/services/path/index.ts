@@ -1,13 +1,4 @@
-import { getApiHost } from 'src/services/apiServer'
-
-/**
- * 环境变量中的host
- *
- * @private
- * @description
- * 以后可能还会把/api写入，但目前先这样
- */
-const HOST = getApiHost()
+import { apiServer } from 'src/services/apiServer'
 
 /**
  * 路由表
@@ -30,13 +21,27 @@ const HOST = getApiHost()
  */
 export const PATH = {
   /** ----- user ----- */
-  USER_LOGIN: `${HOST}/api/user/login`,
-  USER_REFRESH_TOKEN: `${HOST}/api/user/refresh_token`,
-  USER_SEND_RESET_EMAIL: `${HOST}/api/user/send_reset_email`,
-  USER_SEND_REGISTER_EMAIL: `${HOST}/api/user/send_register_email`,
-  USER_RESET_PASSWORD: `${HOST}/api/user/reset_password`,
-  USER_REGISTER: `${HOST}/api/user/register`,
-  USER_UPLOAD_BOOK: `${HOST}/api/user/upload_book`
+  get USER_LOGIN() {
+    return `${apiServer.value}/api/user/login`
+  },
+  get USER_REFRESH_TOKEN() {
+    return `${apiServer.value}/api/user/refresh_token`
+  },
+  get USER_SEND_RESET_EMAIL() {
+    return `${apiServer.value}/api/user/send_reset_email`
+  },
+  get USER_SEND_REGISTER_EMAIL() {
+    return `${apiServer.value}/api/user/send_register_email`
+  },
+  get USER_RESET_PASSWORD() {
+    return `${apiServer.value}/api/user/reset_password`
+  },
+  get USER_REGISTER() {
+    return `${apiServer.value}/api/user/register`
+  },
+  get USER_UPLOAD_BOOK() {
+    return `${apiServer.value}/api/user/upload_book`
+  }
   /** ----- end user ----- */
 
   /** ----- book ----- */

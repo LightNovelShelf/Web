@@ -1,15 +1,17 @@
-let api = VUE_APP_API_SERVER
+import { useStorage } from '@vueuse/core'
 
-function getApiserver() {
-  return `${api}/hub/api`
-}
+// 第一个就是默认的
+const apiServerOptions = [
+  {
+    label: '(HK 被污染) api.lightnovel.app',
+    value: 'https://api.lightnovel.app:45122'
+  },
+  {
+    label: '(CloudFlare) api.lightnovel.life',
+    value: 'https://api.lightnovel.life'
+  }
+]
 
-function getApiHost() {
-  return api
-}
+const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server', apiServerOptions[0].value)
 
-function setApiServer(str: string) {
-  api = str
-}
-
-export { getApiserver, getApiHost, setApiServer }
+export { apiServer, apiServerOptions }
