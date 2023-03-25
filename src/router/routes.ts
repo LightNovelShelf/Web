@@ -71,6 +71,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/setting',
     name: 'Setting',
+    meta: { requiresAuth: false },
     component: () => import('../views/Setting.vue')
   },
   {
