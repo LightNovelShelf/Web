@@ -1,5 +1,6 @@
 declare global {
   interface Window {
+    turnstile: any
     Sanitizer: any
   }
   interface Element {

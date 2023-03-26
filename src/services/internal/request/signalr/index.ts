@@ -210,6 +210,7 @@ const requestWithSignalrInRateLimit = ((...args) => {
 
 export { requestWithSignalrInRateLimit as requestWithSignalr }
 
+// TODO 由于hub可能被改变，这里的订阅也会失效
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
   const inspector = new SignalrInspector(methodName, [])
