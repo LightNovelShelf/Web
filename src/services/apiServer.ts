@@ -12,6 +12,13 @@ const apiServerOptions = [
   }
 ]
 
+if (__DEV__) {
+  apiServerOptions.unshift({
+    label: '开发服务器',
+    value: 'http://localhost:5000'
+  })
+}
+
 const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server', apiServerOptions[0].value)
 
 export { apiServer, apiServerOptions }

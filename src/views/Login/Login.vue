@@ -31,6 +31,7 @@
               <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
             </template>
           </q-input>
+          <vue-turnstile ref="turnstile" v-model="token" />
           <div class="row">
             <q-btn rounded flat :to="{ name: 'Register' }">注册</q-btn>
             <q-space />
@@ -49,36 +50,38 @@
 <script setup lang="ts">
 import { icon } from 'assets/icon'
 import { ref } from 'vue'
-import { useReCaptcha } from 'vue-recaptcha-v3'
 import { login } from 'src/services/user'
 import { sha256 } from 'src/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router'
 import { useAppStore } from 'stores/app'
+import VueTurnstile from 'src/views/Login/VueTurnstile.vue'
 
 const $q = useQuasar()
 const appStore = useAppStore()
 
 const email = ref('')
 const password = ref('')
+const token = ref()
+const turnstile = ref()
 const isPwd = ref(true)
 const loading = ref(false)
 const route = useRoute()
 const router = useRouter()
 
-const { executeRecaptcha, recaptchaLoaded } = useReCaptcha() || {}
-
 const _login = async () => {
-  loading.value = true
+  if (!turnstile.value?.loaded || !token.value) {
+    $q.notify({
+      type: 'negative',
+      message: '请等待Turnstile服务加载和通过验证'
+    })
+    return
+  }
 
   try {
-    // 获取人机校验结果
-    await recaptchaLoaded!() // 忽略为空的情况，出错了由catch兜住
-    const token = await executeRecaptcha!('login')
-
     // 登录
-    const [, user] = await login(email.value, await sha256(password.value), token)
+    const [, user] = await login(email.value, await sha256(password.value), token.value)
     appStore.user = user
 
     $q.notify({
@@ -98,6 +101,9 @@ const _login = async () => {
 
     await router.replace(to)
   } catch (e) {
+    token.value = null
+    turnstile.value?.reset()
+
     if (e?.target?.localName === 'script') {
       $q.notify({
         type: 'negative',
