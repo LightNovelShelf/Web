@@ -1,5 +1,5 @@
 <template>
-  <div id="turnstile-box" />
+  <div ref="box" />
 </template>
 
 <script setup>
@@ -8,9 +8,10 @@ const emits = defineEmits(['update:modelValue'])
 
 const loaded = ref(!!window.turnstile)
 const widgetId = ref()
+const box = ref()
 
 function render() {
-  widgetId.value = window.turnstile.render('#turnstile-box', {
+  widgetId.value = window.turnstile.render(box.value, {
     sitekey: VUE_CAPTCHA_SITE_KEY,
     callback: (response) => emits('update:modelValue', response),
     'expired-callback': emits('update:modelValue', null),
