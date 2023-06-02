@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.56",
-    "@quasar/app-webpack": "^3.7.2",
+    "@quasar/app-webpack": "^3.9.2",
     "@types/dompurify": "^3.0.2",
     "@types/luxon": "^3.3.0",
     "@types/node": "^18.16.1",
@@ -61,7 +61,7 @@
     "@vue/compiler-sfc": "^3.2.47",
     "dotenv": "^16.0.3",
     "electron": "^22.3.7",
-    "electron-packager": "^15.5.2",
+    "electron-packager": "^17.1.1",
     "eslint": "8.39.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-vue": "^9.11.0",
