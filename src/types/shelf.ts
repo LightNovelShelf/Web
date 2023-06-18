@@ -23,6 +23,8 @@ interface ShelfCommonItem {
   parents: string[]
   /** 加入/更新时间，iso格式字符串 */
   updateAt: string
+  /** 不使用children; tree结构数据约定了打平后放，方便服务器取值分支 */
+  // children: ShelfCommonItem[]
 }
 
 export interface ShelfBookItem extends ShelfCommonItem {

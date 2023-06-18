@@ -73,6 +73,19 @@ function lastItem<T>(arr: T[]): T | null {
 /** 根文件夹名称（系统保留值） */
 export const ROOT_LEVEL_FOLDER_NAME = '根文件夹'
 
+export interface ShelfFolderTreeItem extends ShelfFolderItem {
+  children: ShelfFolderTreeItem[]
+}
+
+/** 把list形式的文件夹还原回 children 形式的数据格式 */
+function folderList2FolderTree(folderList: ShelfFolderItem[]): ShelfFolderTreeItem[] {
+  // 1. 根据文件夹层级先排序（parents长度）：这一步操作是为了实现确保循环时子文件夹一定在父文件夹之前出现
+  // 2. 每一个文件夹都压入到map中，同时如果有parents的话，还会把自己压入parents数组中最后一个id的children数组中
+  // 3. 循环完所有文件夹，必定保证了：文件夹既出现在map中，也一定出现在直属文件夹的children数组中
+  // 4. 拿出map中所有parents数组为空的文件夹（位于根文件夹的文件夹）
+  return []
+}
+
 /** @private 书架store */
 const shelfStore = defineStore('app.shelf', {
   state: () => INIT,
@@ -91,7 +104,13 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 所有文件夹 */
     folders(): ShelfFolderItem[] {
+      console.log('toRaw(this.shelf)', toRaw(this.shelf))
+      debugger
       return toRaw(this.shelf).filter((i): i is ShelfFolderItem => i.type === ShelfItemTypeEnum.FOLDER)
+    },
+    /** 所有文件夹 */
+    foldersinTree(): ShelfFolderTreeItem[] {
+      return folderList2FolderTree(this.folders)
     },
     /** 根据最后一层文件夹名称获取书籍 */
     getItemsByParent(): (parent: string | number | null) => ShelfItem[] {
@@ -229,6 +248,9 @@ const shelfStore = defineStore('app.shelf', {
       } else {
         shelf = serve.data as ShelfItem[]
       }
+
+      console.log('shelf', shelf)
+      debugger
 
       // 记录版本到本地
       this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
