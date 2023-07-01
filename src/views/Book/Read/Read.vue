@@ -138,6 +138,7 @@ import HtmlReader from 'components/html/HtmlReader.vue'
 import { PROVIDE } from 'src/const/provide'
 import { onClickOutside } from '@vueuse/core'
 import DragPageSticky from 'components/DragPageSticky.vue'
+import { apiServer } from 'src/services/apiServer'
 
 const props = defineProps<{
   bid: string
@@ -356,7 +357,7 @@ watch(
   () => {
     let fontUrl = chapter.value?.Font
     if (fontUrl) {
-      if (!fontUrl.startsWith('http')) fontUrl = VUE_APP_API_SERVER + fontUrl
+      if (!fontUrl.startsWith('http')) fontUrl = apiServer.value + fontUrl
       style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
     }
   }

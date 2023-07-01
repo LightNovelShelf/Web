@@ -13,9 +13,8 @@ import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
 import { RetryPolicy } from 'src/services/internal/request/signalr/RetryPolicy'
 import { createRequestQueue } from '../createRequestQueue'
 import { SignalrInspector } from './inspector'
+import { apiServer } from 'src/services/apiServer'
 
-/** signalr接入点 */
-const HOST = `${VUE_APP_API_SERVER}/hub/api`
 /** 是否是未授权产生的signalr错误 */
 const IS_UN_AUTH_ERR = (err: unknown): boolean =>
   /** @todo 未授权没有别的特征，只有通过message来检查 */ getErrMsg(err).includes('user is unauthorized')
@@ -25,39 +24,44 @@ export const connectState = ref<HubConnectionState>(HubConnectionState.Disconnec
 const lastReConnect = ref<number>(0)
 const isStart = ref<boolean>(false)
 
+const setState = () => (connectState.value = hub.state)
+
 /** signalr 连接中心 */
-const hub: HubConnection = new HubConnectionBuilder()
-  .withUrl(HOST, {
-    async accessTokenFactory() {
-      // 查询是否已有会话token
-      let token = sessionToken.get()
-      if (!token) {
-        // 如果没有,查询是否有 longTermToken
-        const _token = await longTermToken.get()
-        // 如果有, 用它来换取会话token
-        if (_token) {
-          try {
-            token = await refreshToken('' + _token)
-          } catch (error) {
-            // -100 token失效, 404 token不存在
-            if (error instanceof ServerError && [-100, 404].includes(error.status)) {
-              await longTermToken.set('')
+let hub: HubConnection = buildHub(`${apiServer.value}/hub/api`)
+
+function buildHub(url: string) {
+  const h = new HubConnectionBuilder()
+    .withUrl(url, {
+      async accessTokenFactory() {
+        // 查询是否已有会话token
+        let token = sessionToken.get()
+        if (!token) {
+          // 如果没有,查询是否有 longTermToken
+          const _token = await longTermToken.get()
+          // 如果有, 用它来换取会话token
+          if (_token) {
+            try {
+              token = await refreshToken('' + _token)
+            } catch (error) {
+              // -100 token失效, 404 token不存在
+              if (error instanceof ServerError && [-100, 404].includes(error.status)) {
+                await longTermToken.set('')
+              }
             }
           }
         }
+        return token
       }
-      return token
-    }
-  })
-  .withAutomaticReconnect(new RetryPolicy())
-  .withHubProtocol(new MessagePackHubProtocol())
-  .configureLogging(__DEV__ ? LogLevel.Information : LogLevel.Critical)
-  .build()
-
-const setState = () => (connectState.value = hub.state)
-hub.onclose(setState)
-hub.onreconnecting(setState)
-hub.onreconnected(setState)
+    })
+    .withAutomaticReconnect(new RetryPolicy())
+    .withHubProtocol(new MessagePackHubProtocol())
+    .configureLogging(__DEV__ ? LogLevel.Information : LogLevel.Critical)
+    .build()
+  h.onclose(setState)
+  h.onreconnecting(setState)
+  h.onreconnected(setState)
+  return h
+}
 
 /** 返回一个 signalr 连接中心 */
 function getSignalr(): Promise<HubConnection> {
@@ -91,6 +95,14 @@ const firstConnect: () => Promise<HubConnection> = (() => {
 /** 强制断开当前连接 */
 export async function rebootSignalr() {
   await hub.stop()
+  clearInterval(lastReConnect.value)
+  isStart.value = false
+  await getSignalr()
+}
+
+export async function switchSignalr() {
+  await hub.stop()
+  hub = buildHub(`${apiServer.value}/hub/api`)
   clearInterval(lastReConnect.value)
   isStart.value = false
   await getSignalr()
@@ -198,6 +210,7 @@ const requestWithSignalrInRateLimit = ((...args) => {
 
 export { requestWithSignalrInRateLimit as requestWithSignalr }
 
+// TODO 由于hub可能被改变，这里的订阅也会失效
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
   const inspector = new SignalrInspector(methodName, [])

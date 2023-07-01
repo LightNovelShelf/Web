@@ -58,6 +58,7 @@
               <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
             </template>
           </q-input>
+          <vue-turnstile ref="turnstile" v-model="token" />
           <div class="row">
             <q-btn rounded flat :to="{ name: 'Login' }">登录</q-btn>
             <q-space />
@@ -76,13 +77,13 @@
 <script lang="ts" setup>
 import { icon } from 'assets/icon'
 import { ref } from 'vue'
-import { useReCaptcha } from 'vue-recaptcha-v3'
-import { login, register, resetPassword, sendRegisterEmail } from 'src/services/user'
+import { register, sendRegisterEmail } from 'src/services/user'
 import { sha256 } from 'src/utils/hash'
 import { useQuasar } from 'quasar'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { useRouter } from 'vue-router'
 import { useAppStore } from 'stores/app'
+import VueTurnstile from 'src/views/Login/VueTurnstile.vue'
 
 const $q = useQuasar()
 const appStore = useAppStore()
@@ -96,22 +97,30 @@ const isPwd = ref(true)
 const loading = ref(false)
 const sending = ref(false)
 const router = useRouter()
-
-const { executeRecaptcha, recaptchaLoaded } = useReCaptcha() || {}
+const token = ref()
+const turnstile = ref()
 
 const sendEmail = async () => {
+  if (!turnstile.value?.loaded || !token.value) {
+    $q.notify({
+      type: 'negative',
+      message: '请等待Turnstile服务加载和通过验证'
+    })
+    return
+  }
+
   sending.value = true
   try {
-    await recaptchaLoaded!()
-    const token = await executeRecaptcha!('login')
-
-    await sendRegisterEmail(email.value, token)
+    await sendRegisterEmail(email.value, token.value)
 
     $q.notify({
       message: '发送成功',
       timeout: 3000
     })
   } catch (e) {
+    token.value = null
+    turnstile.value?.reset()
+
     if (e?.target?.localName === 'script') {
       $q.notify({
         type: 'negative',
