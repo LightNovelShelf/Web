@@ -138,56 +138,77 @@
     <template v-else />
 
     <!-- 书架文件夹选择弹层 -->
-    <q-dialog :model-value="folderSelectorVisible" @update:model-value="toggleShelfFolderSelector">
+    <q-dialog :model-value="folderSelectorModalVisible" @update:model-value="toggleShelfFolderSelector">
       <q-card class="shelf-folder-selector-card">
         <q-card-section>
           <div class="text-h6">{{ parentFolder ? '移动' : '加入' }}到...</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <!--
-          一定要监听 update:model-value 事件，需要依赖它来分辨 selectorValue 是筛选值还是选择值；
-          不监听的话 selectorValue 就都是字符串
-         -->
-          <q-select
-            filled
-            :model-value="selectorValue"
-            :options="folderOptions"
-            use-input
-            fill-input
-            hide-selected
-            input-debounce="0"
-            label="输入文件夹名称进行筛选或创建"
-            @input-value="selectorValue = $event"
-            @update:model-value="selectorValue = $event"
-          >
-            <!-- 空状态 -->
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  {{ selectorValue ? '没有找到，将新建文件夹' : '请输入文件夹名称' }}
-                </q-item-section>
-              </q-item>
-            </template>
-            <!-- 覆盖渲染模板 -->
-            <template v-slot:option="scope">
-              <!-- scope.opt 类型是 QSelectorOption -->
-              <q-item v-bind="scope.itemProps">
-                <q-item-section>
-                  <q-item-label class="max-len-text">{{ scope.opt.label }}</q-item-label>
-                </q-item-section>
-                <q-item-section side>{{ scope.opt.updateAt }}</q-item-section>
-              </q-item>
-            </template>
-          </q-select>
+        <q-card-section class="q-gutter-y-md">
+          <q-radio
+            v-model="addToFolderModalVal"
+            :val="TAddToFolderModalModeEnum.加入现有文件夹"
+            label="加入现有文件夹"
+          />
+          <q-radio
+            v-model="addToFolderModalVal"
+            :val="TAddToFolderModalModeEnum.加入到新文件夹"
+            label="加入到新文件夹"
+          />
+
+          <div>
+            <q-select
+              filled
+              :model-value="selectedFolder"
+              :options="folderOptions"
+              use-input
+              :fill-input="/** 关闭保留输入的功能 */ false"
+              :label="addToFolderModalVal === TAddToFolderModalModeEnum.加入到新文件夹 ? `选择父文件夹` : '选择文件夹'"
+              @update:model-value="selectedFolder = $event"
+            >
+              <!-- 空状态 -->
+              <!-- <template v-slot:no-option>
+                <QItem>
+                  <QItemSection class="text-grey">
+                    {{ selectedFolder ? '没有找到，将新建文件夹' : '请输入文件夹名称' }}
+                  </QItemSection>
+                </QItem>
+              </template> -->
+              <!-- 覆盖渲染模板 -->
+              <template v-slot:option="scope">
+                <!-- scope.opt 类型是 QSelectorOption -->
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section>
+                    <q-item-label class="max-len-text"
+                      >{{
+                        /** tab会被合并，所以用四个个space模拟一个tab */ `&nbsp;&nbsp;&nbsp;&nbsp;`.repeat(
+                          scope.opt.level - 1
+                        )
+                      }}{{ scope.opt.label }}</q-item-label
+                    >
+                  </q-item-section>
+                  <q-item-section side>{{ scope.opt.updateAt }}</q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+          </div>
+
+          <div v-if="addToFolderModalVal === TAddToFolderModalModeEnum.加入到新文件夹">
+            <q-input
+              :model-value="newFolderNameVal"
+              label="输入新文件夹名称"
+              @update:model-value="(evt) => newFolderNameVal = (evt as string)"
+            >
+            </q-input>
+          </div>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn
             flat
-            :disable="!selectorValue"
+            :disable="!selectedFolder"
             :label="
-              selectorValue && typeof selectorValue === 'object'
+              selectedFolder && typeof selectedFolder === 'object'
                 ? `${parentFolder ? '移动' : '加入'}(${selectedCount})`
                 : `${parentFolder ? '创建并移入' : '创建并加入'}(${selectedCount})`
             "
@@ -233,6 +254,8 @@ interface QSelectorOption {
   value: string
   /** 格式化好的最后修改时间 */
   updateAt: string
+  /** 层级 */
+  level: number
   disable?: boolean
 }
 
@@ -256,15 +279,24 @@ const initialized = computed(() => shelfStore.initialized)
 /** 是否处于编辑模式 */
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 /** 文件夹选择弹层 */
-const folderSelectorVisible = ref(false)
+const folderSelectorModalVisible = ref(false)
 /** 文件夹选择器model值 */
-const selectorValue = ref<string | QSelectorOption | null>(null)
+const selectedFolder = ref<QSelectorOption | null>(null)
+
+/** 文件夹名称input val */
+const newFolderNameVal = ref<string>('')
+/** 文件夹加入方式 */
+const enum TAddToFolderModalModeEnum {
+  加入现有文件夹,
+  加入到新文件夹
+}
+const addToFolderModalVal = ref<TAddToFolderModalModeEnum>(TAddToFolderModalModeEnum.加入现有文件夹)
 /** 右键菜单触发的Item ID */
 const contextMenuShelfItemID = ref<number | string>(-1)
 const contextMenuShelfItem = computed<ShelfTypes.ShelfFolderItem | BookInList | null>(() => {
   const { value: id } = contextMenuShelfItemID
 
-  if (!id || id < 0) {
+  if (!id || +id < 0) {
     return null
   }
 
@@ -297,14 +329,15 @@ const folderOptions = computed<QSelectorOption[]>(() => {
       (i): QSelectorOption => ({
         label: i.title,
         value: i.id,
-        updateAt: parseTime(i.updateAt).toLocaleString()
+        updateAt: parseTime(i.updateAt).toLocaleString(),
+        level: 1
       })
     )
     .filter((i) => {
       // 如果 selectorValue 有值 且不是选项值
-      if (selectorValue.value && typeof selectorValue.value !== 'object') {
+      if (selectedFolder.value && typeof selectedFolder.value !== 'object') {
         // 就筛选
-        return i.label.includes(selectorValue.value)
+        return i.label.includes(selectedFolder.value)
       }
 
       return true
@@ -316,7 +349,8 @@ const folderOptions = computed<QSelectorOption[]>(() => {
     realFolders.push({
       label: ROOT_LEVEL_FOLDER_NAME,
       value: ALL_VALUE,
-      updateAt: '系统创建'
+      updateAt: '系统创建',
+      level: 1
     })
   }
   return realFolders
@@ -360,7 +394,7 @@ function addItemToFolderHandle(item: ShelfTypes.ShelfItem) {
   }
 
   // 打开文件夹弹层
-  folderSelectorVisible.value = true
+  folderSelectorModalVisible.value = true
 }
 
 /** 右键菜单 - 移出书架 */
@@ -442,13 +476,13 @@ function moveItemToFolderHandle(item: ShelfTypes.ShelfItem) {
   }
 
   // 打开文件夹弹层
-  folderSelectorVisible.value = true
+  folderSelectorModalVisible.value = true
 }
 
 /** 文件夹选择器提交 */
 async function folderSelectorSubmitHandle() {
   // 没有文件夹名称或者文件夹id的话就不知道要移去哪了，所以返回
-  if (!selectorValue.value) {
+  if (!selectedFolder.value) {
     // 弹个toast
     $.notify({ type: 'warning', message: '请选择一个文件夹或者输入需要新建的文件夹名称' })
     return
@@ -464,10 +498,10 @@ async function folderSelectorSubmitHandle() {
   let folderID
 
   /** 需要创建文件夹：值是字符串而不是option */
-  if (typeof selectorValue.value === 'string') {
-    folderID = shelfStore.createFolder({ name: selectorValue.value })
+  if (typeof selectedFolder.value === 'string') {
+    folderID = shelfStore.createFolder({ name: selectedFolder.value })
   } else {
-    folderID = selectorValue.value.value
+    folderID = selectedFolder.value.value
   }
 
   // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
@@ -551,9 +585,9 @@ function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
 
 /** 弹出书架文件夹选择弹层 */
 function toggleShelfFolderSelector() {
-  folderSelectorVisible.value = !folderSelectorVisible.value
+  folderSelectorModalVisible.value = !folderSelectorModalVisible.value
   // 弹层状态改变时重置 selector 状态
-  selectorValue.value = ''
+  selectedFolder.value = null
 }
 
 /** 同步排序结果到draft */
@@ -788,7 +822,8 @@ onDeactivated(() => {
 
 // 文件夹选择弹层 相关
 .shelf-folder-selector-card {
-  min-width: 320px;
+  width: 640px;
+  max-width: 80vw;
 }
 
 // 限制长度的文字
