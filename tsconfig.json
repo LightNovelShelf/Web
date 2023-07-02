@@ -6,9 +6,11 @@
     "jsx": "preserve",
     "strict": false,
     "alwaysStrict": true,
-    "types": ["unplugin-icons/types/vue"]
+    "types": ["unplugin-icons/types/vue"],
+    "paths": {
+      "src/*": ["src/*"],
+      "assets/*": ["src/assets/*"]
+    }
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
