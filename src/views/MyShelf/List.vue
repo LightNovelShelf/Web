@@ -146,12 +146,14 @@
 
         <q-card-section class="q-gutter-y-md">
           <q-radio
-            v-model="addToFolderModalVal"
+            :model-value="addToFolderModeVal"
+            @update:model-value="onSwitchAddToFolderModeValChange"
             :val="TAddToFolderModalModeEnum.加入现有文件夹"
             label="加入现有文件夹"
           />
           <q-radio
-            v-model="addToFolderModalVal"
+            :model-value="addToFolderModeVal"
+            @update:model-value="onSwitchAddToFolderModeValChange"
             :val="TAddToFolderModalModeEnum.加入到新文件夹"
             label="加入到新文件夹"
           />
@@ -161,19 +163,13 @@
               filled
               :model-value="selectedFolder"
               :options="folderOptions"
-              use-input
+              :use-input="false"
               :fill-input="/** 关闭保留输入的功能 */ false"
-              :label="addToFolderModalVal === TAddToFolderModalModeEnum.加入到新文件夹 ? `选择父文件夹` : '选择文件夹'"
+              :label="
+                addToFolderModeVal === TAddToFolderModalModeEnum.加入到新文件夹 ? `选择父文件夹` : '选择加入的文件夹'
+              "
               @update:model-value="selectedFolder = $event"
             >
-              <!-- 空状态 -->
-              <!-- <template v-slot:no-option>
-                <QItem>
-                  <QItemSection class="text-grey">
-                    {{ selectedFolder ? '没有找到，将新建文件夹' : '请输入文件夹名称' }}
-                  </QItemSection>
-                </QItem>
-              </template> -->
               <!-- 覆盖渲染模板 -->
               <template v-slot:option="scope">
                 <!-- scope.opt 类型是 QSelectorOption -->
@@ -182,7 +178,8 @@
                     <q-item-label class="max-len-text"
                       >{{
                         /** tab会被合并，所以用四个个space模拟一个tab */ `&nbsp;&nbsp;&nbsp;&nbsp;`.repeat(
-                          scope.opt.level - 1
+                          /** .repeat(-1)会报错 */
+                          scope.opt.parents.length && scope.opt.parents.length - 1
                         )
                       }}{{ scope.opt.label }}</q-item-label
                     >
@@ -193,7 +190,7 @@
             </q-select>
           </div>
 
-          <div v-if="addToFolderModalVal === TAddToFolderModalModeEnum.加入到新文件夹">
+          <div v-if="addToFolderModeVal === TAddToFolderModalModeEnum.加入到新文件夹">
             <q-input
               :model-value="newFolderNameVal"
               label="输入新文件夹名称"
@@ -255,7 +252,7 @@ interface QSelectorOption {
   /** 格式化好的最后修改时间 */
   updateAt: string
   /** 层级 */
-  level: number
+  parents: string[]
   disable?: boolean
 }
 
@@ -283,6 +280,10 @@ const folderSelectorModalVisible = ref(false)
 /** 文件夹选择器model值 */
 const selectedFolder = ref<QSelectorOption | null>(null)
 
+watchEffect(() => {
+  console.log('shelfStore.foldersInTree', shelfStore.foldersInTree)
+})
+
 /** 文件夹名称input val */
 const newFolderNameVal = ref<string>('')
 /** 文件夹加入方式 */
@@ -290,7 +291,14 @@ const enum TAddToFolderModalModeEnum {
   加入现有文件夹,
   加入到新文件夹
 }
-const addToFolderModalVal = ref<TAddToFolderModalModeEnum>(TAddToFolderModalModeEnum.加入现有文件夹)
+/** 文件夹加入方式 */
+const addToFolderModeVal = ref<TAddToFolderModalModeEnum>(TAddToFolderModalModeEnum.加入现有文件夹)
+/** 文件夹加入方式 - change */
+function onSwitchAddToFolderModeValChange(val: TAddToFolderModalModeEnum) {
+  addToFolderModeVal.value = val
+  // 重置文件夹选项值，因为两种模式下可选的范围不一样
+  selectedFolder.value = null
+}
 /** 右键菜单触发的Item ID */
 const contextMenuShelfItemID = ref<number | string>(-1)
 const contextMenuShelfItem = computed<ShelfTypes.ShelfFolderItem | BookInList | null>(() => {
@@ -322,38 +330,34 @@ const contextMenuShelfItemTitle = computed(() => {
 })
 /** 文件夹选项 */
 const folderOptions = computed<QSelectorOption[]>(() => {
-  const realFolders = shelfStore.folders
-    // 过滤掉自己，移动到自己没有意义
-    .filter((i) => i.id !== parentFolder.value)
-    .map(
-      (i): QSelectorOption => ({
-        label: i.title,
-        value: i.id,
-        updateAt: parseTime(i.updateAt).toLocaleString(),
-        level: 1
-      })
-    )
-    .filter((i) => {
-      // 如果 selectorValue 有值 且不是选项值
-      if (selectedFolder.value && typeof selectedFolder.value !== 'object') {
-        // 就筛选
-        return i.label.includes(selectedFolder.value)
-      }
+  let folderList = shelfStore.folders.slice()
 
-      return true
+  // 过滤掉自己，移动到自己没有意义
+  if (addToFolderModeVal.value === TAddToFolderModalModeEnum.加入现有文件夹) {
+    folderList = folderList.filter((i) => i.id !== parentFolder.value)
+  }
+
+  const folderOptionList = folderList.map(
+    (i): QSelectorOption => ({
+      label: i.title,
+      value: i.id,
+      updateAt: parseTime(i.updateAt).toLocaleString(),
+      parents: i.parents
     })
+  )
 
   // 如果不在根文件夹
-  if (parentFolder.value) {
+  // 或者 用户选择了加入文件夹
+  if (parentFolder.value || addToFolderModeVal.value === TAddToFolderModalModeEnum.加入到新文件夹) {
     // 把根文件夹推入选项
-    realFolders.push({
+    folderOptionList.push({
       label: ROOT_LEVEL_FOLDER_NAME,
       value: ALL_VALUE,
       updateAt: '系统创建',
-      level: 1
+      parents: []
     })
   }
-  return realFolders
+  return folderOptionList
 })
 /** 选中计数 */
 const selectedCount = computed(() => shelfStore.selectedCount)
@@ -484,7 +488,13 @@ async function folderSelectorSubmitHandle() {
   // 没有文件夹名称或者文件夹id的话就不知道要移去哪了，所以返回
   if (!selectedFolder.value) {
     // 弹个toast
-    $.notify({ type: 'warning', message: '请选择一个文件夹或者输入需要新建的文件夹名称' })
+    $.notify({ type: 'warning', message: '请选择文件夹' })
+    return
+  }
+  // 如果选择加入新文件夹，还要检测一次文件夹名称是否填写了
+  if (addToFolderModeVal.value === TAddToFolderModalModeEnum.加入到新文件夹 && !newFolderNameVal.value) {
+    // 弹个toast
+    $.notify({ type: 'warning', message: '请填写新文件夹名称' })
     return
   }
 
@@ -498,8 +508,12 @@ async function folderSelectorSubmitHandle() {
   let folderID
 
   /** 需要创建文件夹：值是字符串而不是option */
-  if (typeof selectedFolder.value === 'string') {
-    folderID = shelfStore.createFolder({ name: selectedFolder.value })
+  if (addToFolderModeVal.value === TAddToFolderModalModeEnum.加入到新文件夹) {
+    /** @todo 父文件夹 */
+    folderID = shelfStore.createFolder({
+      name: newFolderNameVal.value,
+      parents: [...selectedFolder.value.parents, selectedFolder.value.value].filter((s) => s !== ALL_VALUE)
+    })
   } else {
     folderID = selectedFolder.value.value
   }

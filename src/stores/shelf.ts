@@ -26,14 +26,16 @@ export interface ShelfStore {
 }
 
 /** 初始state */
-const INIT: ShelfStore = {
-  initialized: false,
-  selected: new Set(),
-  source: {
-    [ShelfBranch.main]: [],
-    [ShelfBranch.draft]: []
-  },
-  branch: ShelfBranch.main
+function STATE(): ShelfStore {
+  return {
+    initialized: false,
+    selected: new Set(),
+    source: {
+      [ShelfBranch.main]: [],
+      [ShelfBranch.draft]: []
+    },
+    branch: ShelfBranch.main
+  }
 }
 
 /**
@@ -79,16 +81,22 @@ export interface ShelfFolderTreeItem extends ShelfFolderItem {
 
 /** 把list形式的文件夹还原回 children 形式的数据格式 */
 function folderList2FolderTree(folderList: ShelfFolderItem[]): ShelfFolderTreeItem[] {
-  // 1. 根据文件夹层级先排序（parents长度）：这一步操作是为了实现确保循环时子文件夹一定在父文件夹之前出现
+  // 1. 根据文件夹层级先排升序（parents长度）：这一步操作是为了实现确保循环时子文件夹一定在父文件夹之后出现
   // 2. 每一个文件夹都压入到map中，同时如果有parents的话，还会把自己压入parents数组中最后一个id的children数组中
   // 3. 循环完所有文件夹，必定保证了：文件夹既出现在map中，也一定出现在直属文件夹的children数组中
   // 4. 拿出map中所有parents数组为空的文件夹（位于根文件夹的文件夹）
+
+  const sortedFolderList = toRaw(folderList)
+    .slice()
+    .sort((a, b) => (a.parents.length > b.parents.length ? 1 : -1))
+  console.log('sortedFolderList', sortedFolderList)
   return []
 }
 
 /** @private 书架store */
-const shelfStore = defineStore('app.shelf', {
-  state: () => INIT,
+const shelfStore = defineStore({
+  id: 'app.shelf',
+  state: STATE,
   getters: {
     /** 当前分支的全量项目 */
     shelf(): ShelfItem[] {
@@ -107,7 +115,7 @@ const shelfStore = defineStore('app.shelf', {
       return toRaw(this.shelf).filter((i): i is ShelfFolderItem => i.type === ShelfItemTypeEnum.FOLDER)
     },
     /** 所有文件夹 */
-    foldersinTree(): ShelfFolderTreeItem[] {
+    foldersInTree(): ShelfFolderTreeItem[] {
       return folderList2FolderTree(this.folders)
     },
     /** 根据最后一层文件夹名称获取书籍 */
@@ -425,19 +433,28 @@ const shelfStore = defineStore('app.shelf', {
       this.clearSelected()
     },
     /** 新建文件夹, 返回文件夹ID */
-    createFolder(payload: { name: string }): string {
-      if (payload.name === ROOT_LEVEL_FOLDER_NAME) {
-        Notify.create({
-          type: 'negative',
-          timeout: 1500,
-          position: 'bottom',
-          message: '该文件夹名字无效'
-        })
-        return ''
+    createFolder(payload: { name: string; parents: string[] }): string {
+      const parents = payload.parents
+      const isSameArr = <T extends any[]>(arr1: T, arr2: T): boolean => {
+        if (arr1.length !== arr2.length) {
+          return false
+        }
+
+        const len = arr1.length
+
+        for (let idx = 0; idx < len - 1; idx += 1) {
+          if (arr1[idx] !== arr2[idx]) {
+            return false
+          }
+        }
+
+        return true
       }
 
+      const sameLevelFolderList = this.folders.filter((s) => isSameArr(s.parents, parents))
+
       // 校验重名
-      for (const folder of this.folders) {
+      for (const folder of sameLevelFolderList) {
         if (payload.name === folder.title) {
           Notify.create({
             type: 'negative',
@@ -449,15 +466,15 @@ const shelfStore = defineStore('app.shelf', {
         }
       }
 
-      const folderID = nanoid()
+      const newFolderID = nanoid()
 
       /** 新的文件夹 */
       const folder: ShelfFolderItem = {
         // 固定在第一
         index: 0,
         type: ShelfItemTypeEnum.FOLDER,
-        parents: [],
-        id: folderID,
+        parents: parents,
+        id: newFolderID,
         title: payload.name,
         updateAt: new Date().toISOString()
       }
@@ -476,7 +493,7 @@ const shelfStore = defineStore('app.shelf', {
         )
       })
 
-      return folderID
+      return newFolderID
     },
     /** 重命名文件夹 */
     renameFolder(payload: { name: string; id: string }) {
