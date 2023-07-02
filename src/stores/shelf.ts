@@ -104,8 +104,6 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 所有文件夹 */
     folders(): ShelfFolderItem[] {
-      console.log('toRaw(this.shelf)', toRaw(this.shelf))
-      debugger
       return toRaw(this.shelf).filter((i): i is ShelfFolderItem => i.type === ShelfItemTypeEnum.FOLDER)
     },
     /** 所有文件夹 */
@@ -248,9 +246,6 @@ const shelfStore = defineStore('app.shelf', {
       } else {
         shelf = serve.data as ShelfItem[]
       }
-
-      console.log('shelf', shelf)
-      debugger
 
       // 记录版本到本地
       this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
