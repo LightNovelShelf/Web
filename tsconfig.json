@@ -9,7 +9,8 @@
     "types": ["unplugin-icons/types/vue"],
     "paths": {
       "src/*": ["src/*"],
-      "assets/*": ["src/assets/*"]
+      "assets/*": ["src/assets/*"],
+      "stores/*": ["src/stores/*"]
     }
   },
   "exclude": ["node_modules"]
