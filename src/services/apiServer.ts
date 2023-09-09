@@ -7,6 +7,10 @@ const apiServerOptions = [
     value: 'https://api-hk.lightnovel.life:45122'
   },
   {
+    label: 'ln.0s.hk (HK)',
+    value: 'https://ln.0s.hk'
+  },
+  {
     label: 'lightnovel.life (CloudFlare)',
     value: 'https://api.lightnovel.life'
   },
