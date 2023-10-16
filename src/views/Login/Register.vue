@@ -58,7 +58,12 @@
               <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
             </template>
           </q-input>
-          <vue-turnstile ref="turnstile" v-model="token" />
+          <q-input v-model="registerPassword" label="注册口令(一般不填)">
+            <template v-slot:prepend>
+              <q-icon :name="icon.mdiLockPlus" />
+            </template>
+          </q-input>
+          <vue-turnstile style="margin-top: 8px" ref="turnstile" v-model="token" />
           <div class="row">
             <q-btn rounded flat :to="{ name: 'Login' }">登录</q-btn>
             <q-space />
@@ -93,6 +98,7 @@ const email = ref('')
 const password = ref('')
 const rePassword = ref('')
 const code = ref('')
+const registerPassword = ref(null)
 const isPwd = ref(true)
 const loading = ref(false)
 const sending = ref(false)
@@ -140,7 +146,13 @@ const _register = async () => {
   loading.value = true
 
   try {
-    const [, user] = await register(userName.value, email.value, await sha256(password.value), code.value)
+    const [, user] = await register(
+      userName.value,
+      email.value,
+      await sha256(password.value),
+      code.value,
+      registerPassword.value
+    )
     appStore.user = user
     $q.notify({
       message: '注册成功',
