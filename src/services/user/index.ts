@@ -74,12 +74,18 @@ export async function resetPassword(email: string, newPassword: string, code: st
   })
 }
 
-export async function register(userName: string, email: string, password: string, code: string) {
+export async function register(
+  userName: string,
+  email: string,
+  password: string,
+  code: string,
+  registerPassword: string
+) {
   const res = await requestWithFetch<
     Types.Login.Res,
-    { userName: string; email: string; code: string; password: string }
+    { userName: string; email: string; code: string; password: string; registerPassword: string }
   >(PATH.USER_REGISTER, {
-    payload: { userName, email, password, code }
+    payload: { userName, email, password, code, registerPassword }
   })
 
   sessionToken.set(res.Token)

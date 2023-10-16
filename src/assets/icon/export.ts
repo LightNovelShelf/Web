@@ -121,5 +121,6 @@ export {
   mdiImage,
   mdiStar,
   mdiCommentMultiple,
-  mdiCircleDouble
+  mdiCircleDouble,
+  mdiLockPlus
 } from '@mdi/js'
