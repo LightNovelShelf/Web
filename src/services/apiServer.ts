@@ -3,11 +3,11 @@ import { useStorage } from '@vueuse/core'
 // 第一个就是默认的
 const apiServerOptions = [
   {
-    label: 'lightnovel.life (HK)',
+    label: 'lightnovel.life',
     value: 'https://api-hk.lightnovel.life:45122'
   },
   {
-    label: 'ln.0s.hk (HK)',
+    label: 'ln.0s.hk (Fastly)',
     value: 'https://ln.0s.hk'
   },
   {
@@ -15,7 +15,7 @@ const apiServerOptions = [
     value: 'https://api.lightnovel.life'
   },
   {
-    label: 'lightnovel.app (HK 被污染)',
+    label: 'lightnovel.app (被污染)',
     value: 'https://api.lightnovel.app:45122'
   }
 ]
