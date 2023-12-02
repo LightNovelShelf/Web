@@ -8,7 +8,7 @@ const apiServerOptions = [
   },
   {
     label: 'lightnovel.life (CloudFlare)',
-    value: 'https://api-cf.lightnovel.life'
+    value: 'https://api-cf.lightnovel.life:2053'
   }
 ]
 
