@@ -4,19 +4,11 @@ import { useStorage } from '@vueuse/core'
 const apiServerOptions = [
   {
     label: 'lightnovel.life',
-    value: 'https://api-hk.lightnovel.life:45122'
-  },
-  {
-    label: 'ln.0s.hk (Fastly)',
-    value: 'https://ln.0s.hk'
+    value: 'https://api.lightnovel.life:8443'
   },
   {
     label: 'lightnovel.life (CloudFlare)',
-    value: 'https://api.lightnovel.life'
-  },
-  {
-    label: 'lightnovel.app (被污染)',
-    value: 'https://api.lightnovel.app:45122'
+    value: 'https://api-cf.lightnovel.life'
   }
 ]
 
