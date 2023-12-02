@@ -19,6 +19,6 @@ if (__DEV__) {
   })
 }
 
-const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V1', apiServerOptions[0].value)
+const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V2', apiServerOptions[0].value)
 
 export { apiServer, apiServerOptions }
