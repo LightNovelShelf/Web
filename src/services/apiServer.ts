@@ -4,11 +4,11 @@ import { useStorage } from '@vueuse/core'
 const apiServerOptions = [
   {
     label: 'lightnovel.life',
-    value: 'https://api.lightnovel.life:2053'
+    value: 'https://api.lightnovel.life'
   },
   {
     label: 'lightnovel.life (CloudFlare)',
-    value: 'https://api-cf.lightnovel.life:2053'
+    value: 'https://api-cf.lightnovel.life'
   }
 ]
 
