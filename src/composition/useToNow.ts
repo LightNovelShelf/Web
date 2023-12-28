@@ -4,9 +4,9 @@ import { parseTime, toNow } from 'src/utils/time'
 import { useTickSource } from 'src/composition/useTickSource'
 
 const baseTime = ref(DateTime.now())
-useTickSource(() => {
-  baseTime.value = DateTime.now()
-})
+// useTickSource(() => {
+//   baseTime.value = DateTime.now()
+// })
 
 /**
  * 返回一个定时刷新的 'xx天前' 文案
