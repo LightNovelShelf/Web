@@ -1,5 +1,5 @@
 <template>
-  <div ref="contentRef" class="html-reader" v-html="props.html" @click="clickHandle" />
+  <div ref="contentRef" class="html-reader print-hide" v-html="props.html" @click="clickHandle" />
 </template>
 
 <script lang="ts" setup>
