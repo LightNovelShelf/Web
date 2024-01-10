@@ -1,3 +1,4 @@
+import '../global'
 import { boot } from 'quasar/wrappers'
 
 let app = null

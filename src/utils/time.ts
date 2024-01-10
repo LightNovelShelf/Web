@@ -1,31 +1,39 @@
 import dayjs, { Dayjs } from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
 
 /**
  * 解析时间
  *
- * @param date 接受js时间对象、ISO字符串、luxon对象
+ * @param date 接受js时间对象、ISO字符串、dayjs对象
  */
 export function parseTime(date: Date | Dayjs | string): Dayjs {
+  // 字符串格式的时间戳会parse成错误的时间，但目前没有这种场景，先注释，省点
+  // if (typeof date === 'string' && date === (+date).toString()) {
+  //   date = +date
+  // }
+
   return dayjs(date)
 }
 
-/** 获取时间相对目前的文案描述 */
+/**
+ * 获取时间相对目前的文案描述
+ *
+ * @url https://day.js.org/docs/en/display/from-now#list-of-breakdown-range
+ */
 export function toNow(
   date: Date | Dayjs,
   config: {
-    base?: Dayjs
-    locale?: string
+    now?: Dayjs
     notNegative?: boolean
   } = {
     notNegative: true
   }
 ): string {
-  const { base, locale, notNegative } = config
-  if (notNegative && parseTime(date).isAfter(dayjs())) {
+  const { now = dayjs(), notNegative } = config
+  const dateObj = parseTime(date)
+
+  if (notNegative && dateObj.isSameOrAfter(now, 'second')) {
     return '刚刚'
   }
 
-  return parseTime(date).to(base)
+  return now.to(dateObj)
 }

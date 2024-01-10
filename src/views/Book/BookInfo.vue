@@ -118,7 +118,7 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { useRouter } from 'vue-router'
 import { Comment } from 'src/components/'
 import { getBookInfo } from 'src/services/book'
-import { useToNow } from 'src/composition/useToNow'
+import { useToNowRef } from 'src/composition/useToNowRef'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { loadHistory } from 'src/views/Book/Read/history'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
@@ -195,7 +195,7 @@ const bookInList = computed<BookInList | null>(() =>
       } as BookInList)
     : null
 )
-const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
+const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdateTime)
 const lastReadTitle = computed(() => {
   if (position && position.value?.cid) {
     let chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)

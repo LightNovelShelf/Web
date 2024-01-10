@@ -94,7 +94,7 @@ const { generalSetting } = settingStore
 const request = useTimeoutFn(function (page = currentPage.value, order = props.order) {
   return getBookList({ Page: page, Order: order, Size: 24, IgnoreJapanese: generalSetting.ignoreJapanese }).then(
     (serverData) => {
-      bookData.value = serverData.Data
+      bookData.value = serverData.Data.map((s): typeof s => ({ ...s, LastUpdateTime: new Date() }))
       pageData.value.totalPage = serverData.TotalPages
     }
   )
