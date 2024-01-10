@@ -12,6 +12,7 @@
     "build:android": "quasar build -m capacitor -T android",
     "build:ios": "quasar build -m capacitor -T ios",
     "build:electron": "quasar build -m electron",
+    "preview": "quasar build && serve -s dist/spa",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "inspect": "quasar inspect > debug/webpack.config.txt"
@@ -66,6 +67,7 @@
     "eslint-plugin-vue": "^9.11.0",
     "npm-check-updates": "^16.10.9",
     "prettier": "^2.8.8",
+    "serve": "^14.2.1",
     "unplugin-auto-import": "^0.15.3",
     "unplugin-icons": "^0.16.1",
     "unplugin-vue-components": "^0.24.1",
