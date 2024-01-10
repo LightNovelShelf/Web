@@ -57,7 +57,7 @@
               </q-item-label>
               <q-item-label caption>
                 <div class="row flex-align-center q-gutter-x-md">
-                  <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime, baseTime) }}</div>
+                  <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime) }}</div>
                   <div>
                     <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
                     <q-btn flat dense v-if="comment.Commentaries[`${item.Id}`].CanEdit" @click="_delete(item.Id)">
@@ -108,7 +108,7 @@
                         </q-item-label>
                         <q-item-label caption>
                           <div class="row flex-align-center q-gutter-x-md">
-                            <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime, baseTime) }}</div>
+                            <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime) }}</div>
                             <div>
                               <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
                               <q-btn
@@ -191,7 +191,6 @@
 <script lang="ts" setup>
 import { postComment, replyComment, getComment, deleteComment } from 'src/services/comment'
 import { CommentType, GetComment } from 'src/services/comment/types'
-import { baseTime } from 'src/composition/useToNow'
 import { toNow } from 'src/utils/time'
 import { useAppStore } from 'stores/app'
 import { computed, ref, watch } from 'vue'

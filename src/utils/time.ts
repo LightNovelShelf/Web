@@ -1,41 +1,39 @@
-import { DateTime } from 'luxon'
+import dayjs, { Dayjs } from 'dayjs'
 
 /**
  * 解析时间
  *
- * @param date 接受js时间对象、ISO字符串、luxon对象
+ * @param date 接受js时间对象、ISO字符串、dayjs对象
  */
-export function parseTime(date: Date | DateTime | string): DateTime {
-  if (DateTime.isDateTime(date)) {
-    return date
-  }
+export function parseTime(date: Date | Dayjs | string): Dayjs {
+  // 字符串格式的时间戳会parse成错误的时间，但目前没有这种场景，先注释，省点
+  // if (typeof date === 'string' && date === (+date).toString()) {
+  //   date = +date
+  // }
 
-  if (typeof date === 'string') {
-    return DateTime.fromISO(date)
-  }
-
-  return DateTime.fromJSDate(date)
+  return dayjs(date)
 }
 
-/** 获取时间相对目前的文案描述 */
+/**
+ * 获取时间相对目前的文案描述
+ *
+ * @url https://day.js.org/docs/en/display/from-now#list-of-breakdown-range
+ */
 export function toNow(
-  date: Date | DateTime,
+  date: Date | Dayjs,
   config: {
-    base?: DateTime
-    locale?: string
+    now?: Dayjs
     notNegative?: boolean
   } = {
     notNegative: true
   }
 ): string {
-  const { base, locale, notNegative } = config
-  let result = parseTime(date).toRelative({ base, locale })
-  if (result) {
-    if (notNegative && result.includes('后')) {
-      result = '刚刚'
-    }
-  } else {
-    return 'invalid_date'
+  const { now = dayjs(), notNegative } = config
+  const dateObj = parseTime(date)
+
+  if (notNegative && dateObj.isSameOrAfter(now, 'second')) {
+    return '刚刚'
   }
-  return result
+
+  return now.to(dateObj)
 }
