@@ -1,9 +1,9 @@
-import { DateTime } from 'luxon'
+import dayjs, { Dayjs } from 'dayjs'
 import { computed, ComputedRef, ref, Ref } from 'vue'
 import { parseTime, toNow } from 'src/utils/time'
 import { useTickSource } from 'src/composition/useTickSource'
 
-const baseTime = ref(DateTime.now())
+const baseTime = ref(dayjs())
 // useTickSource(() => {
 //   baseTime.value = DateTime.now()
 // })
@@ -29,7 +29,7 @@ const baseTime = ref(DateTime.now())
  * return { lastUpdateTime }
  * ```
  */
-export function useToNow(date: ComputedRef<Date | DateTime>, notNegative = true, locale?: string): Ref<string> {
+export function useToNow(date: ComputedRef<Date | Dayjs>, notNegative = true, locale?: string): Ref<string> {
   const dateObj = computed(() => parseTime(date.value))
   return computed(() => {
     return toNow(dateObj.value, { base: baseTime.value, locale, notNegative: true })

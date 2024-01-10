@@ -130,11 +130,11 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import { useQuasar, scroll } from 'quasar'
 import AddToShelf from 'src/components/biz/MyShelf/AddToShelf.vue'
 import { BookInList } from 'src/services/book/types'
-import { DateTime } from 'luxon'
 import { CommentType } from 'src/services/comment/types'
 import { userReadPositionDB } from 'src/utils/storage/db'
 import BlurHash from 'src/components/BlurHash.vue'
 import { useSettingStore } from 'stores/setting'
+import { parseTime } from 'src/utils/time'
 
 const props = defineProps<{ bid: string }>()
 
@@ -204,7 +204,7 @@ const lastReadTitle = computed(() => {
   return '暂无'
 })
 function dateFormat(time: Date) {
-  return DateTime.fromJSDate(time).toFormat('yyyy-MM-dd hh:mm')
+  return parseTime(time).format('YYYY-MM-DD HH:mm')
 }
 
 const commentShow = ref(false)

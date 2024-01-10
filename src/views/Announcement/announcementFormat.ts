@@ -1,13 +1,13 @@
 import { useToNow } from 'src/composition/useToNow'
 import { computed, Ref } from 'vue'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { DateTime } from 'luxon'
+import { Dayjs } from 'dayjs'
 import { parseTime } from 'src/utils/time'
 
 export interface Announcement {
   Id: number
   Title: string
-  Create: DateTime
+  Create: Dayjs
   Before: Ref<string>
   Content: string
   PreviewContent: string
