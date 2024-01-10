@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useToNow } from 'src/composition/useToNow'
+import { useToNowRef } from 'src/composition/useToNowRef'
 import { ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum } from 'src/types/shelf'
 import { useShelfStore } from 'stores/shelf'
 import { useBookListStore } from 'stores/bookListData'
@@ -52,7 +52,7 @@ const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
-const updateTime = useToNow(computed(() => new Date(props.item.updateAt)))
+const updateTime = useToNowRef(() => new Date(props.item.updateAt))
 const folderIDs = computed(() => [...props.item.parents, props.item.id])
 const listDataStore = useBookListStore()
 // 限制最多四本书

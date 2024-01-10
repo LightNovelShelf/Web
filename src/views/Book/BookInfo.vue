@@ -118,7 +118,7 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { useRouter } from 'vue-router'
 import { Comment } from 'src/components/'
 import { getBookInfo } from 'src/services/book'
-import { useToNow } from 'src/composition/useToNow'
+import { useToNowRef } from 'src/composition/useToNowRef'
 import { QGrid, QGridItem } from 'src/components/grid'
 import { loadHistory } from 'src/views/Book/Read/history'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
@@ -130,11 +130,11 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import { useQuasar, scroll } from 'quasar'
 import AddToShelf from 'src/components/biz/MyShelf/AddToShelf.vue'
 import { BookInList } from 'src/services/book/types'
-import { DateTime } from 'luxon'
 import { CommentType } from 'src/services/comment/types'
 import { userReadPositionDB } from 'src/utils/storage/db'
 import BlurHash from 'src/components/BlurHash.vue'
 import { useSettingStore } from 'stores/setting'
+import { parseTime } from 'src/utils/time'
 
 const props = defineProps<{ bid: string }>()
 
@@ -195,7 +195,7 @@ const bookInList = computed<BookInList | null>(() =>
       } as BookInList)
     : null
 )
-const LastUpdateTimeDesc = useToNow(computed(() => book.value?.LastUpdateTime))
+const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdateTime)
 const lastReadTitle = computed(() => {
   if (position && position.value?.cid) {
     let chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)
@@ -204,7 +204,7 @@ const lastReadTitle = computed(() => {
   return '暂无'
 })
 function dateFormat(time: Date) {
-  return DateTime.fromJSDate(time).toFormat('yyyy-MM-dd hh:mm')
+  return parseTime(time).format('YYYY-MM-DD HH:mm')
 }
 
 const commentShow = ref(false)

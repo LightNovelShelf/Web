@@ -4,6 +4,7 @@ export interface BookInList {
   Id: number
   Cover: string
   Placeholder?: string
+  // TODO: 走了二进制解码后自动转Date对象的特性丢失了，就是一个ISO 8601的日期
   LastUpdateTime: Date
   UserName: string
   Title: string

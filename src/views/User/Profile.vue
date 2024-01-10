@@ -147,7 +147,7 @@ const profileListOptions: Array<Record<string, any>> = [
   {
     label: '注册时间',
     key: 'RegisterTime',
-    value: (u) => (u?.RegisterTime ? parseTime(u.RegisterTime).toFormat('yyyy-MM-dd') : null),
+    value: (u) => (u?.RegisterTime ? parseTime(u.RegisterTime).format('YYYY-MM-DD') : null),
     icon: icon.mdiCalendarRangeOutline
   }
 ]
