@@ -5,13 +5,13 @@ import dayjs, { Dayjs } from 'dayjs'
  *
  * @param date 接受js时间对象、ISO字符串、dayjs对象
  */
-export function parseTime(date: Date | Dayjs | string): Dayjs {
+export function parseTime(date: Date | Dayjs | string | undefined | null): Dayjs {
   // 字符串格式的时间戳会parse成错误的时间，但目前没有这种场景，先注释，省点
   // if (typeof date === 'string' && date === (+date).toString()) {
   //   date = +date
   // }
 
-  return dayjs(date)
+  return dayjs(date || 0)
 }
 
 /**
