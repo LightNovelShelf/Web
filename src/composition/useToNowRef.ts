@@ -79,7 +79,7 @@ export function useToNowRef(dateGetter: MaybeRefOrGetter<Date | Dayjs | undefine
       return
     }
 
-    // 秒级别的差异，每半分钟刷新一次
+    // 秒级别的差异，每秒刷新一次
     // => "x秒前"
     if (date.diff(now, 'second') < 60) {
       const timeout = setTimeout(refreshNowRef, 1_000 * 1)
