@@ -58,7 +58,7 @@
               <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
             </template>
           </q-input>
-          <q-input v-model="registerPassword" label="注册口令(一般不填)">
+          <q-input v-model="inviteCode" :rules="[(val) => !!val || '无效的邀请码']" label="邀请码">
             <template v-slot:prepend>
               <q-icon :name="icon.mdiLockPlus" />
             </template>
@@ -98,7 +98,7 @@ const email = ref('')
 const password = ref('')
 const rePassword = ref('')
 const code = ref('')
-const registerPassword = ref(null)
+const inviteCode = ref(null)
 const isPwd = ref(true)
 const loading = ref(false)
 const sending = ref(false)
@@ -151,7 +151,7 @@ const _register = async () => {
       email.value,
       await sha256(password.value),
       code.value,
-      registerPassword.value
+      inviteCode.value
     )
     appStore.user = user
     $q.notify({
