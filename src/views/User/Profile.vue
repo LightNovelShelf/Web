@@ -133,6 +133,12 @@ const profileListOptions: Array<Record<string, any>> = [
     copiable: true
   },
   {
+    label: '邀请码',
+    key: 'InviteCode',
+    icon: icon.mdiLockPlus,
+    copiable: true
+  },
+  {
     label: '用户组',
     key: 'UserGroup',
     value: (u) => u?.Role.Name,
