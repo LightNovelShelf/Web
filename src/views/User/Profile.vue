@@ -15,10 +15,13 @@
               </q-item-section>
               <q-item-section class="label-item">{{ option.label }}</q-item-section>
               <q-item-section side v-if="!['Avatar'].includes(option.key)">
-                {{ option.value ? option.value(user) : user?.[option.key] }}
+                {{ (option.value ? option.value(user) : user?.[option.key]).replace(/(.)/g, option.hide ? '*' : '$1') }}
               </q-item-section>
               <q-item-section side v-if="option.editable">
                 <q-icon size="18px" :name="icon.mdiChevronRight" />
+              </q-item-section>
+              <q-item-section side v-if="option.hide != undefined" @click="option.hide = !option.hide">
+                <q-icon size="18px" :name="option.hide ? icon.mdiEye : icon.mdiEyeOff" />
               </q-item-section>
             </q-item>
           </template>
@@ -105,7 +108,7 @@ const qqAvatarReg = /https:\/\/q.qlogo.cn\/headimg_dl\?spec=100&dst_uin=/
 const qqGroupAvatarReg = /https:\/\/p.qlogo.cn\/gh\/([0-9]*)\/([0-9]*)\/100/
 const qqAvatarUrl = 'https://q.qlogo.cn/headimg_dl?spec=100&dst_uin='
 const qqGroupAvatarUrl = 'https://p.qlogo.cn/gh/{group_num}/{group_num}/100'
-const profileListOptions: Array<Record<string, any>> = [
+const profileListOptions: Array<Record<string, any>> = reactive([
   {
     label: '头像',
     key: 'Avatar',
@@ -136,7 +139,8 @@ const profileListOptions: Array<Record<string, any>> = [
     label: '邀请码',
     key: 'InviteCode',
     icon: icon.mdiLockPlus,
-    copiable: true
+    copiable: true,
+    hide: true
   },
   {
     label: '用户组',
@@ -156,7 +160,7 @@ const profileListOptions: Array<Record<string, any>> = [
     value: (u) => (u?.RegisterTime ? parseTime(u.RegisterTime).format('YYYY-MM-DD') : null),
     icon: icon.mdiCalendarRangeOutline
   }
-]
+])
 
 async function handleSubmit() {
   let avatarVal = ''
