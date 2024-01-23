@@ -15,10 +15,15 @@
               </q-item-section>
               <q-item-section class="label-item">{{ option.label }}</q-item-section>
               <q-item-section side v-if="!['Avatar'].includes(option.key)">
-                {{ option.value ? option.value(user) : user?.[option.key] }}
+                {{
+                  option.value ? option.value(user) : option.hide ? getHideChar(user?.[option.key]) : user?.[option.key]
+                }}
               </q-item-section>
               <q-item-section side v-if="option.editable">
                 <q-icon size="18px" :name="icon.mdiChevronRight" />
+              </q-item-section>
+              <q-item-section side v-if="option.hide != undefined" @click.stop="option.hide = !option.hide">
+                <q-icon size="18px" :name="option.hide ? icon.mdiEye : icon.mdiEyeOff" />
               </q-item-section>
             </q-item>
           </template>
@@ -77,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, ref, watch, reactive } from 'vue'
 import { icon } from 'assets/icon'
 import { useAppStore } from 'stores/app'
 import { storeToRefs } from 'pinia'
@@ -105,7 +110,7 @@ const qqAvatarReg = /https:\/\/q.qlogo.cn\/headimg_dl\?spec=100&dst_uin=/
 const qqGroupAvatarReg = /https:\/\/p.qlogo.cn\/gh\/([0-9]*)\/([0-9]*)\/100/
 const qqAvatarUrl = 'https://q.qlogo.cn/headimg_dl?spec=100&dst_uin='
 const qqGroupAvatarUrl = 'https://p.qlogo.cn/gh/{group_num}/{group_num}/100'
-const profileListOptions: Array<Record<string, any>> = [
+const profileListOptions: Array<Record<string, any>> = reactive([
   {
     label: '头像',
     key: 'Avatar',
@@ -136,7 +141,8 @@ const profileListOptions: Array<Record<string, any>> = [
     label: '邀请码',
     key: 'InviteCode',
     icon: icon.mdiLockPlus,
-    copiable: true
+    copiable: true,
+    hide: true
   },
   {
     label: '用户组',
@@ -156,7 +162,11 @@ const profileListOptions: Array<Record<string, any>> = [
     value: (u) => (u?.RegisterTime ? parseTime(u.RegisterTime).format('YYYY-MM-DD') : null),
     icon: icon.mdiCalendarRangeOutline
   }
-]
+])
+
+function getHideChar(str: string) {
+  return str?.replace(/(.)/g, '*')
+}
 
 async function handleSubmit() {
   let avatarVal = ''
