@@ -15,12 +15,14 @@
               </q-item-section>
               <q-item-section class="label-item">{{ option.label }}</q-item-section>
               <q-item-section side v-if="!['Avatar'].includes(option.key)">
-                {{ (option.value ? option.value(user) : user?.[option.key]).replace(/(.)/g, option.hide ? '*' : '$1') }}
+                {{
+                  option.value ? option.value(user) : option.hide ? getHideChar(user?.[option.key]) : user?.[option.key]
+                }}
               </q-item-section>
               <q-item-section side v-if="option.editable">
                 <q-icon size="18px" :name="icon.mdiChevronRight" />
               </q-item-section>
-              <q-item-section side v-if="option.hide != undefined" @click="option.hide = !option.hide">
+              <q-item-section side v-if="option.hide != undefined" @click.stop="option.hide = !option.hide">
                 <q-icon size="18px" :name="option.hide ? icon.mdiEye : icon.mdiEyeOff" />
               </q-item-section>
             </q-item>
@@ -80,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, ref, watch, reactive} from 'vue'
+import { computed, defineComponent, ref, watch, reactive } from 'vue'
 import { icon } from 'assets/icon'
 import { useAppStore } from 'stores/app'
 import { storeToRefs } from 'pinia'
@@ -161,6 +163,10 @@ const profileListOptions: Array<Record<string, any>> = reactive([
     icon: icon.mdiCalendarRangeOutline
   }
 ])
+
+function getHideChar(str: string) {
+  return str?.replace(/(.)/g, '*')
+}
 
 async function handleSubmit() {
   let avatarVal = ''
