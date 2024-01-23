@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, ref, watch, reactive} from 'vue'
 import { icon } from 'assets/icon'
 import { useAppStore } from 'stores/app'
 import { storeToRefs } from 'pinia'
