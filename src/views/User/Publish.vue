@@ -187,6 +187,10 @@ const categoryOptions = ref([
   {
     label: '原创',
     value: 7
+  },
+  {
+    label: 'AI翻译',
+    value: 8
   }
 ])
 const createBookData = reactive<QuickCreateBook.Request>({
