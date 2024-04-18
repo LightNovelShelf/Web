@@ -1,10 +1,15 @@
 import DOMPurify from 'dompurify'
 
 let sanitizer: null | { sanitizeFor: (...args: unknown[]) => any } = null
-if (window.Sanitizer) {
-  const defaultConfig = new window.Sanitizer().getConfiguration()
-  defaultConfig.allowElements.push('svg')
-  sanitizer = new window.Sanitizer(defaultConfig)
+
+try {
+  if (window.Sanitizer) {
+    const defaultConfig = new window.Sanitizer().getConfiguration()
+    defaultConfig.allowElements.push('svg')
+    sanitizer = new window.Sanitizer(defaultConfig)
+  }
+} catch (e) {
+  // ignore
 }
 
 export default function sanitizerHtml(content: string, tag = 'div') {
