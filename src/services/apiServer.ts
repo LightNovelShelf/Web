@@ -7,8 +7,8 @@ const apiServerOptions = [
     value: 'https://api.lightnovel.life'
   },
   {
-    label: 'lightnovel.life (CloudFlare)',
-    value: 'https://api-cf.lightnovel.life'
+    label: 'lightnovel.life (临时)',
+    value: 'https://api-2.lightnovel.life'
   }
 ]
 
@@ -19,6 +19,6 @@ if (__DEV__) {
   })
 }
 
-const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V3', apiServerOptions[0].value)
+const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V4', apiServerOptions[0].value)
 
 export { apiServer, apiServerOptions }
