@@ -63,6 +63,17 @@
           </q-tooltip>
         </q-fab-action>
         <q-fab-action
+          @click="toggleDark"
+          color="primary"
+          :icon="
+            Dark.mode === 'auto' ? icon.mdiBrightnessAuto : Dark.mode ? icon.mdiWeatherNight : icon.mdiWeatherSunny
+          "
+        >
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            切换颜色模式
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action
           v-if="$q.fullscreen.isCapable && !readSetting['hideFullScreen']"
           @click="$q.fullscreen.toggle()"
           color="primary"
@@ -220,6 +231,19 @@ const bgStyle = computed(() => ({
       : 'initial',
   backgroundColor: readSetting.bgType === 'custom' ? readSetting.customColor : 'initial'
 }))
+
+const { dark } = storeToRefs(settingStore)
+watch(dark, (newDark) => {
+  Dark.set(newDark)
+  settingStore.save()
+})
+function toggleDark() {
+  if (Dark.mode === 'auto') {
+    dark.value = !Dark.isActive
+  } else {
+    dark.value = !Dark.mode
+  }
+}
 
 const readStyle = computed(() => ({
   fontSize: readSetting.fontSize + 'px',
