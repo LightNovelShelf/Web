@@ -3,16 +3,12 @@ import { useStorage } from '@vueuse/core'
 // 第一个就是默认的
 const apiServerOptions = [
   {
-    label: 'lightnovel.life (HK)',
-    value: 'https://api-hk.lightnovel.life:45122'
-  },
-  {
-    label: 'lightnovel.life (CloudFlare)',
+    label: 'lightnovel.life',
     value: 'https://api.lightnovel.life'
   },
   {
-    label: 'lightnovel.app (HK 被污染)',
-    value: 'https://api.lightnovel.app:45122'
+    label: 'lightnovel.life (临时)',
+    value: 'https://api-2.lightnovel.life'
   }
 ]
 
@@ -23,6 +19,6 @@ if (__DEV__) {
   })
 }
 
-const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V1', apiServerOptions[0].value)
+const apiServer = useStorage((VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V4', apiServerOptions[0].value)
 
 export { apiServer, apiServerOptions }

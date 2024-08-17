@@ -13,6 +13,7 @@ export {
   mdiBroadcast,
   mdiBroadcastOff,
   mdiBell,
+  mdiBrightnessAuto,
   mdiHistory,
   mdiMessageText,
   mdiCog,
@@ -102,6 +103,8 @@ export {
   mdiContentSave,
   mdiSquareEditOutline,
   mdiWalletOutline,
+  mdiWeatherNight,
+  mdiWeatherSunny,
   mdiAccountCog,
   mdiPen,
   mdiFuriganaHorizontal,
@@ -121,5 +124,6 @@ export {
   mdiImage,
   mdiStar,
   mdiCommentMultiple,
-  mdiCircleDouble
+  mdiCircleDouble,
+  mdiLockPlus
 } from '@mdi/js'

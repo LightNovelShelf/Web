@@ -3,7 +3,7 @@ import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum, SHELF_STR
 import { shelfDB, shelfStructVerDB } from 'src/utils/storage/db'
 import { toRaw } from 'vue'
 import { produce } from 'immer'
-import { isEqual } from 'lodash-es'
+import isEqual from 'lodash.isequal'
 import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
 import { getBookShelfBinary, saveBookShelf } from 'src/services/user'

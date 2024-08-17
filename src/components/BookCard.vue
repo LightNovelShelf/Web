@@ -46,7 +46,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useToNow } from 'src/composition/useToNow'
+import { useToNowRef } from 'src/composition/useToNowRef'
 import { BookInList } from 'src/services/book/types'
 import { useQuasar } from 'quasar'
 import BlurHash from 'src/components/BlurHash.vue'
@@ -57,13 +57,7 @@ const { generalSetting } = settingStore // 引入setting用于控制图片自定
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const cover = computed(() => props.book.Cover)
-const updateTime = computed(() => {
-  if (+props.book.LastUpdateTime <= 0) {
-    return ''
-  }
-
-  return useToNow(computed(() => props.book.LastUpdateTime)).value
-})
+const updateTime = useToNowRef(() => props.book.LastUpdateTime)
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting
