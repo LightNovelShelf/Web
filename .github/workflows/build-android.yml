@@ -17,10 +17,10 @@ jobs:
       - name: 设置权限
         run: chmod -R 755 ./src-capacitor/android/
 
-      - name: 设置 JDK 11
+      - name: 设置 JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: 设置 Android SDK
