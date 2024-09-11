@@ -31,15 +31,31 @@
               <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
             </template>
           </q-input>
-          <vue-turnstile ref="turnstile" v-model="token" />
+          <vue-turnstile
+            ref="turnstile"
+            v-model="token"
+            theme="auto"
+            @passed="() => (canLogin = true) && (loading = false)"
+          />
           <div class="row">
             <q-btn rounded flat :to="{ name: 'Register' }">注册</q-btn>
             <q-space />
             <q-btn rounded flat :to="{ name: 'Reset' }">忘记密码</q-btn>
           </div>
-          <q-btn :loading="loading" color="primary" style="height: 50px" class="full-width" type="submit">
+          <q-btn
+            :loading="loading"
+            :color="canLogin ? 'primary' : 'secondary'"
+            style="height: 50px"
+            class="full-width"
+            type="submit"
+            :disable="!canLogin"
+          >
             登录
             <q-icon right size="24px" :name="icon.mdiSend" />
+            <template v-slot:loading>
+              <q-spinner-hourglass class="on-left" />
+              加载中
+            </template>
           </q-btn>
         </q-form>
       </div>
@@ -66,9 +82,10 @@ const password = ref('')
 const token = ref()
 const turnstile = ref()
 const isPwd = ref(true)
-const loading = ref(false)
+const loading = ref(true)
 const route = useRoute()
 const router = useRouter()
+const canLogin = ref(false)
 
 const _login = async () => {
   if (!turnstile.value?.loaded || !token.value) {

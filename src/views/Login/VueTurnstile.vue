@@ -2,9 +2,13 @@
   <div ref="box" />
 </template>
 
-<script setup>
-const props = defineProps({ modelValue: String })
-const emits = defineEmits(['update:modelValue'])
+<script setup lang="ts">
+const props = defineProps({
+  modelValue: String,
+  theme: String as PropType<'light' | 'dark' | 'auto'>,
+  size: String as PropType<'normal' | 'flexible' | 'compact'>
+})
+const emits = defineEmits(['update:modelValue', 'passed'])
 
 const loaded = ref(!!window.turnstile)
 const widgetId = ref()
@@ -13,9 +17,28 @@ const box = ref()
 function render() {
   widgetId.value = window.turnstile.render(box.value, {
     sitekey: VUE_CAPTCHA_SITE_KEY,
-    callback: (response) => emits('update:modelValue', response),
-    'expired-callback': emits('update:modelValue', null),
-    'error-callback': emits('update:modelValue', null)
+    callback: (response) => {
+      emits('passed')
+      emits('update:modelValue', response)
+    },
+    'expired-callback': () => {
+      emits('passed')
+      emits('update:modelValue', null)
+    },
+    'error-callback': () => {
+      emits('passed')
+      emits('update:modelValue', null)
+    },
+    'unsupported-callback': () => {
+      emits('passed')
+      emits('update:modelValue', null)
+    },
+    'timeout-callback': () => {
+      emits('passed')
+      emits('update:modelValue', null)
+    },
+    theme: props.theme ?? 'auto',
+    size: props.size ?? 'flexible'
   })
 }
 
@@ -29,6 +52,7 @@ onMounted(() => {
     script.defer = true
     document.head.appendChild(script)
 
+    //@ts-expect-error
     window.onloadTurnstileCallback = () => {
       loaded.value = true
       render()
