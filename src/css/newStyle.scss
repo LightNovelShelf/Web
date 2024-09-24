@@ -1,0 +1,47 @@
+:root {
+  --font-color: rgb(100, 100, 100);
+  --font-color-dark: rgb(50, 50, 50);
+}
+
+
+@font-face {
+  font-family: "pingfang";
+  src: url("../../public/font/pingfang.ttf");
+}
+
+body {
+  font-family: pingfang, sans-serif !important;
+  color: var(--font-color);
+}
+
+
+main {
+  max-width: 1450px !important;
+}
+
+.q-card {
+  border-radius: 10px !important;
+}
+
+.book-name {
+  justify-content: center;
+  padding-top: .15em;
+}
+
+.book-name-text {
+  color: var(--font-color-dark);
+  font-size: 13px !important;
+}
+
+.text-subtitle1 {
+  font-size: 20px !important;
+}
+
+.introduction {
+  line-height: unset !important;
+}
+
+.read {
+  color: var(--font-color-dark) !important;
+}
+
