@@ -19,6 +19,7 @@ import { NOOP } from 'src/const/empty'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 import { OverlayScrollbars } from 'overlayscrollbars'
 import { onMounted } from 'vue'
+import 'src/css/newStyle.scss'
 
 const $q = useQuasar()
 
