@@ -14,8 +14,7 @@
         style="padding: 0 0 0 12px"
       >
         <div class="row flex-center">
-          <q-icon size="24px" :name="icon.mdiInformation" />
-          <q-tooltip anchor="bottom right" self="top right"> 欢迎来稿一个新的网站图标 </q-tooltip>
+          <q-icon size="48px" name="svguse:icons.svg#bookshelf" />
         </div>
         <q-toolbar-title shrink @click="changAppName">
           {{ appName }}
