@@ -14,7 +14,7 @@
         style="padding: 0 0 0 12px"
       >
         <div class="row flex-center">
-          <q-icon size="48px" name="svguse:icons.svg#bookshelf" />
+          <q-icon size="24px" name="svguse:icons.svg#book" />
         </div>
         <q-toolbar-title shrink @click="changAppName">
           {{ appName }}
