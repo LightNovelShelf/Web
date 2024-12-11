@@ -47,7 +47,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useToNowRef } from 'src/composition/useToNowRef'
-import { BookInList } from 'src/services/book/types'
+import type { BookInList } from 'src/services/book/types'
 import { useQuasar } from 'quasar'
 import BlurHash from 'src/components/BlurHash.vue'
 import { useSettingStore } from 'stores/setting'

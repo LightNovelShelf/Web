@@ -32,5 +32,5 @@ export const longTermToken = {
   },
   set(token: string): Promise<void> {
     return userAuthenticationDB.set('RefreshToken', token).then(NOOP)
-  }
+  },
 }

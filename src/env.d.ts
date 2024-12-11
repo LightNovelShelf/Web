@@ -1,25 +1,15 @@
-/* eslint-disable */
-
 declare namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: string
     VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined
     VUE_ROUTER_BASE: string | undefined
+    /** Code runs in development mode */
+    DEV: boolean
+    /** Code runs in production mode */
+    PROD: boolean
+    /** Code runs in development mode or `--debug` flag was set for production mode */
+    DEBUGGING: boolean
+    /** Quasar CLI mode (spa, pwa, …) */
+    MODE: string
   }
 }
-
-/** 是否位于开发模式 */
-declare const __DEV__: boolean
-
-/** 人机检查密钥 */
-declare const VUE_CAPTCHA_SITE_KEY: string
-/** token有效期，ms；当前是30s */
-declare const VUE_APP_TOKEN_EXP_TIME: string
-/** APP标识，方便多实例共享localhost等域名时，区分cache前缀 */
-declare const VUE_APP_NAME: string
-/** session有效期，ms */
-declare const VUE_SESSION_TOKEN_VALIDITY: string
-/** 版本号VER */
-// declare const VUE_APP_VER: string
-/** 是否打印ws的返回信息 */
-declare const VUE_TRACE_SERVER: string

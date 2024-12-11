@@ -1,4 +1,4 @@
-import { store } from 'quasar/wrappers'
+import { defineStore } from '#q-app/wrappers'
 import { createPinia } from 'pinia'
 import { createPiniaLoading } from './plugin/piniaLoading'
 
@@ -10,7 +10,7 @@ import { createPiniaLoading } from './plugin/piniaLoading'
  * async/await or return a Promise which resolves
  * with the Store instance.
  */
-export default store((/* { ssrContext } */) => {
+export default defineStore((/* { ssrContext } */) => {
   const pinia = createPinia()
 
   pinia.use(createPiniaLoading())

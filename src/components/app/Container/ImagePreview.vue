@@ -8,11 +8,12 @@
 <script lang="ts" setup>
 import { provide } from 'vue'
 import { PROVIDE } from 'src/const/provide'
+import 'viewerjs/dist/viewer.min.css'
 
 // 用于单张图片预览
 const showImage = reactive({
   src: null,
-  alt: ''
+  alt: '',
 })
 
 const viewerRef = ref()
@@ -27,7 +28,7 @@ provide(PROVIDE.IMAGE_PREVIEW, {
   show,
   get isShow() {
     return viewerRef.value.$viewer.isShown
-  }
+  },
 })
 </script>
 

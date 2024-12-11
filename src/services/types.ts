@@ -1,7 +1,7 @@
 /** 用到的http method */
 export enum RequestMethod {
   GET = 'GET',
-  POST = 'POST'
+  POST = 'POST',
 }
 /** 请求选项 */
 export interface RequestConfig<Data> {

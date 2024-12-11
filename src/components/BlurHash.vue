@@ -16,7 +16,7 @@ watchEffect(() => {
     /** img的比例就是 2/3 所以decode时也贴近这个比例 */
     const decodeSize = {
       width: 2 * 10,
-      height: 3 * 10
+      height: 3 * 10,
     }
 
     // canvas的width是指画布的逻辑大小，与canvas元素大小不一样时浏览器会自己拉伸，就像图片拉伸

@@ -1,7 +1,5 @@
 {
-  "appId": "app.lightnovel.android",
+  "appId": "dev.wuyu.bookshelf",
   "appName": "轻书架",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
   "webDir": "www"
 }

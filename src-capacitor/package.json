@@ -2,11 +2,11 @@
   "name": "light_novel_shelf",
   "version": "0.0.1",
   "description": "A Online Novel Reading Project",
-  "author": "wuyu8512 <wuyu8512@gmail.com>",
+  "author": "wuyu <https://github.com/wuyu8512>",
   "private": true,
   "dependencies": {
-    "@capacitor/android": "^2.5.0",
-    "@capacitor/cli": "^2.0.0",
-    "@capacitor/core": "^2.0.0"
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
   }
 }

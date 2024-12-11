@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { ShelfItem, ShelfBookItem, ShelfFolderItem, ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
+import type { ShelfItem, ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
+import { ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
 import { shelfDB, shelfStructVerDB } from 'src/utils/storage/db'
 import { toRaw } from 'vue'
 import { produce } from 'immer'
@@ -10,7 +11,7 @@ import { getBookShelfBinary, saveBookShelf } from 'src/services/user'
 
 export enum ShelfBranch {
   main = 'main',
-  draft = 'draft'
+  draft = 'draft',
 }
 type ShelfSourceStruct = {
   [key in ShelfBranch]: ShelfItem[]
@@ -31,9 +32,9 @@ const INIT: ShelfStore = {
   selected: new Set(),
   source: {
     [ShelfBranch.main]: [],
-    [ShelfBranch.draft]: []
+    [ShelfBranch.draft]: [],
   },
-  branch: ShelfBranch.main
+  branch: ShelfBranch.main,
 }
 
 /**
@@ -150,9 +151,9 @@ const shelfStore = defineStore('app.shelf', {
     /** 选中的书籍 */
     selectedBooks(): ShelfBookItem[] {
       return this.shelf.filter(
-        (i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && this.selected.has(i.id))
+        (i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && this.selected.has(i.id)),
       )
-    }
+    },
   },
   actions: {
     /** git ------------ */
@@ -167,7 +168,7 @@ const shelfStore = defineStore('app.shelf', {
       await shelfStructVerDB.set('VER', SHELF_STRUCT_VER.LATEST)
 
       this.commit({
-        shelf: this.squeezeShelfItemIndex(toRaw(this.shelf))
+        shelf: this.squeezeShelfItemIndex(toRaw(this.shelf)),
       })
 
       // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
@@ -291,7 +292,7 @@ const shelfStore = defineStore('app.shelf', {
         parents: [],
         // 添加到首位
         index: 0,
-        updateAt: new Date().toISOString()
+        updateAt: new Date().toISOString(),
       }
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
@@ -304,7 +305,7 @@ const shelfStore = defineStore('app.shelf', {
               item.index += 1
             }
           })
-        })
+        }),
       })
       await this.push({ syncRetome: true })
     },
@@ -316,8 +317,8 @@ const shelfStore = defineStore('app.shelf', {
         // 移出后index就会出现空洞，squeeze一次
         shelf: this.squeezeShelfItemIndex(
           // 删除项目
-          produce(toRaw(this.shelf), (draft) => draft.filter((i) => !items.has(i.id)))
-        )
+          produce(toRaw(this.shelf), (draft) => draft.filter((i) => !items.has(i.id))),
+        ),
       })
 
       // 如果标记为立即push（比如 详请页 移出收藏 场景）
@@ -367,8 +368,8 @@ const shelfStore = defineStore('app.shelf', {
                 item.index += 1
               }
             })
-          })
-        )
+          }),
+        ),
       })
     },
     /** 选中记录 */
@@ -400,8 +401,8 @@ const shelfStore = defineStore('app.shelf', {
                 item.index += 1
               }
             })
-          })
-        )
+          }),
+        ),
       })
 
       // 清掉选择状态，不然会导致数据一直认为有已选的项目
@@ -414,7 +415,7 @@ const shelfStore = defineStore('app.shelf', {
           type: 'negative',
           timeout: 1500,
           position: 'bottom',
-          message: '该文件夹名字无效'
+          message: '该文件夹名字无效',
         })
         return ''
       }
@@ -426,7 +427,7 @@ const shelfStore = defineStore('app.shelf', {
             type: 'negative',
             timeout: 1500,
             position: 'bottom',
-            message: '已有同名文件夹'
+            message: '已有同名文件夹',
           })
           return ''
         }
@@ -442,7 +443,7 @@ const shelfStore = defineStore('app.shelf', {
         parents: [],
         id: folderID,
         title: payload.name,
-        updateAt: new Date().toISOString()
+        updateAt: new Date().toISOString(),
       }
 
       this.commit({
@@ -455,8 +456,8 @@ const shelfStore = defineStore('app.shelf', {
 
             // 压入首位
             draft.unshift(folder)
-          })
-        )
+          }),
+        ),
       })
 
       return folderID
@@ -471,14 +472,13 @@ const shelfStore = defineStore('app.shelf', {
               return
             }
           }
-        })
+        }),
       })
     },
     /** 删除文件夹 */
     deleteFolder(payload: { id: string }) {
       this.commit({
         shelf: this.squeezeShelfItemIndex(
-          // @ts-ignore
           produce(toRaw(this.shelf), (draft) => {
             let currentMaxIndex = this.curMaxIndexInFolder(null)
 
@@ -504,15 +504,15 @@ const shelfStore = defineStore('app.shelf', {
                 type: 'negative',
                 timeout: 1500,
                 position: 'bottom',
-                message: '文件夹ID无效，请联系开发者'
+                message: '文件夹ID无效，请联系开发者',
               })
               return
             }
 
             // 删除文件夹
             draft.splice(folderIndex, 1)
-          })
-        )
+          }),
+        ),
       })
     },
     /** 保存修改 */
@@ -521,10 +521,10 @@ const shelfStore = defineStore('app.shelf', {
       this.merge({ to: ShelfBranch.main })
       this.checkout({ to: ShelfBranch.main })
       await this.push({ syncRetome: true })
-    }
+    },
 
     /** actions end */
-  }
+  },
 })
 
 /** @public 书架store */

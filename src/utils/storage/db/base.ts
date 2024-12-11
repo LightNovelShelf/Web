@@ -66,7 +66,7 @@ export class DB<Value = unknown> {
       storeName: name,
       version: VER,
       description: DB_DESC,
-      driver: localforage.INDEXEDDB
+      driver: localforage.INDEXEDDB,
     })
   }
 
@@ -80,7 +80,7 @@ export class DB<Value = unknown> {
     /** DB名，需要保证全局唯一 */
     DB_NAME: string,
     /** DB描述 */
-    DB_DESC = ''
+    DB_DESC = '',
 
     /** db配置 */
     // config?: {}

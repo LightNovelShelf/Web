@@ -39,9 +39,9 @@
             v-if="connectState === HubConnectionState.Connected"
             color="positive"
             size="24px"
-            :name="icon.mdiBroadcast"
+            name="mdiBroadcast"
           />
-          <q-icon left v-else color="negative" size="24px" :name="icon.mdiBroadcastOff" />
+          <q-icon left v-else color="negative" size="24px" name="mdiBroadcast" />
 
           <span v-if="connectState === HubConnectionState.Connected">当前在线</span>
           <span v-else-if="connectState === HubConnectionState.Reconnecting">正在尝试重新连接</span>
@@ -53,7 +53,6 @@
 </template>
 
 <script lang="ts" setup>
-import { icon } from 'assets/icon'
 import { connectState } from 'src/services/utils'
 import { useLayout } from './useLayout'
 import { HubConnectionState } from '@microsoft/signalr'
@@ -63,91 +62,91 @@ const menuOptions: Array<Record<string, any>> = [
     label: '首页',
     key: 'Home',
     route: 'Home',
-    icon: icon.mdiHome
+    icon: 'mdiHome',
   },
   {
     label: '公告',
     key: 'Announcement',
     route: 'Announcement',
-    icon: icon.mdiBullhorn
+    icon: 'mdiBullhorn',
   },
   {
     label: '订阅内容',
     key: 'Subscriptions',
     route: 'Subscriptions',
     disabled: true,
-    icon: icon.mdiPinwheel
+    icon: 'mdiPinwheel',
   },
   {
     label: 'separator',
-    key: 'separator 0'
+    key: 'separator 0',
   },
   {
     label: '全部小说',
     key: 'BookList',
-    icon: icon.mdiBook,
+    icon: 'mdiBook',
     route: 'BookList',
-    params: { order: 'latest', page: '1' }
+    params: { order: 'latest', page: '1' },
   },
   {
     label: '近期排行',
     key: 'BookRank',
-    icon: icon.mdiFire,
+    icon: 'mdiFire',
     route: 'BookRank',
-    params: { type: 'weekly' }
+    params: { type: 'weekly' },
   },
   {
     label: '我的书架',
     key: 'MyShelf',
     route: 'MyShelf',
-    icon: icon.mdiFolderHeartOutline
+    icon: 'mdiFolderHeartOutline',
   },
   {
     label: 'separator',
-    key: 'separator 1'
+    key: 'separator 1',
   },
   {
     label: '社区',
     key: 'Community',
     route: 'ForumList',
     disabled: true,
-    icon: icon.mdiForum
+    icon: 'mdiForum',
   },
   {
     label: '阅读历史',
     key: 'History',
     route: 'History',
-    icon: icon.mdiHistory
+    icon: 'mdiHistory',
   },
   {
     label: 'separator',
-    key: 'separator 2'
+    key: 'separator 2',
   },
   {
     label: '设置',
     key: 'Setting',
     route: 'Setting',
-    icon: icon.mdiCog
+    icon: 'mdiCog',
   },
   {
     label: '帮助',
     key: 'Help',
     route: 'Help',
     disabled: true,
-    icon: icon.mdiHelpCircle
+    icon: 'mdiHelpCircle',
   },
   {
     label: '发送反馈',
     key: 'send_feedback',
     disabled: true,
-    icon: icon.mdiMessageAlert
+    icon: 'mdiMessageAlert',
   },
   {
     label: '贡献列表',
     key: 'collaborator',
     route: 'Collaborator',
-    icon: icon.mdiAccountMultiple
-  }
+    icon: 'mdiAccountMultiple',
+  },
 ]
 
 const layout = useLayout()

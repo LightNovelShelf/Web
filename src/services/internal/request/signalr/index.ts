@@ -1,4 +1,5 @@
-import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr'
+import type { HubConnection } from '@microsoft/signalr'
+import { HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ref } from 'vue'
 import { ungzip } from 'pako'
@@ -51,11 +52,11 @@ function buildHub(url: string) {
           }
         }
         return token
-      }
+      },
     })
     .withAutomaticReconnect(new RetryPolicy())
     .withHubProtocol(new MessagePackHubProtocol())
-    .configureLogging(__DEV__ ? LogLevel.Information : LogLevel.Critical)
+    .configureLogging(process.env.APP_URL ? LogLevel.Information : LogLevel.Critical)
     .build()
   h.onclose(setState)
   h.onreconnecting(setState)
@@ -214,7 +215,7 @@ export { requestWithSignalrInRateLimit as requestWithSignalr }
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
   const inspector = new SignalrInspector(methodName, [])
-  if (__DEV__ && VUE_TRACE_SERVER) {
+  if (process.env.DEV && process.env.VUE_TRACE_SERVER) {
     _cb = (res: Res): void => {
       inspector.add(inspector.TYPE_ENUM.REVICE, { data: res })
       inspector.flush({ clear: false })

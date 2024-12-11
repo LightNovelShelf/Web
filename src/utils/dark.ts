@@ -15,5 +15,5 @@ export const Dark = {
   },
   set(value: 'auto' | boolean) {
     localStorage.setItem(Key, `${value}`)
-  }
+  },
 }

@@ -1,4 +1,5 @@
-import { onMounted, onBeforeUnmount, ref, Ref } from 'vue'
+import type { Ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import MiniMasonry from 'minimasonry'
 
 export interface UseMasonryAction {
@@ -14,13 +15,13 @@ export function useMasonry(ele: Ref<Element>): UseMasonryAction {
     instance.value = new MiniMasonry({
       container: ele.value,
       surroundingGutter: false,
-      gutter: 15
+      gutter: 15,
     })
   })
 
   const actions: UseMasonryAction = {
     layout: () => instance.value?.layout(),
-    destroy: () => instance.value?.destroy()
+    destroy: () => instance.value?.destroy(),
   }
 
   onBeforeUnmount(actions.destroy)

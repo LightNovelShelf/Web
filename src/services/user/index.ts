@@ -1,16 +1,15 @@
 import { rebootSignalr, requestWithFetch, requestWithSignalr } from 'src/services/internal/request'
 import { PATH } from 'src/services/path'
 import { longTermToken, sessionToken } from 'src/utils/session'
-import * as Types from './type'
+import type * as Types from './type'
 import { RequestMethod } from 'src/services/types'
 import type { ShelfItem, SHELF_STRUCT_VER } from 'src/types/shelf'
-import type { ShelfLegacyStruct } from 'src/utils/migrations/shelf/struct/types'
-import { QuickCreateBook } from './type'
+import type * as ShelfLegacyStruct from 'src/utils/migrations/shelf/struct/types'
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
   const res = await requestWithFetch<Types.Login.Res, Types.Login.Param>(PATH.USER_LOGIN, {
-    payload: { email, password, token }
+    payload: { email, password, token },
   })
 
   // 记录到全局变量中, 方便其它业务取值
@@ -33,7 +32,7 @@ export async function login(email: string, password: string, token: string) {
 /** 换取会话密钥 */
 export async function refreshToken(longTermToken: string) {
   const token = await requestWithFetch<Types.RefreshToken.Res, Types.RefreshToken.Param>(PATH.USER_REFRESH_TOKEN, {
-    payload: { token: longTermToken }
+    payload: { token: longTermToken },
   })
 
   /** 刷新成功后自动更新会话密钥 */
@@ -57,29 +56,26 @@ export async function getReadHistory() {
 export async function sendResetEmail(email: string, token: string) {
   await requestWithFetch<void, { email: string; token: string }>(PATH.USER_SEND_RESET_EMAIL, {
     payload: { email, token },
-    method: RequestMethod.GET
+    method: RequestMethod.GET,
   })
 }
 
 export async function sendRegisterEmail(email: string, token: string) {
   await requestWithFetch<void, { email: string; token: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
     payload: { email, token },
-    method: RequestMethod.GET
+    method: RequestMethod.GET,
   })
 }
 
 export async function resetPassword(email: string, newPassword: string, code: string) {
   await requestWithFetch<void, { email: string; code: string; newPassword: string }>(PATH.USER_RESET_PASSWORD, {
-    payload: { email, code, newPassword }
+    payload: { email, code, newPassword },
   })
 }
 
 export async function register(userName: string, email: string, password: string, code: string, inviteCode: string) {
-  const res = await requestWithFetch<
-    Types.Login.Res,
-    { userName: string; email: string; code: string; password: string; inviteCode: string }
-  >(PATH.USER_REGISTER, {
-    payload: { userName, email, password, code, inviteCode }
+  const res = await requestWithFetch<Types.Register.Res, Types.Register.Param>(PATH.USER_REGISTER, {
+    payload: { userName, email, password, code, inviteCode },
   })
 
   sessionToken.set(res.Token)
@@ -115,7 +111,7 @@ export async function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT
 /** 取用户书架二进制信息 */
 export async function getBookShelfBinary() {
   return requestWithSignalr<{
-    data: (ShelfItem | ShelfLegacyStruct.First.ServerShelfItem)[]
+    data: (ShelfItem | ShelfLegacyStruct.ServerShelfItem)[]
     /** @legacy 历史数据可能没有ver这个键值 */
     ver?: SHELF_STRUCT_VER
   }>('GetBookShelfBinary')

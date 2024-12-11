@@ -16,7 +16,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  position: 'bottom-right'
+  position: 'bottom-right',
 })
 
 const fabPos = ref([])

@@ -1,4 +1,4 @@
-import { AnyFunc } from 'src/types/utils'
+import type { AnyFunc } from 'src/types/utils'
 import { NOOP } from 'src/const/empty'
 
 /**

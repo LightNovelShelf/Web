@@ -25,7 +25,7 @@ const $q = useQuasar()
 $q.loadingBar.setDefaults({
   color: 'purple',
   size: '2px',
-  position: 'top'
+  position: 'top',
 })
 
 const appStore = useAppStore()
@@ -38,7 +38,7 @@ useServerNotify('OnMessage', (message: string) => {
     html: true,
     message: sanitizerHtml(message),
     timeout: 2500,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -49,7 +49,7 @@ useServerNotify('OnError', (message: string) => {
     type: 'negative',
     message: sanitizerHtml(message),
     timeout: 5000,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -60,7 +60,7 @@ useServerNotify('OnSuccess', (message: string) => {
     type: 'positive',
     message: sanitizerHtml(message),
     timeout: 5000,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -72,10 +72,10 @@ const getUser = async () => {
 }
 getUser()
 
-let color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
+const color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
 
 watchEffect(() => {
-  let metaThemeColor = document.querySelector('meta[name=theme-color]')
+  const metaThemeColor = document.querySelector('meta[name=theme-color]')
   metaThemeColor?.setAttribute('content', color.value)
 })
 
@@ -86,17 +86,17 @@ onMounted(() => {
     {
       target: bodyElement,
       cancel: {
-        nativeScrollbarsOverlaid: true
-      }
+        nativeScrollbarsOverlaid: true,
+      },
     },
     {
       scrollbars: {
         theme: 'scrollbar-base scrollbar-auto',
         autoHide: 'move',
         autoHideDelay: 500,
-        autoHideSuspend: false
-      }
-    }
+        autoHideSuspend: false,
+      },
+    },
   )
 })
 </script>

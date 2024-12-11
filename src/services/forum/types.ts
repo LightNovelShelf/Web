@@ -1,11 +1,11 @@
-import { ListResult } from '../types'
+import type { ListResult } from '../types'
 
 export enum ForumType {
   Anime = 'Anime',
   Comic = 'Comic',
   Game = 'Game',
   Novel = 'Novel',
-  Website = 'Website'
+  Website = 'Website',
 }
 
 export namespace GetForumList {

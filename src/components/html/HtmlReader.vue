@@ -23,26 +23,26 @@ const contentRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
 
 function getElement(event: Event) {
-  let target = <Node>event.target
+  const target = <Node>event.target
   if (target instanceof Element) return target
   if (target.parentElement instanceof Element) return target.parentElement
   return null
 }
 
 function clickHandle(event: Event) {
-  let target = getElement(event)
+  const target = getElement(event)
   if (
     target instanceof HTMLImageElement &&
-    (target.parentElement.classList.contains('duokan-image-single') ||
-      target.parentElement.classList.contains('image-preview'))
+    (target.parentElement?.classList.contains('duokan-image-single') ||
+      target.parentElement?.classList.contains('image-preview'))
   ) {
     imagePreview.show(target.src, target.alt)
   } else if (target instanceof HTMLAnchorElement) {
     const reservedWord = ['_self', '_blank', '_parent', '_top']
     const protocol = ['file:', 'ftp:', 'mailto:']
-    if (reservedWord.indexOf(target.getAttribute('href')) !== -1) return
+    if (reservedWord.indexOf(target.getAttribute('href')!) !== -1) return
     for (const p of protocol) {
-      if (target.getAttribute('href').startsWith(p)) return
+      if (target.getAttribute('href')?.startsWith(p)) return
     }
     event.preventDefault()
     readerHandleLinkClick(target)
@@ -62,7 +62,7 @@ function readerHandleLinkClick(a: HTMLAnchorElement) {
   if (href.startsWith('#')) {
     if (href.length === 1 || href === '#top') scrollTo(0, 0)
     const target = document.getElementById(href.replace('#', ''))
-    document.scrollingElement.scrollTop = target.getBoundingClientRect().top - headerOffset.value
+    document!.scrollingElement!.scrollTop = target!.getBoundingClientRect().top - headerOffset.value
     return
   }
 
@@ -89,12 +89,11 @@ function makeUrl(link: string) {
 }
 
 function manageScrollClick(event: any) {
-  // @ts-ignore
   if (readSetting.tapToScroll && !imagePreview.isShow) {
-    let h = window.innerHeight
+    const h = window.innerHeight
     if (event.y < 0.25 * h || event.y > 0.75 * h) {
-      let target = scroll.getScrollTarget(contentRef.value)
-      let offset = scroll.getVerticalScrollPosition(target)
+      const target = scroll.getScrollTarget(contentRef.value!)
+      const offset = scroll.getVerticalScrollPosition(target)
       scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
     }
   }

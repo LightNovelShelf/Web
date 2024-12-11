@@ -19,6 +19,6 @@ export default defineComponent({
         router.replace({ name: 'Login', params: { authRedirect: 1 }, query: { from: encodeURIComponent(fullPath) } })
       }
     })
-  }
+  },
 })
 </script>

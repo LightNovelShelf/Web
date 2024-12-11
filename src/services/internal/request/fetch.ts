@@ -1,4 +1,4 @@
-import { RequestConfig } from 'src/services/types'
+import type { RequestConfig } from 'src/services/types'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { stringifyQuery } from 'vue-router'
 import { ServerError } from 'src/services/internal/ServerError'
@@ -9,14 +9,14 @@ import { getVisitorId } from './getVisitorId'
 
 async function requestWithFetch<Res = unknown, Data = any>(
   url: string,
-  options: RequestConfig<Data> = {}
+  options: RequestConfig<Data> = {},
 ): Promise<Res> {
   const visitorId = await getVisitorId
   // 补全默认值; 项目里绝大部分接口都是POST接口所以默认post了
   options.method = options.method ?? RequestMethod.POST
 
   const fetchOpt: RequestInit = {
-    method: options.method
+    method: options.method,
   }
   const headers = new Headers()
   headers.append('Accept', 'application/json')

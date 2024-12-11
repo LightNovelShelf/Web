@@ -1,7 +1,8 @@
-import { onActivated, onMounted, onDeactivated, Ref } from 'vue'
+import type { Ref } from 'vue';
+import { onActivated, onMounted, onDeactivated } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
-import { UseTimeoutFnAction } from '../useTimeoutFn'
-import { AnyFunc } from 'src/types/utils'
+import type { UseTimeoutFnAction } from '../useTimeoutFn'
+import type { AnyFunc } from 'src/types/utils'
 
 /** 请求初始化流程 */
 export function useInitRequest(
@@ -11,7 +12,7 @@ export function useInitRequest(
     after?: AnyFunc
     isActive?: Ref<boolean>
     onlyRouteEnter?: boolean
-  }
+  },
 ) {
   let first = true
 

@@ -37,5 +37,5 @@ export default new BBCode({
   '\\[list\\](.+?)\\[/list\\]': '<ul>$1</ul>',
   '\\[\\*\\](.+?)\\[/\\*\\]': '<li>$1</li>',
 
-  '\\[ruby=(.+?)\\](.+?)\\[/ruby\\]': '<ruby>$2<rt>$1</rt></ruby>'
+  '\\[ruby=(.+?)\\](.+?)\\[/ruby\\]': '<ruby>$2<rt>$1</rt></ruby>',
 })

@@ -1,14 +1,15 @@
 import { requestWithSignalr } from 'src/services/internal/request'
-import { CommentType, GetComment, PostComment } from './types'
+import type { GetComment, PostComment } from './types'
+import { CommentType } from './types'
 
 /** 评论 */
 export function postComment(req: PostComment.Request) {
-  return requestWithSignalr<PostComment.Response>('PostComment', req)
+  return requestWithSignalr('PostComment', req)
 }
 
 /** 回复评论 */
 export function replyComment(req: PostComment.Request) {
-  return requestWithSignalr<PostComment.Response>('ReplyComment', req)
+  return requestWithSignalr('ReplyComment', req)
 }
 
 /** 获取评论 */

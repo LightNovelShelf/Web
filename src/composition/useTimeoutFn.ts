@@ -1,6 +1,7 @@
 import { NOOP } from 'src/const/empty'
-import { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from 'src/types/utils'
-import { computed, onDeactivated, onUnmounted, Ref, ref } from 'vue'
+import type { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from 'src/types/utils'
+import type { Ref} from 'vue';
+import { computed, onDeactivated, onUnmounted, ref } from 'vue'
 import { useLoadingFn } from './useFnLoading'
 
 /** 延时执行 */
@@ -63,7 +64,7 @@ const DELAY_MS = 200
 export function useTimeoutFn<P extends any[] = any[], R = any>(
   cb: AnyFunc<P, R>,
   delay: number = DELAY_MS,
-  config?: UseTimeoutFnConfig
+  config?: UseTimeoutFnConfig,
 ): UseTimeoutFnAction<P, R> {
   let timeoutContext: NodeJS.Timeout | undefined
   let rejector: ((err?: unknown) => void) | undefined

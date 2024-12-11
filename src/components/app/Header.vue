@@ -6,7 +6,7 @@
     :height-hint="headerHeight"
   >
     <q-toolbar>
-      <q-btn flat dense round aria-label="Menu" :icon="icon.mdiMenu" @click="siderShow = !siderShow" />
+      <q-btn flat dense round aria-label="Menu" icon="mdiMenu" @click="siderShow = !siderShow" />
 
       <div
         class="row q-ml-xs cursor-pointer flex-center non-selectable"
@@ -40,20 +40,20 @@
         <q-btn v-if="$q.screen.gt.xs" round dense flat>
           <!-- <q-badge color="red" floating> 22 </q-badge>-->
           <q-tooltip>通知</q-tooltip>
-          <q-icon :name="icon.mdiBell"></q-icon>
+          <q-icon name="mdiBell"></q-icon>
         </q-btn>
 
         <q-btn v-if="$q.screen.gt.xs" round dense flat>
           <!-- <q-badge color="red" floating> 99+ </q-badge>-->
           <q-tooltip>通知</q-tooltip>
-          <q-icon :name="icon.mdiMessageText"></q-icon>
+          <q-icon name="mdiMessageText"></q-icon>
         </q-btn>
 
         <div style="width: 10px" />
 
         <q-avatar size="36px" ref="avatar">
           <img v-if="user" :src="user.Avatar" alt="avatar" />
-          <q-icon size="36px" v-else :name="icon.mdiAccountCircle"></q-icon>
+          <q-icon size="36px" v-else name="mdiAccountCircle"></q-icon>
 
           <q-menu
             class="avatar-popover"
@@ -82,7 +82,7 @@
                     <div class="col level-item__bar--tag level-item__bar--next">--</div>
                   </div>
 
-                  <div class="text-caption text-opacity level-item__text"> 恭喜你已经是满级了 </div>
+                  <div class="text-caption text-opacity level-item__text">恭喜你已经是满级了</div>
                 </template>
                 <template v-else>
                   <div class="row q-col-gutter-sm items-center">
@@ -126,13 +126,13 @@
                     "
                   >
                     <q-item-section avatar>
-                      <q-icon size="18px" :name="option.icon" />
+                      <q-icon size="18px" :name="option.i" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ option.label }}</q-item-label>
                     </q-item-section>
                     <q-item-section side>
-                      <q-icon size="18px" :name="icon.mdiChevronRight" />
+                      <q-icon size="18px" name="mdiChevronRight" />
                     </q-item-section>
                   </q-item>
                 </template>
@@ -143,7 +143,7 @@
               <div class="logout-item">
                 <q-item clickable v-ripple @click="logout">
                   <q-item-section avatar>
-                    <q-icon size="18px" :name="icon.mdiLogoutVariant" />
+                    <q-icon size="18px" name="mdiLogoutVariant" />
                   </q-item-section>
                   <q-item-section>退出登录</q-item-section>
                 </q-item>
@@ -172,9 +172,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
-import { icon } from 'assets/icon'
 import { useAppStore } from 'stores/app'
 import { useLayout } from './useLayout'
 import { storeToRefs } from 'pinia'
@@ -197,7 +196,7 @@ const { siderShow, headerHeight, siderBreakpoint } = layout
 const searchKey = ref('')
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),
-  window.innerWidth <= siderBreakpoint.value
+  window.innerWidth <= siderBreakpoint.value,
 )
 const router = useRouter()
 
@@ -215,26 +214,26 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
     label: '个人中心',
     key: 'Account',
     route: 'UserProfile',
-    icon: icon.mdiAccountOutline
+    icon: 'mdiAccountOutline',
   },
   {
     label: '发布管理',
     key: 'Contribution',
     route: 'UserPublish',
-    icon: icon.mdiAccountCog
+    icon: 'mdiAccountCog',
   },
   {
     label: '我的书架',
     key: 'MyShelf',
     route: 'MyShelf',
-    icon: icon.mdiFolderHeartOutline
+    icon: 'mdiFolderHeartOutline',
   },
   {
     label: '网站设置',
     key: 'Setting',
     route: 'Setting',
-    icon: icon.mdiCog
-  }
+    icon: 'mdiCog',
+  },
 ]
 
 function onSearch(keyWords: string, exact: boolean) {
@@ -249,7 +248,7 @@ function logout() {
     title: '提示',
     message: '你确定要退出登录吗？',
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(async () => {
     appStore.$reset()
     await longTermToken.set('')

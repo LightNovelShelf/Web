@@ -19,7 +19,7 @@
       :max-width="props.maxWidth"
       :style="{
         width: searchBarWidth,
-        maxWidth: props.maxWidth
+        maxWidth: props.maxWidth,
       }"
     >
       <q-list v-show="!!keyword">
@@ -39,8 +39,8 @@ import { computed, ref, toRefs } from 'vue'
 const props = withDefaults(
   defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),
   {
-    modelValue: ''
-  }
+    modelValue: '',
+  },
 )
 const emits = defineEmits<{
   (e: 'search', val: string, exact: boolean): void

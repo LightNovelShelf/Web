@@ -14,5 +14,5 @@ export interface Card {
 export enum CardSize {
   normal = 'normal',
   small = 'small',
-  nano = 'nano'
+  nano = 'nano',
 }

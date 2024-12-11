@@ -1,4 +1,5 @@
-import dayjs, { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 
 /**
  * 解析时间
@@ -25,8 +26,8 @@ export function toNow(
     now?: Dayjs
     notNegative?: boolean
   } = {
-    notNegative: true
-  }
+    notNegative: true,
+  },
 ): string {
   const { now = dayjs(), notNegative } = config
   const dateObj = parseTime(date)

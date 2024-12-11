@@ -1,4 +1,5 @@
-import dayjs, { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs'
 import { type MaybeRefOrGetter, toValue } from 'vue'
 import { parseTime, toNow } from 'src/utils/time'
 
