@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { toRaw } from 'vue'
-import { userSettingDB } from 'src/utils/storage/db'
+
 import { Dark } from 'src/utils/dark'
+import { userSettingDB } from 'src/utils/storage/db'
 
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({

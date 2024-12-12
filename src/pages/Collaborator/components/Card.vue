@@ -16,8 +16,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-import type { Card } from 'src/types/collaborator'
 import { useResizeObserver } from 'src/composition/useResizeObserver'
+
+import type { Card } from 'src/types/collaborator'
 
 const props = defineProps<{ class?: string; data: Card }>()
 const emit = defineEmits<{

@@ -1,7 +1,11 @@
 import { debounce } from 'quasar'
-import { saveReadPosition } from 'src/services/book'
-import type { Ref } from 'vue'
+
+
 import { userReadPositionDB } from 'src/utils/storage/db'
+
+import { saveReadPosition } from 'src/services/book'
+
+import type { Ref } from 'vue'
 
 function findElementNode(node: Node): Element {
   return node.nodeType === Node.ELEMENT_NODE ? (node as Element) : findElementNode(node.parentNode!)

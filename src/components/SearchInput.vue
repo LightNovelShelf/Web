@@ -34,8 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-import { useMergeState } from 'src/composition/useMergeState'
 import { computed, ref, toRefs } from 'vue'
+
+import { useMergeState } from 'src/composition/useMergeState'
 const props = withDefaults(
   defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),
   {
@@ -61,16 +62,14 @@ const [keyword] = useMergeState(toRefs(props).modelValue)
 const visible = ref(false)
 
 const searchBarWidth = computed(() => {
-  return props.width(visible.value)
+  return props.width!(visible.value)
 })
 
 // 在某次框架更新中，onblur事件比click触发早了，需要手动跳转
-function onBlur(evt) {
+function onBlur(evt: any) {
   //onBlur时调用handle
-  if (evt.relatedTarget !== null) {
-    if (evt.relatedTarget.id === 'exact') {
-      searchHandle(true)
-    }
+  if ((evt.relatedTarget as Element)?.id === 'exact') {
+    searchHandle(true)
   }
   visible.value = false
 }

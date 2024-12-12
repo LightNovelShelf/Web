@@ -1,13 +1,16 @@
-import { defineStore } from 'pinia'
-import type { ShelfItem, ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
-import { ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
-import { shelfDB, shelfStructVerDB } from 'src/utils/storage/db'
-import { toRaw } from 'vue'
 import { produce } from 'immer'
 import isEqual from 'lodash.isequal'
-import { Notify } from 'quasar'
 import { nanoid } from 'nanoid'
+import { defineStore } from 'pinia'
+import { Notify } from 'quasar'
+import { toRaw } from 'vue'
+
+import { shelfDB, shelfStructVerDB } from 'src/utils/storage/db'
+
 import { getBookShelfBinary, saveBookShelf } from 'src/services/user'
+import { ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
+
+import type { ShelfItem, ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
 
 export enum ShelfBranch {
   main = 'main',

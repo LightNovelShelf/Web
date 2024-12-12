@@ -1,11 +1,9 @@
 import { defineBoot } from '#q-app/wrappers'
-
 import dayjs from 'dayjs'
 import zh from 'dayjs/locale/zh'
-
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import updateLocale from 'dayjs/plugin/updateLocale'
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 
 export default defineBoot(() => {
   dayjs.extend(relativeTime)

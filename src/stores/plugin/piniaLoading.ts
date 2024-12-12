@@ -1,7 +1,7 @@
-import 'pinia'
+import { computed, ref } from 'vue'
+
 import type { _ActionsTree, PiniaPlugin } from 'pinia'
 import type { Ref } from 'vue'
-import { computed, ref } from 'vue'
 
 // 这一坨注释其实时想把同步的action给排除掉，但是就算做到了排除，结果是失去了 loading 跳转函数的能力
 // type _EnsureFunc<T> = T extends (...args: any) => any ? T : never

@@ -1,5 +1,7 @@
 import { effectScope, ref, watch } from 'vue'
+
 import type { AnyVoidFunc } from 'src/types/utils'
+
 import { safeCall } from '../safeCall'
 
 const notifier = ref(-1)

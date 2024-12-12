@@ -1,5 +1,6 @@
-import type { AnyFunc } from 'src/types/utils'
 import { NOOP } from 'src/const/empty'
+
+import type { AnyFunc } from 'src/types/utils'
 
 /**
  * catch 住所有错误的调用

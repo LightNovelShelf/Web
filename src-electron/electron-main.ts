@@ -1,7 +1,8 @@
-import { app, BrowserWindow } from 'electron'
-import path from 'path'
 import os from 'os'
+import path from 'path'
 import { fileURLToPath } from 'url'
+
+import { app, BrowserWindow } from 'electron'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()

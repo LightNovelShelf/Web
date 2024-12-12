@@ -3,8 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
 import { decode } from 'blurhash'
+import { ref, watchEffect } from 'vue'
 
 const props = defineProps<{ blurhash?: string }>()
 

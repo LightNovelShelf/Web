@@ -1,8 +1,12 @@
+import { computed, onDeactivated, onUnmounted, ref } from 'vue'
+
 import { NOOP } from 'src/const/empty'
+
 import type { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from 'src/types/utils'
 import type { Ref} from 'vue';
-import { computed, onDeactivated, onUnmounted, ref } from 'vue'
+
 import { useLoadingFn } from './useFnLoading'
+
 
 /** 延时执行 */
 export interface UseTimeoutFnAction<P extends any[] = any[], R = any> extends AnyAsyncFunc<P, Promise<R>> {

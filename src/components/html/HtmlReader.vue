@@ -3,11 +3,16 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue'
-import { PROVIDE } from 'src/const/provide'
 import { scroll, useQuasar } from 'quasar'
+import { inject } from 'vue'
+
 import { useSettingStore } from 'stores/setting'
+
+import { PROVIDE } from 'src/const/provide'
+
 import { useLayout } from '../app/useLayout'
+
+
 
 const $q = useQuasar()
 const router = useRouter()

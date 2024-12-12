@@ -172,16 +172,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
-import { useAppStore } from 'stores/app'
-import { useLayout } from './useLayout'
 import { storeToRefs } from 'pinia'
-import { useMedia } from 'src/composition/useMedia'
-import { longTermToken, sessionToken } from 'src/utils/session'
 import { useQuasar } from 'quasar'
-import { rebootSignalr } from 'src/services/internal/request'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { longTermToken, sessionToken } from 'src/utils/session'
+
+import { useAppStore } from 'stores/app'
+
+import { useMedia } from 'src/composition/useMedia'
+
+import { rebootSignalr } from 'src/services/internal/request'
+
+import { useLayout } from './useLayout'
 import SearchInput from '../SearchInput.vue'
 
 const route = useRoute()

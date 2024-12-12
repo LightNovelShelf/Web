@@ -2,7 +2,6 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 import { defineConfig } from '#q-app/wrappers'
-
 import AutoImport from 'unplugin-auto-import/vite'
 
 export default defineConfig((/* ctx */) => {
@@ -63,9 +62,7 @@ export default defineConfig((/* ctx */) => {
       // minify: false,
       // polyfillModulePreload: true,
       // distDir
-      alias: {
-        'md-editor-v3': './node_modules/md-editor-v3/lib/MdEditor',
-      },
+      // alias: {},
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},

@@ -43,13 +43,17 @@
 
 <script setup lang="ts">
 import { ref, defineComponent, computed } from 'vue'
-import { getReadHistory, clearHistory } from 'src/services/user'
-import BookCard from 'src/components/BookCard.vue'
-import { getBookListByIds } from 'src/services/book'
-import type { BookInList } from 'src/services/book/types'
-import { QGrid, QGridItem } from 'src/components/grid'
+
+import BookCard from 'components/BookCard.vue'
+import { QGrid, QGridItem } from 'components/grid'
+
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { getBookListByIds } from 'src/services/book'
+import { getReadHistory, clearHistory } from 'src/services/user'
+
+import type { BookInList } from 'src/services/book/types'
 
 defineComponent({ QGrid, QGridItem })
 

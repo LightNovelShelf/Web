@@ -113,28 +113,34 @@
 </template>
 
 <script lang="ts" setup>
+import { useQuasar, scroll } from 'quasar'
 import { computed, ref, onActivated, toRaw } from 'vue'
-import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { useRouter } from 'vue-router'
-import { Comment } from 'src/components/'
-import { getBookInfo } from 'src/services/book'
-import { useToNowRef } from 'src/composition/useToNowRef'
-import { QGrid, QGridItem } from 'src/components/grid'
-import { loadHistory } from 'src/views/Book/Read/history'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
-import type { BookServicesTypes } from 'src/services/book'
-import { useAppStore } from 'stores/app'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
-import { useQuasar, scroll } from 'quasar'
-import AddToShelf from 'src/components/biz/MyShelf/AddToShelf.vue'
-import type { BookInList } from 'src/services/book/types'
-import { CommentType } from 'src/services/comment/types'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { userReadPositionDB } from 'src/utils/storage/db'
-import BlurHash from 'src/components/BlurHash.vue'
-import { useSettingStore } from 'stores/setting'
 import { parseTime } from 'src/utils/time'
+
+import { useAppStore } from 'stores/app'
+import { useSettingStore } from 'stores/setting'
+
+import { Comment } from 'components'
+import AddToShelf from 'components/biz/MyShelf/AddToShelf.vue'
+import BlurHash from 'components/BlurHash.vue'
+import { QGrid, QGridItem } from 'components/grid'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useToNowRef } from 'src/composition/useToNowRef'
+
+import { loadHistory } from 'src/pages/Book/Read/history'
+import { getBookInfo } from 'src/services/book'
+import { CommentType } from 'src/services/comment/types'
+
+import type { BookServicesTypes } from 'src/services/book'
+import type { BookInList } from 'src/services/book/types'
+
 
 const props = defineProps<{ bid: string }>()
 

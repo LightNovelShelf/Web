@@ -7,18 +7,23 @@
 </template>
 
 <script lang="ts" setup>
-import { AppSide, AppHeader, AppContainer } from 'src/components/app/index'
+import { OverlayScrollbars } from 'overlayscrollbars'
 import { useQuasar } from 'quasar'
-import { useServerNotify } from 'src/services/utils/useServerNotify'
+import { onMounted } from 'vue'
+
 import sanitizerHtml from 'src/utils/sanitizeHtml'
+import { longTermToken } from 'src/utils/session'
+
 import { useSettingStore } from 'src/stores/setting'
 import { useAppStore } from 'stores/app'
-import { longTermToken } from 'src/utils/session'
-import { getMyInfo } from 'src/services/user'
+
+import { AppSide, AppHeader, AppContainer } from 'components/app/index'
+
 import { NOOP } from 'src/const/empty'
+import { getMyInfo } from 'src/services/user'
+import { useServerNotify } from 'src/services/utils/useServerNotify'
+
 import 'overlayscrollbars/styles/overlayscrollbars.css'
-import { OverlayScrollbars } from 'overlayscrollbars'
-import { onMounted } from 'vue'
 
 const $q = useQuasar()
 

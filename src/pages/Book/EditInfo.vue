@@ -45,17 +45,24 @@
 </template>
 
 <script lang="ts" setup>
+import { useQuasar } from 'quasar'
 import { computed, ref, toRaw } from 'vue'
 
-import { QGrid, QGridItem } from 'src/components/grid'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
-import { getBookEditInfo, editBook } from 'src/services/book'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { getErrMsg } from 'src/utils/getErrMsg'
-import { useQuasar } from 'quasar'
-import { HtmlEditor, BlurHash } from 'src/components'
+
 import { useSettingStore } from 'stores/setting'
+
+import { HtmlEditor, BlurHash } from 'components'
 import DragPageSticky from 'components/DragPageSticky.vue'
+import { QGrid, QGridItem } from 'components/grid'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { getBookEditInfo, editBook } from 'src/services/book'
+
+
+
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)

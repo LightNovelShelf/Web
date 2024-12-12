@@ -3,10 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import BookCard from 'src/components/BookCard.vue'
-import { useBookListStore } from 'stores/bookListData'
-import type { ShelfBookItem } from 'src/types/shelf'
 import { computed } from 'vue'
+
+import { useBookListStore } from 'stores/bookListData'
+
+import BookCard from 'components/BookCard.vue'
+
+import type { ShelfBookItem } from 'src/types/shelf'
 
 const props = defineProps<{ item: ShelfBookItem }>()
 const listDataStore = useBookListStore()

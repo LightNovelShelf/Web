@@ -45,12 +45,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useToNowRef } from 'src/composition/useToNowRef'
-import type { BookInList } from 'src/services/book/types'
 import { useQuasar } from 'quasar'
-import BlurHash from 'src/components/BlurHash.vue'
+import { computed, ref } from 'vue'
+
 import { useSettingStore } from 'stores/setting'
+
+import BlurHash from 'components/BlurHash.vue'
+
+import { useToNowRef } from 'src/composition/useToNowRef'
+
+import type { BookInList } from 'src/services/book/types'
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
@@ -61,6 +65,7 @@ const updateTime = useToNowRef(() => props.book.LastUpdateTime)
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting
+  return true
 }
 </script>
 

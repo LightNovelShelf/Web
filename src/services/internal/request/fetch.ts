@@ -1,11 +1,17 @@
-import type { RequestConfig } from 'src/services/types'
-import { getErrMsg } from 'src/utils/getErrMsg'
 import { stringifyQuery } from 'vue-router'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { sessionToken } from 'src/utils/session'
+
 import { ServerError } from 'src/services/internal/ServerError'
 import { RequestMethod } from 'src/services/types'
-import { sessionToken } from 'src/utils/session'
+
+import type { RequestConfig } from 'src/services/types'
+
 import { createRequestQueue } from './createRequestQueue'
 import { getVisitorId } from './getVisitorId'
+
+
 
 async function requestWithFetch<Res = unknown, Data = any>(
   url: string,

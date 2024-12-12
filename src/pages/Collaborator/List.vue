@@ -6,12 +6,17 @@ export default {
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import CardItem from './components/Card.vue'
-import { useResizeObserver } from 'src/composition/useResizeObserver'
+
 import { debounceInFrame } from 'src/utils/debounceInFrame'
+
 import { useMasonry } from 'src/composition/useMasonry'
+import { useResizeObserver } from 'src/composition/useResizeObserver'
+
 import { getCollaboratorList } from 'src/services/context'
+
 import type { Card } from 'src/types/collaborator'
+
+import CardItem from './components/Card.vue'
 
 /** 数据源 */
 const collaborators = ref<Card[]>([])

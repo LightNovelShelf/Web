@@ -1,10 +1,14 @@
+import type * as ShelfLegacyStruct from 'src/utils/migrations/shelf/struct/types'
+import { longTermToken, sessionToken } from 'src/utils/session'
+
 import { rebootSignalr, requestWithFetch, requestWithSignalr } from 'src/services/internal/request'
 import { PATH } from 'src/services/path'
-import { longTermToken, sessionToken } from 'src/utils/session'
-import type * as Types from './type'
 import { RequestMethod } from 'src/services/types'
+
+import type * as Types from './type'
 import type { ShelfItem, SHELF_STRUCT_VER } from 'src/types/shelf'
-import type * as ShelfLegacyStruct from 'src/utils/migrations/shelf/struct/types'
+
+
 
 /** 登录 */
 export async function login(email: string, password: string, token: string) {

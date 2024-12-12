@@ -70,14 +70,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { resetPassword, sendResetEmail } from 'src/services/user'
-import { sha256 } from 'src/utils/hash'
 import { useQuasar } from 'quasar'
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { sha256 } from 'src/utils/hash'
+
 import { useAppStore } from 'stores/app'
+
 import VueTurnstile from 'src/pages/Login/VueTurnstile.vue'
+import { resetPassword, sendResetEmail } from 'src/services/user'
 
 const $q = useQuasar()
 const appStore = useAppStore()

@@ -20,16 +20,21 @@
 </template>
 
 <script lang="ts" setup>
+import { useQuasar } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
-import BookCard from 'src/components/BookCard.vue'
-import { getRank } from 'src/services/book'
-import { useQuasar } from 'quasar'
-import type { BookInList } from 'src/services/book/types'
-import { NOOP } from 'src/const/empty'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import BookCard from 'components/BookCard.vue'
+import { QGrid, QGridItem } from 'components/grid'
+
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { QGrid, QGridItem } from 'src/components/grid'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { NOOP } from 'src/const/empty'
+import { getRank } from 'src/services/book'
+
+import type { BookInList } from 'src/services/book/types'
+
 
 const props = defineProps<{ type: 'daily' | 'weekly' | 'monthly' }>()
 

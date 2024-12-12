@@ -40,14 +40,22 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useToNowRef } from 'src/composition/useToNowRef'
-import type { ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
-import { ShelfItemTypeEnum } from 'src/types/shelf'
-import { useShelfStore } from 'stores/shelf'
+
 import { useBookListStore } from 'stores/bookListData'
-import type { BookInList } from 'src/services/book/types'
-import BlurHash from 'src/components/BlurHash.vue'
 import { useSettingStore } from 'stores/setting'
+import { useShelfStore } from 'stores/shelf'
+
+import BlurHash from 'components/BlurHash.vue'
+
+import { useToNowRef } from 'src/composition/useToNowRef'
+
+import { ShelfItemTypeEnum } from 'src/types/shelf'
+
+import type { BookInList } from 'src/services/book/types'
+import type { ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
+
+
+
 
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()

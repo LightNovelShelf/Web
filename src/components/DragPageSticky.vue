@@ -7,6 +7,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
+import type { TouchPanValue } from 'quasar'
+
 interface Props {
   initialOffset?: {
     x: number
@@ -19,7 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
   position: 'bottom-right',
 })
 
-const fabPos = ref([])
+const fabPos = ref([0, 0])
 const initialOffset = props.initialOffset || reactive({ x: 18, y: 18 })
 const isDragging = ref(false)
 
@@ -27,10 +29,10 @@ watchEffect(() => {
   fabPos.value = [initialOffset.x, initialOffset.y]
 })
 
-function moveFab(ev) {
+const moveFab: TouchPanValue = (ev) => {
   isDragging.value = ev.isFirst !== true && ev.isFinal !== true
-  initialOffset.x = fabPos.value[0] - ev.delta.x
-  initialOffset.y = fabPos.value[1] - ev.delta.y
+  initialOffset.x = fabPos.value[0] - ev.delta!.x!
+  initialOffset.y = fabPos.value[1] - ev.delta!.y!
 }
 </script>
 

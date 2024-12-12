@@ -82,14 +82,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, ref, watch, reactive } from 'vue'
 
-import { useAppStore } from 'stores/app'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { setAvatar, getMyInfo } from 'src/services/user'
+import { computed, defineComponent, ref, watch, reactive } from 'vue'
+
+
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
+
+import { useAppStore } from 'stores/app'
+
+import { setAvatar, getMyInfo } from 'src/services/user'
+
 import { AnyFunc } from '../../types/utils'
 const avatar = computed(() => appStore.avatar)
 

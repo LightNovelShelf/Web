@@ -53,9 +53,11 @@
 </template>
 
 <script lang="ts" setup>
-import { connectState } from 'src/services/utils'
-import { useLayout } from './useLayout'
 import { HubConnectionState } from '@microsoft/signalr'
+
+import { connectState } from 'src/services/utils'
+
+import { useLayout } from './useLayout'
 
 const menuOptions: Array<Record<string, any>> = [
   {

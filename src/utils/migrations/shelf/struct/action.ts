@@ -1,5 +1,7 @@
-import type { ShelfItem } from 'src/types/shelf'
 import { ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
+
+import type { ShelfItem } from 'src/types/shelf'
+
 import * as ShelfLegacyStruct from './types'
 
 /**

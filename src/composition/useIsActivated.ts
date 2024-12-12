@@ -1,6 +1,7 @@
-import type { Ref} from 'vue';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, toRaw } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
+
+import type { Ref} from 'vue';
 
 /** keep-alive的组件是否激活展示 */
 export function useIsActivated(): Ref<boolean> {

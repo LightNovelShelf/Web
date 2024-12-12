@@ -1,7 +1,8 @@
-import { requestWithSignalr } from '../internal/request'
+import type { SaveReadPositionRequest } from './types'
 
 import * as Types from './types'
-import type { SaveReadPositionRequest } from './types'
+import { requestWithSignalr } from '../internal/request'
+
 export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */

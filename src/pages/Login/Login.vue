@@ -64,15 +64,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { login } from 'src/services/user'
-import { sha256 } from 'src/utils/hash'
 import { useQuasar } from 'quasar'
-import { getErrMsg } from 'src/utils/getErrMsg'
-import type { RouteLocationRaw } from 'vue-router'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { sha256 } from 'src/utils/hash'
+
 import { useAppStore } from 'stores/app'
+
 import VueTurnstile from 'src/pages/Login/VueTurnstile.vue'
+import { login } from 'src/services/user'
+
+import type { RouteLocationRaw } from 'vue-router'
 
 const $q = useQuasar()
 const appStore = useAppStore()

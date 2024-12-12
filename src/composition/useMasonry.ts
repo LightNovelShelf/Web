@@ -1,6 +1,7 @@
-import type { Ref } from 'vue';
-import { onMounted, onBeforeUnmount, ref } from 'vue'
 import MiniMasonry from 'minimasonry'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
+
+import type { Ref } from 'vue';
 
 export interface UseMasonryAction {
   layout: () => void

@@ -150,18 +150,23 @@
 </template>
 
 <script lang="ts" setup>
-import { useLayout } from 'src/components/app/useLayout'
-import { QGrid, QGridItem } from 'src/components/grid'
-
-import type { BookServicesTypes } from 'src/services/book'
-import { editBook, getBookEditInfo, getBookSetting, setBookSetting } from 'src/services/book'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useQuasar } from 'quasar'
-import { BlurHash, HtmlEditor } from 'src/components'
-import { getErrMsg } from 'src/utils/getErrMsg'
 import Draggable from 'vuedraggable'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+
 import { useAppStore } from 'stores/app'
+import { useSettingStore } from 'stores/setting'
+
+import { BlurHash, HtmlEditor } from 'components'
+import { useLayout } from 'components/app/useLayout'
+import DragPageSticky from 'components/DragPageSticky.vue'
+import { QGrid, QGridItem } from 'components/grid'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { editBook, getBookEditInfo, getBookSetting, setBookSetting } from 'src/services/book'
 import {
   changeChapterSort,
   createNewChapter,
@@ -169,8 +174,10 @@ import {
   editChapterContent,
   getChapterEditInfo,
 } from 'src/services/chapter'
-import { useSettingStore } from 'stores/setting'
-import DragPageSticky from 'components/DragPageSticky.vue'
+
+import type { BookServicesTypes } from 'src/services/book'
+
+
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore

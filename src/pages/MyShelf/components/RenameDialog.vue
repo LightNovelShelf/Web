@@ -18,8 +18,9 @@
 </template>
 
 <script setup lang="ts">
-import type { ShelfFolderItem } from 'src/types/shelf'
 import { ref, watch } from 'vue'
+
+import type { ShelfFolderItem } from 'src/types/shelf'
 
 const props = defineProps<{
   modelValue: ShelfFolderItem | null

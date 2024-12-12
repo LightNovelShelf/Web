@@ -99,15 +99,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import { useQuasar, debounce } from 'quasar'
-import type { QEditorCommand } from 'quasar'
-import prettier from 'prettier/standalone'
+import { MdEditor } from 'md-editor-v3'
 import parserHtml from 'prettier/parser-html'
-import { useSettingStore } from 'stores/setting'
-import bbCodeParser from 'src/utils/bbcode/simple'
+import prettier from 'prettier/standalone'
+import { useQuasar, debounce } from 'quasar'
 import TurndownService from 'turndown'
-import MdEditor, { type ToolbarNames, type UploadImgEvent } from 'app/node_modules/md-editor-v3/lib/MdEditor'
+import { computed, nextTick, ref, watch } from 'vue'
+
+import bbCodeParser from 'src/utils/bbcode/simple'
+
+import { useSettingStore } from 'stores/setting'
+
+import type { ToolbarNames } from 'md-editor-v3'
+import type { QEditorCommand } from 'quasar'
+
 import 'md-editor-v3/lib/style.css'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
@@ -245,17 +250,17 @@ const definitions: Record<string, QEditorCommand> = {
   dot: { tip: '插入着重号', icon: 'mdiCircleDouble', handler: htmlDotHandler },
 }
 
-MdEditor.config({
-  markedRenderer(renderer) {
-    renderer.image = (href: string, title: string, desc: string) => {
-      return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
-    }
-    renderer.heading = (text, level, raw, s, index) => {
-      return `<h${level} id="heading-${index}">${text}</h${level}>`
-    }
-    return renderer
-  },
-})
+// MdEditor.config({
+//   markedRenderer(renderer) {
+//     renderer.image = (href: string, title: string, desc: string) => {
+//       return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
+//     }
+//     renderer.heading = (text, level, raw, s, index) => {
+//       return `<h${level} id="heading-${index}">${text}</h${level}>`
+//     }
+//     return renderer
+//   },
+// })
 const mdToolBar: ToolbarNames[] = [
   'bold',
   'underline',

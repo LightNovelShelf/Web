@@ -25,15 +25,19 @@
 </template>
 
 <script lang="ts" setup>
+
+import { useQuasar } from 'quasar'
 import { computed, ref, toRaw } from 'vue'
 
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { getErrMsg } from 'src/utils/getErrMsg'
-import { useQuasar } from 'quasar'
-import { getChapterEditInfo, editChapterContent } from 'src/services/chapter'
-import { HtmlEditor } from 'src/components'
+
+import { HtmlEditor } from 'components'
 import DragPageSticky from 'components/DragPageSticky.vue'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { getChapterEditInfo, editChapterContent } from 'src/services/chapter'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)

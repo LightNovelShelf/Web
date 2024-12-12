@@ -1,10 +1,12 @@
 import { defineRouter } from '#q-app/wrappers'
+import { nanoid } from 'nanoid'
 import { Notify } from 'quasar'
 import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
-import type { HistoryState, RouteRecordNameGeneric } from 'vue-router'
-import { nanoid } from 'nanoid'
 
 import { longTermToken, sessionToken } from 'src/utils/session'
+
+import type { HistoryState, RouteRecordNameGeneric } from 'vue-router'
+
 import routes from './routes'
 
 /*

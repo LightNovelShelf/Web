@@ -1,5 +1,6 @@
-import type { Card } from 'src/types/collaborator'
 import { nanoid } from 'nanoid'
+
+import type { Card } from 'src/types/collaborator'
 
 const imgs: string[] = [
   'https://img.acgdmzy.com:45112/images/2021/08/22/08579907e581.webp',

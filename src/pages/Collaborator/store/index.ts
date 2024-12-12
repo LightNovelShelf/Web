@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+
 import { collaborators } from './data'
 
 /** 贡献列表store */

@@ -60,9 +60,7 @@
         <q-fab-action
           @click="toggleDark"
           color="primary"
-          :icon="
-            Dark.mode === 'auto' ? icon.mdiBrightnessAuto : Dark.mode ? icon.mdiWeatherNight : icon.mdiWeatherSunny
-          "
+          :icon="Dark.mode === 'auto' ? 'mdiBrightnessAuto' : Dark.mode ? 'mdiWeatherNight' : 'mdiWeatherSunny'"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             切换颜色模式
@@ -72,7 +70,7 @@
           v-if="$q.fullscreen.isCapable && !readSetting['hideFullScreen']"
           @click="$q.fullscreen.toggle()"
           color="primary"
-          :icon="$q.fullscreen.isActive ? icon.mdiFullscreenExit : icon.mdiFullscreen"
+          :icon="$q.fullscreen.isActive ? 'mdiFullscreenExit' : 'mdiFullscreen'"
           :disable="isDragging"
         >
           <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
@@ -115,6 +113,8 @@
 </template>
 
 <script lang="ts" setup>
+import { onClickOutside } from '@vueuse/core'
+import { useQuasar, Dark, colors, debounce } from 'quasar'
 import {
   computed,
   defineComponent,
@@ -127,24 +127,27 @@ import {
   ref,
   watch,
 } from 'vue'
-import { getChapterContent } from 'src/services/chapter'
-import { useQuasar, Dark, colors, debounce } from 'quasar'
-import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { syncReading, scrollToHistory, loadHistory } from './history'
-import { useLayout } from 'components/app/useLayout'
-import { useSettingStore } from 'stores/setting'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
-import { useAppStore } from 'stores/app'
 import { useRouter } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
 import { delay } from 'src/utils/delay'
-import { NOOP } from 'src/const/empty'
-import HtmlReader from 'components/html/HtmlReader.vue'
-import { PROVIDE } from 'src/const/provide'
-import { onClickOutside } from '@vueuse/core'
+import { getErrMsg } from 'src/utils/getErrMsg'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
+
+import { useAppStore } from 'stores/app'
+import { useSettingStore } from 'stores/setting'
+
+import { useLayout } from 'components/app/useLayout'
 import DragPageSticky from 'components/DragPageSticky.vue'
+import HtmlReader from 'components/html/HtmlReader.vue'
+
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { NOOP } from 'src/const/empty'
+import { PROVIDE } from 'src/const/provide'
 import { apiServer } from 'src/services/apiServer'
+import { getChapterContent } from 'src/services/chapter'
+
+import { syncReading, scrollToHistory, loadHistory } from './history'
 
 const props = defineProps<{
   bid: string
@@ -164,7 +167,7 @@ const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
 
 const chapter = ref<any>()
 const noteElement = ref()
-const readerRef = ref(null)
+const readerRef = ref()
 const note = reactive({
   target: '',
   content: '',
@@ -193,7 +196,7 @@ const getContent = useTimeoutFn(async () => {
       if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
         await delay(200)
         await nextTick(() => {
-          scrollToHistory(readerRef.value.contentRef, res.ReadPosition.XPath, headerOffset)
+          scrollToHistory(readerRef.value!.contentRef, res.ReadPosition.XPath, headerOffset)
         })
       }
     })().then(NOOP)
@@ -311,9 +314,9 @@ watch(
   () => {
     nextTick(async () => {
       readerRef.value.contentRef.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
-        const id = element.getAttribute('href').replace('#', '')
+        const id = element.getAttribute('href')!.replace('#', '')
         //获取注释内容
-        const noteElement = document.getElementById(id)
+        const noteElement = document.getElementById(id)!
         const content = noteElement.innerHTML
         // 隐藏内容
         noteElement.style.display = 'none'
@@ -359,7 +362,7 @@ onActivated(() => {
     const position = loadHistory(userId.value, bid.value)
     if (position && position.cid === cid.value) {
       if (position.top) {
-        document.scrollingElement.scrollTop = position.top
+        document.scrollingElement!.scrollTop = position.top
       } else {
         scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
       }
@@ -405,11 +408,10 @@ watch(
   & {
     all: unset;
     user-select: none;
+    font-family: read, sans-serif !important;
   }
 
   @import '../../../css/read';
-
-  font-family: read, sans-serif !important;
 
   * {
     line-break: anywhere;

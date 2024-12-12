@@ -9,14 +9,18 @@ export default {}
 
 <script lang="ts" setup>
 // 加入书架按钮
-import { computed, ref } from 'vue'
-import { useQuasar } from 'quasar'
-import type { AnyVoidFunc } from 'src/types/utils'
-import type { BookServicesTypes } from 'src/services/book'
-import { useShelfStore } from 'stores/shelf'
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { connectState } from 'src/services/utils'
 import { HubConnectionState } from '@microsoft/signalr'
+import { useQuasar } from 'quasar'
+import { computed, ref } from 'vue'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+
+import { useShelfStore } from 'stores/shelf'
+
+import { connectState } from 'src/services/utils'
+
+import type { BookServicesTypes } from 'src/services/book'
+import type { AnyVoidFunc } from 'src/types/utils'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 

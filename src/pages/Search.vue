@@ -51,12 +51,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
-import { getBookList } from 'src/services/book'
-import { QGrid, QGridItem } from 'components/grid'
-import BookCard from 'components/BookCard.vue'
-import type { BookInList } from 'src/services/book/types'
 import { useRouter } from 'vue-router'
+
+import BookCard from 'components/BookCard.vue'
+import { QGrid, QGridItem } from 'components/grid'
 import SearchInput from 'components/SearchInput.vue'
+
+import { getBookList } from 'src/services/book'
+
+import type { BookInList } from 'src/services/book/types'
+
 
 const router = useRouter()
 const route = useRoute()

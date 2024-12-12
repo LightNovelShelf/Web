@@ -1,5 +1,6 @@
-import type * as Types from './types'
 import { requestWithSignalr } from 'src/services/internal/request'
+
+import type * as Types from './types'
 
 export async function getForumList(req: Types.GetForumList.Request) {
   return requestWithSignalr('GetForumList', req)

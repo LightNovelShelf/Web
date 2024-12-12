@@ -204,9 +204,10 @@
 </template>
 
 <script setup lang="ts">
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+
 import { getForumInfo } from 'src/services/forum'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
 const props = defineProps<{ id: string }>()
 const _id = computed(() => ~~props.id || 1)

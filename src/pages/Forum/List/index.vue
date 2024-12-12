@@ -36,9 +36,10 @@
 </template>
 
 <script setup lang="ts">
+import { ForumType } from 'src/services/forum/types'
+
 import ForumList from './components/ForumList.vue'
 
-import { ForumType } from 'src/services/forum/types'
 
 const tabOptions: Array<Record<string, any>> = [
   {

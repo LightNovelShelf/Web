@@ -3,6 +3,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
 import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
 
 /** 监听鉴权失败消息 */

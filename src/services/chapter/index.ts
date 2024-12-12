@@ -2,6 +2,7 @@ import { requestWithSignalr } from 'src/services/internal/request'
 
 import type * as Types from './types'
 
+
 /** 获取章节内容信息 */
 export function getChapterContent(request: Types.GetChapterContentRequest) {
   return requestWithSignalr('GetChapterContentBinary', request)

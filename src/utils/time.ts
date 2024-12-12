@@ -1,5 +1,6 @@
-import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
+
+import type { Dayjs } from 'dayjs'
 
 /**
  * 解析时间

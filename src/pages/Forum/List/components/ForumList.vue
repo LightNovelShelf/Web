@@ -39,11 +39,14 @@
 
 <script setup lang="ts">
 import { QGrid, QGridItem } from 'components/grid'
-import { getForumList } from 'src/services/forum'
-import type { ForumType } from 'src/services/forum/types'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
+import { getForumList } from 'src/services/forum'
+
+import type { ForumType } from 'src/services/forum/types'
+
 
 const props = defineProps<{ type: ForumType }>()
 

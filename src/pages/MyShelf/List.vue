@@ -81,8 +81,8 @@
                   ><q-tooltip anchor="top middle" self="bottom middle" max-width="10em" :delay="200">{{
                     contextMenuShelfItemTitle
                   }}</q-tooltip>
-                  <div class="max-len-text">{{ contextMenuShelfItemTitle }}</div></q-item-section
-                >
+                  <div class="max-len-text">{{ contextMenuShelfItemTitle }}</div>
+                </q-item-section>
               </q-item>
 
               <q-separator />
@@ -205,28 +205,35 @@
 </template>
 
 <script lang="ts" setup>
-import { QGrid, QGridItem } from 'src/components/grid'
-import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
-import * as ShelfTypes from 'src/types/shelf'
-import { useForwardRef } from 'src/utils/useForwardRef'
-import Sortable from 'sortablejs'
-import { safeCall } from 'src/utils/safeCall'
-import { useQuasar } from 'quasar'
-import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from 'stores/shelf'
-import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
-import { useRoute, useRouter } from 'vue-router'
-import RenameDialog from './components/RenameDialog.vue'
-import NavBackToParentFolder from './components/NavBackToParentFolder.vue'
-import { useIsActivated } from 'src/composition/useIsActivated'
-import { ALL_VALUE } from 'src/const'
-import { parseTime } from 'src/utils/time'
-import { connectState } from 'src/services/utils'
-import { NOOP } from 'src/const/empty'
 import { HubConnectionState } from '@microsoft/signalr'
-import { useLayout } from 'src/components/app/useLayout'
-import ShelfCard from './components/ShelfCard.vue'
-import type { BookInList } from 'src/services/book/types'
+import { useQuasar } from 'quasar'
+import Sortable from 'sortablejs'
+import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+import { safeCall } from 'src/utils/safeCall'
+import { parseTime } from 'src/utils/time'
+import { useForwardRef } from 'src/utils/useForwardRef'
+
 import { useBookListStore } from 'stores/bookListData'
+import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from 'stores/shelf'
+
+import { useLayout } from 'components/app/useLayout'
+import { QGrid, QGridItem } from 'components/grid'
+
+import { useIsActivated } from 'src/composition/useIsActivated'
+
+import { ALL_VALUE } from 'src/const'
+import { NOOP } from 'src/const/empty'
+import { connectState } from 'src/services/utils'
+import * as ShelfTypes from 'src/types/shelf'
+
+import type { BookInList } from 'src/services/book/types'
+import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
+
+import NavBackToParentFolder from './components/NavBackToParentFolder.vue'
+import RenameDialog from './components/RenameDialog.vue'
+import ShelfCard from './components/ShelfCard.vue'
 
 interface QSelectorOption {
   label: string
@@ -524,7 +531,7 @@ function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
 
     // 编辑模式下点击事件被蒙层接管，需要手动实现
     if (item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER) {
-      router.push({ ...route, params: { folderID: item.id } })
+      router.push({ ...route, params: { folderID: item.id } } as RouteLocationRaw)
       return
     }
 
@@ -656,6 +663,7 @@ onDeactivated(() => {
 .actions-wrap-placeholder {
   height: 48.1px;
 }
+
 .actions-wrap {
   display: flex;
   position: fixed;
@@ -703,9 +711,11 @@ onDeactivated(() => {
   text-align: center;
   font-size: 12px;
 }
+
 .empty-placeholder-icon {
   display: block;
 }
+
 .empty-placeholder-label {
   margin-top: 4px;
 }
@@ -768,13 +778,13 @@ onDeactivated(() => {
   // icon的viewBox是24，绘制的直径是20（M12 20）
   // 18则是icon的整体大小
   // 2的来源是圆的border-width是1，border有2
-  width: $icon-size * ((20 - 2) / 24);
-  height: $icon-size * ((20 - 2) / 24);
+  width: $icon-size * calc((20 - 2) / 24);
+  height: $icon-size * calc((20 - 2) / 24);
 
   :deep(svg) {
     // 4的来源就很简单了，24减去直径
     // 因为位移只需要关心一个方向的边，所以减1就够了
-    transform: translate(-$icon-size * math.div(4-1, 24), -$icon-size * (math.div(4-1, 24)));
+    transform: translate(-$icon-size * calc((4 - 1) / 24), -$icon-size * calc((4 - 1) / 24));
     // ff下需要设置这个才有体积
     width: 100%;
     height: 100%;

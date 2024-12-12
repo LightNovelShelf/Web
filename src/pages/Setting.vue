@@ -127,11 +127,12 @@
 </template>
 
 <script lang="ts" setup>
+import { storeToRefs } from 'pinia'
+import { Dark } from 'quasar'
 import { watch, ref } from 'vue'
 
-import { Dark } from 'quasar'
 import { useSettingStore } from 'stores/setting'
-import { storeToRefs } from 'pinia'
+
 import { apiServer, apiServerOptions } from 'src/services/apiServer'
 import { switchSignalr } from 'src/services/internal/request/signalr'
 

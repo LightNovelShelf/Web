@@ -1,9 +1,10 @@
 import js from '@eslint/js'
-import globals from 'globals'
-import pluginVue from 'eslint-plugin-vue'
 import pluginQuasar from '@quasar/app-vite/eslint'
-import vueTsEslintConfig from '@vue/eslint-config-typescript'
 import prettierSkipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import vueTsEslintConfig from '@vue/eslint-config-typescript'
+import importPlugin from 'eslint-plugin-import'
+import pluginVue from 'eslint-plugin-vue'
+import globals from 'globals'
 
 export default [
   {
@@ -20,6 +21,17 @@ export default [
 
   ...pluginQuasar.configs.recommended(),
   js.configs.recommended,
+
+  importPlugin.flatConfigs.recommended,
+  {
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+        },
+      },
+    },
+  },
 
   /**
    * https://eslint.vuejs.org
@@ -49,29 +61,6 @@ export default [
       // Other utility configurations, such as 'eslintRecommended', (note that it's in camelCase)
       // are also extendable here. But we don't recommend using them directly.
     ],
-
-    // Optional: specify the script langs in `.vue` files
-    // Defaults to `{ ts: true, js: false, tsx: false, jsx: false }`
-    supportedScriptLangs: {
-      ts: true,
-
-      // [!DISCOURAGED]
-      // Set to `true` to allow plain `<script>` or `<script setup>` blocks.
-      // This might result-in false positive or negatives in some rules for `.vue` files.
-      // Note you also need to configure `allowJs: true` and `checkJs: true`
-      // in corresponding `tsconfig.json` files.
-      js: false,
-
-      // [!STRONGLY DISCOURAGED]
-      // Set to `true` to allow `<script lang="tsx">` blocks.
-      // This would be in conflict with all type-aware rules.
-      tsx: false,
-
-      // [!STRONGLY DISCOURAGED]
-      // Set to `true` to allow `<script lang="jsx">` blocks.
-      // This would be in conflict with all type-aware rules and may result in false positives.
-      jsx: false,
-    },
   }),
 
   {
@@ -99,6 +88,49 @@ export default [
       // allow debugger during development only
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
       'no-unused-vars': 0,
+
+      // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
+      'import/order': [
+        'warn',
+        {
+          'newlines-between': 'always',
+          groups: ['builtin', 'external', 'internal', 'type'],
+          pathGroups: [
+            {
+              pattern: 'src/utils/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '{src/,}stores/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '{src/,}components{/,}**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '{src/,}composition{/,}**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '**/**.css',
+              group: 'type',
+              position: 'after',
+            },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          warnOnUnassignedImports: true,
+          alphabetize: {
+            order: 'asc',
+            orderImportKind: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
 
       '@typescript-eslint/no-unused-vars': 0,
       '@typescript-eslint/no-require-imports': 0,
