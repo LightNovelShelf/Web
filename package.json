@@ -13,6 +13,10 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build",
+    "build:pwa": "quasar build -m pwa",
+    "build:android": "quasar build -m capacitor -T android",
+    "build:ios": "quasar build -m capacitor -T ios",
+    "build:electron": "quasar build -m electron",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
