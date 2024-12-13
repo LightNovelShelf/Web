@@ -24,7 +24,7 @@ class TokenStorage {
 }
 
 /** 会话密钥 */
-export const sessionToken = new TokenStorage(+VUE_SESSION_TOKEN_VALIDITY || 3000)
+export const sessionToken = new TokenStorage(+process.env.VUE_SESSION_TOKEN_VALIDITY || 3000)
 
 /** 长期密钥 */
 export const longTermToken = {

@@ -54,9 +54,6 @@ import { ShelfItemTypeEnum } from 'src/types/shelf'
 import type { BookInList } from 'src/services/book/types'
 import type { ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
 
-
-
-
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()
 const settingStore = useSettingStore()
@@ -85,6 +82,7 @@ function queryItem(entry: IntersectionObserverEntry) {
         .map((o) => o.id),
     })
   }
+  return true
 }
 </script>
 

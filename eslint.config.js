@@ -136,8 +136,8 @@ export default [
       '@typescript-eslint/no-require-imports': 0,
       '@typescript-eslint/no-explicit-any': 0,
       '@typescript-eslint/no-namespace': 0,
+      '@typescript-eslint/no-empty-object-type': 0,
       '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: true }],
-      '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
 
       'vue/multi-word-component-names': 0,
       'vue/block-lang': 0,

@@ -39,12 +39,9 @@ export default defineConfig((/* ctx */) => {
       },
 
       typescript: {
-        strict: true,
+        strict: false,
         vueShim: true,
-        extendTsConfig(tsConfig) {
-          tsConfig.compilerOptions!.noUncheckedIndexedAccess = false
-          // tsConfig.compilerOptions!.moduleResolution = 'bundler'
-        },
+        // extendTsConfig(tsConfig) {},
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
@@ -93,7 +90,14 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
-      config: {},
+      config: {
+        screen: {
+          bodyClasses: true,
+        },
+        loadingBar: {
+          skipHijack: true,
+        },
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       lang: 'zh-CN', // Quasar language pack
@@ -106,7 +110,7 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: ['Notify', 'LoadingBar', 'Dialog', 'AppFullscreen', 'AppVisibility', 'Meta'],
     },
 
     // animations: 'all', // --- includes all animations

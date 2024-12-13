@@ -41,10 +41,10 @@
               v-model="currentPage"
               :max="pageData.totalPage"
               direction-links
-              :icon-first="icon.mdiSkipPrevious"
-              :icon-last="icon.mdiSkipNext"
-              :icon-prev="icon.mdiChevronLeft"
-              :icon-next="icon.mdiChevronRight"
+              icon-first="mdiSkipPrevious"
+              icon-last="mdiSkipNext"
+              icon-prev="mdiChevronLeft"
+              icon-next="mdiChevronRight"
               :max-pages="8"
               :input="!$q.screen.gt.sm"
             />
@@ -136,7 +136,6 @@ import { getMyBooks, quickCreateBook, refreshToken } from 'src/services/user'
 import type { QUploaderFactoryFn } from 'quasar'
 import type { BookInList } from 'src/services/book/types'
 import type { QuickCreateBook } from 'src/services/user/type'
-
 
 defineComponent({ QGrid, QGridItem })
 

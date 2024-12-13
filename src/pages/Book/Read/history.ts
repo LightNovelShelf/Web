@@ -1,6 +1,5 @@
 import { debounce } from 'quasar'
 
-
 import { userReadPositionDB } from 'src/utils/storage/db'
 
 import { saveReadPosition } from 'src/services/book'
@@ -11,7 +10,7 @@ function findElementNode(node: Node): Element {
   return node.nodeType === Node.ELEMENT_NODE ? (node as Element) : findElementNode(node.parentNode!)
 }
 
-function readXPath(element: Element, context: Element = document.body) {
+function readXPath(element: Element, context: Element = document.body): string {
   if (context === document.body) {
     /* eslint-disable */
     if (element.id !== '') {
@@ -33,6 +32,7 @@ function readXPath(element: Element, context: Element = document.body) {
       ix++
     }
   }
+  return ''
 }
 
 export function loadHistory(uid: number, BookId: number) {
@@ -50,7 +50,7 @@ export async function saveHistory(
   userReadPositionDB.set(`${uid}_${BookId}`, {
     cid: bookParam.Id,
     xPath: bookParam.xpath,
-    top: document.scrollingElement.scrollTop,
+    top: document.scrollingElement!.scrollTop,
   })
   await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
 }
@@ -58,9 +58,9 @@ export async function saveHistory(
 export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>) {
   try {
     let rst = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
-    let target = rst.iterateNext() as HTMLElement
+    let target = rst.iterateNext() as Element
     if (target) {
-      document.scrollingElement.scrollTop = target.getBoundingClientRect().top - offset.value
+      document.scrollingElement!.scrollTop = target.getBoundingClientRect().top - offset.value
     }
   } catch (e) {
     console.log(e)
@@ -76,9 +76,9 @@ export async function syncReading(
   },
   offset: Ref<number>,
 ) {
-  let visibleDom: HTMLElement[] = []
+  let visibleDom: Element[] = []
   let doSync = debounce(async () => {
-    let topTarget = visibleDom.reduce((res: { target: HTMLElement; rect: DOMRect }, target: HTMLElement) => {
+    let topTarget = visibleDom.reduce((res: { target: Element; rect: DOMRect } | null, target: Element) => {
       // target.style.background = null
       let rect = target.getBoundingClientRect()
       if (rect.top >= offset.value) {
@@ -112,7 +112,7 @@ export async function syncReading(
     entities.forEach((entity) => {
       if (entity.target instanceof HTMLElement) {
         let domTarget = entity.target as HTMLElement
-        domTarget.style.background = null
+        domTarget.style.background = ''
         if (entity.isIntersecting) {
           visibleDom.push(domTarget)
         } else {
@@ -124,7 +124,7 @@ export async function syncReading(
   })
 
   let walker = document.createTreeWalker(dom, NodeFilter.SHOW_TEXT, (node) => {
-    return node.nodeValue.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    return node.nodeValue!.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
   })
   while (walker.nextNode()) {
     try {

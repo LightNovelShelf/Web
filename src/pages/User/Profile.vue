@@ -23,7 +23,7 @@
                 <q-icon size="18px" name="mdiChevronRight" />
               </q-item-section>
               <q-item-section side v-if="option.hide != undefined" @click.stop="option.hide = !option.hide">
-                <q-icon size="18px" :name="option.hide ? icon.mdiEye : icon.mdiEyeOff" />
+                <q-icon size="18px" :name="option.hide ? 'mdiEye' : 'mdiEyeOff'" />
               </q-item-section>
             </q-item>
           </template>
@@ -82,11 +82,9 @@
 </template>
 
 <script setup lang="ts">
-
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { computed, defineComponent, ref, watch, reactive } from 'vue'
-
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
@@ -95,7 +93,6 @@ import { useAppStore } from 'stores/app'
 
 import { setAvatar, getMyInfo } from 'src/services/user'
 
-import { AnyFunc } from '../../types/utils'
 const avatar = computed(() => appStore.avatar)
 
 defineComponent({ name: 'Profile' })

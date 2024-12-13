@@ -141,7 +141,6 @@ import { CommentType } from 'src/services/comment/types'
 import type { BookServicesTypes } from 'src/services/book'
 import type { BookInList } from 'src/services/book/types'
 
-
 const props = defineProps<{ bid: string }>()
 
 const settingStore = useSettingStore()
@@ -229,9 +228,10 @@ function downScrollClick() {
   scroll.setVerticalScrollPosition(target, offset, duration)
 }
 const scrollClick = computed(() => (commentShow.value ? upScrollClick : downScrollClick))
-const scrollIcon = computed(() => (commentShow.value ? icon.mdiArrowUp : icon.mdiArrowDown))
+const scrollIcon = computed(() => (commentShow.value ? 'mdiArrowUp' : 'mdiArrowDown'))
 function commentBeShown(entries) {
   commentShow.value = entries.isIntersecting
+  return true
 }
 </script>
 

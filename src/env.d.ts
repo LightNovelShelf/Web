@@ -11,5 +11,13 @@ declare namespace NodeJS {
     DEBUGGING: boolean
     /** Quasar CLI mode (spa, pwa, …) */
     MODE: string
+
+    // 环境变量
+    VUE_APP_NAME: string
+    VUE_APP_TOKEN_EXP_TIME: string
+    VUE_SESSION_TOKEN_VALIDITY: string
+    VUE_CAPTCHA_SITE_KEY: string
+    VUE_TRACE_SERVER: string
+    ANALYZE: string
   }
 }

@@ -1,11 +1,10 @@
-
-
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { parseTime } from 'src/utils/time'
 
 import { useToNowRef } from 'src/composition/useToNowRef'
 
 import type { Dayjs } from 'dayjs'
+import type { Announcement as _Announcement } from 'src/services/context/type'
 import type { Ref } from 'vue'
 
 export interface Announcement {
@@ -18,14 +17,14 @@ export interface Announcement {
 }
 
 function getPreview(html: string): string {
-  let div = document.createElement('div')
+  const div = document.createElement('div')
   div.innerHTML = sanitizerHtml(html)
-  const text = div.textContent.trim()
-  div = null
+  const text = div.textContent!.trim()
+  div.remove()
   return text.length > 50 ? text.substring(0, 50) + '...' : text
 }
 
-export function announcementFormat(element): Announcement {
+export function announcementFormat(element: _Announcement): Announcement {
   return {
     Id: element.Id,
     Create: parseTime(element.CreateTime),
@@ -36,7 +35,7 @@ export function announcementFormat(element): Announcement {
   }
 }
 
-export function announcementListFormat(announcementList): Announcement[] {
+export function announcementListFormat(announcementList: _Announcement[]): Announcement[] {
   const re: Announcement[] = []
   announcementList.forEach((element) => {
     re.push(announcementFormat(element))

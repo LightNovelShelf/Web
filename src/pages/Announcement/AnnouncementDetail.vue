@@ -33,7 +33,7 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import { useAppStore } from 'stores/app'
 
-import { Comment } from 'components/'
+import { Comment } from 'components'
 import HtmlReader from 'components/html/HtmlReader.vue'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'

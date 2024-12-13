@@ -1,14 +1,14 @@
 import MiniMasonry from 'minimasonry'
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 
-import type { Ref } from 'vue';
+import type { Ref } from 'vue'
 
 export interface UseMasonryAction {
   layout: () => void
   destroy: () => void
 }
 
-export function useMasonry(ele: Ref<Element>): UseMasonryAction {
+export function useMasonry(ele: Ref<HTMLElement>): UseMasonryAction {
   /** masonry实例 */
   const instance = ref<any>(null)
 

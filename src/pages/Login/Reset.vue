@@ -28,7 +28,7 @@
               <q-icon name="mdiLock" />
             </template>
             <template v-slot:append>
-              <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
+              <q-icon :name="isPwd ? 'mdiEyeOff' : 'mdiEye'" class="cursor-pointer" @click="isPwd = !isPwd" />
             </template>
           </q-input>
           <q-input
@@ -42,7 +42,7 @@
               <q-icon name="mdiLock" />
             </template>
             <template v-slot:append>
-              <q-icon :name="isPwd ? icon.mdiEyeOff : icon.mdiEye" class="cursor-pointer" @click="isPwd = !isPwd" />
+              <q-icon :name="isPwd ? 'mdiEyeOff' : 'mdiEye'" class="cursor-pointer" @click="isPwd = !isPwd" />
             </template>
           </q-input>
           <q-input no-error-icon :rules="[(val) => !!val || '无效的验证码']" v-model="code" label="验证码">

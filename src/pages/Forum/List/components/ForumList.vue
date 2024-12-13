@@ -26,10 +26,10 @@
         v-model="currentPage"
         :max="pageData.totalPage"
         direction-links
-        :icon-first="icon.mdiSkipPrevious"
-        :icon-last="icon.mdiSkipNext"
-        :icon-prev="icon.mdiChevronLeft"
-        :icon-next="icon.mdiChevronRight"
+        icon-first="mdiSkipPrevious"
+        icon-last="mdiSkipNext"
+        icon-prev="mdiChevronLeft"
+        icon-next="mdiChevronRight"
         :max-pages="8"
         :input="!$q.screen.gt.sm"
       />
@@ -46,7 +46,6 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { getForumList } from 'src/services/forum'
 
 import type { ForumType } from 'src/services/forum/types'
-
 
 const props = defineProps<{ type: ForumType }>()
 

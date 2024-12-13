@@ -21,5 +21,6 @@ function queryItem(entry: IntersectionObserverEntry) {
   if (entry.isIntersecting && item) {
     listDataStore.queryBooks({ ids: [item.id] })
   }
+  return true
 }
 </script>

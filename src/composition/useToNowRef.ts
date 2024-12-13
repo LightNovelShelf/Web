@@ -26,7 +26,9 @@ import type { Dayjs } from 'dayjs'
  * return { lastUpdateTime }
  * ```
  */
-export function useToNowRef(dateGetter: MaybeRefOrGetter<Date | Dayjs | undefined | null>): ComputedRef<string | null> {
+export function useToNowRef(
+  dateGetter: MaybeRefOrGetter<Date | Dayjs | string | undefined | null>,
+): ComputedRef<string> {
   const dateRef = computed<Dayjs | null>(() => {
     const dateVal = toValue(dateGetter)
     if (!dateVal) {
@@ -108,6 +110,6 @@ export function useToNowRef(dateGetter: MaybeRefOrGetter<Date | Dayjs | undefine
 
   return computed(() => {
     // console.log('re-calc toNow', dateRef.value.format(), nowRef.value.format())
-    return dateRef.value ? toNow(dateRef.value, { now: nowRef.value, notNegative: true }) : null
+    return dateRef.value ? toNow(dateRef.value, { now: nowRef.value, notNegative: true }) : ''
   })
 }
