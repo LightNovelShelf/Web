@@ -136,8 +136,8 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
 
+import { DragPageSticky } from 'components'
 import { useLayout } from 'components/app/useLayout'
-import DragPageSticky from 'components/DragPageSticky.vue'
 import HtmlReader from 'components/html/HtmlReader.vue'
 
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'

@@ -50,7 +50,7 @@ import { computed, ref } from 'vue'
 
 import { useSettingStore } from 'stores/setting'
 
-import BlurHash from 'components/BlurHash.vue'
+import { BlurHash } from 'components'
 
 import { useToNowRef } from 'src/composition/useToNowRef'
 

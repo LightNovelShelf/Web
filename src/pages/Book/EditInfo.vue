@@ -52,17 +52,13 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 
 import { useSettingStore } from 'stores/setting'
 
-import { HtmlEditor, BlurHash } from 'components'
-import DragPageSticky from 'components/DragPageSticky.vue'
+import { HtmlEditor, BlurHash, DragPageSticky } from 'components'
 import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { getBookEditInfo, editBook } from 'src/services/book'
-
-
-
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)

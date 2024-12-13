@@ -125,9 +125,8 @@ import { parseTime } from 'src/utils/time'
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
 
-import { Comment } from 'components'
+import { Comment, BlurHash } from 'components'
 import AddToShelf from 'components/biz/MyShelf/AddToShelf.vue'
-import BlurHash from 'components/BlurHash.vue'
 import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'

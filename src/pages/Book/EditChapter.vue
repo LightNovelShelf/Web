@@ -25,14 +25,12 @@
 </template>
 
 <script lang="ts" setup>
-
 import { useQuasar } from 'quasar'
 import { computed, ref, toRaw } from 'vue'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 
-import { HtmlEditor } from 'components'
-import DragPageSticky from 'components/DragPageSticky.vue'
+import { HtmlEditor, DragPageSticky } from 'components'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'

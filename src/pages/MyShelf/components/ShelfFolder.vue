@@ -45,7 +45,7 @@ import { useBookListStore } from 'stores/bookListData'
 import { useSettingStore } from 'stores/setting'
 import { useShelfStore } from 'stores/shelf'
 
-import BlurHash from 'components/BlurHash.vue'
+import { BlurHash } from 'components'
 
 import { useToNowRef } from 'src/composition/useToNowRef'
 

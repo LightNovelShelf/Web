@@ -4,7 +4,7 @@
 import { defineConfig } from '#q-app/wrappers'
 import AutoImport from 'unplugin-auto-import/vite'
 
-export default defineConfig((/* ctx */) => {
+export default defineConfig((ctx) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -61,7 +61,26 @@ export default defineConfig((/* ctx */) => {
       // distDir
       // alias: {},
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.build = {
+          ...viteConf.build,
+          rollupOptions: {
+            output: {
+              assetFileNames: 'assets/[ext]/[name]-[hash][extname]',
+              manualChunks: (id) => {
+                // PWA 模式下把文件打包在一块
+                if (ctx.modeName == 'pwa') {
+                  if (id.includes('node_modules')) {
+                    return 'vendor'
+                  } else if (id.includes('/src/')) {
+                    return 'chunk'
+                  }
+                }
+              },
+            },
+          },
+        }
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [

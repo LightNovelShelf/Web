@@ -158,9 +158,8 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
 
-import { BlurHash, HtmlEditor } from 'components'
+import { BlurHash, HtmlEditor, DragPageSticky } from 'components'
 import { useLayout } from 'components/app/useLayout'
-import DragPageSticky from 'components/DragPageSticky.vue'
 import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
@@ -176,8 +175,6 @@ import {
 } from 'src/services/chapter'
 
 import type { BookServicesTypes } from 'src/services/book'
-
-
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
