@@ -1,4 +1,4 @@
-const Key: string = (VUE_APP_NAME || 'LightNovelShelf') + '_Dark'
+const Key: string = (process.env.VUE_APP_NAME || 'LightNovelShelf') + '_Dark'
 
 /** Dark设置 */
 export const Dark = {
@@ -15,5 +15,5 @@ export const Dark = {
   },
   set(value: 'auto' | boolean) {
     localStorage.setItem(Key, `${value}`)
-  }
+  },
 }

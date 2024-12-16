@@ -1,9 +1,18 @@
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import { Dark, Quasar } from 'quasar'
-import { Dark as DarkSet } from 'src/utils/dark'
-import mdiIconSet from './quasar/iconSet'
+import mdiIconSet from 'quasar/icon-set/svg-mdi-v7.js'
 
-export default boot(() => {
+import { Dark as DarkSet } from 'src/utils/dark'
+
+import * as myIcons from './quasar/icon'
+
+export default defineBoot(() => {
   Dark.set(DarkSet.get())
   Quasar.iconSet.set(mdiIconSet)
+  Quasar.iconSet.iconMapFn = (iconName) => {
+    const icon = myIcons[iconName]
+    if (icon !== undefined) {
+      return { icon }
+    }
+  }
 })

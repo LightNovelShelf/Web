@@ -1,6 +1,6 @@
 export enum CommentType {
   Book = 'Book',
-  Announcement = 'Announcement'
+  Announcement = 'Announcement',
 }
 
 export namespace PostComment {
@@ -8,11 +8,9 @@ export namespace PostComment {
     Type: CommentType
     Id: number
     Content: string
-    ReplyId?: number
+    ReplyId?: number | undefined | null
     ParentId?: number
   }
-
-  export interface Response {}
 }
 
 export namespace GetComment {
@@ -27,8 +25,8 @@ export namespace GetComment {
     Type: CommentType
     Page: number
     TotalPages: number
-    Users: Record<string, any>[]
-    Commentaries: Record<string, any>[]
+    Users: { [key: string]: any }
+    Commentaries: { [key: string]: any }
     Data: { Id: number; Reply: number[] }[]
   }
 }

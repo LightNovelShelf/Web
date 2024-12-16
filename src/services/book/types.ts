@@ -1,4 +1,4 @@
-import { ListResult } from '../types'
+import type { ListResult } from '../types'
 
 export interface BookInList {
   Id: number

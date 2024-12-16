@@ -6,13 +6,7 @@
       paragraph-tag="p"
       :toolbar="toolbar"
       v-model="htmlContent"
-      :definitions="{
-        bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
-        removeFormat: { handler: removeFormat },
-        ruby: { tip: '插入注音', icon: icon.mdiFuriganaHorizontal, handler: htmlRubyHandler },
-        code: { tip: '输入源代码', icon: icon.mdiCodeTags, handler: showInputCode },
-        dot: { tip: '插入着重号', icon: icon.mdiCircleDouble, handler: htmlDotHandler }
-      }"
+      :definitions="definitions"
       min-height="5rem"
     >
     </q-editor>
@@ -105,15 +99,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import { useQuasar, debounce } from 'quasar'
-import prettier from 'prettier/standalone'
-import parserHtml from 'prettier/parser-html'
-import { useSettingStore } from 'stores/setting'
-import bbCodeParser from 'src/utils/bbcode/simple'
+import { MdEditor } from 'md-editor-v3'
+import { format } from 'prettier'
+import * as prettierPluginHtml from 'prettier/plugins/html.js'
+import { useQuasar } from 'quasar'
 import TurndownService from 'turndown'
-import MdEditor, { ToolbarNames } from 'md-editor-v3'
-import { icon } from 'assets/icon'
+import { computed, nextTick, ref, watch } from 'vue'
+
+import bbCodeParser from 'src/utils/bbcode/simple'
+
+import { useSettingStore } from 'stores/setting'
+
+import type { ToolbarNames } from 'md-editor-v3'
+import type { QEditorCommand } from 'quasar'
+
 import 'md-editor-v3/lib/style.css'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
@@ -124,9 +123,8 @@ const htmlContent = computed<string>({
     return props.html
   },
   set(html) {
-    clearHtml(html)
     emit('update:html', html)
-  }
+  },
 })
 const settingStore = useSettingStore()
 const { editorSetting } = settingStore
@@ -135,7 +133,7 @@ const SimpleToolbar = [
   ['left', 'center', 'right', 'justify'],
   ['bold', 'italic', 'underline', 'strike', 'dot'],
   ['undo', 'redo'],
-  ['removeFormat', 'code']
+  ['removeFormat', 'code'],
 ]
 const CommonToolbar = [
   [
@@ -144,8 +142,8 @@ const CommonToolbar = [
       icon: $q.iconSet.editor.align,
       fixedLabel: true,
       list: 'only-icons',
-      options: ['left', 'center', 'right', 'justify']
-    }
+      options: ['left', 'center', 'right', 'justify'],
+    },
   ],
   ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript', 'ruby', 'dot'],
   ['hr', 'link', 'image'],
@@ -155,7 +153,7 @@ const CommonToolbar = [
       label: $q.lang.editor.formatting,
       icon: $q.iconSet.editor.formatting,
       list: 'no-icons',
-      options: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code']
+      options: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'],
     },
     {
       label: $q.lang.editor.fontSize,
@@ -163,13 +161,13 @@ const CommonToolbar = [
       fixedLabel: true,
       fixedIcon: true,
       list: 'no-icons',
-      options: ['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7']
+      options: ['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7'],
     },
-    'removeFormat'
+    'removeFormat',
   ],
   ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
   ['undo', 'redo'],
-  ['code', 'bbcode']
+  ['code', 'bbcode'],
 ]
 const toolbar = computed(() => {
   if (props.mode === 'simple') {
@@ -179,7 +177,6 @@ const toolbar = computed(() => {
   }
 })
 
-const chapter = ref<any>()
 const editorRef = ref()
 const inputCodeShow = ref(false)
 const htmlCodeTextarea = ref('')
@@ -203,22 +200,27 @@ const BBCodeTransForm = () => {
 }
 function removeFormat() {
   editorRef.value.runCmd('removeFormat')
-  nextTick(() => {
-    htmlContent.value = htmlContent.value.replaceAll('style=""', '')
-    htmlContent.value = htmlContent.value.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
+  nextTick(async () => {
+    let html = htmlContent.value.replaceAll('style=""', '')
+    html = html.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
+    html = await htmlFormat(html)
+    htmlContent.value = html
   })
 }
-const clearHtml = debounce(function clearHtml(html: string) {
-  if (html.indexOf('MsoNormal') !== -1) {
-    console.log('本次可能从word粘贴内容')
-    const el = editorRef.value.getContentEl() as Element
-    el.querySelectorAll('.MsoNormal').forEach((item) => {
-      item.classList.remove('MsoNormal')
-      if (item.classList.length === 0) item.removeAttribute('class')
-    })
-    emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
-  }
-}, 100)
+const clearWord = () => {
+  const el = editorRef.value.getContentEl() as Element
+  el.querySelectorAll('.MsoNormal').forEach((item) => {
+    item.classList.remove('MsoNormal')
+    if (item.classList.length === 0) item.removeAttribute('class')
+  })
+  emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
+}
+const htmlFormat = async (html) => {
+  return await format(html, {
+    parser: 'html',
+    plugins: [prettierPluginHtml],
+  })
+}
 const htmlRubyHandler = () => {
   const selection = window.getSelection()?.toString()
   if (!selection) return
@@ -231,11 +233,11 @@ const htmlDotHandler = () => {
   const dotStr = `<span class="dot">${selection}</span>`
   editorRef.value.runCmd('insertHTML', dotStr)
 }
-function showInputCode() {
+async function showInputCode() {
   try {
-    htmlCodeTextarea.value = prettier.format(htmlContent.value, {
+    htmlCodeTextarea.value = await format(htmlContent.value, {
       parser: 'html',
-      plugins: [parserHtml]
+      plugins: [prettierPluginHtml],
     })
   } catch (e) {
     htmlCodeTextarea.value = htmlContent.value
@@ -243,18 +245,25 @@ function showInputCode() {
 
   inputCodeShow.value = true
 }
+const definitions: Record<string, QEditorCommand> = {
+  removeFormat: { handler: removeFormat },
+  bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
+  ruby: { tip: '插入注音', icon: 'mdiFuriganaHorizontal', handler: htmlRubyHandler },
+  code: { tip: '输入源代码', icon: 'mdiCodeTags', handler: showInputCode },
+  dot: { tip: '插入着重号', icon: 'mdiCircleDouble', handler: htmlDotHandler },
+}
 
-MdEditor.config({
-  markedRenderer(renderer) {
-    renderer.image = (href: string, title: string, desc: string) => {
-      return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
-    }
-    renderer.heading = (text, level, raw, s, index) => {
-      return `<h${level} id="heading-${index}">${text}</h${level}>`
-    }
-    return renderer
-  }
-})
+// MdEditor.config({
+//   markedRenderer(renderer) {
+//     renderer.image = (href: string, title: string, desc: string) => {
+//       return `<div class="illus duokan-image-single"><img src="${href}" alt="${desc || ''}"></div>`
+//     }
+//     renderer.heading = (text, level, raw, s, index) => {
+//       return `<h${level} id="heading-${index}">${text}</h${level}>`
+//     }
+//     return renderer
+//   },
+// })
 const mdToolBar: ToolbarNames[] = [
   'bold',
   'underline',
@@ -282,7 +291,7 @@ const mdToolBar: ToolbarNames[] = [
   'fullscreen',
   'preview',
   'htmlPreview',
-  'catalog'
+  'catalog',
 ]
 const turndownService = new TurndownService()
 turndownService.keep(['ruby', 'rt'])
@@ -292,7 +301,7 @@ const mdRubyHandler = () => {
   const selection = window.getSelection()
   const endPoint = textarea.selectionStart
 
-  if (!selection.anchorNode.contains(textarea) || !selection.focusNode.contains(textarea)) {
+  if (!selection?.anchorNode?.contains(textarea) || !selection?.focusNode?.contains(textarea)) {
     return
   }
 
@@ -315,7 +324,7 @@ const mdDotHandler = () => {
   const selection = window.getSelection()
   const endPoint = textarea.selectionStart
 
-  if (!selection.anchorNode.contains(textarea) || !selection.focusNode.contains(textarea)) {
+  if (!selection?.anchorNode?.contains(textarea) || !selection?.focusNode?.contains(textarea)) {
     return
   }
 
@@ -337,12 +346,12 @@ function sanitizeHtml(html: string) {
   return html
   // return `<div class="md-editor">${html}</div>`
 }
-async function onUploadImg(files: FileList, callback: (urls: string[]) => void) {
+function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
   $q.notify({
     position: 'bottom',
     html: true,
     message: '暂时不支持上传图片，请使用链接',
-    timeout: 2500
+    timeout: 2500,
   })
 }
 
@@ -362,7 +371,7 @@ watch(
     } else {
       isChange.value = false
     }
-  }
+  },
 )
 
 const isChange = ref(false)
@@ -387,9 +396,7 @@ watch(editorSetting, parseMarkDown)
     padding: unset;
   }
 }
-</style>
 
-<style lang="scss">
 .edit-input {
   max-height: calc(100vh - 250px);
 }

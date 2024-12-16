@@ -1,9 +1,13 @@
-import { route } from 'quasar/wrappers'
-import { Notify } from 'quasar'
-import { longTermToken, sessionToken } from 'src/utils/session'
-import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
-import routes from './routes'
+import { defineRouter } from '#q-app/wrappers'
 import { nanoid } from 'nanoid'
+import { Notify } from 'quasar'
+import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
+
+import { longTermToken, sessionToken } from 'src/utils/session'
+
+import type { HistoryState, RouteRecordNameGeneric } from 'vue-router'
+
+import routes from './routes'
 
 /*
  * If not building with SSR mode, you can
@@ -13,35 +17,35 @@ import { nanoid } from 'nanoid'
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-export default route(function (/* { store, ssrContext } */) {
-  const keys = []
+export default defineRouter(function (/* { store, ssrContext } */) {
+  const keys: string[] = []
 
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
-    ? (baseUrl) => {
-        const history = createWebHistory(baseUrl)
-        const _push = history.push
-        const _replace = history.replace
-        const setKey = (to, data) => {
-          if (!data) data = {}
-          data['key'] = `[${to}] ${nanoid()}`
-          keys.push(data['key'])
-          return data
+      ? (baseUrl?: string) => {
+          const history = createWebHistory(baseUrl)
+          const _push = history.push
+          const _replace = history.replace
+          const setKey = (to: string, data?: HistoryState) => {
+            if (!data) data = {}
+            data['key'] = `[${to}] ${nanoid()}`
+            keys.push(data['key'])
+            return data
+          }
+          history.push = (to, data) => {
+            data = setKey(to, data)
+            _push(to, data)
+          }
+          history.replace = (to, data) => {
+            data = setKey(to, data)
+            _replace(to, data)
+          }
+          return history
         }
-        history.push = (to, data) => {
-          data = setKey(to, data)
-          _push(to, data)
-        }
-        history.replace = (to, data) => {
-          data = setKey(to, data)
-          _replace(to, data)
-        }
-        return history
-      }
-    : createWebHashHistory
+      : createWebHashHistory
 
-  const router = createRouter({
+  const Router = createRouter({
     scrollBehavior(to, from, savedPosition) {
       // Read 页面的滚动历史由页面自己处理
       if (to.name !== 'Read') {
@@ -57,16 +61,16 @@ export default route(function (/* { store, ssrContext } */) {
     // Leave this as is and make changes in quasar.conf.js instead!
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
-    history: createHistory(process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE)
+    history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
-  router.beforeEach(async function (to) {
+  Router.beforeEach(async function (to) {
     if (to.params.authRedirect) {
       Notify.create({
         type: 'negative',
         timeout: 1500,
         position: 'bottom',
-        message: '此操作必须登录，正在前往登录页面'
+        message: '此操作必须登录，正在前往登录页面',
       })
     }
 
@@ -86,7 +90,7 @@ export default route(function (/* { store, ssrContext } */) {
         type: 'negative',
         timeout: 1500,
         position: 'bottom',
-        message: '此页面必须登录'
+        message: '此页面必须登录',
       })
     }
 
@@ -94,8 +98,8 @@ export default route(function (/* { store, ssrContext } */) {
     return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
   })
 
-  const readyRoute = []
-  router.afterEach((to) => {
+  const readyRoute: RouteRecordNameGeneric[] = []
+  Router.afterEach((to) => {
     const key = history.state['key']
     if (readyRoute.includes(to.name)) {
       if (key) {
@@ -109,5 +113,5 @@ export default route(function (/* { store, ssrContext } */) {
     }
   })
 
-  return router
+  return Router
 })

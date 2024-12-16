@@ -4,7 +4,7 @@ export enum HashMethod {
   SHA1 = 'SHA1',
   SHA256 = 'SHA-256',
   SHA384 = 'SHA-384',
-  SHA512 = 'SHA-512'
+  SHA512 = 'SHA-512',
 }
 
 /**
@@ -14,8 +14,8 @@ export enum HashMethod {
  */
 async function hash(message: string, method: HashMethod = HashMethod.SHA256): Promise<string> {
   // dev环境下提供fallback，方便局域网调试
-  if (__DEV__) {
-    // __DEV__ 单独写，方便webpack在production模式下消除deadcode
+  if (process.env.DEV) {
+    // 单独写，方便在production模式下消除deadcode
     if (!window.isSecureContext) {
       const lib = await import('hash.js')
       switch (method) {

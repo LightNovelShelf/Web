@@ -1,4 +1,4 @@
-import { IRetryPolicy, RetryContext } from '@microsoft/signalr/src/IRetryPolicy'
+import type { IRetryPolicy, RetryContext } from '@microsoft/signalr/src/IRetryPolicy'
 
 export class RetryPolicy implements IRetryPolicy {
   nextRetryDelayInMilliseconds(retryContext: RetryContext) {

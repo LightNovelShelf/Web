@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
 import { useQuasar } from 'quasar'
+import { computed, defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'QGrid',
@@ -14,40 +14,40 @@ export default defineComponent({
     // 横向间隔槽
     xGap: {
       type: [Number, String],
-      default: 0
+      default: 0,
     },
     // 纵向间隔槽
     yGap: {
       type: [Number, String],
-      default: 0
+      default: 0,
     },
     // 默认一行的栅格数量
     cols: {
       type: [Number, String],
-      default: 24
+      default: 24,
     },
     // 很小
     xs: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 小的
     sm: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 中等
     md: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 大的
     lg: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 很大
     xl: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // divref
-    forwardRef: Function
+    forwardRef: Function,
   },
   setup(props) {
     const $q = useQuasar()
@@ -65,13 +65,13 @@ export default defineComponent({
       width: '100%',
       display: 'grid',
       'grid-template-columns': `repeat(${cols.value}, minmax(0px, 1fr))`,
-      gap: `${props.yGap}px ${props.xGap}px`
+      gap: `${props.yGap}px ${props.xGap}px`,
     }))
 
     return {
-      styleObj
+      styleObj,
     }
-  }
+  },
 })
 </script>
 

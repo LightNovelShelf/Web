@@ -1,7 +1,7 @@
 export interface GetChapterContentRequest {
   Bid: number
   SortNum: number
-  Convert?: 't2s' | 's2t'
+  Convert?: 't2s' | 's2t' | null | undefined
 }
 
 interface GetChapterEditInfoBySortNum {

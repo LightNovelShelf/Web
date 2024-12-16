@@ -2,63 +2,63 @@
   <div ref="telegram"></div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
 const props = defineProps({
   mode: {
     type: String,
     required: true,
-    validator(value) {
+    validator(value: string) {
       return ['callback', 'redirect'].includes(value)
-    }
+    },
   },
   telegramLogin: {
     type: String,
     required: true,
-    validator(value) {
+    validator(value: string) {
       return value.endsWith('bot') || value.endsWith('Bot')
-    }
+    },
   },
   redirectUrl: {
     type: String,
-    default: ''
+    default: '',
   },
   requestAccess: {
     type: String,
     default: 'read',
-    validator(value) {
+    validator(value: string) {
       return ['read', 'write'].includes(value)
-    }
+    },
   },
   size: {
     type: String,
     default: 'large',
-    validator(value) {
+    validator(value: string) {
       return ['small', 'medium', 'large'].includes(value)
-    }
+    },
   },
   userpic: {
     type: Boolean,
-    default: true
+    default: true,
   },
   radius: {
-    type: String
-  }
+    type: String,
+  },
 })
 
 const emit = defineEmits(['callback', 'loaded'])
-function onTelegramAuth(user) {
+function onTelegramAuth(user: any) {
   emit('callback', user)
 }
 
-const telegram = ref(null)
+const telegram = ref()
 const script = document.createElement('script')
 script.async = true
 script.src = 'https://telegram.org/js/telegram-widget.js?19'
 
 script.setAttribute('data-size', props.size)
-script.setAttribute('data-userpic', props.userpic)
+script.setAttribute('data-userpic', `${props.userpic}`)
 script.setAttribute('data-telegram-login', props.telegramLogin)
 script.setAttribute('data-request-access', props.requestAccess)
 
@@ -76,6 +76,6 @@ if (props.mode === 'callback') {
 }
 
 onMounted(() => {
-  telegram.value.appendChild(script)
+  telegram.value?.appendChild(script)
 })
 </script>

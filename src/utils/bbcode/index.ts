@@ -30,7 +30,7 @@ export default class BBCode {
   add(regex, replacement) {
     this.codes.push({
       regexp: new RegExp(regex, 'igms'),
-      replacement: replacement
+      replacement: replacement,
     })
 
     return this
@@ -48,7 +48,7 @@ export default class BBCode {
 
       return {
         regexp: new RegExp(regex, 'igms'),
-        replacement: replacement
+        replacement: replacement,
       }
     }, this)
 

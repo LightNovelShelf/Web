@@ -3,13 +3,14 @@ export enum ShelfItemTypeEnum {
   /** 书籍 */
   BOOK = 'BOOK',
   /** 文件夹 */
-  FOLDER = 'FOLDER'
+  FOLDER = 'FOLDER',
 }
 
 export enum SHELF_STRUCT_VER {
   'V20220211' = '20220211',
   /** 最新版本号，动态改变 */
-  LATEST = '20220211'
+  /* eslint-disable-next-line */
+  LATEST = '20220211',
 }
 
 interface ShelfCommonItem {

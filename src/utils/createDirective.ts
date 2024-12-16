@@ -1,5 +1,4 @@
-import { AnyFunc, AnyVoidFunc } from 'src/types/utils'
-import { Directive } from 'vue'
+import type { Directive } from 'vue'
 
 /**
  * 没逻辑作用，主要是为了 type-safe

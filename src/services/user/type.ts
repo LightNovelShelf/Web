@@ -1,10 +1,25 @@
-import { GetBookListRequest, GetBookListRes } from 'src/services/book/types'
+import type { GetBookListRequest, GetBookListRes } from 'src/services/book/types'
 
 export namespace Login {
   export interface Param {
     email: string
     password: string
     token: string
+  }
+
+  export interface Res {
+    RefreshToken: string
+    Token: string
+  }
+}
+
+export namespace Register {
+  export interface Param {
+    userName: string
+    email: string
+    password: string
+    code: string
+    inviteCode: string
   }
 
   export interface Res {

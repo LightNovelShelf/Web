@@ -20,7 +20,7 @@ import { defineStore } from 'pinia'
 export const useAppStore = defineStore('app', {
   state: () => ({
     appName: '轻书架',
-    user: null as any
+    user: null as any,
   }),
   getters: {
     doubleRepeat: (state) => state.appName.repeat(2),
@@ -36,7 +36,7 @@ export const useAppStore = defineStore('app', {
     },
     avatar(): string {
       return this.user?.Avatar
-    }
+    },
   },
   actions: {
     reverse() {
@@ -47,6 +47,6 @@ export const useAppStore = defineStore('app', {
     async asyncReverse() {
       await Promise.resolve()
       this.reverse()
-    }
-  }
+    },
+  },
 })

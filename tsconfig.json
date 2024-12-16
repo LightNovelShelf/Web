@@ -1,14 +1,3 @@
 {
-  "extends": "@quasar/app-webpack/tsconfig-preset",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "lib": ["ESNext", "DOM"],
-    "jsx": "preserve",
-    "strict": false,
-    "alwaysStrict": true,
-    "types": ["unplugin-icons/types/vue"]
-  },
-  "exclude": [
-    "node_modules"
-  ]
+  "extends": "./.quasar/tsconfig.json"
 }

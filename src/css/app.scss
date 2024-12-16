@@ -16,8 +16,15 @@
 .scrollbar-base.os-scrollbar {
   padding-top: 0.5rem; /* 8px */
   padding-bottom: 0.5rem; /* 8px */
-  transition: width 0.15s ease-in-out, height 0.15s ease-in-out, opacity 0.15s, visibility 0.15s, top 0.15s, right 0.15s,
-    bottom 0.15s, left 0.15s;
+  transition:
+    width 0.15s ease-in-out,
+    height 0.15s ease-in-out,
+    opacity 0.15s,
+    visibility 0.15s,
+    top 0.15s,
+    right 0.15s,
+    bottom 0.15s,
+    left 0.15s;
   pointer-events: unset;
 
   &.os-scrollbar-horizontal {

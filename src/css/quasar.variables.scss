@@ -17,6 +17,7 @@ $secondary: #26a69a;
 $accent: #9c27b0;
 
 $dark: #1d1d1d;
+$dark-page: #121212;
 
 $positive: #21ba45;
 $negative: #c10015;
@@ -34,11 +35,12 @@ $tooltip-mobile-fontsize: 10px !default;
 
 // 覆盖默认样式
 .q-notification {
-  transition: transform 0.5s, opacity 0.5s !important;
+  transition:
+    transform 0.5s,
+    opacity 0.5s !important;
 }
 
 .q-badge--floating {
-  // 从naive-ui里抄来的
   right: unset !important;
   left: 100% !important;
   transform: translateX(-50%);
