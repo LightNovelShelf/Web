@@ -100,9 +100,9 @@
 
 <script lang="ts" setup>
 import { MdEditor } from 'md-editor-v3'
-import parserHtml from 'prettier/parser-html'
-import prettier from 'prettier/standalone'
-import { useQuasar, debounce } from 'quasar'
+import { format } from 'prettier'
+import * as prettierPluginHtml from 'prettier/plugins/html.js'
+import { useQuasar } from 'quasar'
 import TurndownService from 'turndown'
 import { computed, nextTick, ref, watch } from 'vue'
 
@@ -123,7 +123,6 @@ const htmlContent = computed<string>({
     return props.html
   },
   set(html) {
-    clearHtml(html)
     emit('update:html', html)
   },
 })
@@ -178,7 +177,6 @@ const toolbar = computed(() => {
   }
 })
 
-const chapter = ref<any>()
 const editorRef = ref()
 const inputCodeShow = ref(false)
 const htmlCodeTextarea = ref('')
@@ -202,22 +200,27 @@ const BBCodeTransForm = () => {
 }
 function removeFormat() {
   editorRef.value.runCmd('removeFormat')
-  nextTick(() => {
-    htmlContent.value = htmlContent.value.replaceAll('style=""', '')
-    htmlContent.value = htmlContent.value.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
+  nextTick(async () => {
+    let html = htmlContent.value.replaceAll('style=""', '')
+    html = html.replace(/<span\s*?lang=".+?"\s*?>(.*?)<\/span>/gi, '$1')
+    html = await htmlFormat(html)
+    htmlContent.value = html
   })
 }
-const clearHtml = debounce(function clearHtml(html: string) {
-  if (html.indexOf('MsoNormal') !== -1) {
-    console.log('本次可能从word粘贴内容')
-    const el = editorRef.value.getContentEl() as Element
-    el.querySelectorAll('.MsoNormal').forEach((item) => {
-      item.classList.remove('MsoNormal')
-      if (item.classList.length === 0) item.removeAttribute('class')
-    })
-    emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
-  }
-}, 100)
+const clearWord = () => {
+  const el = editorRef.value.getContentEl() as Element
+  el.querySelectorAll('.MsoNormal').forEach((item) => {
+    item.classList.remove('MsoNormal')
+    if (item.classList.length === 0) item.removeAttribute('class')
+  })
+  emit('update:html', el.innerHTML.replaceAll('<o:p></o:p>', ''))
+}
+const htmlFormat = async (html) => {
+  return await format(html, {
+    parser: 'html',
+    plugins: [prettierPluginHtml],
+  })
+}
 const htmlRubyHandler = () => {
   const selection = window.getSelection()?.toString()
   if (!selection) return
@@ -232,9 +235,9 @@ const htmlDotHandler = () => {
 }
 async function showInputCode() {
   try {
-    htmlCodeTextarea.value = await prettier.format(htmlContent.value, {
+    htmlCodeTextarea.value = await format(htmlContent.value, {
       parser: 'html',
-      plugins: [parserHtml],
+      plugins: [prettierPluginHtml],
     })
   } catch (e) {
     htmlCodeTextarea.value = htmlContent.value
