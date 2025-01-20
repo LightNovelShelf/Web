@@ -3,8 +3,7 @@ import { onBeforeRouteLeave, useRoute } from 'vue-router'
 
 import type { UseTimeoutFnAction } from '../useTimeoutFn'
 import type { AnyFunc } from 'src/types/utils'
-import type { Ref } from 'vue';
-
+import type { Ref } from 'vue'
 
 /** 请求初始化流程 */
 export function useInitRequest(

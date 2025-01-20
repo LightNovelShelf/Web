@@ -1,7 +1,14 @@
 <template>
   <div :class="mode">
-    <q-editor ref="editorRef" paragraph-tag="p" :toolbar="toolbar" v-model="htmlContent" :definitions="definitions">
-    </q-editor>
+    <q-editor
+      ref="editorRef"
+      paragraph-tag="p"
+      :toolbar="toolbar"
+      v-model="htmlContent"
+      :definitions="definitions"
+      @compositionstart="composing = true"
+      @compositionend="composing = false"
+    />
 
     <q-dialog v-model="inputBBCodeShow">
       <q-card style="width: 800px; max-width: 90vw">
@@ -42,31 +49,101 @@
 <script lang="ts" setup>
 import { format } from 'prettier'
 import * as prettierPluginHtml from 'prettier/plugins/html.js'
-import { useQuasar } from 'quasar'
-import { computed, nextTick, ref, watch } from 'vue'
+import { debounce, useQuasar } from 'quasar'
 
 import bbCodeParser from 'src/utils/bbcode/simple'
 
 import type { QEditor, QEditorCommand } from 'quasar'
+import { useEventListener } from '@vueuse/core'
+import { useIsActivated } from 'src/composition/useIsActivated'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
 const emit = defineEmits(['update:html'])
+let isInternalChange = false
 const htmlContent = computed<string>({
   get() {
     return props.html
   },
   set(html) {
-    console.log('set html', html)
-
+    isInternalChange = true
     emit('update:html', html)
   },
 })
 
+let composing = false
+let history = []
+let historyIndex = -1
+const setHistory = debounce((newValue) => {
+  if ((historyIndex === -1 || history[historyIndex] !== newValue) && !composing) {
+    history = history.slice(0, historyIndex + 1)
+    history.push(newValue)
+    historyIndex++
+  }
+}, 50)
+watch(
+  htmlContent,
+  (newValue) => {
+    if (isInternalChange) {
+      // 内部改变
+      isInternalChange = false
+    } else {
+      // 外部改变
+      composing = false
+      history = []
+      historyIndex = -1
+    }
+
+    setHistory(newValue)
+  },
+  { immediate: true },
+)
+
+const undo = () => {
+  if (historyIndex > 0) {
+    historyIndex--
+    htmlContent.value = history[historyIndex]
+  }
+}
+
+const redo = () => {
+  if (historyIndex < history.length - 1) {
+    historyIndex++
+    htmlContent.value = history[historyIndex]
+  }
+}
+
+let cleanup = () => {}
+const isActive = useIsActivated()
+watch(
+  isActive,
+  (value) => {
+    if (value) {
+      cleanup()
+      cleanup = useEventListener('keydown', (e) => {
+        if (e.ctrlKey) {
+          if (e.key === 'z') {
+            undo()
+            e.preventDefault()
+            e.stopPropagation()
+          } else if (e.key === 'y') {
+            redo()
+            e.preventDefault()
+            e.stopPropagation()
+          }
+        }
+      })
+    } else {
+      cleanup()
+    }
+  },
+  { immediate: true },
+)
+
 const SimpleToolbar = [
   ['left', 'center', 'right', 'justify'],
   ['bold', 'italic', 'underline', 'strike', 'dot'],
-  ['undo', 'redo'],
+  ['myUndo', 'myRedo'],
   ['removeFormat', 'code'],
 ]
 const CommonToolbar = [
@@ -100,7 +177,7 @@ const CommonToolbar = [
     'removeFormat',
   ],
   ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
-  ['undo', 'redo'],
+  ['myUndo', 'myRedo'],
   ['code', 'bbcode'],
 ]
 const toolbar = computed(() => {
@@ -148,7 +225,7 @@ function removeFormat() {
   editorRef.value.runCmd('removeFormat')
 }
 
-const htmlFormat = async (html) => {
+const htmlFormat = async (html: string) => {
   return await format(html, {
     parser: 'html',
     plugins: [prettierPluginHtml],
@@ -200,6 +277,8 @@ const definitions: Record<string, QEditorCommand> = {
   ruby: { tip: '插入注音', icon: 'mdiFuriganaHorizontal', handler: htmlRubyHandler },
   code: { tip: '输入源代码', icon: 'mdiCodeTags', handler: showInputCode },
   dot: { tip: '插入着重号', icon: 'mdiCircleDouble', handler: htmlDotHandler },
+  myUndo: { tip: '撤销 (CTRL + Z)', icon: 'mdiUndo', handler: undo },
+  myRedo: { tip: '重做 (CTRL + Y)', icon: 'mdiRedo', handler: redo },
 }
 
 function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
