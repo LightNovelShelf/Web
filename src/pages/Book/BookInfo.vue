@@ -9,9 +9,7 @@
                 <div class="absolute-bottom bottom-shadow">
                   <div class="row">
                     <div class="row flex-align-center q-gutter-xs">
-                      <q-icon size="24px">
-                        <i-mdi-heart />
-                      </q-icon>
+                      <q-icon size="24px" name="mdiHeart" />
                       <span>{{ book.Likes }}</span>
                     </div>
                     <q-space />

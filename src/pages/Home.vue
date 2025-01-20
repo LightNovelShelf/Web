@@ -38,19 +38,19 @@
             <div class="content row full-width">
               <div class="col-3">
                 <div class="text-opacity">当前在线</div>
-                <div class="text-h6">{{ onlineInfo.OnlineCount }}</div>
+                <div class="text-h6">{{ onlineInfo?.OnlineCount }}</div>
               </div>
               <div class="col-3">
                 <div class="text-opacity">今日总数</div>
-                <div class="text-h6">{{ onlineInfo.DayCount }}</div>
+                <div class="text-h6">{{ onlineInfo?.DayCount }}</div>
               </div>
               <div class="col-3">
                 <div class="text-opacity">今日注册</div>
-                <div class="text-h6">{{ onlineInfo.DayRegister }}</div>
+                <div class="text-h6">{{ onlineInfo?.DayRegister }}</div>
               </div>
               <div class="col-3">
                 <div class="text-opacity">最高在线</div>
-                <div class="text-h6">{{ onlineInfo.MaxOnline }}</div>
+                <div class="text-h6">{{ onlineInfo?.MaxOnline }}</div>
               </div>
             </div>
           </q-card-section>

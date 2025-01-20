@@ -12,8 +12,6 @@ import { PROVIDE } from 'src/const/provide'
 
 import { useLayout } from '../app/useLayout'
 
-
-
 const $q = useQuasar()
 const router = useRouter()
 const layout = useLayout()

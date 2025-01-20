@@ -72,38 +72,21 @@
         style="display: flex !important; height: calc(100vh - 180px)"
         :theme="$q.dark.isActive ? 'dark' : 'light'"
         :toolbars="mdToolBar"
+        noMermaid
+        noKatex
       >
-        <template #defToolbars>
-          <MdEditor.NormalToolbar title="插入注音" @click="mdRubyHandler">
-            <template #trigger>
-              <svg class="md-editor-icon" aria-hidden="true">
-                <path
-                  d="M8.5 2C7.12 2 6 3.12 6 4.5S7.12 7 8.5 7 11 5.88 11 4.5 9.88 2 8.5 2M15.5 2C14.12 2 13 3.12 13 4.5S14.12 7 15.5 7 18 5.88 18 4.5 16.88 2 15.5 2M11 8V10H5V12H14.95C14.53 13.13 13.5 14.5 12.16 15.67C11.12 14.74 10.35 13.82 9.82 13H7.5C8.08 14.25 9.13 15.62 10.62 16.96L6.55 20.22L5.76 20.84L7 22.41L7.8 21.78L12.17 18.28L16.55 21.78L17.33 22.41L18.58 20.84L17.8 20.22L13.73 16.97C15.34 15.5 16.7 13.85 17.07 12H19V10H13V8H11Z"
-                />
-              </svg>
-            </template>
-          </MdEditor.NormalToolbar>
-          <MdEditor.NormalToolbar title="插入着重号" @click="mdDotHandler">
-            <template #trigger>
-              <svg class="md-editor-icon" aria-hidden="true">
-                <path
-                  d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 2a8 8 0 0 1 8 8a8 8 0 0 1-8 8a8 8 0 0 1-8-8a8 8 0 0 1 8-8m0 2a6 6 0 0 0-6 6a6 6 0 0 0 6 6a6 6 0 0 0 6-6a6 6 0 0 0-6-6m0 2a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4Z"
-                />
-              </svg>
-            </template>
-          </MdEditor.NormalToolbar>
-        </template>
       </md-editor>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import TurndownService from '@joplin/turndown'
+import { gfm } from '@joplin/turndown-plugin-gfm'
 import { MdEditor } from 'md-editor-v3'
 import { format } from 'prettier'
 import * as prettierPluginHtml from 'prettier/plugins/html.js'
 import { useQuasar } from 'quasar'
-import TurndownService from 'turndown'
 import { computed, nextTick, ref, watch } from 'vue'
 
 import bbCodeParser from 'src/utils/bbcode/simple'
@@ -294,6 +277,9 @@ const mdToolBar: ToolbarNames[] = [
   'catalog',
 ]
 const turndownService = new TurndownService()
+console.log(gfm)
+
+turndownService.use(gfm)
 turndownService.keep(['ruby', 'rt'])
 const markdownText = ref('')
 const mdRubyHandler = () => {
@@ -387,7 +373,7 @@ watch(editorSetting, parseMarkDown)
 .common {
   .q-editor--default .q-editor__content,
   .md-editor-preview {
-    @import '../../css/read';
+    // @import '../../css/read';
   }
 }
 
