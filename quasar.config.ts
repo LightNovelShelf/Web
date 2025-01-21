@@ -173,28 +173,6 @@ export default defineConfig((ctx) => {
       // extendPWACustomSWConf (esbuildConf) {},
       extendGenerateSWOptions(cfg) {
         cfg.maximumFileSizeToCacheInBytes = 3 * 1024 * 1024
-        cfg.runtimeCaching = [
-          {
-            urlPattern: /.*\.(woff2|woff|ttf)/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'font-cache',
-              cacheableResponse: {
-                statuses: [200],
-              },
-            },
-          },
-          {
-            urlPattern: /.*\/icons\/.*/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'image-cache',
-              cacheableResponse: {
-                statuses: [200],
-              },
-            },
-          },
-        ]
       },
       // extendInjectManifestOptions (cfg) {}
     },
