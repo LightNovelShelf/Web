@@ -45,6 +45,8 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 import 'cropperjs/dist/cropper.css'
 import 'md-editor-v3/lib/style.css'
 
+import { uploadImage } from 'src/services/user'
+
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
 const editorRef = ref<ExposeParam>()
@@ -117,13 +119,18 @@ function sanitize(html: string) {
   html = sanitizerHtml(html)
   return html
 }
-function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
+async function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
   $q.notify({
     position: 'bottom',
     html: true,
     message: '暂时不支持上传图片，请使用链接',
     timeout: 2500,
   })
+  // const file = files[0]
+  // console.log(file)
+
+  // const res = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
+  // callback([res.Url])
 }
 
 const turndownService = new TurndownService({ codeBlockStyle: 'fenced', headingStyle: 'atx' })

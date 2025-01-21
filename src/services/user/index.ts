@@ -138,3 +138,8 @@ export async function getMyBooks(req: Types.GetMyBooks.Request) {
 export async function quickCreateBook(req: Types.QuickCreateBook.Request) {
   return requestWithSignalr<Types.QuickCreateBook.Response>('QuickCreateBook', req)
 }
+
+/** 上传图片，返回图片链接 */
+export async function uploadImage(req: Types.UploadImage.Request) {
+  return requestWithSignalr<Types.UploadImage.Response>('UploadImage', req)
+}

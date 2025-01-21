@@ -52,3 +52,13 @@ export namespace QuickCreateBook {
   }
   export type Response = number
 }
+
+export namespace UploadImage {
+  export interface Request {
+    FileName: string
+    ImageData: Uint8Array
+  }
+  export interface Response {
+    Url: string
+  }
+}
