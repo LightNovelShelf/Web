@@ -171,7 +171,30 @@ export default defineConfig((ctx) => {
       // useCredentialsForManifestTag: true,
       // injectPwaMetaTags: false,
       // extendPWACustomSWConf (esbuildConf) {},
-      // extendGenerateSWOptions (cfg) {},
+      extendGenerateSWOptions(cfg) {
+        cfg.runtimeCaching = [
+          {
+            urlPattern: /.*\.(woff2|woff|ttf)/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'font-cache',
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          {
+            urlPattern: /.*\/icons\/.*/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+        ]
+      },
       // extendInjectManifestOptions (cfg) {}
     },
 

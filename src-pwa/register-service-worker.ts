@@ -1,3 +1,4 @@
+import { Notify } from 'quasar'
 import { register } from 'register-service-worker'
 
 // The ready(), registered(), cached(), updatefound() and updated()
@@ -29,6 +30,12 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   updated(/* registration */) {
     // console.log('New content is available; please refresh.')
+    Notify.create({
+      message: '有新内容可用了，请刷新或重新打开网页',
+      position: 'bottom',
+      timeout: 0,
+      type: 'positive',
+    })
   },
 
   offline() {
