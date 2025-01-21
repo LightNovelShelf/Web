@@ -69,8 +69,6 @@ export default defineConfig((ctx) => {
               assetFileNames: 'assets/[ext]/[name]-[hash][extname]',
               manualChunks: (id) => {
                 if (id.includes('node_modules')) {
-                  if (id.includes('vue')) return 'vendor-vue'
-                  if (id.includes('quasar')) return 'vendor-quasar'
                   if (id.includes('md-editor-v3') || id.includes('codemirror')) return 'vendor-editor'
                   return 'vendor'
                 }
