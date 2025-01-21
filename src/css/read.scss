@@ -11,6 +11,14 @@ p {
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
+
+  img {
+    box-shadow: black 0 0 3px;
+    box-sizing: border-box;
+    margin: 5px 0;
+    cursor: pointer;
+    border: 1px solid white;
+  }
 }
 
 img {
@@ -18,14 +26,6 @@ img {
   height: auto;
   max-width: 100%;
   max-height: 100%;
-}
-
-.duokan-image-single img {
-  box-shadow: black 0 0 3px;
-  box-sizing: border-box;
-  margin: 5px 0;
-  cursor: pointer;
-  border: 1px solid white;
 }
 
 .change-image {
@@ -356,4 +356,9 @@ h3 {
 .em-dot {
   text-emphasis: circle;
   text-emphasis-position: under right;
+}
+
+/*MarkDown编辑器样式兼容*/
+blockquote p {
+  text-indent: unset;
 }

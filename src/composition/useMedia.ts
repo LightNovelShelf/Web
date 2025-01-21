@@ -1,6 +1,6 @@
 import { ref, watch, onUnmounted } from 'vue'
 
-import type { Ref} from 'vue';
+import type { Ref } from 'vue'
 
 /**
  * 返回当前屏幕是否匹配传入的query

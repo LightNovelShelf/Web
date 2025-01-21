@@ -15,10 +15,11 @@
 <script lang="ts" setup>
 import { useEventListener } from '@vueuse/core'
 import { format } from 'prettier'
-import * as prettierPluginHtml from 'prettier/plugins/html.js'
+import prettierPluginHtml from 'prettier/plugins/html.js'
 import { debounce, useQuasar } from 'quasar'
 
 import bbCodeParser from 'src/utils/bbcode/simple'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import { useIsActivated } from 'src/composition/useIsActivated'
 
@@ -179,7 +180,6 @@ const insertRuby = () => {
         type: 'text', // optional
       },
       cancel: true,
-      persistent: true,
     }).onOk((data) => {
       const rubyStr = `<ruby>${selectedText}<rt>${data}</rt></ruby>`
       editorRef.value.caret.range.deleteContents()
@@ -226,10 +226,9 @@ const inputHtml = async () => {
       autogrow: true,
     },
     cancel: true,
-    persistent: true,
     class: 'html-input',
   }).onOk((data) => {
-    htmlContent.value = data
+    htmlContent.value = sanitizerHtml(data)
   })
 }
 const inputBBCode = () => {
@@ -244,7 +243,6 @@ const inputBBCode = () => {
       autogrow: true,
     },
     cancel: true,
-    persistent: true,
     class: 'html-input',
   }).onOk((data) => {
     let arr = bbCodeParser.parse(data).split('\n')

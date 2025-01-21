@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 
 import type { AnyFunc } from 'src/types/utils'
-import type { Ref } from 'vue';
+import type { Ref } from 'vue'
 
 export interface UseFnLoadingReturn<P extends any[] = any[], R = any> extends AnyFunc<P, R> {
   loading: Ref<boolean>

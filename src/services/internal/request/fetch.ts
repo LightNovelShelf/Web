@@ -11,8 +11,6 @@ import type { RequestConfig } from 'src/services/types'
 import { createRequestQueue } from './createRequestQueue'
 import { getVisitorId } from './getVisitorId'
 
-
-
 async function requestWithFetch<Res = unknown, Data = any>(
   url: string,
   options: RequestConfig<Data> = {},

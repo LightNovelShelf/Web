@@ -208,7 +208,6 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
 import { getForumInfo } from 'src/services/forum'
 
-
 const props = defineProps<{ id: string }>()
 const _id = computed(() => ~~props.id || 1)
 

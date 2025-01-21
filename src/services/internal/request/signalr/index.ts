@@ -18,10 +18,6 @@ import { createRequestQueue } from '../createRequestQueue'
 import { tryResponseFromCache, updateResponseCache } from './cache'
 import { SignalrInspector } from './inspector'
 
-
-
-
-
 /** 是否是未授权产生的signalr错误 */
 const IS_UN_AUTH_ERR = (err: unknown): boolean =>
   /** @todo 未授权没有别的特征，只有通过message来检查 */ getErrMsg(err).includes('user is unauthorized')

@@ -40,7 +40,6 @@ import { ForumType } from 'src/services/forum/types'
 
 import ForumList from './components/ForumList.vue'
 
-
 const tabOptions: Array<Record<string, any>> = [
   {
     name: 'Star',

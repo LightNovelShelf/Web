@@ -281,7 +281,6 @@ async function saveInfo() {
     title: '提示',
     message: '你确定要保存吗？',
     cancel: true,
-    persistent: true,
   }).onOk(async () => {
     try {
       await editBook(toRaw(book.value))
@@ -304,7 +303,6 @@ async function saveChapter() {
     title: '提示',
     message: '你确定要保存吗？',
     cancel: true,
-    persistent: true,
   }).onOk(async () => {
     try {
       await editChapterContent(toRaw(chapter.value))
@@ -335,7 +333,7 @@ async function addChapter() {
   $q.dialog({
     title: '章节顺序',
     cancel: true,
-    persistent: true,
+
     prompt: {
       label: '从1开始，0在最后（留空则在最后插入）',
       model: '',
@@ -352,7 +350,6 @@ async function delChapter(sortNum: number) {
     title: '提示',
     message: '该章节将被永久删除！',
     cancel: true,
-    persistent: true,
   }).onOk(async () => {
     try {
       const resp: ChapterInfo[] = <any>await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
@@ -384,7 +381,7 @@ async function createChapter() {
           emptyHtml && '<br/>内容：轻书架'
         }`,
         html: true,
-        persistent: true,
+
         cancel: true,
       }).onOk(async () => {
         creatingChapterContent.html = '轻书架'

@@ -8,8 +8,6 @@ import { RequestMethod } from 'src/services/types'
 import type * as Types from './type'
 import type { ShelfItem, SHELF_STRUCT_VER } from 'src/types/shelf'
 
-
-
 /** 登录 */
 export async function login(email: string, password: string, token: string) {
   const res = await requestWithFetch<Types.Login.Res, Types.Login.Param>(PATH.USER_LOGIN, {

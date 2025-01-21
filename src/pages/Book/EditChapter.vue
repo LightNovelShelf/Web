@@ -55,7 +55,6 @@ async function save() {
     title: '提示',
     message: '你确定要保存吗？',
     cancel: true,
-    persistent: true,
   }).onOk(async () => {
     try {
       await editChapterContent(toRaw(chapter.value))

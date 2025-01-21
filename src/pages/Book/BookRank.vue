@@ -35,7 +35,6 @@ import { getRank } from 'src/services/book'
 
 import type { BookInList } from 'src/services/book/types'
 
-
 const props = defineProps<{ type: 'daily' | 'weekly' | 'monthly' }>()
 
 const options = [

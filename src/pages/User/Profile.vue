@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <q-dialog ref="dialog" v-model="visible" persistent>
+    <q-dialog ref="dialog" v-model="visible">
       <q-card style="min-width: 350px">
         <q-form @submit="handleSubmit">
           <q-card-section>

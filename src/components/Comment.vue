@@ -204,8 +204,6 @@ import { postComment, replyComment, getComment, deleteComment } from 'src/servic
 
 import type { CommentType, GetComment } from 'src/services/comment/types'
 
-
-
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
 const appStore = useAppStore()
@@ -304,7 +302,6 @@ const _delete = async (id: number) => {
     title: '提示',
     message: '你确定要删除这条评论吗？',
     cancel: true,
-    persistent: true,
   }).onOk(async () => {
     await deleteComment(id)
     $q.notify({

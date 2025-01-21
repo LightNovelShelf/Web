@@ -12,7 +12,6 @@
     <q-menu
       no-focus
       no-refocus
-      persistent
       no-parent-event
       v-model="visible"
       :offset="[0, 2]"

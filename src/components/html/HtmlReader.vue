@@ -8,9 +8,9 @@ import { inject } from 'vue'
 
 import { useSettingStore } from 'stores/setting'
 
-import { PROVIDE } from 'src/const/provide'
+import { useLayout } from 'components/app/useLayout'
 
-import { useLayout } from '../app/useLayout'
+import { PROVIDE } from 'src/const/provide'
 
 const $q = useQuasar()
 const router = useRouter()
@@ -37,7 +37,8 @@ function clickHandle(event: Event) {
   if (
     target instanceof HTMLImageElement &&
     (target.parentElement?.classList.contains('duokan-image-single') ||
-      target.parentElement?.classList.contains('image-preview'))
+      target.parentElement?.classList.contains('image-preview') ||
+      target.parentElement?.classList.contains('illus'))
   ) {
     imagePreview.show(target.src, target.alt)
   } else if (target instanceof HTMLAnchorElement) {

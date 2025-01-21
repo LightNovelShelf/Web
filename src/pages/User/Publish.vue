@@ -229,7 +229,6 @@ function delBook(bid: number, index: number) {
     title: '提示',
     message: '你确定要删除吗？',
     cancel: true,
-    persistent: true,
   }).onOk(async () => {
     try {
       await deleteBook(bid)

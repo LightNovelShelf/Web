@@ -47,7 +47,7 @@ import { reactive, ref } from 'vue'
 
 import { getAnnouncementList } from 'src/services/context'
 
-import type { Announcement } from './announcementFormat';
+import type { Announcement } from './announcementFormat'
 
 import { announcementListFormat } from './announcementFormat'
 

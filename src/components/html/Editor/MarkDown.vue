@@ -1,17 +1,34 @@
 <template>
   <div :class="mode">
     <md-editor
+      ref="editorRef"
       v-model="markdownText"
-      editorId="md-introduction"
       :onHtmlChanged="onHtmlChanged"
-      :sanitize="sanitizeHtml"
       :onUploadImg="onUploadImg"
       style="height: calc(100vh - 190px)"
       :theme="$q.dark.isActive ? 'dark' : 'light'"
       :toolbars="mdToolBar"
+      :sanitize="sanitize"
       noMermaid
       noKatex
+      noImgZoomIn
+      noHighlight
+      autoDetectCode
+      :showCodeRowNumber="false"
+      :codeFoldable="false"
     >
+      <template #defToolbars>
+        <NormalToolbar title="插入注音" @click="insertRuby">
+          <template #trigger>
+            <q-icon name="mdiFuriganaHorizontal" />
+          </template>
+        </NormalToolbar>
+        <NormalToolbar title="插入着重号" @click="insertDot">
+          <template #trigger>
+            <q-icon name="mdiCircleDouble" />
+          </template>
+        </NormalToolbar>
+      </template>
     </md-editor>
   </div>
 </template>
@@ -19,37 +36,27 @@
 <script lang="ts" setup>
 import TurndownService from '@joplin/turndown'
 import { gfm } from '@joplin/turndown-plugin-gfm'
-import { MdEditor } from 'md-editor-v3'
-import { format } from 'prettier'
-import * as prettierPluginHtml from 'prettier/plugins/html.js'
+import { MdEditor, NormalToolbar, type ToolbarNames, type ExposeParam } from 'md-editor-v3'
 import { useQuasar } from 'quasar'
-import { computed, nextTick, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
-import { useSettingStore } from 'stores/setting'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
 
-import type { ToolbarNames } from 'md-editor-v3'
-
+import 'cropperjs/dist/cropper.css'
 import 'md-editor-v3/lib/style.css'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
+const editorRef = ref<ExposeParam>()
 const emit = defineEmits(['update:html'])
-const htmlContent = computed<string>({
-  get() {
-    return props.html
-  },
-  set(html) {
-    emit('update:html', html)
-  },
-})
-const settingStore = useSettingStore()
-const { editorSetting } = settingStore
 
 const mdToolBar: ToolbarNames[] = [
   'bold',
   'underline',
   'italic',
   'strikeThrough',
+  0,
+  1,
   '-',
   'title',
   'sub',
@@ -57,12 +64,13 @@ const mdToolBar: ToolbarNames[] = [
   'quote',
   'unorderedList',
   'orderedList',
+  'task',
   '-',
+  'codeRow',
+  'code',
   'link',
   'image',
   'table',
-  0,
-  1,
   '-',
   'revoke',
   'next',
@@ -71,62 +79,43 @@ const mdToolBar: ToolbarNames[] = [
   'pageFullscreen',
   'fullscreen',
   'preview',
+  'previewOnly',
   'htmlPreview',
-  'catalog',
 ]
-const turndownService = new TurndownService()
-turndownService.use(gfm)
-turndownService.keep(['ruby', 'rt'])
+
 const markdownText = ref('')
-const mdRubyHandler = () => {
-  const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
-  const selection = window.getSelection()
-  const endPoint = textarea.selectionStart
-
-  if (!selection?.anchorNode?.contains(textarea) || !selection?.focusNode?.contains(textarea)) {
-    return
-  }
-
-  const rubyStr = selection
-    ? `<ruby>${selection.toString()}<rt>注音内容</rt></ruby>`
-    : '<ruby>被注音文字<rt>注音内容</rt></ruby>'
-
-  const prefixStr = textarea.value.substring(0, endPoint)
-  const suffixStr = textarea.value.substring(endPoint + (selection?.toString().length || 0))
-
-  markdownText.value = `${prefixStr}${rubyStr}${suffixStr}`
-
-  setTimeout(() => {
-    textarea.setSelectionRange(endPoint, rubyStr.length + endPoint)
-    textarea.focus()
-  }, 0)
+const insertRuby = () => {
+  $q.dialog({
+    title: '请输入注音内容',
+    prompt: {
+      model: '',
+      type: 'text', // optional
+    },
+    cancel: true,
+  }).onOk((data) => {
+    editorRef.value.insert((selectText) => {
+      return {
+        targetValue: `<ruby>${selectText}<rt>${data}</rt></ruby>`,
+        select: true,
+        deviationStart: 0,
+        deviationEnd: 0,
+      }
+    })
+  })
 }
-const mdDotHandler = () => {
-  const textarea = document.querySelector('#md-introduction-textarea') as HTMLTextAreaElement
-  const selection = window.getSelection()
-  const endPoint = textarea.selectionStart
-
-  if (!selection?.anchorNode?.contains(textarea) || !selection?.focusNode?.contains(textarea)) {
-    return
-  }
-
-  const dotStr = selection ? `<span class="dot">${selection.toString()}</span>` : '<span class="dot">着重号</span>'
-
-  const prefixStr = textarea.value.substring(0, endPoint)
-  const suffixStr = textarea.value.substring(endPoint + (selection?.toString().length || 0))
-
-  markdownText.value = `${prefixStr}${dotStr}${suffixStr}`
-
-  setTimeout(() => {
-    textarea.setSelectionRange(endPoint, dotStr.length + endPoint)
-    textarea.focus()
-  }, 0)
+const insertDot = () => {
+  editorRef.value.insert((selectText) => {
+    return {
+      targetValue: `<span class="dot">${selectText}</span>`,
+      select: true,
+      deviationStart: 0,
+      deviationEnd: 0,
+    }
+  })
 }
-function sanitizeHtml(html: string) {
-  // 这里可以对markdown生成的代码进行一些自定义
-  html = html.replace(/<p>(<div class="illus duokan-image-single">.*?<\/div>)<\/p>/gi, '$1')
+function sanitize(html: string) {
+  html = sanitizerHtml(html)
   return html
-  // return `<div class="md-editor">${html}</div>`
 }
 function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
   $q.notify({
@@ -137,32 +126,56 @@ function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
   })
 }
 
-// 第一次进来初始化
-const parseMarkDown = () => {
-  if (editorSetting.mode === 'markdown') {
-    markdownText.value = turndownService.turndown(htmlContent.value).replace(/^ {2}$/gm, '<br>')
-  }
-}
-parseMarkDown()
-watch(
-  () => props.html,
-  () => {
-    if (!isChange.value) {
-      //console.log('change')
-      parseMarkDown()
-    } else {
-      isChange.value = false
-    }
+const turndownService = new TurndownService({ codeBlockStyle: 'fenced', headingStyle: 'atx' })
+turndownService.use(gfm)
+turndownService.keep(['ruby', 'rt'])
+// 去掉代码的工具栏
+turndownService.addRule('ignoreCodeTool', {
+  filter: function (node) {
+    return node.classList && node.classList.contains('md-editor-code-action')
   },
-)
+  replacement: function (content, node, options) {
+    return ''
+  },
+})
+// 保留着重号
+turndownService.addRule('preserveDot', {
+  filter: function (node) {
+    return node.classList && node.classList.contains('dot')
+  },
+  replacement: function (content, node) {
+    return node.outerHTML // 保留元素的外部 HTML
+  },
+})
+// 保留<br>
+turndownService.addRule('convertPBrToBr', {
+  filter: function (node) {
+    return node.nodeName === 'BR'
+  },
+  replacement: function (content, node) {
+    return '<br>\r\n'
+  },
+})
 
-const isChange = ref(false)
+let isInternalChange = false
+
 const onHtmlChanged = (html: string) => {
-  // MarkDown模式下不需要清理代码
-  isChange.value = true
+  isInternalChange = true
   emit('update:html', html)
 }
-watch(editorSetting, parseMarkDown)
+
+watch(
+  () => props.html,
+  (html) => {
+    if (isInternalChange) {
+      isInternalChange = false
+    } else {
+      // 对外部html的改变做初始化
+      markdownText.value = turndownService.turndown(html)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style lang="scss" scoped>
@@ -175,6 +188,12 @@ watch(editorSetting, parseMarkDown)
 :deep(.md-editor-preview) {
   p {
     padding: unset;
+  }
+
+  .illus,
+  .illu,
+  .duokan-image-single {
+    padding: 5px;
   }
 }
 </style>

@@ -61,7 +61,6 @@ import { getBookList } from 'src/services/book'
 
 import type { BookInList } from 'src/services/book/types'
 
-
 const router = useRouter()
 const route = useRoute()
 const scrollEleInstanceRef = ref<null | {

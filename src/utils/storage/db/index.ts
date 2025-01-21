@@ -3,7 +3,6 @@ import type { ShelfItem } from 'src/types/shelf'
 import { DB } from './base'
 import { MemoryDB } from './memory'
 
-
 export const shelfDB = new DB<ShelfItem>('USER_SHELF', '用于储存用户书架数据')
 /**
  * 书架数据结构版本

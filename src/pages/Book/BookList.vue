@@ -53,9 +53,6 @@ import { getBookList } from 'src/services/book'
 
 import type { BookInList } from 'src/services/book/types'
 
-
-
-
 defineComponent({ QGrid, QGridItem })
 const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
 
