@@ -9,53 +9,20 @@
       @compositionstart="composing = true"
       @compositionend="composing = false"
     />
-
-    <q-dialog v-model="inputBBCodeShow">
-      <q-card style="width: 800px; max-width: 90vw">
-        <q-card-section>
-          <div class="text-h6">输入BBCode并转换</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <q-input dense input-class="edit-input" v-model="inputBBCode" autofocus outlined autogrow type="textarea" />
-        </q-card-section>
-
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="取消" v-close-popup />
-          <q-btn flat label="确认转换" v-close-popup @click="BBCodeTransForm" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog v-model="inputHtmlShow">
-      <q-card style="width: 800px; max-width: 90vw">
-        <q-card-section>
-          <div class="text-h6">输入HTML代码</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <q-input dense v-model="inputHtml" input-class="edit-input" autofocus outlined autogrow type="textarea" />
-        </q-card-section>
-
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="取消" v-close-popup />
-          <q-btn flat label="确认输入" v-close-popup @click="htmlContent = inputHtml" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { useEventListener } from '@vueuse/core'
 import { format } from 'prettier'
 import * as prettierPluginHtml from 'prettier/plugins/html.js'
 import { debounce, useQuasar } from 'quasar'
 
 import bbCodeParser from 'src/utils/bbcode/simple'
 
-import type { QEditor, QEditorCommand } from 'quasar'
-import { useEventListener } from '@vueuse/core'
 import { useIsActivated } from 'src/composition/useIsActivated'
+
+import type { QEditor, QEditorCommand } from 'quasar'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
@@ -190,37 +157,7 @@ const toolbar = computed(() => {
 
 const editorRef = ref<QEditor>()
 
-// 俩弹窗
-const inputHtmlShow = ref(false)
-const inputHtml = ref('')
-const inputBBCodeShow = ref(false)
-const inputBBCode = ref('')
-const ShowBBCodePopup = () => {
-  inputBBCodeShow.value = true
-}
-const BBCodeTransForm = () => {
-  let arr = bbCodeParser.parse(inputBBCode.value).split('\n')
-  arr = arr.map((o: string) => {
-    if (o === '') o = '<br />'
-    if (!o.startsWith('<div') && !o.startsWith('<h')) {
-      o = '<p>' + o + '</p>'
-    }
-    return o
-  })
-  htmlContent.value = arr.join('')
-
-  inputBBCode.value = ''
-}
-async function showInputCode() {
-  try {
-    inputHtml.value = await htmlFormat(htmlContent.value)
-  } catch (e) {
-    inputHtml.value = htmlContent.value
-  }
-
-  inputHtmlShow.value = true
-}
-
+// 事件处理
 function removeFormat() {
   editorRef.value.runCmd('removeFormat')
 }
@@ -231,7 +168,7 @@ const htmlFormat = async (html: string) => {
     plugins: [prettierPluginHtml],
   })
 }
-const htmlRubyHandler = () => {
+const insertRuby = () => {
   if (editorRef.value.caret.hasSelection) {
     const selectedText = editorRef.value.caret.range.toString()
 
@@ -258,7 +195,7 @@ const htmlRubyHandler = () => {
     })
   }
 }
-const htmlDotHandler = () => {
+const insertDot = () => {
   if (editorRef.value.caret.hasSelection) {
     const span = document.createElement('span')
     span.classList.add('dot')
@@ -270,13 +207,64 @@ const htmlDotHandler = () => {
     editorRef.value.getContentEl().dispatchEvent(event)
   }
 }
+const inputHtml = async () => {
+  let html = ''
+  try {
+    html = await htmlFormat(htmlContent.value)
+  } catch (e) {
+    html = htmlContent.value
+  }
+
+  $q.dialog({
+    title: '输入HTML代码',
+    prompt: {
+      model: html,
+      type: 'textarea',
+      dense: true,
+      autofocus: true,
+      outlined: true,
+      autogrow: true,
+    },
+    cancel: true,
+    persistent: true,
+    class: 'html-input',
+  }).onOk((data) => {
+    htmlContent.value = data
+  })
+}
+const inputBBCode = () => {
+  $q.dialog({
+    title: '输入BBCode',
+    prompt: {
+      model: '',
+      type: 'textarea',
+      dense: true,
+      autofocus: true,
+      outlined: true,
+      autogrow: true,
+    },
+    cancel: true,
+    persistent: true,
+    class: 'html-input',
+  }).onOk((data) => {
+    let arr = bbCodeParser.parse(data).split('\n')
+    arr = arr.map((o: string) => {
+      if (o === '') o = '<br />'
+      if (!o.startsWith('<div') && !o.startsWith('<h')) {
+        o = '<p>' + o + '</p>'
+      }
+      return o
+    })
+    htmlContent.value = arr.join('')
+  })
+}
 
 const definitions: Record<string, QEditorCommand> = {
   removeFormat: { handler: removeFormat },
-  bbcode: { tip: '转换BBCode', label: 'BBCode', handler: ShowBBCodePopup },
-  ruby: { tip: '插入注音', icon: 'mdiFuriganaHorizontal', handler: htmlRubyHandler },
-  code: { tip: '输入源代码', icon: 'mdiCodeTags', handler: showInputCode },
-  dot: { tip: '插入着重号', icon: 'mdiCircleDouble', handler: htmlDotHandler },
+  bbcode: { tip: '转换BBCode', label: 'BBCode', handler: inputBBCode },
+  ruby: { tip: '插入注音', icon: 'mdiFuriganaHorizontal', handler: insertRuby },
+  code: { tip: '输入源代码', icon: 'mdiCodeTags', handler: inputHtml },
+  dot: { tip: '插入着重号', icon: 'mdiCircleDouble', handler: insertDot },
   myUndo: { tip: '撤销 (CTRL + Z)', icon: 'mdiUndo', handler: undo },
   myRedo: { tip: '重做 (CTRL + Y)', icon: 'mdiRedo', handler: redo },
 }
@@ -293,8 +281,19 @@ function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
 
 <style lang="scss" scoped>
 .common {
-  ::v-deep .q-editor__content {
+  :deep(.q-editor__content) {
     @import '../../../css/read';
+  }
+}
+</style>
+
+<style lang="scss">
+.html-input {
+  width: 1000px;
+  max-width: 90vw;
+
+  .q-dialog-plugin__form {
+    max-height: 75vh;
   }
 }
 </style>

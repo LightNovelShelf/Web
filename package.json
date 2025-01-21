@@ -37,7 +37,7 @@
     "md-editor-v3": "^5.2.1",
     "minimasonry": "^1.3.2",
     "nanoid": "^5.0.9",
-    "overlayscrollbars": "^2.10.1",
+    "overlayscrollbars-vue": "^0.5.9",
     "pako": "^2.1.0",
     "pinia": "^2.3.0",
     "quasar": "^2.17.7",

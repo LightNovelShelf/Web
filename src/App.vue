@@ -7,15 +7,14 @@
 </template>
 
 <script lang="ts" setup>
-import { OverlayScrollbars } from 'overlayscrollbars'
+import { useOverlayScrollbars, type UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
-import { onMounted } from 'vue'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { longTermToken } from 'src/utils/session'
 
-import { useSettingStore } from 'src/stores/setting'
 import { useAppStore } from 'stores/app'
+import { useSettingStore } from 'stores/setting'
 
 import { AppSide, AppHeader, AppContainer } from 'components/app/index'
 
@@ -23,7 +22,7 @@ import { NOOP } from 'src/const/empty'
 import { getMyInfo } from 'src/services/user'
 import { useServerNotify } from 'src/services/utils/useServerNotify'
 
-import 'overlayscrollbars/styles/overlayscrollbars.css'
+import 'overlayscrollbars/overlayscrollbars.css'
 
 const $q = useQuasar()
 
@@ -43,7 +42,7 @@ useServerNotify('OnMessage', (message: string) => {
     html: true,
     message: sanitizerHtml(message),
     timeout: 5000,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -84,25 +83,28 @@ watchEffect(() => {
   metaThemeColor?.setAttribute('content', color.value)
 })
 
-onMounted(() => {
-  const bodyElement = document.querySelector('body')
-  if (!bodyElement) return
-  const osInstance = OverlayScrollbars(
-    {
-      target: bodyElement,
-      cancel: {
-        nativeScrollbarsOverlaid: true,
-      },
-    },
-    {
+const scrollbarParams = computed(
+  (): UseOverlayScrollbarsParams => ({
+    defer: true,
+    options: {
       scrollbars: {
-        theme: 'scrollbar-base scrollbar-auto',
+        theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
         autoHide: 'move',
         autoHideDelay: 500,
         autoHideSuspend: false,
       },
     },
-  )
+  }),
+)
+
+const [initBodyOverlayScrollbars] = useOverlayScrollbars(scrollbarParams)
+onMounted(() => {
+  initBodyOverlayScrollbars({
+    target: document.body,
+    cancel: {
+      body: false,
+    },
+  })
 })
 </script>
 
