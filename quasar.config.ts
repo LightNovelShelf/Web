@@ -68,13 +68,18 @@ export default defineConfig((ctx) => {
             output: {
               assetFileNames: 'assets/[ext]/[name]-[hash][extname]',
               manualChunks: (id) => {
-                // PWA 模式下把文件打包在一块
-                if (ctx.modeName == 'pwa') {
-                  if (id.includes('node_modules')) {
-                    return 'vendor'
-                  } else if (id.includes('/src/')) {
-                    return 'chunk'
+                const name = ['@codemirror', '@vue', 'quasar', 'prettier', '@lezer']
+
+                for (const n of name) {
+                  if (id.includes(`node_modules/${n}`)) {
+                    return `vendor-${n}`
                   }
+                }
+
+                if (id.includes('node_modules')) {
+                  return 'vendor'
+                } else if (id.includes('/src/')) {
+                  return 'chunk'
                 }
               },
             },
