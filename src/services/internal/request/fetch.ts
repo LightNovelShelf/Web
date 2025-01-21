@@ -5,10 +5,11 @@ import { sessionToken } from 'src/utils/session'
 
 import { ServerError } from 'src/services/internal/ServerError'
 import { RequestMethod } from 'src/services/types'
+import { getSessionToken } from 'src/services/utils'
 
 import type { RequestConfig } from 'src/services/types'
 
-import { createRequestQueue } from './createRequestQueue'
+import { queue } from './createRequestQueue'
 import { getVisitorId } from './getVisitorId'
 
 async function requestWithFetch<Res = unknown, Data = any>(
@@ -68,9 +69,11 @@ async function requestWithFetch<Res = unknown, Data = any>(
 
   fetchOpt.headers = headers
 
-  const token = sessionToken.get()
-  if (token) {
-    fetchOpt.headers.append('Authorization', `Bearer ${token}`)
+  if (options.auth) {
+    const token = await getSessionToken()
+    if (token) {
+      fetchOpt.headers.append('Authorization', `Bearer ${token}`)
+    }
   }
 
   const res = await fetch(url, fetchOpt)
@@ -91,7 +94,6 @@ async function requestWithFetch<Res = unknown, Data = any>(
   throw new Error(getErrMsg(content))
 }
 
-const queue = createRequestQueue()
 const requestWithFetchInRateLimit = ((...args) => {
   return queue.add(() => requestWithFetch(...args))
 }) as typeof requestWithFetch

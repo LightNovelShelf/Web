@@ -14,7 +14,7 @@ import { refreshToken } from 'src/services/user'
 
 import type { HubConnection } from '@microsoft/signalr'
 
-import { createRequestQueue } from '../createRequestQueue'
+import { queue } from '../createRequestQueue'
 import { tryResponseFromCache, updateResponseCache } from './cache'
 import { SignalrInspector } from './inspector'
 
@@ -205,7 +205,6 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
   }
 }
 
-const queue = createRequestQueue()
 /** 速率限制后的请求句柄 */
 const requestWithSignalrInRateLimit = ((...args) => {
   return queue.add(() => requestWithSignalr(...args))
