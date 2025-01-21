@@ -68,17 +68,14 @@ export default defineConfig((ctx) => {
             output: {
               assetFileNames: 'assets/[ext]/[name]-[hash][extname]',
               manualChunks: (id) => {
-                const name = ['@codemirror', '@vue', 'quasar', 'prettier', '@lezer']
-
-                for (const n of name) {
-                  if (id.includes(`node_modules/${n}`)) {
-                    return `vendor-${n}`
-                  }
+                if (id.includes('node_modules')) {
+                  if (id.includes('vue')) return 'vendor-vue'
+                  if (id.includes('quasar')) return 'vendor-quasar'
+                  if (id.includes('md-editor-v3') || id.includes('codemirror')) return 'vendor-editor'
+                  return 'vendor'
                 }
 
-                if (id.includes('node_modules')) {
-                  return 'vendor'
-                } else if (id.includes('/src/')) {
+                if (id.includes('/src/')) {
                   return 'chunk'
                 }
               },
@@ -177,6 +174,7 @@ export default defineConfig((ctx) => {
       // injectPwaMetaTags: false,
       // extendPWACustomSWConf (esbuildConf) {},
       extendGenerateSWOptions(cfg) {
+        cfg.maximumFileSizeToCacheInBytes = 3 * 1024 * 1024
         cfg.runtimeCaching = [
           {
             urlPattern: /.*\.(woff2|woff|ttf)/,
