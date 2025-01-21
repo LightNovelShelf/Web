@@ -2,20 +2,16 @@ name: Build CI For Android
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: 设置权限
-        run: chmod -R 755 ./src-capacitor/android/
 
       - name: 设置 JDK
         uses: actions/setup-java@v4
@@ -42,7 +38,7 @@ jobs:
         run: npm run build:android
 
       - name: 上传 Apk
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release-unsigned
           path: ./dist/capacitor/android/apk/release/app-release-unsigned.apk
