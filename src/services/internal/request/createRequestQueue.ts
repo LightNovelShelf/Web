@@ -12,4 +12,4 @@ export function createRequestQueue() {
   // return new RateLimitQueue(1, 5 * 1000)
 }
 
-// export const queue = getQueue()
+export const queue = createRequestQueue()

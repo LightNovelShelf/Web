@@ -89,7 +89,7 @@ const insertRuby = () => {
     title: '请输入注音内容',
     prompt: {
       model: '',
-      type: 'text', // optional
+      type: 'text',
     },
     cancel: true,
   }).onOk((data) => {

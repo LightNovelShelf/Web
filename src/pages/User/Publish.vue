@@ -118,9 +118,6 @@ import { ref, computed, watch, defineComponent, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
-import { longTermToken, sessionToken } from 'src/utils/session'
-
-import { useSettingStore } from 'stores/setting'
 
 import BookCard from 'components/BookCard.vue'
 import { QGrid, QGridItem } from 'components/grid'
@@ -129,9 +126,9 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { deleteBook } from 'src/services/book'
-import { ServerError } from 'src/services/internal/ServerError'
 import { PATH } from 'src/services/path'
-import { getMyBooks, quickCreateBook, refreshToken } from 'src/services/user'
+import { getMyBooks, quickCreateBook } from 'src/services/user'
+import { getSessionToken } from 'src/services/utils'
 
 import type { QUploaderFactoryFn } from 'quasar'
 import type { BookInList } from 'src/services/book/types'
@@ -164,7 +161,6 @@ const pageData = ref({ totalPage: 1 })
 const _page = ref(1)
 const createBookShow = ref(false)
 const uploadBookShow = ref(false)
-const settingStore = useSettingStore()
 const categoryOptions = ref([
   {
     label: '录入完成',
@@ -273,28 +269,8 @@ function checkFile(files: File[]) {
   return files.filter((file) => file.name.endsWith('.epub'))
 }
 const factoryFn: QUploaderFactoryFn = (files) => {
-  async function getToken() {
-    let token = sessionToken.get()
-    if (!token) {
-      // 如果没有,查询是否有 longTermToken
-      const _token = await longTermToken.get()
-      // 如果有, 用它来换取会话token
-      if (_token) {
-        try {
-          token = await refreshToken('' + _token)
-        } catch (error) {
-          // -100 token失效, 404 token不存在
-          if (error instanceof ServerError && [-100, 404].includes(error.status)) {
-            await longTermToken.set('')
-          }
-        }
-      }
-    }
-    return token
-  }
-
   return new Promise((resolve, reject) => {
-    getToken().then((token) => {
+    getSessionToken().then((token) => {
       resolve({
         url: PATH.USER_UPLOAD_BOOK,
         method: 'POST',
