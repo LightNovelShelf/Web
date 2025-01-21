@@ -7,25 +7,29 @@
 </template>
 
 <script lang="ts" setup>
-import { AppSide, AppHeader, AppContainer } from 'src/components/app/index'
+import { useOverlayScrollbars, type UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
-import { useServerNotify } from 'src/services/utils/useServerNotify'
+
 import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { useSettingStore } from 'src/stores/setting'
-import { useAppStore } from 'stores/app'
 import { longTermToken } from 'src/utils/session'
-import { getMyInfo } from 'src/services/user'
+
+import { useAppStore } from 'stores/app'
+import { useSettingStore } from 'stores/setting'
+
+import { AppSide, AppHeader, AppContainer } from 'components/app/index'
+
 import { NOOP } from 'src/const/empty'
-import 'overlayscrollbars/styles/overlayscrollbars.css'
-import { OverlayScrollbars } from 'overlayscrollbars'
-import { onMounted } from 'vue'
+import { getMyInfo } from 'src/services/user'
+import { useServerNotify } from 'src/services/utils/useServerNotify'
+
+import 'overlayscrollbars/overlayscrollbars.css'
 
 const $q = useQuasar()
 
 $q.loadingBar.setDefaults({
   color: 'purple',
   size: '2px',
-  position: 'top'
+  position: 'top',
 })
 
 const appStore = useAppStore()
@@ -38,7 +42,7 @@ useServerNotify('OnMessage', (message: string) => {
     html: true,
     message: sanitizerHtml(message),
     timeout: 5000,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -49,7 +53,7 @@ useServerNotify('OnError', (message: string) => {
     type: 'negative',
     message: sanitizerHtml(message),
     timeout: 5000,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -60,7 +64,7 @@ useServerNotify('OnSuccess', (message: string) => {
     type: 'positive',
     message: sanitizerHtml(message),
     timeout: 5000,
-    actions: [{ label: '关闭', color: 'white', handler: NOOP }]
+    actions: [{ label: '关闭', color: 'white', handler: NOOP }],
   })
 })
 
@@ -72,32 +76,35 @@ const getUser = async () => {
 }
 getUser()
 
-let color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
+const color = computed(() => ($q.dark.isActive ? '#263238' : '#1976D2'))
 
 watchEffect(() => {
-  let metaThemeColor = document.querySelector('meta[name=theme-color]')
+  const metaThemeColor = document.querySelector('meta[name=theme-color]')
   metaThemeColor?.setAttribute('content', color.value)
 })
 
-onMounted(() => {
-  const bodyElement = document.querySelector('body')
-  if (!bodyElement) return
-  const osInstance = OverlayScrollbars(
-    {
-      target: bodyElement,
-      cancel: {
-        nativeScrollbarsOverlaid: true
-      }
-    },
-    {
+const scrollbarParams = computed(
+  (): UseOverlayScrollbarsParams => ({
+    defer: true,
+    options: {
       scrollbars: {
-        theme: 'scrollbar-base scrollbar-auto',
+        theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
         autoHide: 'move',
         autoHideDelay: 500,
-        autoHideSuspend: false
-      }
-    }
-  )
+        autoHideSuspend: false,
+      },
+    },
+  }),
+)
+
+const [initBodyOverlayScrollbars] = useOverlayScrollbars(scrollbarParams)
+onMounted(() => {
+  initBodyOverlayScrollbars({
+    target: document.body,
+    cancel: {
+      body: false,
+    },
+  })
 })
 </script>
 

@@ -1,19 +1,22 @@
-import { HubConnection, HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr'
+import { HubConnectionBuilder, LogLevel, HubConnectionState } from '@microsoft/signalr'
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
-import { ref } from 'vue'
 import { ungzip } from 'pako'
+import { ref } from 'vue'
 
-import { ServerError } from 'src/services/internal/ServerError'
-
-import { tryResponseFromCache, updateResponseCache } from './cache'
-import { longTermToken, sessionToken } from 'src/utils/session'
-import { refreshToken } from 'src/services/user'
-import { getErrMsg } from 'src/utils/getErrMsg'
 import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
-import { RetryPolicy } from 'src/services/internal/request/signalr/RetryPolicy'
-import { createRequestQueue } from '../createRequestQueue'
-import { SignalrInspector } from './inspector'
+import { getErrMsg } from 'src/utils/getErrMsg'
+import { longTermToken, sessionToken } from 'src/utils/session'
+
 import { apiServer } from 'src/services/apiServer'
+import { RetryPolicy } from 'src/services/internal/request/signalr/RetryPolicy'
+import { ServerError } from 'src/services/internal/ServerError'
+import { refreshToken } from 'src/services/user'
+
+import type { HubConnection } from '@microsoft/signalr'
+
+import { createRequestQueue } from '../createRequestQueue'
+import { tryResponseFromCache, updateResponseCache } from './cache'
+import { SignalrInspector } from './inspector'
 
 /** 是否是未授权产生的signalr错误 */
 const IS_UN_AUTH_ERR = (err: unknown): boolean =>
@@ -51,11 +54,11 @@ function buildHub(url: string) {
           }
         }
         return token
-      }
+      },
     })
     .withAutomaticReconnect(new RetryPolicy())
     .withHubProtocol(new MessagePackHubProtocol())
-    .configureLogging(__DEV__ ? LogLevel.Information : LogLevel.Critical)
+    .configureLogging(process.env.APP_URL ? LogLevel.Information : LogLevel.Critical)
     .build()
   h.onclose(setState)
   h.onreconnecting(setState)
@@ -214,7 +217,7 @@ export { requestWithSignalrInRateLimit as requestWithSignalr }
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
   const inspector = new SignalrInspector(methodName, [])
-  if (__DEV__ && VUE_TRACE_SERVER) {
+  if (process.env.DEV && process.env.VUE_TRACE_SERVER) {
     _cb = (res: Res): void => {
       inspector.add(inspector.TYPE_ENUM.REVICE, { data: res })
       inspector.flush({ clear: false })

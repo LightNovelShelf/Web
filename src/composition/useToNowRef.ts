@@ -1,6 +1,9 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import { type MaybeRefOrGetter, toValue } from 'vue'
+
 import { parseTime, toNow } from 'src/utils/time'
+
+import type { Dayjs } from 'dayjs'
 
 /**
  * 返回一个定时刷新的 'xx天前' 文案
@@ -23,7 +26,9 @@ import { parseTime, toNow } from 'src/utils/time'
  * return { lastUpdateTime }
  * ```
  */
-export function useToNowRef(dateGetter: MaybeRefOrGetter<Date | Dayjs | undefined | null>): ComputedRef<string> {
+export function useToNowRef(
+  dateGetter: MaybeRefOrGetter<Date | Dayjs | string | undefined | null>,
+): ComputedRef<string> {
   const dateRef = computed<Dayjs | null>(() => {
     const dateVal = toValue(dateGetter)
     if (!dateVal) {
@@ -105,6 +110,6 @@ export function useToNowRef(dateGetter: MaybeRefOrGetter<Date | Dayjs | undefine
 
   return computed(() => {
     // console.log('re-calc toNow', dateRef.value.format(), nowRef.value.format())
-    return dateRef.value ? toNow(dateRef.value, { now: nowRef.value, notNegative: true }) : null
+    return dateRef.value ? toNow(dateRef.value, { now: nowRef.value, notNegative: true }) : ''
   })
 }

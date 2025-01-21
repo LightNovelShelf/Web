@@ -1,5 +1,6 @@
-import { NOOP } from 'src/const/empty'
 import { userAuthenticationDB } from 'src/utils/storage/db'
+
+import { NOOP } from 'src/const/empty'
 
 class TokenStorage {
   private readonly INIT_SOURCE = ''
@@ -23,7 +24,7 @@ class TokenStorage {
 }
 
 /** 会话密钥 */
-export const sessionToken = new TokenStorage(+VUE_SESSION_TOKEN_VALIDITY || 3000)
+export const sessionToken = new TokenStorage(+process.env.VUE_SESSION_TOKEN_VALIDITY || 3000)
 
 /** 长期密钥 */
 export const longTermToken = {
@@ -32,5 +33,5 @@ export const longTermToken = {
   },
   set(token: string): Promise<void> {
     return userAuthenticationDB.set('RefreshToken', token).then(NOOP)
-  }
+  },
 }

@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { toRaw } from 'vue'
-import { userSettingDB } from 'src/utils/storage/db'
+
 import { Dark } from 'src/utils/dark'
+import { userSettingDB } from 'src/utils/storage/db'
 
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({
@@ -10,7 +11,7 @@ export const useSettingStore = defineStore('app.setting', {
     generalSetting: {
       enableBlurHash: true,
       globalWidth: 100,
-      ignoreJapanese: false
+      ignoreJapanese: false,
     },
     readSetting: {
       fontSize: 16,
@@ -22,11 +23,11 @@ export const useSettingStore = defineStore('app.setting', {
       justify: false,
       showButton: true,
       tapToScroll: false,
-      hideFullScreen: false
+      hideFullScreen: false,
     },
     editorSetting: {
-      mode: 'html' as 'html' | 'markdown'
-    }
+      mode: 'html' as 'html' | 'markdown',
+    },
   }),
   actions: {
     async init() {
@@ -41,7 +42,7 @@ export const useSettingStore = defineStore('app.setting', {
                 this[key][_key] = setting[_key]
               })
             }
-          })()
+          })(),
         )
       })
       await Promise.all(p)
@@ -54,7 +55,7 @@ export const useSettingStore = defineStore('app.setting', {
       })
       await Promise.all(p)
       Dark.set(this.dark)
-    }
+    },
   },
   getters: {
     buildReaderWidth(): string {
@@ -65,6 +66,6 @@ export const useSettingStore = defineStore('app.setting', {
     },
     getGlobalWidth(): string {
       return this.generalSetting.globalWidth + '%'
-    }
-  }
+    },
+  },
 })

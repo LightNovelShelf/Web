@@ -3,7 +3,7 @@ import { inject, computed, reactive, toRefs } from 'vue'
 const layoutStore = reactive({
   siderShow: false,
   siderBreakpoint: 1023,
-  headerHeight: 58
+  headerHeight: 58,
 })
 
 export const useLayout = () => {
@@ -11,6 +11,6 @@ export const useLayout = () => {
 
   return {
     ...toRefs(layoutStore),
-    headerOffset: computed(() => ql.header.offset)
+    headerOffset: computed(() => ql.header.offset),
   }
 }

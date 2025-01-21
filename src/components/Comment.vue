@@ -145,10 +145,10 @@
             v-model="currentPage"
             :max="comment?.TotalPages"
             direction-links
-            :icon-first="icon.mdiSkipPrevious"
-            :icon-last="icon.mdiSkipNext"
-            :icon-prev="icon.mdiChevronLeft"
-            :icon-next="icon.mdiChevronRight"
+            icon-first="mdiSkipPrevious"
+            icon-last="mdiSkipNext"
+            icon-prev="mdiChevronLeft"
+            icon-next="mdiChevronRight"
             :max-pages="8"
             :input="!$q.screen.gt.sm"
           />
@@ -162,7 +162,7 @@
           <div class="text-h6">
             回复
             <span class="text-bold">
-              {{ comment.Users[`${comment.Commentaries[`${replyId || parentId}`].UserId}`].UserName }}
+              {{ comment!.Users[`${comment!.Commentaries[`${replyId || parentId}`].UserId}`].UserName }}
             </span>
             的评论
           </div>
@@ -189,16 +189,20 @@
 </template>
 
 <script lang="ts" setup>
-import { postComment, replyComment, getComment, deleteComment } from 'src/services/comment'
-import { CommentType, GetComment } from 'src/services/comment/types'
-import { toNow } from 'src/utils/time'
-import { useAppStore } from 'stores/app'
-import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useQuasar } from 'quasar'
-import { icon } from 'assets/icon'
+import { computed, ref, watch } from 'vue'
+
 import { getErrMsg } from 'src/utils/getErrMsg'
+import { toNow } from 'src/utils/time'
+
+import { useAppStore } from 'stores/app'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+
+import { postComment, replyComment, getComment, deleteComment } from 'src/services/comment'
+
+import type { CommentType, GetComment } from 'src/services/comment/types'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
@@ -207,7 +211,8 @@ const { user } = storeToRefs(appStore)
 const comment = ref<GetComment.Response>()
 
 const isActive = computed(
-  () => comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page
+  () =>
+    comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page,
 )
 
 const currentPage = ref(1)
@@ -224,13 +229,14 @@ const request = async () => {
   posting.value = false
 }
 
-function onVisible(entry: IntersectionObserverEntry) {
+const onVisible = (entry: IntersectionObserverEntry) => {
   if (entry.isIntersecting) {
     if (needRequest.value) {
       needRequest.value = false
       request()
     }
   }
+  return true
 }
 
 watch(() => currentPage.value, request)
@@ -243,13 +249,13 @@ const post = async () => {
       $q.notify({
         message: '评论成功',
         timeout: 2000,
-        type: 'positive'
+        type: 'positive',
       })
     } catch (error) {
       $q.notify({
         message: getErrMsg(error),
         color: 'negative',
-        timeout: 1500
+        timeout: 1500,
       })
     }
     posting.value = false
@@ -271,19 +277,19 @@ const reply = async () => {
         Type: props.type,
         Id: props.id,
         Content: inputReplyComment.value,
-        ReplyId: replyId.value || null,
-        ParentId: parentId.value
+        ReplyId: replyId.value,
+        ParentId: parentId.value!,
       })
       $q.notify({
         message: '评论成功',
         timeout: 2000,
-        type: 'positive'
+        type: 'positive',
       })
     } catch (error) {
       $q.notify({
         message: getErrMsg(error),
         color: 'negative',
-        timeout: 1500
+        timeout: 1500,
       })
     }
     inputReplyComment.value = null
@@ -291,18 +297,17 @@ const reply = async () => {
   }
 }
 
-const _delete = async (id) => {
+const _delete = async (id: number) => {
   $q.dialog({
     title: '提示',
     message: '你确定要删除这条评论吗？',
     cancel: true,
-    persistent: true
   }).onOk(async () => {
     await deleteComment(id)
     $q.notify({
       message: '删除成功',
       timeout: 2000,
-      type: 'positive'
+      type: 'positive',
     })
     await request()
   })
@@ -312,7 +317,7 @@ useInitRequest(
   () => {
     needRequest.value = true
   },
-  { isActive }
+  { isActive },
 )
 </script>
 

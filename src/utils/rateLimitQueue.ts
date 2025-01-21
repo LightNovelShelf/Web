@@ -9,7 +9,7 @@ export class RateLimitQueue {
     /** 最多多少个请求 */
     private readonly max: number,
     /** 在多少时间的周期内 @default 1000 默认1秒 */
-    private readonly perMs: number = 1000
+    private readonly perMs: number = 1000,
   ) {
     if (this.max <= 0) {
       throw new Error('max must bigger than 0')

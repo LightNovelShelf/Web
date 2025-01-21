@@ -1,5 +1,7 @@
 import { effectScope, ref, watch } from 'vue'
-import { AnyVoidFunc } from 'src/types/utils'
+
+import type { AnyVoidFunc } from 'src/types/utils'
+
 import { safeCall } from '../safeCall'
 
 const notifier = ref(-1)
@@ -21,5 +23,5 @@ export const unAuthenticationNotify = {
   /** 适合在setup内调用 @return unsubscribe */
   useSubscribe(cb: AnyVoidFunc): AnyVoidFunc {
     return watch(notifier, safeCall(cb))
-  }
+  },
 }

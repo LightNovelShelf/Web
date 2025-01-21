@@ -3,7 +3,7 @@ enum RecordTypeEnum {
   SENT = 'SENT',
   REVICE = 'REVICE',
   SUCCESS = 'SUCCESS',
-  FAIL = 'FAIL'
+  FAIL = 'FAIL',
 }
 
 interface RecordItemAdditionData<T = unknown> {
@@ -23,7 +23,10 @@ export class SignalrInspector {
 
   private records: RecordItem[] = []
 
-  constructor(public readonly url: string, public readonly params: unknown[]) {
+  constructor(
+    public readonly url: string,
+    public readonly params: unknown[],
+  ) {
     this.records.push({ type: RecordTypeEnum.INIT, when: SignalrInspector.now() })
   }
 
@@ -32,7 +35,7 @@ export class SignalrInspector {
   }
 
   public flush = ({ clear = true }: { clear?: boolean } = {}) => {
-    if (__DEV__ && VUE_TRACE_SERVER) {
+    if (process.env.DEV && process.env.VUE_TRACE_SERVER) {
       const groupName = `signalr request data trace: '${this.url}'`
       console.groupCollapsed(groupName)
       let lastRecord: RecordItem | null = null

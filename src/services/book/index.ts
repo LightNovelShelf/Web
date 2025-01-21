@@ -1,7 +1,8 @@
-import { requestWithSignalr } from '../internal/request'
+import type { SaveReadPositionRequest } from './types'
 
 import * as Types from './types'
-import { SaveReadPositionRequest } from './types'
+import { requestWithSignalr } from '../internal/request'
+
 export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */
@@ -23,7 +24,7 @@ export function getReadPosition(bid: number) {
 /** 从一批id获取书籍列表 */
 export function getBookListByIds(ids: number[]) {
   // 校验数量，接口限制一次最多24本
-  if (__DEV__) {
+  if (process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION) {
     if (ids.length > 24) {
       throw new Error('单次批量操作最多24本')
     }
