@@ -4,9 +4,9 @@
   </div>
 </template>
 
-<script>
-import { computed, defineComponent } from 'vue'
+<script lang="ts">
 import { useQuasar } from 'quasar'
+import { computed, defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'QGridItem',
@@ -14,28 +14,28 @@ export default defineComponent({
     // 栅格占据的列数
     span: {
       type: [Number, String],
-      default: 1
+      default: 1,
     },
     // 很小
     xs: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 小的
     sm: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 中等
     md: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 大的
     lg: {
-      type: [Number, String]
+      type: [Number, String],
     },
     // 很大
     xl: {
-      type: [Number, String]
-    }
+      type: [Number, String],
+    },
   },
   setup(props) {
     const $q = useQuasar()
@@ -50,13 +50,13 @@ export default defineComponent({
     })
 
     const styleObj = computed(() => ({
-      'grid-column': `span ${span.value} / span 1`
+      'grid-column': `span ${span.value} / span 1`,
     }))
 
     return {
-      styleObj
+      styleObj,
     }
-  }
+  },
 })
 </script>
 

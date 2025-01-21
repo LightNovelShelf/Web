@@ -3,7 +3,7 @@ export function thresholdInFrame<T extends (...args: any[]) => void>(cb: T): T {
   const _cb = cb.bind(this) as T
 
   const context: { func: T | null } = {
-    func: null
+    func: null,
   }
   return function (...args: any[]) {
     const scheduled = !!context.func

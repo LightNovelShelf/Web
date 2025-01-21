@@ -3,6 +3,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
 import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
 
 /** 监听鉴权失败消息 */
@@ -19,6 +20,6 @@ export default defineComponent({
         router.replace({ name: 'Login', params: { authRedirect: 1 }, query: { from: encodeURIComponent(fullPath) } })
       }
     })
-  }
+  },
 })
 </script>

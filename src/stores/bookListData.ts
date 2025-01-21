@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
-import { BookInList } from 'src/services/book/types'
-import { getBookListByIds } from 'src/services/book'
 import { toRaw } from 'vue'
+
+import { getBookListByIds } from 'src/services/book'
+
+import type { BookInList } from 'src/services/book/types'
 
 export interface BookListStore {
   books: Map<number, BookInList>
@@ -18,7 +20,7 @@ const INIT: BookListStore = {
   books: new Map(),
   pending: new Set(),
   querying: new Set(),
-  schemeContext: 0
+  schemeContext: 0,
 }
 
 class EMPTY_BOOK implements BookInList {
@@ -63,7 +65,7 @@ export const useBookListStore = defineStore('app.bookList', {
       return (book: BookInList): boolean => {
         return book instanceof EMPTY_BOOK
       }
-    }
+    },
   },
   actions: {
     /** @public 添加查询 */
@@ -131,6 +133,6 @@ export const useBookListStore = defineStore('app.bookList', {
           this.books.set(book.Id, book)
         }
       }
-    }
-  }
+    },
+  },
 })

@@ -1,4 +1,4 @@
-import { ListResult } from 'src/services/types'
+import type { ListResult } from 'src/services/types'
 
 export interface OnlineInfo {
   OnlineCount: number

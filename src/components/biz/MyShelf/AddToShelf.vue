@@ -9,15 +9,18 @@ export default {}
 
 <script lang="ts" setup>
 // 加入书架按钮
-import { computed, ref } from 'vue'
-import { mdiHeartOutline, mdiHeartRemoveOutline } from 'assets/icon/export'
-import { useQuasar } from 'quasar'
-import { AnyVoidFunc } from 'src/types/utils'
-import type { BookServicesTypes } from 'src/services/book'
-import { useShelfStore } from 'stores/shelf'
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { connectState } from 'src/services/utils'
 import { HubConnectionState } from '@microsoft/signalr'
+import { useQuasar } from 'quasar'
+import { computed, ref } from 'vue'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+
+import { useShelfStore } from 'stores/shelf'
+
+import { connectState } from 'src/services/utils'
+
+import type { BookServicesTypes } from 'src/services/book'
+import type { AnyVoidFunc } from 'src/types/utils'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 
@@ -30,12 +33,11 @@ const shelfStore = useShelfStore()
 const liked = computed<boolean>(() => shelfStore.booksMap.has(bookId.value ?? -1))
 /** 读取/写入中 */
 const loading = computed(
-  () => shelfStore.useLoading((s) => s.pull || s.push).value || connectState.value !== HubConnectionState.Connected
+  () => shelfStore.useLoading((s) => s.pull || s.push).value || connectState.value !== HubConnectionState.Connected,
 )
 /** 收起最后一次通知 */
 let disMiss: AnyVoidFunc
 
-const icon = computed<string>(() => (liked.value ? mdiHeartRemoveOutline : mdiHeartOutline))
 const label = computed<string>(() => (liked.value ? '移出书架' : '加入书架'))
 const color = 'primary'
 const outline = computed<boolean>(() => liked.value)
