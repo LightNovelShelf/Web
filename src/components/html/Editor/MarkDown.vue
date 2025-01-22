@@ -42,10 +42,10 @@ import { ref, watch } from 'vue'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 
+import { uploadImage } from 'src/services/user'
+
 import 'cropperjs/dist/cropper.css'
 import 'md-editor-v3/lib/style.css'
-
-import { uploadImage } from 'src/services/user'
 
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
@@ -120,17 +120,30 @@ function sanitize(html: string) {
   return html
 }
 async function onUploadImg(files: Array<File>, callback: (urls: string[]) => void) {
-  $q.notify({
-    position: 'bottom',
-    html: true,
-    message: '暂时不支持上传图片，请使用链接',
-    timeout: 2500,
+  const notif = $q.notify({
+    group: false,
+    timeout: 0,
+    spinner: true,
+    message: '上传中...',
+    caption: `0/${files.length}`,
   })
-  // const file = files[0]
-  // console.log(file)
 
-  // const res = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
-  // callback([res.Url])
+  const urls: string[] = []
+  for (const file of files) {
+    const res = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
+    urls.push(res.Url)
+    notif({
+      caption: `${urls.length}/${files.length}`,
+    })
+  }
+  callback(urls)
+
+  notif({
+    icon: 'mdiCheck',
+    spinner: false,
+    message: '',
+    timeout: 1000,
+  })
 }
 
 const turndownService = new TurndownService({ codeBlockStyle: 'fenced', headingStyle: 'atx' })
