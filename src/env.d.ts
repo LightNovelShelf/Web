@@ -18,6 +18,6 @@ declare namespace NodeJS {
     VUE_SESSION_TOKEN_VALIDITY: string
     VUE_CAPTCHA_SITE_KEY: string
     VUE_TRACE_SERVER: string
-    ANALYZE: string
+    VUE_COMMIT_SHA: string
   }
 }
