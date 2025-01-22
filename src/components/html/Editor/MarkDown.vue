@@ -5,7 +5,7 @@
       v-model="markdownText"
       :onHtmlChanged="onHtmlChanged"
       :onUploadImg="onUploadImg"
-      style="height: calc(100vh - 190px)"
+      style="height: calc(100vh - 200px)"
       :theme="$q.dark.isActive ? 'dark' : 'light'"
       :toolbars="mdToolBar"
       :sanitize="sanitize"
