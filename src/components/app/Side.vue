@@ -33,7 +33,11 @@
       <div class="temp-box" />
 
       <div class="absolute-bottom column flex-center" style="bottom: 24px">
-        <div class="q-pb-sm">网页版本：{{ commitSha }}</div>
+        <div v-if="commitSha === 'dev'" class="q-pb-sm">网页版本：dev</div>
+        <div v-else class="q-pb-sm">
+          网页版本：
+          <a :href="`https://github.com/LightNovelShelf/Web/tree/${commitSha}`" target="_blank">{{ commitSha }}</a>
+        </div>
         <div class="row flex-align-center">
           <q-icon
             left
