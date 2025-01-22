@@ -53,7 +53,9 @@ export default defineConfig((ctx) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        VUE_COMMIT_SHA: process.env.CF_PAGES_COMMIT_SHA,
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

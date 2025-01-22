@@ -32,7 +32,8 @@
 
       <div class="temp-box" />
 
-      <div class="absolute-bottom row flex-center" style="bottom: 24px">
+      <div class="absolute-bottom column flex-center" style="bottom: 24px">
+        <div class="q-pb-sm">网页版本：{{ commitSha }}</div>
         <div class="row flex-align-center">
           <q-icon
             left
@@ -150,6 +151,7 @@ const menuOptions: Array<Record<string, any>> = [
     icon: 'mdiAccountMultiple',
   },
 ]
+const commitSha = process.env.VUE_COMMIT_SHA
 
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout
