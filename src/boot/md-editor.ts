@@ -30,6 +30,24 @@ export default defineBoot(() => {
                 const src = token.attrs[token.attrIndex('src')][1]
                 return `<div class="${pluginOptions.classes}"><img src="${src}"></div>`
               }
+
+              // 判断图片是否在段落中，如果是则不生成 p 标签
+
+              md.renderer.rules.paragraph_open = function (tokens, idx, options, env, self) {
+                const nextToken = tokens[idx + 1]
+                if (nextToken && nextToken.children?.find((t) => t.type === 'image')) {
+                  return ''
+                }
+                return '<p>'
+              }
+
+              md.renderer.rules.paragraph_close = function (tokens, idx, options, env, self) {
+                const prevToken = tokens[idx - 1]
+                if (prevToken && prevToken.children?.find((t) => t.type === 'image')) {
+                  return ''
+                }
+                return '</p>'
+              }
             },
             options: {
               classes: 'illus',

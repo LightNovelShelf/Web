@@ -136,7 +136,6 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
       caption: `${urls.length}/${files.length}`,
     })
   }
-  callback(urls)
 
   notif({
     icon: 'mdiCheck',
@@ -144,8 +143,17 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
     message: '',
     timeout: 1000,
   })
-}
 
+  // 手动插入图片
+  editorRef.value.insert((selectText) => {
+    return {
+      targetValue: urls.map((url) => `![](${url})`).join('\r\n\r\n'),
+      select: false,
+      deviationStart: 0,
+      deviationEnd: 0,
+    }
+  })
+}
 const turndownService = new TurndownService({ codeBlockStyle: 'fenced', headingStyle: 'atx' })
 turndownService.use(gfm)
 turndownService.keep(['ruby', 'rt'])
