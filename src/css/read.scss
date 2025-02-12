@@ -13,9 +13,13 @@ p {
   align-items: center;
 
   img {
+    margin: 5px;
+    padding: unset;
+  }
+
+  img:not(.no-preview) {
     box-shadow: black 0 0 3px;
     box-sizing: border-box;
-    margin: 5px 0;
     cursor: pointer;
     border: 1px solid white;
   }

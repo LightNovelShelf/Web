@@ -28,7 +28,9 @@ export default defineBoot(() => {
               md.renderer.rules.image = function (tokens, idx, options, env, self) {
                 const token = tokens[idx]
                 const src = token.attrs[token.attrIndex('src')][1]
-                return `<div class="${pluginOptions.classes}"><img src="${src}"></div>`
+                // 将src后的hash作为图片样式
+                const hash = src.split('#')[1]
+                return `<div class="${pluginOptions.classes}"><img src="${src}" class="${hash}"></div>`
               }
 
               // 判断图片是否在段落中，如果是则不生成 p 标签
