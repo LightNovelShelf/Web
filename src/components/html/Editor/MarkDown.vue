@@ -221,7 +221,7 @@ watch(
   .illus,
   .illu,
   .duokan-image-single {
-    padding: 5px;
+    padding: 0 5px;
   }
 }
 </style>

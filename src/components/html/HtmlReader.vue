@@ -36,6 +36,7 @@ function clickHandle(event: Event) {
   const target = getElement(event)
   if (
     target instanceof HTMLImageElement &&
+    !target.classList.contains('no-preview') &&
     (target.parentElement?.classList.contains('duokan-image-single') ||
       target.parentElement?.classList.contains('image-preview') ||
       target.parentElement?.classList.contains('illus'))
