@@ -406,6 +406,7 @@ watch(
 
 :deep(.read) {
   & {
+    user-select: none;
     font-family: read, sans-serif !important;
   }
 

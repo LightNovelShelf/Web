@@ -29,31 +29,36 @@ export default defineBoot(() => {
                 const token = tokens[idx]
                 const src = token.attrs[token.attrIndex('src')][1]
                 // 将src后的hash作为图片样式
-                const hash = src.split('#')[1]
-                return `<div class="${pluginOptions.classes}"><img src="${src}" class="${hash}"></div>`
+                const hash = src.split('#')[1] || ''
+                return `<img src="${src}" class="${hash}">`
               }
 
-              // 判断图片是否在段落中，如果是则不生成 p 标签
-
+              // 判断图片是否在段落中，且没有其他文本，如果是则不生成 p 标签
               md.renderer.rules.paragraph_open = function (tokens, idx, options, env, self) {
                 const nextToken = tokens[idx + 1]
-                if (nextToken && nextToken.children?.find((t) => t.type === 'image')) {
-                  return ''
+                if (
+                  nextToken &&
+                  nextToken.children?.find((t) => t.type === 'image') &&
+                  nextToken.children.length === 1
+                ) {
+                  return '<div class="illus">'
                 }
                 return '<p>'
               }
 
               md.renderer.rules.paragraph_close = function (tokens, idx, options, env, self) {
                 const prevToken = tokens[idx - 1]
-                if (prevToken && prevToken.children?.find((t) => t.type === 'image')) {
-                  return ''
+                if (
+                  prevToken &&
+                  prevToken.children?.find((t) => t.type === 'image') &&
+                  prevToken.children.length === 1
+                ) {
+                  return '</div>'
                 }
                 return '</p>'
               }
             },
-            options: {
-              classes: 'illus',
-            },
+            options: {},
           }
         }
 
