@@ -1,6 +1,10 @@
 p {
-  margin: 0 0 0.5em 0;
+  margin: 0.3em 0 0.3em 0;
   text-indent: 2em;
+}
+
+p img {
+  margin: 0 5px;
 }
 
 /*图片相关*/
@@ -11,11 +15,6 @@ p {
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
-
-  img {
-    margin: 5px;
-    padding: unset;
-  }
 
   img:not(.no-preview) {
     box-shadow: black 0 0 3px;
@@ -30,6 +29,7 @@ img {
   height: auto;
   max-width: 100%;
   max-height: 100%;
+  padding: unset;
 }
 
 .change-image {
