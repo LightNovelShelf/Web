@@ -406,12 +406,8 @@ watch(
 
 :deep(.read) {
   & {
-    all: unset;
-    user-select: none;
     font-family: read, sans-serif !important;
   }
-
-  @import '../../../css/read';
 
   * {
     line-break: anywhere;
