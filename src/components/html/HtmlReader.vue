@@ -106,4 +106,12 @@ function manageScrollClick(event: any) {
 defineExpose({ contentRef })
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+:deep() {
+  & {
+    all: unset;
+  }
+
+  @import '../../css/read';
+}
+</style>

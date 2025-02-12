@@ -99,12 +99,14 @@ const scrollbarParams = computed(
 
 const [initBodyOverlayScrollbars] = useOverlayScrollbars(scrollbarParams)
 onMounted(() => {
-  initBodyOverlayScrollbars({
-    target: document.body,
-    cancel: {
-      body: false,
-    },
-  })
+  if ($q.platform.is.desktop) {
+    initBodyOverlayScrollbars({
+      target: document.body,
+      cancel: {
+        body: false,
+      },
+    })
+  }
 })
 </script>
 

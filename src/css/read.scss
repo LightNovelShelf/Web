@@ -294,27 +294,22 @@ h3 {
 /*RGB颜色*/
 .red {
   color: #ff0000;
-  //background-color: initial !important;
 }
 
 .green {
   color: #00ff00;
-  //background-color: initial !important;
 }
 
 .blue {
   color: #0000ff;
-  //background-color: initial !important;
 }
 
 .black {
   color: #000000;
-  //background-color: initial !important;
 }
 
 .white {
   color: #ffffff;
-  //background-color: initial !important;
 }
 
 /*float*/
@@ -356,9 +351,4 @@ h3 {
 .em-dot {
   text-emphasis: circle;
   text-emphasis-position: under right;
-}
-
-/*MarkDown编辑器样式兼容*/
-blockquote p {
-  text-indent: unset;
 }
