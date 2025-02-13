@@ -65,7 +65,8 @@ export default [
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
       // allow debugger during development only
-      'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+      'no-debugger': 'error',
+      'no-console': 'warn',
 
       // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
       'import/order': [

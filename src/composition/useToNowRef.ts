@@ -1,9 +1,10 @@
 import dayjs from 'dayjs'
-import { type MaybeRefOrGetter, toValue } from 'vue'
+import { toValue } from 'vue'
 
 import { parseTime, toNow } from 'src/utils/time'
 
 import type { Dayjs } from 'dayjs'
+import type { MaybeRefOrGetter } from 'vue'
 
 /**
  * 返回一个定时刷新的 'xx天前' 文案

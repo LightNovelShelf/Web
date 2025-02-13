@@ -43,6 +43,7 @@
 </template>
 
 <script lang="ts" setup>
+import { noop } from '@vueuse/core'
 import { reactive, ref } from 'vue'
 
 import { getAnnouncementList } from 'src/services/context'
@@ -70,9 +71,8 @@ function onLoad(index, done) {
         done()
       }
     })
-    .catch((error) => {
-      console.log(error)
-    })
+    // FIXME: 确认这个catch是干什么用的，是想真的catch error还是只是调试用
+    .catch(noop)
 }
 
 const updateAnnouncement = () => {
