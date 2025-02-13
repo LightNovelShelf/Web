@@ -4,7 +4,6 @@ import prettierSkipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import importPlugin from 'eslint-plugin-import'
 import pluginVue from 'eslint-plugin-vue'
-import globals from 'globals'
 
 export default [
   {
@@ -54,27 +53,19 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-
-      globals: {
-        ...globals.browser,
-        ...globals.node, // SSR, Electron, config files
-        process: 'readonly', // process.env.*
-        ga: 'readonly', // Google Analytics
-        cordova: 'readonly',
-        Capacitor: 'readonly',
-        chrome: 'readonly', // BEX related
-        browser: 'readonly', // BEX related
-      },
     },
 
     // add your custom rules here
     rules: {
+      // https://eslint.org/docs/latest/rules/no-undef#handled_by_typescript
+      // done by ts
+      'no-undef': 'off',
+
       'prefer-promise-reject-errors': 'off',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
       // allow debugger during development only
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-      'no-unused-vars': 0,
 
       // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
       'import/order': [
@@ -118,6 +109,7 @@ export default [
           },
         },
       ],
+      'import/consistent-type-specifier-style': [2, 'prefer-top-level'],
 
       '@typescript-eslint/no-unused-vars': 0,
       '@typescript-eslint/no-require-imports': 0,
@@ -128,15 +120,6 @@ export default [
 
       'vue/multi-word-component-names': 0,
       'vue/block-lang': 0,
-    },
-  },
-
-  {
-    files: ['src-pwa/custom-service-worker.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.serviceworker,
-      },
     },
   },
 
