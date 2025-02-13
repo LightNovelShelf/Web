@@ -33,14 +33,10 @@ export default defineBoot(() => {
                 return `<img src="${src}" class="${hash}">`
               }
 
-              // 判断图片是否在段落中，且没有其他文本，如果是则不生成 p 标签
+              // 判断段落中是否只有图片，如果是则返回 div.illus，否则返回 p
               md.renderer.rules.paragraph_open = function (tokens, idx, options, env, self) {
                 const nextToken = tokens[idx + 1]
-                if (
-                  nextToken &&
-                  nextToken.children?.find((t) => t.type === 'image') &&
-                  nextToken.children.length === 1
-                ) {
+                if (nextToken && nextToken.children?.every((t) => t.type === 'image')) {
                   return '<div class="illus">'
                 }
                 return '<p>'
@@ -48,11 +44,7 @@ export default defineBoot(() => {
 
               md.renderer.rules.paragraph_close = function (tokens, idx, options, env, self) {
                 const prevToken = tokens[idx - 1]
-                if (
-                  prevToken &&
-                  prevToken.children?.find((t) => t.type === 'image') &&
-                  prevToken.children.length === 1
-                ) {
+                if (prevToken && prevToken.children?.every((t) => t.type === 'image')) {
                   return '</div>'
                 }
                 return '</p>'

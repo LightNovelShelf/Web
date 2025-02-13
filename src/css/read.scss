@@ -1,10 +1,12 @@
 p {
-  margin: 0.3em 0 0.3em 0;
+  margin: 0;
+  padding: 0;
+  line-height: 1.8em;
   text-indent: 2em;
-}
 
-p img {
-  margin: 0 5px;
+  img {
+    margin: 0 5px;
+  }
 }
 
 /*图片相关*/
@@ -15,12 +17,13 @@ p img {
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
+  gap: 2px;
 
   img:not(.no-preview) {
     box-shadow: black 0 0 3px;
     box-sizing: border-box;
+    border: 1px solid #ddd;
     cursor: pointer;
-    border: 1px solid white;
   }
 }
 
@@ -30,21 +33,7 @@ img {
   max-width: 100%;
   max-height: 100%;
   padding: unset;
-}
-
-.change-image {
-  display: none;
-}
-
-@media screen and (min-device-aspect-ratio: 5/4) {
-  .change {
-    display: none;
-  }
-
-  .change-image {
-    display: flex;
-    margin: 5px 0;
-  }
+  border-radius: 3px;
 }
 
 /*注释相关*/
