@@ -1,4 +1,4 @@
-import { type Ref } from 'vue'
+import type {Ref} from 'vue';
 
 /**
  * 用来获取vue组件内别的node元素的ref

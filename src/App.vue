@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useOverlayScrollbars, type UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
+import { useOverlayScrollbars } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
@@ -21,6 +21,8 @@ import { AppSide, AppHeader, AppContainer } from 'components/app/index'
 import { NOOP } from 'src/const/empty'
 import { getMyInfo } from 'src/services/user'
 import { useServerNotify } from 'src/services/utils/useServerNotify'
+
+import type { UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
 
 import 'overlayscrollbars/overlayscrollbars.css'
 

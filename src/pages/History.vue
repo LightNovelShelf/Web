@@ -42,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import { noop } from '@vueuse/core'
 import { ref, defineComponent, computed } from 'vue'
 
 import BookCard from 'components/BookCard.vue'
@@ -88,9 +89,8 @@ const confirmClear = async () => {
     .then((res) => {
       bookData.value = []
     })
-    .catch((error) => {
-      console.log(error)
-    })
+    // FIXME: 确认这个catch是干什么用的，是想真的catch error还是只是调试用
+    .catch(noop)
 }
 
 const requestHistory = useTimeoutFn(async () => {
@@ -102,9 +102,8 @@ const requestHistory = useTimeoutFn(async () => {
         scroll.value.poll()
       }
     })
-    .catch((error) => {
-      console.log(error)
-    })
+    // FIXME: 确认这个catch是干什么用的，是想真的catch error还是只是调试用
+    .catch(noop)
 })
 useInitRequest(requestHistory, {
   before: () => {
@@ -126,9 +125,8 @@ const onLoad = async (index, done) => {
         done()
       }
     })
-    .catch((error) => {
-      console.log(error)
-    })
+    // FIXME: 确认这个catch是干什么用的，是想真的catch error还是只是调试用
+    .catch(noop)
 }
 </script>
 

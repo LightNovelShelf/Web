@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 enum RecordTypeEnum {
   INIT = 'INIT',
   SENT = 'SENT',

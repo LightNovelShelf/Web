@@ -21,18 +21,21 @@
         </q-toolbar-title>
       </div>
 
-      <search-input
-        v-show="!hideSearchBar"
-        placeholder="搜索"
-        dark
-        dense
-        standout
-        class="q-ml-md"
-        v-model="searchKey"
-        :width="searchInputWidth"
-        max-width="unset"
-        @search="onSearch"
-      />
+      <!-- form 是为了规避 focus-index 跳到意外的地方的问题 -->
+      <form @submit.prevent>
+        <search-input
+          v-show="!hideSearchBar"
+          placeholder="搜索"
+          dark
+          dense
+          standout
+          class="q-ml-md"
+          v-model="searchKey"
+          :width="searchInputWidth"
+          max-width="unset"
+          @search="onSearch"
+        />
+      </form>
 
       <q-space />
 
