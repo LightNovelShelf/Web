@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type StateEntry } from 'vue-router'
+import type { StateEntry } from 'vue-router'
 
 const router = useRouter()
 

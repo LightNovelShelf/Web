@@ -70,6 +70,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { sha256 } from 'src/utils/hash'
+import { longTermToken } from 'src/utils/session'
 
 import { useAppStore } from 'stores/app'
 
@@ -140,6 +141,19 @@ const _login = async () => {
 
   loading.value = false
 }
+
+/** 检测一次在路由上的token并记录下来
+ *
+ * 方便局域网调试，规避局域网不好启用人机验证的问题
+ */
+function checkTokenInQueryOnce() {
+  const preDefinedToken = route.query.token
+  if (!preDefinedToken) return
+  longTermToken.set(preDefinedToken as string)
+  alert('DEBUG: 已记录，请刷新')
+}
+
+onMounted(checkTokenInQueryOnce)
 </script>
 
 <style scoped lang="scss"></style>

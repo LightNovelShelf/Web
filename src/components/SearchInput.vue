@@ -3,8 +3,8 @@
     :model-value="keyword"
     @update:model-value="syncHandle"
     @keyup.enter="searchHandle()"
-    @click="visible = true"
-    @focus="visible = true"
+    @click="onOpenMenuIfCan()"
+    @focus="onOpenMenuIfCan()"
     @blur="onBlur"
     ref="inputEleRef"
     :style="{ flexBasis: searchBarWidth, maxWidth: props.maxWidth }"
@@ -64,6 +64,14 @@ const searchBarWidth = computed(() => {
   return props.width!(visible.value)
 })
 
+/** 在有 keyword 的时候打开下拉菜单
+ *
+ * 出于未知原因，在没有keyword（也就是下拉菜单没有item）的情况下打开menu会导致menu无法再打开（除非先close
+ */
+function onOpenMenuIfCan() {
+  visible.value = !!keyword.value
+}
+
 // 在某次框架更新中，onblur事件比click触发早了，需要手动跳转
 function onBlur(evt: any) {
   //onBlur时调用handle
@@ -78,10 +86,13 @@ function syncHandle(evt: string | number | null) {
     emits('update:modelValue', evt)
     keyword.value = evt
   }
+
+  onOpenMenuIfCan()
 }
 
 function searchHandle(exact = false) {
   emits('update:modelValue', keyword.value)
+  if (!keyword.value) return
   emits('search', keyword.value, !!exact)
 
   // 因为点menu的话一定会blur没法避免，所以这里统一blur（即使是按回车触发的search）

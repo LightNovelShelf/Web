@@ -41,7 +41,6 @@ export const useAppStore = defineStore('app', {
   actions: {
     reverse() {
       this.appName = this.appName.split('').reverse().join('')
-      console.log('this.appName', this.appName)
     },
 
     async asyncReverse() {
