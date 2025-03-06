@@ -6,12 +6,13 @@ import { userSettingDB } from 'src/utils/storage/db'
 
 export const useSettingStore = defineStore('app.setting', {
   state: () => ({
-    isInit: true,
+    isInit: false,
     dark: Dark.get(), // dark 设置不保存到服务器
     generalSetting: {
       enableBlurHash: true,
       globalWidth: 100,
       ignoreJapanese: false,
+      ignoreAI: false,
     },
     readSetting: {
       fontSize: 16,
@@ -46,6 +47,7 @@ export const useSettingStore = defineStore('app.setting', {
         )
       })
       await Promise.all(p)
+      this.isInit = true
     },
     async save() {
       const p = []

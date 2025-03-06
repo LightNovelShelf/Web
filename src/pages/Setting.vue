@@ -20,6 +20,7 @@
               <div class="q-gutter-xs light-radio q-mt-md">
                 <div class="text-subtitle1">书籍列表</div>
                 <q-toggle v-model="generalSetting.ignoreJapanese" label="隐藏日版" />
+                <q-toggle v-model="generalSetting.ignoreAI" label="隐藏AI内容" />
               </div>
               <q-separator />
               <div class="q-gutter-xs light-radio q-mt-md">

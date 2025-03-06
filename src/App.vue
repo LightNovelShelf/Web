@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf" :class="$q.dark.isActive ? '' : 'bg-grey-1'">
     <app-header />
     <app-side />
-    <app-container />
+    <app-container v-if="settingStore.isInit" />
   </q-layout>
 </template>
 

@@ -96,12 +96,16 @@ const order = computed({
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
 const request = useTimeoutFn(function (page = currentPage.value, order = props.order) {
-  return getBookList({ Page: page, Order: order, Size: 24, IgnoreJapanese: generalSetting.ignoreJapanese }).then(
-    (serverData) => {
-      bookData.value = serverData.Data
-      pageData.value.totalPage = serverData.TotalPages
-    },
-  )
+  return getBookList({
+    Page: page,
+    Order: order,
+    Size: 24,
+    IgnoreJapanese: generalSetting.ignoreJapanese,
+    IgnoreAI: generalSetting.ignoreAI,
+  }).then((serverData) => {
+    bookData.value = serverData.Data
+    pageData.value.totalPage = serverData.TotalPages
+  })
 })
 
 const loading = request.loading
