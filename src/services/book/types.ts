@@ -50,11 +50,12 @@ export interface GetBookInfoRes {
 }
 
 export interface GetBookListRequest {
-  Page: number
-  Size: number
+  Page?: number
+  Size?: number
   KeyWords?: string
   Order?: 'new' | 'view' | 'latest'
   IgnoreJapanese?: boolean
+  IgnoreAI?: boolean
 }
 
 export interface SaveReadPositionRequest {

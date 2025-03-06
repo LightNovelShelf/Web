@@ -17,22 +17,23 @@ export function useInitRequest(
 ) {
   let first = true
 
-  // 在每次判断路由为前进或第一次进入时加载数据
-  onMounted(async () => {
-    first = false
+  const call = async () => {
     if (config?.before) config?.before()
     if ('syncCall' in cb) await cb.syncCall()
     else cb()
     if (config?.after) config?.after()
+  }
+
+  // 在每次判断路由为前进或第一次进入时加载数据
+  onMounted(async () => {
+    first = false
+    await call()
   })
 
   const router = useRoute()
   onActivated(async () => {
     if (first && (router.meta.reload || (config?.isActive ? !config?.isActive?.value : false))) {
-      if (config?.before) config?.before()
-      if ('syncCall' in cb) await cb()
-      else cb()
-      if (config?.after) config?.after()
+      await call()
     }
   })
 

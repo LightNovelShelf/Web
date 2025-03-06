@@ -197,13 +197,17 @@ const banList = ref<any[]>()
 const banImages = ref<string[]>()
 const viewerRef = ref<any>()
 const settingStore = useSettingStore()
+const { generalSetting } = settingStore
 const getInfo = useTimeoutFn(async () => {
   // 这样可以使Signalr在一个ws消息中并发调用
   const p1 = getOnlineInfo().then((res) => (onlineInfo.value = res))
   const p2 = getAnnouncementList({ Page: 1, Size: 5 }).then(
     (res) => (announcementList.value = announcementListFormat(res.Data)),
   )
-  const p3 = getLatestBookList().then((res) => (bookData.value = res.Data))
+  const p3 = getLatestBookList({
+    IgnoreJapanese: generalSetting.ignoreJapanese,
+    IgnoreAI: generalSetting.ignoreAI,
+  }).then((res) => (bookData.value = res.Data))
   const p4 = getBanInfoList().then((res: any[]) => (banList.value = res))
   await Promise.all([p1, p2, p3, p4])
 })

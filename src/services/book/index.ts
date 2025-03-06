@@ -35,8 +35,8 @@ export function getBookListByIds(ids: number[]) {
 getBookListByIds.MAX_CONCURRENT = 24
 
 /** 取最新的6本书，无需登录 */
-export function getLatestBookList() {
-  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookListBinary')
+export function getLatestBookList(param: Types.GetBookListRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookListBinary', param)
 }
 
 /** 取最近的排行榜 */

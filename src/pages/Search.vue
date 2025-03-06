@@ -53,6 +53,8 @@
 import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useSettingStore } from 'src/stores/setting'
+
 import BookCard from 'components/BookCard.vue'
 import { QGrid, QGridItem } from 'components/grid'
 import SearchInput from 'components/SearchInput.vue'
@@ -63,6 +65,7 @@ import type { BookInList } from 'src/services/book/types'
 
 const router = useRouter()
 const route = useRoute()
+const { generalSetting } = useSettingStore()
 const scrollEleInstanceRef = ref<null | {
   stop(): void
   reset(): void
@@ -111,7 +114,13 @@ const searchInputWidth = () => {
 const requestBook = async (index: number, done: (stop?: boolean) => void) => {
   loading.value = true
   try {
-    const res = await getBookList({ Page: index, Size: 24, KeyWords: searchKeyInRoute.value })
+    const res = await getBookList({
+      Page: index,
+      Size: 24,
+      KeyWords: searchKeyInRoute.value,
+      IgnoreJapanese: generalSetting.ignoreJapanese,
+      IgnoreAI: generalSetting.ignoreAI,
+    })
     bookData.push(...res.Data)
     if (res.TotalPages === index || res.TotalPages === 0) scrollEleInstanceRef.value.stop()
     else done()
