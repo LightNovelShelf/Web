@@ -102,7 +102,7 @@ const isExactInRoute = computed(() => {
  * 但初始化逻辑中体现不了对 exact 的使用，所以退而求其次放这里来了，简化维护是心智负担
  */
 const searchKeyInRoute = computed(() => {
-  const keyword = last(route.params?.keyWords ?? '')
+  const keyword = last(route.query?.keywords ?? '')
   return isExactInRoute.value ? `"${keyword}"` : keyword
 })
 
@@ -130,7 +130,7 @@ const requestBook = async (index: number, done: (stop?: boolean) => void) => {
 }
 
 function onSearch(val: string, exact: boolean) {
-  router.push({ name: 'Search', params: { keyWords: val }, query: { exact: exact ? '1' : '' } })
+  router.push({ name: 'Search', query: { keywords: val, exact: exact ? '1' : '' } })
 }
 
 // 同步路由的值到input中并触发容器初始化

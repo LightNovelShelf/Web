@@ -134,7 +134,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/History.vue'),
   },
   {
-    path: '/search/:keyWords?',
+    /** @query {{ keywords?: string, exact?: string }} */
+    path: '/search/result',
     name: 'Search',
     props: true,
     component: () => import('../pages/Search.vue'),
