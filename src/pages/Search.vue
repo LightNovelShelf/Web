@@ -11,28 +11,28 @@
               dense
               :width="searchInputWidth"
               max-width="600px"
-              v-model="state.searchKey"
+              v-model="searchKeyInInput"
               @search="onSearch"
             />
           </div>
           <div class="q-gutter-y-md">
-            <q-tabs dense v-model="state.tab" class="text-teal">
+            <q-tabs dense v-model="tab" class="text-teal">
               <template v-for="option in tabOptions" :key="option.key">
                 <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
               </template>
             </q-tabs>
-            <q-tab-panels v-model="state.tab" animated>
+            <q-tab-panels v-model="tab" animated>
               <q-tab-panel name="Book">
-                <template v-if="state.bookData.length">
+                <template v-if="bookData.length">
                   <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-                    <q-grid-item v-for="book in state.bookData" :key="book['Id']">
+                    <q-grid-item v-for="book in bookData" :key="book['Id']">
                       <book-card :book="book"></book-card>
                     </q-grid-item>
                   </q-grid>
                 </template>
-                <template v-else-if="!state.loading">
+                <template v-else-if="!loading">
                   <div class="row justify-center q-my-md text-center text-h5">
-                    无<template v-if="state.extra">精确</template>搜索结果
+                    无<template v-if="isExactInRoute">精确</template>搜索结果
                   </div>
                 </template>
               </q-tab-panel>
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useSettingStore } from 'src/stores/setting'
@@ -72,22 +72,12 @@ const scrollEleInstanceRef = ref<null | {
   resume(): void
   poll(): void
 }>(null)
-const state = ref({
-  /** 搜索关键词 @description 用户输入是啥就是啥 */
-  searchKey: '',
+const loading = ref(false)
 
-  /** 精确搜索 */
-  extra: false,
-
-  /** 当前tab */
-  tab: 'Book',
-
-  /** 书籍数据 */
-  bookData: [],
-
-  /** 搜索结果加载态 @TODO: 使用 useRequest 代替手动管理 */
-  loading: false,
-})
+/** 移除精确搜索的双引号 */
+function getTrimmedKeyword(str: string) {
+  return str.replace(/^"(.+)"$/, '$1')
+}
 
 /** 数组的最后一个，如果不是数组就返回输入值 */
 function last(param: string | string[]): string {
@@ -98,68 +88,70 @@ function last(param: string | string[]): string {
   return param
 }
 
-const searchInputWidth = () => '60vw'
-const requestBook = async (index: number, done: (stop?: boolean) => void) => {
-  state.value.loading = true
-  try {
-    const KeyWords = state.value.extra ? `"${state.value.searchKey}"` : state.value.searchKey
+const isExactInRoute = computed(() => {
+  const exact = !!last(route.query?.exact ?? '')
+  return exact
+})
 
+/**
+ * 路由上指定的关键词
+ *
+ * @desc
+ * 这里就组装好数据是为了简化watch逻辑：keyword和extra变了都要初始化，
+ *
+ * 但初始化逻辑中体现不了对 exact 的使用，所以退而求其次放这里来了，简化维护是心智负担
+ */
+const searchKeyInRoute = computed(() => {
+  const keyword = last(route.params?.keyWords ?? '')
+  return isExactInRoute.value ? `"${keyword}"` : keyword
+})
+
+/** 仅用作search-input的受控记录 */
+const searchKeyInInput = ref('')
+const searchInputWidth = () => {
+  return '60vw'
+}
+const requestBook = async (index: number, done: (stop?: boolean) => void) => {
+  loading.value = true
+  try {
     const res = await getBookList({
       Page: index,
       Size: 24,
-      KeyWords: KeyWords,
+      KeyWords: searchKeyInRoute.value,
       IgnoreJapanese: generalSetting.ignoreJapanese,
       IgnoreAI: generalSetting.ignoreAI,
     })
-    state.value.bookData.push(...res.Data)
+    bookData.push(...res.Data)
     if (res.TotalPages === index || res.TotalPages === 0) scrollEleInstanceRef.value.stop()
     else done()
   } finally {
-    state.value.loading = false
+    loading.value = false
   }
 }
 
 function onSearch(val: string, exact: boolean) {
-  state.value.searchKey = val
-  state.value.extra = exact
-
-  // sync state to url, so it can restore after refresh
-  router.replace({ name: 'Search', query: { keywords: val, exact: exact ? '1' : '' } })
-
-  triggerSearchReq()
+  router.push({ name: 'Search', params: { keyWords: val }, query: { exact: exact ? '1' : '' } })
 }
 
-/** 重新初始化搜素 */
-function triggerSearchReq() {
-  const instance = scrollEleInstanceRef.value
-  if (!instance) {
-    return
-  }
+// 同步路由的值到input中并触发容器初始化
+watch(
+  [searchKeyInRoute, scrollEleInstanceRef],
+  ([nextSearchKey, instance]) => {
+    if (!instance) {
+      return
+    }
+    searchKeyInInput.value = getTrimmedKeyword(nextSearchKey)
 
-  instance.reset()
-  instance.resume()
-  // 通过 q-infinite-scroll 的 poll 方法来触发加载
-  instance.poll()
+    instance.reset()
+    instance.resume()
+    instance.poll()
 
-  // 数组在这重置还有一层用意：触发滚动容器回调；poll调用后理应就会触发回调，但实际情况并非如此
-  // TODO: 探明滚动容器触发条件
-  state.value.bookData.length = 0
-}
-
-/** 从url上提取搜索关键词，触发请求 */
-function tryResyncSearchStateFromUrl() {
-  const keyword = last(route.query?.keywords ?? '')
-  const isExact = !!route.query?.exact
-
-  if (keyword === state.value.searchKey && isExact === state.value.extra) {
-    return
-  }
-
-  state.value.searchKey = keyword
-  state.value.extra = isExact
-  triggerSearchReq()
-}
-
+    // 数组在这重置还有一层用意：触发滚动容器回调；poll调用后理应就会触发回调，但实际情况并非如此
+    // TODO：探明滚动容器触发条件
+    bookData.length = 0
+  },
+  { immediate: true },
+)
 const tabOptions: Array<Record<string, any>> = [
   {
     name: 'Book',
@@ -183,10 +175,8 @@ const tabOptions: Array<Record<string, any>> = [
     disable: true,
   },
 ]
-
-// 初始化
-onMounted(tryResyncSearchStateFromUrl)
-onActivated(tryResyncSearchStateFromUrl)
+const tab = ref('Book')
+const bookData = reactive<BookInList[]>([])
 </script>
 
 <style scoped lang="scss"></style>
