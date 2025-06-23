@@ -244,8 +244,8 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
   },
 ]
 
-function onSearch(keyWords: string, exact: boolean) {
-  router.push({ name: 'Search', params: { keyWords: keyWords }, query: { exact: exact ? '1' : '' } })
+function onSearch(keywords: string, exact: boolean) {
+  router.push({ name: 'Search', query: { keywords: keywords, exact: exact ? '1' : '' } })
   searchKey.value = ''
 }
 function changAppName() {
