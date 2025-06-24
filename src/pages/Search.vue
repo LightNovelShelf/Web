@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useSettingStore } from 'src/stores/setting'
@@ -60,8 +60,6 @@ import { QGrid, QGridItem } from 'components/grid'
 import SearchInput from 'components/SearchInput.vue'
 
 import { getBookList } from 'src/services/book'
-
-import type { BookInList } from 'src/services/book/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -73,11 +71,11 @@ const scrollEleInstanceRef = ref<null | {
   poll(): void
 }>(null)
 const state = ref({
+  // 部分组件会在setup初始化，所以不能等 onMounted 等周期再对state内容初始化
   /** 搜索关键词 @description 用户输入是啥就是啥 */
-  searchKey: '',
-
+  searchKey: '' + (route.query?.keywords ?? ''),
   /** 精确搜索 */
-  extra: false,
+  extra: !!route.query?.exact,
 
   /** 当前tab */
   tab: 'Book',
@@ -88,15 +86,6 @@ const state = ref({
   /** 搜索结果加载态 @TODO: 使用 useRequest 代替手动管理 */
   loading: false,
 })
-
-/** 数组的最后一个，如果不是数组就返回输入值 */
-function last(param: string | string[]): string {
-  if (Array.isArray(param)) {
-    return param[param.length - 1]
-  }
-
-  return param
-}
 
 const searchInputWidth = () => '60vw'
 const requestBook = async (index: number, done: (stop?: boolean) => void) => {
@@ -146,14 +135,14 @@ function triggerSearchReq() {
   state.value.bookData.length = 0
 }
 
-/** 从url上提取搜索关键词，触发请求 */
+/** 从url上提取搜索关键词，触发请求 @idempotent 对外幂等 */
 function tryResyncSearchStateFromUrl() {
-  const keyword = last(route.query?.keywords ?? '')
+  const keyword = '' + (route.query?.keywords ?? '')
   const isExact = !!route.query?.exact
 
-  if (keyword === state.value.searchKey && isExact === state.value.extra) {
-    return
-  }
+  const isSameSearchQuery = keyword === state.value.searchKey && isExact === state.value.extra
+  // 搜索条件对比url上的没变就不再触发
+  if (isSameSearchQuery) return
 
   state.value.searchKey = keyword
   state.value.extra = isExact
