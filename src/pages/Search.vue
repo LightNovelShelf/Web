@@ -136,9 +136,9 @@ function triggerSearchReq() {
 }
 
 /** 从url上提取搜索关键词，触发请求 @idempotent 对外幂等 */
-function tryResyncSearchStateFromUrl() {
-  const keyword = '' + (route.query?.keywords ?? '')
-  const isExact = !!route.query?.exact
+function tryResyncSearchStateFromUrl(toRoute = route) {
+  const keyword = '' + (toRoute.query?.keywords ?? '')
+  const isExact = !!toRoute.query?.exact
 
   const isSameSearchQuery = keyword === state.value.searchKey && isExact === state.value.extra
   // 搜索条件对比url上的没变就不再触发
@@ -176,6 +176,7 @@ const tabOptions: Array<Record<string, any>> = [
 // 初始化
 onMounted(tryResyncSearchStateFromUrl)
 onActivated(tryResyncSearchStateFromUrl)
+onBeforeRouteUpdate(tryResyncSearchStateFromUrl)
 </script>
 
 <style scoped lang="scss"></style>
