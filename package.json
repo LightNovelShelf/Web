@@ -61,7 +61,7 @@
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.4.0",
     "autoprefixer": "^10.4.20",
-    "electron": "^34.1.1",
+    "electron": "^35.7.5",
     "eslint": "^9.20.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.31.0",
