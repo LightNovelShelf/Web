@@ -26,6 +26,8 @@ import type { UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
 
 import 'overlayscrollbars/overlayscrollbars.css'
 
+import { getAnnouncementDetail, getBanInfoList, getOnlineInfo } from './services/context'
+
 const $q = useQuasar()
 
 $q.loadingBar.setDefaults({
@@ -110,6 +112,10 @@ onMounted(() => {
     })
   }
 })
+
+// getBanInfoList()
+// getAnnouncementDetail({ Id: 1 })
+// getOnlineInfo()
 </script>
 
 <style lang="scss"></style>

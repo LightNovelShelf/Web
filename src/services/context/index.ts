@@ -5,21 +5,21 @@ import type { Card } from 'src/types/collaborator'
 
 /** 获取贡献者列表 */
 export function getCollaboratorList() {
-  return requestWithSignalr<Card[]>('GetCollaboratorList')
+  return requestWithSignalr<Card[]>('GetCollaboratorList', {}, {})
 }
 
 export function getOnlineInfo() {
-  return requestWithSignalr<OnlineInfo>('GetOnlineInfo')
+  return requestWithSignalr<OnlineInfo>('GetOnlineInfo', {}, {})
 }
 
 export function getAnnouncementList(request: GetAnnouncementList.Request) {
-  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementListBinary', request)
+  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementList', request, {})
 }
 
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
-  return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request)
+  return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request, {})
 }
 
 export function getBanInfoList() {
-  return requestWithSignalr('GetBanInfoList')
+  return requestWithSignalr('GetBanList', {}, { UseGzip: true })
 }
