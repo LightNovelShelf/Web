@@ -113,9 +113,9 @@ onMounted(() => {
   }
 })
 
-// getBanInfoList()
-// getAnnouncementDetail({ Id: 1 })
-// getOnlineInfo()
+getBanInfoList()
+getAnnouncementDetail({ Id: 1 })
+getOnlineInfo()
 </script>
 
 <style lang="scss"></style>

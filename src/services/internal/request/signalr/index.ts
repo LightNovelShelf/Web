@@ -231,3 +231,7 @@ export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res
     hub.off(methodName, _cb)
   }
 }
+
+export const defaultRequestOptions = {
+  UseGzip: true,
+}
