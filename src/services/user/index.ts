@@ -116,7 +116,7 @@ export async function getBookShelfBinary() {
     data: (ShelfItem | ShelfLegacyStruct.ServerShelfItem)[]
     /** @legacy 历史数据可能没有ver这个键值 */
     ver?: SHELF_STRUCT_VER
-  }>('GetBookShelfBinary')
+  }>('GetBookShelf')
 }
 
 /** 清空用户历史记录 */
@@ -131,7 +131,7 @@ export async function setAvatar(url: string) {
 
 /** 取用户书籍 */
 export async function getMyBooks(req: Types.GetMyBooks.Request) {
-  return requestWithSignalr<Types.GetMyBooks.Response>('GetMyBooksBinary', req)
+  return requestWithSignalr<Types.GetMyBooks.Response>('GetMyBooks', req)
 }
 
 /** 快速新建书籍，返回新建的书籍id */

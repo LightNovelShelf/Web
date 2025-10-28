@@ -10,7 +10,7 @@
                   <div class="row">
                     <div class="row flex-align-center q-gutter-xs">
                       <q-icon size="24px" name="mdiHeart" />
-                      <span>{{ book.Likes }}</span>
+                      <span>{{ book.Favorite }}</span>
                     </div>
                     <q-space />
                     <div class="row flex-align-center q-gutter-xs">
@@ -19,9 +19,9 @@
                     </div>
                   </div>
                 </div>
-                <template v-if="book.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
+                <!-- <template v-if="book.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
                   <blur-hash :blurhash="book.Placeholder" />
-                </template>
+                </template> -->
               </q-img>
               <q-responsive v-else :ratio="2 / 3">
                 <q-skeleton class="fit" square />
@@ -52,7 +52,7 @@
               <div class="text-subtitle1 text-weight-bold">《{{ book['Title'] }}》</div>
               <div style="margin-top: 24px">作者：{{ book['Author'] }}</div>
               <div>最后更新：{{ book['LastUpdate'] }}</div>
-              <div>更新时间：{{ dateFormat(book['LastUpdateTime']) }} ({{ LastUpdateTimeDesc }})</div>
+              <div>更新时间：{{ dateFormat(book['LastUpdatedAt']) }} ({{ LastUpdateTimeDesc }})</div>
               <div>上次阅读：{{ lastReadTitle }}</div>
               <div style="margin-top: 24px">
                 <div>简介</div>
@@ -197,7 +197,7 @@ const bookInList = computed<BookInList | null>(() =>
       } as BookInList)
     : null,
 )
-const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdateTime)
+const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdatedAt)
 const lastReadTitle = computed(() => {
   if (position.value && position.value?.cid) {
     const chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)

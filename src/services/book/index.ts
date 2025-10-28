@@ -10,16 +10,16 @@ export function getBookList(param: Types.GetBookListRequest) {
   return requestWithSignalr<Types.GetBookListRes>('GetBookListBinary', param)
 }
 /** 获取书籍信息 */
-export function getBookInfo(bid: number) {
-  return requestWithSignalr<Types.GetBookInfoRes>('GetBookInfo', bid)
+export function getBookInfo(id: number) {
+  return requestWithSignalr<Types.GetBookInfoRes>('GetBookInfo', { Id: id })
 }
 /** 保存阅读位置 */
 export function saveReadPosition(param: SaveReadPositionRequest) {
   return requestWithSignalr('SaveReadPosition', param)
 }
 /** 获取阅读位置 */
-export function getReadPosition(bid: number) {
-  return requestWithSignalr('GetReadPosition', bid)
+export function getReadPosition(id: number) {
+  return requestWithSignalr('GetReadPosition', { Id: id })
 }
 /** 从一批id获取书籍列表 */
 export function getBookListByIds(ids: number[]) {
@@ -29,19 +29,19 @@ export function getBookListByIds(ids: number[]) {
       throw new Error('单次批量操作最多24本')
     }
   }
-  return requestWithSignalr<Types.BookInList[]>('GetBookListByIds', ids)
+  return requestWithSignalr<Types.BookInList[]>('GetBookListByIds', { Ids: ids })
 }
 /** 最大并行数量 */
 getBookListByIds.MAX_CONCURRENT = 24
 
 /** 取最新的6本书，无需登录 */
 export function getLatestBookList(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookListBinary', param)
+  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookList', param)
 }
 
 /** 取最近的排行榜 */
 export function getRank(days: number) {
-  return requestWithSignalr<Types.BookInList[]>('GetRankBinary', days)
+  return requestWithSignalr<Types.BookInList[]>('GetRank', days)
 }
 
 /** 编辑书籍信息 */
