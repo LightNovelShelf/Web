@@ -45,7 +45,7 @@ const chapter = ref<any>()
 const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.value?.SortNum === sortNum.value)
 
 const request = useTimeoutFn(async () => {
-  chapter.value = await getChapterEditInfo({ BookId: bid.value, SortNum: sortNum.value })
+  chapter.value = await getChapterEditInfo({ Bid: bid.value, SortNum: sortNum.value })
 })
 
 const $q = useQuasar()

@@ -5,7 +5,7 @@ export interface GetChapterContentRequest {
 }
 
 interface GetChapterEditInfoBySortNum {
-  BookId?: number
+  Bid?: number
   SortNum?: number
 }
 
@@ -16,21 +16,20 @@ interface GetChapterEditInfoByCid {
 export type GetChapterEditInfo = GetChapterEditInfoBySortNum | GetChapterEditInfoByCid
 
 interface EditChapterContentRequestBySortNum extends GetChapterEditInfoBySortNum {
-  Content?: string
-  Title?: string
+  Map?: {
+    Content?: string
+    Title?: string
+  }
 }
 
 interface EditChapterContentRequestByCid extends GetChapterEditInfoByCid {
-  Content?: string
-  Title?: string
+  Map?: {
+    Content?: string
+    Title?: string
+  }
 }
 
 export type EditChapterContentRequest = EditChapterContentRequestBySortNum | EditChapterContentRequestByCid
-
-export interface DeleteChapterRequest {
-  BookId: number
-  SortNum: number
-}
 
 export interface ChangeChapterSortRequest {
   BookId: number

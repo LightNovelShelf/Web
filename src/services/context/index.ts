@@ -1,25 +1,25 @@
-import { requestWithSignalr, defaultRequestOptions } from 'src/services/internal/request'
+import { requestWithSignalr } from 'src/services/internal/request'
 
 import type { GetAnnouncementDetail, GetAnnouncementList, OnlineInfo } from 'src/services/context/type'
 import type { Card } from 'src/types/collaborator'
 
 /** 获取贡献者列表 */
 export function getCollaboratorList() {
-  return requestWithSignalr<Card[]>('GetCollaboratorList', {}, defaultRequestOptions)
+  return requestWithSignalr<Card[]>('GetCollaboratorList')
 }
 
 export function getOnlineInfo() {
-  return requestWithSignalr<OnlineInfo>('GetOnlineInfo', {}, defaultRequestOptions)
+  return requestWithSignalr<OnlineInfo>('GetOnlineInfo')
 }
 
 export function getAnnouncementList(request: GetAnnouncementList.Request) {
-  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementList', request, defaultRequestOptions)
+  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementList', request)
 }
 
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
-  return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request, defaultRequestOptions)
+  return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request)
 }
 
 export function getBanInfoList() {
-  return requestWithSignalr('GetBanList', {}, defaultRequestOptions)
+  return requestWithSignalr('GetBanList')
 }

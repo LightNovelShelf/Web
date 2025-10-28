@@ -21,5 +21,5 @@ export function getComments(req: GetComments.Request) {
 
 /** 删除评论 */
 export function deleteComment(id: number) {
-  return requestWithSignalr('DeleteComment', id)
+  return requestWithSignalr('DeleteComment', { Id: id })
 }

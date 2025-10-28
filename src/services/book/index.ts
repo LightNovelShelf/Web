@@ -41,22 +41,22 @@ export function getLatestBookList(param: Types.GetBookListRequest) {
 
 /** 取最近的排行榜 */
 export function getRank(days: number) {
-  return requestWithSignalr<Types.BookInList[]>('GetRank', days)
+  return requestWithSignalr<Types.BookInList[]>('GetRank', { Days: days })
 }
 
 /** 编辑书籍信息 */
-export function editBook(request: Types.EditBookRequest) {
-  return requestWithSignalr('EditBook', request)
+export function editBook(bid: number, request: Types.EditBookRequest) {
+  return requestWithSignalr('UpdateBook', { Id: bid, Map: request })
 }
 
 /** 取编辑用的书籍信息 */
 export function getBookEditInfo(bid: number) {
-  return requestWithSignalr('GetBookEditInfo', bid)
+  return requestWithSignalr('GetBookEditInfo', { Id: bid })
 }
 
 /** 删除书籍 */
 export function deleteBook(bid: number) {
-  return requestWithSignalr('DeleteBook', bid)
+  return requestWithSignalr('DeleteBook', { Id: bid })
 }
 
 /** 设置书籍 */
@@ -64,6 +64,6 @@ export function setBookSetting(request: Types.SetBookSetting) {
   return requestWithSignalr('SetBookSetting', request)
 }
 
-export function getBookSetting(request: number) {
-  return requestWithSignalr('GetBookSetting', request)
+export function getBookSetting(bid: number) {
+  return requestWithSignalr('GetBookSetting', { Id: bid })
 }

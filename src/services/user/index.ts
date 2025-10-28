@@ -126,7 +126,7 @@ export async function clearHistory() {
 
 /** 设置头像 */
 export async function setAvatar(url: string) {
-  return requestWithSignalr('SetAvatar', url)
+  return requestWithSignalr('SetAvatar', { Url: url })
 }
 
 /** 取用户书籍 */

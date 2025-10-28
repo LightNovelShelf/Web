@@ -205,6 +205,10 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
   }
 }
 
+const defaultRequestOptions = {
+  UseGzip: true,
+}
+
 /** 速率限制后的请求句柄 */
 const requestWithSignalrInRateLimit = ((methodName: string, params: object, options: object) => {
   return queue.add(() => requestWithSignalr(methodName, params, { ...defaultRequestOptions, ...options }))
@@ -230,8 +234,4 @@ export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res
   return function () {
     hub.off(methodName, _cb)
   }
-}
-
-export const defaultRequestOptions = {
-  UseGzip: true,
 }

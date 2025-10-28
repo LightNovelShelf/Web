@@ -4,7 +4,7 @@ import type * as Types from './types'
 
 /** 获取章节内容信息 */
 export function getChapterContent(request: Types.GetChapterContentRequest) {
-  return requestWithSignalr('GetChapterContentBinary', request)
+  return requestWithSignalr('GetChapterContent', request)
 }
 
 export function editChapterContent(request: Types.EditChapterContentRequest) {
@@ -19,7 +19,7 @@ export function createNewChapter(request: Types.EditChapterContentRequest) {
   return requestWithSignalr('CreateNewChapter', request)
 }
 
-export function deleteChapter(request: Types.DeleteChapterRequest) {
+export function deleteChapter(request: Types.EditChapterContentRequest) {
   return requestWithSignalr('DeleteChapter', request)
 }
 
