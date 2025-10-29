@@ -170,8 +170,8 @@ import {
   changeChapterSort,
   createNewChapter,
   deleteChapter,
-  editChapterContent,
-  getChapterEditInfo,
+  updateNovelChapter,
+  getNovelEditInfo,
 } from 'src/services/chapter'
 
 import type { BookServicesTypes } from 'src/services/book'
@@ -230,7 +230,7 @@ watch(
       return
     }
     chapter.value = { Title: '加载中...', Content: '加载中...' }
-    chapter.value = await getChapterEditInfo({ BookId: _bid.value, Cid: _cid.value })
+    chapter.value = await getNovelEditInfo({ Bid: _bid.value, Cid: _cid.value })
     chapterLoaded.value = true
   },
 )
@@ -283,7 +283,7 @@ async function saveInfo() {
     cancel: true,
   }).onOk(async () => {
     try {
-      await editBook(toRaw(book.value))
+      await editBook(_bid.value, toRaw(book.value))
 
       $q.notify({
         type: 'positive',
@@ -305,7 +305,7 @@ async function saveChapter() {
     cancel: true,
   }).onOk(async () => {
     try {
-      await editChapterContent(toRaw(chapter.value))
+      await updateNovelChapter({ Cid: _cid.value, Map: toRaw(chapter.value) })
 
       $q.notify({
         type: 'positive',

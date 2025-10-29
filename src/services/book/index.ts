@@ -7,7 +7,7 @@ export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */
 export function getBookList(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookListBinary', param)
+  return requestWithSignalr<Types.GetBookListRes>('GetBookList', param)
 }
 /** 获取书籍信息 */
 export function getBookInfo(id: number) {
@@ -65,5 +65,5 @@ export function setBookSetting(request: Types.SetBookSetting) {
 }
 
 export function getBookSetting(bid: number) {
-  return requestWithSignalr('GetBookSetting', { Id: bid })
+  return requestWithSignalr('GetBookSettings', { Id: bid })
 }

@@ -4,32 +4,32 @@ export interface GetNovelContentRequest {
   Convert?: 't2s' | 's2t' | null | undefined
 }
 
-interface GetChapterEditInfoBySortNum {
+interface GetNovelEditInfoBySortNum {
   Bid?: number
   SortNum?: number
 }
 
-interface GetChapterEditInfoByCid {
+interface GetNovelEditInfoByCid {
   Cid?: number
 }
 
-export type GetChapterEditInfo = GetChapterEditInfoBySortNum | GetChapterEditInfoByCid
+export type GetNovelEditInfo = GetNovelEditInfoBySortNum | GetNovelEditInfoByCid
 
-interface EditChapterContentRequestBySortNum extends GetChapterEditInfoBySortNum {
+interface UpdateNovelChapterRequestBySortNum extends GetNovelEditInfoBySortNum {
   Map?: {
     Content?: string
     Title?: string
   }
 }
 
-interface EditChapterContentRequestByCid extends GetChapterEditInfoByCid {
+interface UpdateNovelChapterRequestByCid extends GetNovelEditInfoByCid {
   Map?: {
     Content?: string
     Title?: string
   }
 }
 
-export type EditChapterContentRequest = EditChapterContentRequestBySortNum | EditChapterContentRequestByCid
+export type UpdateNovelChapterRequest = UpdateNovelChapterRequestBySortNum | UpdateNovelChapterRequestByCid
 
 export interface ChangeChapterSortRequest {
   BookId: number

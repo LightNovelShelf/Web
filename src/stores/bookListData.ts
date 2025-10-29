@@ -39,7 +39,7 @@ class INVALID_BOOK implements BookInList {
   constructor(public readonly Id = -1) {}
   public readonly Title = '无效书籍'
   // public readonly Cover = '/img/bg-paper-dark.jpeg'
-  public readonly Cover = 'https://proxy.lightnovel.app/file/ddc5fbc993a81e7d25e77.png'
+  public readonly Cover = 'https://p.lightnovel.life/file/ddc5fbc993a81e7d25e77.png'
   public readonly LastUpdatedAt = new Date(-1)
   public readonly UserName = ''
   public readonly Level = 0

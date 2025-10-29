@@ -7,19 +7,19 @@ export function getNovelContent(request: Types.GetNovelContentRequest) {
   return requestWithSignalr('GetNovelContent', request)
 }
 
-export function editChapterContent(request: Types.EditChapterContentRequest) {
-  return requestWithSignalr('EditChapterContent', request)
+export function updateNovelChapter(request: Types.UpdateNovelChapterRequest) {
+  return requestWithSignalr('UpdateNovelChapter', request)
 }
 
-export function getChapterEditInfo(request: Types.EditChapterContentRequest) {
-  return requestWithSignalr('GetChapterEditInfo', request)
+export function getNovelEditInfo(request: Types.UpdateNovelChapterRequest) {
+  return requestWithSignalr('GetNovelEditInfo', request)
 }
 
-export function createNewChapter(request: Types.EditChapterContentRequest) {
+export function createNewChapter(request: Types.UpdateNovelChapterRequest) {
   return requestWithSignalr('CreateNewChapter', request)
 }
 
-export function deleteChapter(request: Types.EditChapterContentRequest) {
+export function deleteChapter(request: Types.UpdateNovelChapterRequest) {
   return requestWithSignalr('DeleteChapter', request)
 }
 
