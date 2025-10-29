@@ -3,8 +3,8 @@ import { requestWithSignalr } from 'src/services/internal/request'
 import type * as Types from './types'
 
 /** 获取章节内容信息 */
-export function getChapterContent(request: Types.GetChapterContentRequest) {
-  return requestWithSignalr('GetChapterContent', request)
+export function getNovelContent(request: Types.GetNovelContentRequest) {
+  return requestWithSignalr('GetNovelContent', request)
 }
 
 export function editChapterContent(request: Types.EditChapterContentRequest) {

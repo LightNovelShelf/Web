@@ -1,4 +1,4 @@
-export interface GetChapterContentRequest {
+export interface GetNovelContentRequest {
   Bid: number
   SortNum: number
   Convert?: 't2s' | 's2t' | null | undefined

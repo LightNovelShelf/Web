@@ -19,9 +19,9 @@
                     </div>
                   </div>
                 </div>
-                <!-- <template v-if="book.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
-                  <blur-hash :blurhash="book.Placeholder" />
-                </template> -->
+                <template v-if="placeholder && generalSetting.enableBlurHash" v-slot:loading>
+                  <blur-hash :blurhash="placeholder" />
+                </template>
               </q-img>
               <q-responsive v-else :ratio="2 / 3">
                 <q-skeleton class="fit" square />
@@ -119,6 +119,7 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { userReadPositionDB } from 'src/utils/storage/db'
 import { parseTime } from 'src/utils/time'
+import { getPlaceholder } from 'src/utils/url'
 
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
@@ -198,6 +199,7 @@ const bookInList = computed<BookInList | null>(() =>
     : null,
 )
 const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdatedAt)
+const placeholder = computed(() => getPlaceholder(book.value?.Cover))
 const lastReadTitle = computed(() => {
   if (position.value && position.value?.cid) {
     const chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)
