@@ -65,13 +65,14 @@ export interface SaveReadPositionRequest {
 }
 
 export interface EditBookRequest {
-  Bid: number
-  Cover: string
-  Title: string
-  Author: string
-  Introduction: string
+  Cover?: string
+  Title?: string
+  Author?: string
+  Introduction?: string
   // 分类ID
-  CategoryId: number
+  CategoryId?: number
+  Level?: number
+  InteriorLevel?: number
 }
 
 export interface SetBookSetting {

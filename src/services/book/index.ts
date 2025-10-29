@@ -58,12 +58,3 @@ export function getBookEditInfo(bid: number) {
 export function deleteBook(bid: number) {
   return requestWithSignalr('DeleteBook', { Id: bid })
 }
-
-/** 设置书籍 */
-export function setBookSetting(request: Types.SetBookSetting) {
-  return requestWithSignalr('SetBookSetting', request)
-}
-
-export function getBookSetting(bid: number) {
-  return requestWithSignalr('GetBookSettings', { Id: bid })
-}

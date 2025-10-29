@@ -15,8 +15,8 @@ export function getNovelEditInfo(request: Types.UpdateNovelChapterRequest) {
   return requestWithSignalr('GetNovelEditInfo', request)
 }
 
-export function createNewChapter(request: Types.UpdateNovelChapterRequest) {
-  return requestWithSignalr('CreateNewChapter', request)
+export function createNewNovelChapter(request: Types.UpdateNovelChapterRequest) {
+  return requestWithSignalr('CreateNewNovelChapter', request)
 }
 
 export function deleteChapter(request: Types.UpdateNovelChapterRequest) {

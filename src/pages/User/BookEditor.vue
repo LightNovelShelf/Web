@@ -165,10 +165,10 @@ import { QGrid, QGridItem } from 'components/grid'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
-import { editBook, getBookEditInfo, getBookSetting, setBookSetting } from 'src/services/book'
+import { editBook, getBookEditInfo } from 'src/services/book'
 import {
   changeChapterSort,
-  createNewChapter,
+  createNewNovelChapter,
   deleteChapter,
   updateNovelChapter,
   getNovelEditInfo,
@@ -263,7 +263,7 @@ async function save() {
 
 async function saveSetting() {
   try {
-    await setBookSetting({ Bid: _bid.value, Settings: toRaw(bookSetting) })
+    await editBook(_bid.value, toRaw(bookSetting))
     $q.notify({
       type: 'positive',
       message: '设置成功',
@@ -352,7 +352,7 @@ async function delChapter(sortNum: number) {
     cancel: true,
   }).onOk(async () => {
     try {
-      const resp: ChapterInfo[] = <any>await deleteChapter({ BookId: _bid.value, SortNum: sortNum })
+      const resp: ChapterInfo[] = <any>await deleteChapter({ Bid: _bid.value, SortNum: sortNum })
       if (chapters.value[sortNum - 1].Id === _cid.value) tab.value = 'information'
       chapters.value = resp
       $q.notify({
@@ -393,11 +393,13 @@ async function createChapter() {
     }
 
     async function inner() {
-      const { Chapters: resp, NewCid: cid } = <any>await createNewChapter({
-        BookId: _bid.value,
+      const { Chapters: resp, NewCid: cid } = <any>await createNewNovelChapter({
+        Bid: _bid.value,
         SortNum: sort,
-        Content: creatingChapterContent.html,
-        Title: creatingChapterContent.title,
+        Map: {
+          Content: creatingChapterContent.html,
+          Title: creatingChapterContent.title,
+        },
       })
       $q.notify({
         type: 'positive',
@@ -454,12 +456,12 @@ const request = useTimeoutFn(async () => {
     })
     chapters.value = <ChapterInfo[]>data.Book.Chapters
     book.value = data.Book
+
+    bookSetting.Level = data.Book.Level
+    bookSetting.InteriorLevel = data.Book.InteriorLevel
   })
-  const p2 = getBookSetting(_bid.value).then((setting: Record<string, any>) => {
-    bookSetting.Level = setting.Level
-    bookSetting.InteriorLevel = setting.InteriorLevel
-  })
-  await Promise.all([p1, p2])
+
+  await Promise.all([p1])
 })
 
 const refresh = () => {
