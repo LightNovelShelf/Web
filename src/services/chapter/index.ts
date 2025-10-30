@@ -23,6 +23,6 @@ export function deleteChapter(request: Types.UpdateNovelChapterRequest) {
   return requestWithSignalr('DeleteChapter', request)
 }
 
-export function changeChapterSort(request: Types.ChangeChapterSortRequest) {
-  return requestWithSignalr('ChangeChapterSort', request)
+export function reorderChapter(request: Types.ReorderChapterRequest) {
+  return requestWithSignalr('ReorderChapter', request)
 }

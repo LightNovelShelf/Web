@@ -167,7 +167,7 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { editBook, getBookEditInfo } from 'src/services/book'
 import {
-  changeChapterSort,
+  reorderChapter,
   createNewNovelChapter,
   deleteChapter,
   updateNovelChapter,
@@ -430,7 +430,7 @@ async function handleChange(evt) {
   const newSort = newIndex + 1
 
   try {
-    const changedList = await changeChapterSort({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
+    const changedList = await reorderChapter({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
     chapters.value = <ChapterInfo[]>changedList
   } catch (e) {
     $q.notify({

@@ -31,7 +31,7 @@ interface UpdateNovelChapterRequestByCid extends GetNovelEditInfoByCid {
 
 export type UpdateNovelChapterRequest = UpdateNovelChapterRequestBySortNum | UpdateNovelChapterRequestByCid
 
-export interface ChangeChapterSortRequest {
+export interface ReorderChapterRequest {
   BookId: number
   OldSortNum: number
   NewSortNum: number

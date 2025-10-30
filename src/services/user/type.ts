@@ -58,7 +58,5 @@ export namespace UploadImage {
     FileName: string
     ImageData: Uint8Array
   }
-  export interface Response {
-    Url: string
-  }
+  export type Response = string
 }

@@ -157,8 +157,8 @@ const getInfo = useTimeoutFn(async () => {
     const temp = bookInfo.value.ReadPosition
     if (temp) {
       position.value = {
-        cid: temp.Cid,
-        xPath: temp.XPath,
+        cid: temp.ChapterId,
+        xPath: temp.Position,
       }
       userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
     }
