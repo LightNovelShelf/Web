@@ -127,12 +127,12 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { deleteBook } from 'src/services/book'
 import { PATH } from 'src/services/path'
-import { getMyBooks, quickCreateBook } from 'src/services/user'
+import { getMyBooks, quickCreateNovel } from 'src/services/user'
 import { getSessionToken } from 'src/services/utils'
 
 import type { QUploaderFactoryFn } from 'quasar'
 import type { BookInList } from 'src/services/book/types'
-import type { QuickCreateBook } from 'src/services/user/type'
+import type { QuickCreateNovel } from 'src/services/user/type'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -195,10 +195,10 @@ const categoryOptions = ref([
     value: 8,
   },
 ])
-const createBookData = reactive<QuickCreateBook.Request>({
+const createBookData = reactive<QuickCreateNovel.Request>({
   Cover: '',
   Title: '',
-  Count: 10,
+  Count: 5,
   Author: '',
   Introduction: '',
   CategoryId: 1,
@@ -249,7 +249,7 @@ async function createBook() {
       Count: ~~createBookData.Count,
       Introduction: createBookData.Introduction.replace(/^([\s\S]*?)$/gm, '<p>$1</p>'),
     }
-    const bid = await quickCreateBook(request)
+    const bid = await quickCreateNovel(request)
     $q.notify({
       type: 'positive',
       message: '创建成功',

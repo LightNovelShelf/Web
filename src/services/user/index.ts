@@ -135,8 +135,8 @@ export async function getMyBooks(req: Types.GetMyBooks.Request) {
 }
 
 /** 快速新建书籍，返回新建的书籍id */
-export async function quickCreateBook(req: Types.QuickCreateBook.Request) {
-  return requestWithSignalr<Types.QuickCreateBook.Response>('QuickCreateBook', req)
+export async function quickCreateNovel(req: Types.QuickCreateNovel.Request) {
+  return requestWithSignalr<Types.QuickCreateNovel.Response>('QuickCreateNovel', req)
 }
 
 /** 上传图片，返回图片链接 */
