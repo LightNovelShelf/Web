@@ -49,7 +49,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@electron/packager": "^19.0.1",
+    "@electron/packager": "^18.4.4",
     "@eslint/js": "^9.38.0",
     "@quasar/app-vite": "^2.4.0",
     "@types/lodash.isequal": "^4.5.8",
