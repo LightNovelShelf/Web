@@ -1,38 +1,37 @@
-export interface GetChapterContentRequest {
+export interface GetNovelContentRequest {
   Bid: number
   SortNum: number
   Convert?: 't2s' | 's2t' | null | undefined
 }
 
-interface GetChapterEditInfoBySortNum {
-  BookId?: number
+interface GetNovelEditInfoBySortNum {
+  Bid?: number
   SortNum?: number
 }
 
-interface GetChapterEditInfoByCid {
+interface GetNovelEditInfoByCid {
   Cid?: number
 }
 
-export type GetChapterEditInfo = GetChapterEditInfoBySortNum | GetChapterEditInfoByCid
+export type GetNovelEditInfo = GetNovelEditInfoBySortNum | GetNovelEditInfoByCid
 
-interface EditChapterContentRequestBySortNum extends GetChapterEditInfoBySortNum {
-  Content?: string
-  Title?: string
+interface UpdateNovelChapterRequestBySortNum extends GetNovelEditInfoBySortNum {
+  Map?: {
+    Content?: string
+    Title?: string
+  }
 }
 
-interface EditChapterContentRequestByCid extends GetChapterEditInfoByCid {
-  Content?: string
-  Title?: string
+interface UpdateNovelChapterRequestByCid extends GetNovelEditInfoByCid {
+  Map?: {
+    Content?: string
+    Title?: string
+  }
 }
 
-export type EditChapterContentRequest = EditChapterContentRequestBySortNum | EditChapterContentRequestByCid
+export type UpdateNovelChapterRequest = UpdateNovelChapterRequestBySortNum | UpdateNovelChapterRequestByCid
 
-export interface DeleteChapterRequest {
-  BookId: number
-  SortNum: number
-}
-
-export interface ChangeChapterSortRequest {
+export interface ReorderChapterRequest {
   BookId: number
   OldSortNum: number
   NewSortNum: number

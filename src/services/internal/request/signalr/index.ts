@@ -205,9 +205,13 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
   }
 }
 
+const defaultRequestOptions = {
+  UseGzip: true,
+}
+
 /** 速率限制后的请求句柄 */
-const requestWithSignalrInRateLimit = ((...args) => {
-  return queue.add(() => requestWithSignalr(...args))
+const requestWithSignalrInRateLimit = ((methodName: string, params: object, options: object) => {
+  return queue.add(() => requestWithSignalr(methodName, params, { ...defaultRequestOptions, ...options }))
 }) as typeof requestWithSignalr
 
 export { requestWithSignalrInRateLimit as requestWithSignalr }

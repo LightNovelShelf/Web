@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import TurndownService from '@joplin/turndown'
 import { gfm } from '@joplin/turndown-plugin-gfm'
-import { MdEditor, NormalToolbar   } from 'md-editor-v3'
+import { MdEditor, NormalToolbar } from 'md-editor-v3'
 import { useQuasar } from 'quasar'
 import { ref, watch } from 'vue'
 
@@ -44,7 +44,7 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import { uploadImage } from 'src/services/user'
 
-import type {ToolbarNames, ExposeParam} from 'md-editor-v3';
+import type { ToolbarNames, ExposeParam } from 'md-editor-v3'
 
 import 'cropperjs/dist/cropper.css'
 import 'md-editor-v3/lib/style.css'
@@ -133,7 +133,7 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
   const urls: string[] = []
   for (const file of files) {
     const res = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
-    urls.push(res.Url)
+    urls.push(res)
     notif({
       caption: `${urls.length}/${files.length}`,
     })

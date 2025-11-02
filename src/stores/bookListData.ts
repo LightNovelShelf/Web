@@ -28,7 +28,7 @@ class EMPTY_BOOK implements BookInList {
   public readonly Title = ''
   // public readonly Cover = '/img/bg-paper-dark.jpeg'
   public readonly Cover = ''
-  public readonly LastUpdateTime = new Date(-1)
+  public readonly LastUpdatedAt = new Date(-1)
   public readonly UserName = ''
   public readonly Level = 0
   public readonly InteriorLevel = 0
@@ -39,8 +39,8 @@ class INVALID_BOOK implements BookInList {
   constructor(public readonly Id = -1) {}
   public readonly Title = '无效书籍'
   // public readonly Cover = '/img/bg-paper-dark.jpeg'
-  public readonly Cover = 'https://proxy.lightnovel.app/file/ddc5fbc993a81e7d25e77.png'
-  public readonly LastUpdateTime = new Date(1)
+  public readonly Cover = 'https://p.lightnovel.life/file/ddc5fbc993a81e7d25e77.png'
+  public readonly LastUpdatedAt = new Date(-1)
   public readonly UserName = ''
   public readonly Level = 0
   public readonly InteriorLevel = 0
@@ -129,7 +129,7 @@ export const useBookListStore = defineStore('app.bookList', {
         const ids = booksGroups[i]
         const books = res[i]
         for (let j = 0; j < ids.length; j++) {
-          const book = books.find((b) => b.Id === ids[j]) ?? new INVALID_BOOK(ids[j])
+          const book = books.find((b) => b?.Id === ids[j]) ?? new INVALID_BOOK(ids[j])
           this.books.set(book.Id, book)
         }
       }

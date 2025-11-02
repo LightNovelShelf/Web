@@ -13,7 +13,7 @@ export namespace PostComment {
   }
 }
 
-export namespace GetComment {
+export namespace GetComments {
   export interface Request {
     Type: CommentType
     Id: number

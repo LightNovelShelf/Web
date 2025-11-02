@@ -3,9 +3,8 @@ import type { ListResult } from '../types'
 export interface BookInList {
   Id: number
   Cover: string
-  Placeholder?: string
   // TODO: 走了二进制解码后自动转Date对象的特性丢失了，就是一个ISO 8601的日期
-  LastUpdateTime: Date
+  LastUpdatedAt: Date
   UserName: string
   Title: string
   Level?: number
@@ -18,10 +17,12 @@ export interface BookInList {
 }
 
 export interface GetBookListRes extends ListResult<BookInList> {}
+
 interface ChapterInfo {
   Title: string
   Id: number
 }
+
 export interface GetBookInfoRes {
   Book: {
     Arthur: string
@@ -29,14 +30,13 @@ export interface GetBookInfoRes {
     Chapter: ChapterInfo[]
     Id: number
     Cover: string
-    Placeholder?: string
     ExtraInfo: any
     Introduction: string
     Author: string
-    LastUpdate: string
-    LastUpdateTime: Date
-    CreatedTime: Date
-    Likes: number
+    LastUpdatedChapter: string
+    LastUpdatedAt: Date
+    CreatedAt: Date
+    Favorite: number
     Title: string
     CanEdit: boolean
     User: {
@@ -65,13 +65,14 @@ export interface SaveReadPositionRequest {
 }
 
 export interface EditBookRequest {
-  Bid: number
-  Cover: string
-  Title: string
-  Author: string
-  Introduction: string
+  Cover?: string
+  Title?: string
+  Author?: string
+  Introduction?: string
   // 分类ID
-  CategoryId: number
+  CategoryId?: number
+  Level?: number
+  InteriorLevel?: number
 }
 
 export interface SetBookSetting {

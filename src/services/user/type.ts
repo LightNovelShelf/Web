@@ -40,12 +40,12 @@ export namespace GetMyBooks {
   export type Response = GetBookListRes
 }
 
-export namespace QuickCreateBook {
+export namespace QuickCreateNovel {
   export interface Request {
-    Title: string
-    Author: string
     // 章节数量
     Count: number
+    Title: string
+    Author: string
     Cover: string
     Introduction: string
     CategoryId: number
@@ -58,7 +58,5 @@ export namespace UploadImage {
     FileName: string
     ImageData: Uint8Array
   }
-  export interface Response {
-    Url: string
-  }
+  export type Response = string
 }

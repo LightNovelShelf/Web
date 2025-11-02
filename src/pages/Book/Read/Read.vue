@@ -145,7 +145,7 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { NOOP } from 'src/const/empty'
 import { PROVIDE } from 'src/const/provide'
 import { apiServer } from 'src/services/apiServer'
-import { getChapterContent } from 'src/services/chapter'
+import { getNovelContent } from 'src/services/chapter'
 
 import { syncReading, scrollToHistory, loadHistory } from './history'
 
@@ -181,7 +181,7 @@ const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
 
 const getContent = useTimeoutFn(async () => {
   try {
-    const res: any = await getChapterContent({
+    const res: any = await getNovelContent({
       Bid: bid.value,
       SortNum: sortNum.value,
       Convert: settingStore.readSetting.convert,
@@ -193,10 +193,10 @@ const getContent = useTimeoutFn(async () => {
       timeout: 1500,
     })
     ;(async () => {
-      if (res.ReadPosition && res.ReadPosition.Cid === res.Chapter.Id) {
+      if (res.ReadPosition && res.ReadPosition.ChapterId === res.Chapter.Id) {
         await delay(200)
         await nextTick(() => {
-          scrollToHistory(readerRef.value!.contentRef, res.ReadPosition.XPath, headerOffset)
+          scrollToHistory(readerRef.value!.contentRef, res.ReadPosition.Position, headerOffset)
         })
       }
     })().then(NOOP)

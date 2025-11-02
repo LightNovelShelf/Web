@@ -35,7 +35,7 @@ import { HtmlEditor, DragPageSticky } from 'components'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
-import { getChapterEditInfo, editChapterContent } from 'src/services/chapter'
+import { getNovelEditInfo, updateNovelChapter } from 'src/services/chapter'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)
@@ -45,7 +45,7 @@ const chapter = ref<any>()
 const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.value?.SortNum === sortNum.value)
 
 const request = useTimeoutFn(async () => {
-  chapter.value = await getChapterEditInfo({ BookId: bid.value, SortNum: sortNum.value })
+  chapter.value = await getNovelEditInfo({ Bid: bid.value, SortNum: sortNum.value })
 })
 
 const $q = useQuasar()
@@ -57,7 +57,7 @@ async function save() {
     cancel: true,
   }).onOk(async () => {
     try {
-      await editChapterContent(toRaw(chapter.value))
+      await updateNovelChapter({ Cid: chapter.value.Id, Map: toRaw(chapter.value) })
 
       $q.notify({
         type: 'positive',
