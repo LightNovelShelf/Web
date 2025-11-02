@@ -57,7 +57,7 @@
               </q-item-label>
               <q-item-label caption>
                 <div class="row flex-align-center q-gutter-x-md">
-                  <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedTime) }}</div>
+                  <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedAt) }}</div>
                   <div>
                     <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
                     <q-btn flat dense v-if="comment.Commentaries[`${item.Id}`].CanEdit" @click="_delete(item.Id)">
@@ -108,7 +108,7 @@
                         </q-item-label>
                         <q-item-label caption>
                           <div class="row flex-align-center q-gutter-x-md">
-                            <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedTime) }}</div>
+                            <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedAt) }}</div>
                             <div>
                               <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
                               <q-btn
