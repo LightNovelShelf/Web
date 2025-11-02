@@ -52,7 +52,7 @@ export async function getMyInfo() {
 
 /** 获取用户阅读历史 */
 export async function getReadHistory() {
-  return requestWithSignalr<[]>('GetReadHistory')
+  return requestWithSignalr<{ Novel: number[]; Comic: number[] }>('GetReadHistory')
 }
 
 export async function sendResetEmail(email: string, token: string) {
