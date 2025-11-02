@@ -121,7 +121,7 @@ export async function getBookShelfBinary() {
 
 /** 清空用户历史记录 */
 export async function clearHistory() {
-  return requestWithSignalr('ClearHistory')
+  return requestWithSignalr('ClearReadHistory')
 }
 
 /** 设置头像 */
