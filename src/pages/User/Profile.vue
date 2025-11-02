@@ -160,8 +160,8 @@ const profileListOptions: Array<Record<string, any>> = reactive([
   },
   {
     label: '注册时间',
-    key: 'RegisterTime',
-    value: (u) => (u?.RegisterTime ? parseTime(u.RegisterTime).format('YYYY-MM-DD') : null),
+    key: 'RegisterAt',
+    value: (u) => (u?.RegisterAt ? parseTime(u.RegisterAt).format('YYYY-MM-DD') : null),
     icon: 'mdiCalendarRangeOutline',
   },
 ])

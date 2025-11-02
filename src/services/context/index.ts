@@ -13,7 +13,7 @@ export function getOnlineInfo() {
 }
 
 export function getAnnouncementList(request: GetAnnouncementList.Request) {
-  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementListBinary', request)
+  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementList', request)
 }
 
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
@@ -21,5 +21,5 @@ export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
 }
 
 export function getBanInfoList() {
-  return requestWithSignalr('GetBanInfoList')
+  return requestWithSignalr('GetBanList')
 }

@@ -89,7 +89,7 @@ async function save() {
     cancel: true,
   }).onOk(async () => {
     try {
-      await editBook(toRaw(book.value))
+      await editBook(bid.value, toRaw(book.value))
 
       $q.notify({
         type: 'positive',

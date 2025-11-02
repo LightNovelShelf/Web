@@ -200,15 +200,15 @@ import { useAppStore } from 'stores/app'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
-import { postComment, replyComment, getComment, deleteComment } from 'src/services/comment'
+import { postComment, replyComment, getComments, deleteComment } from 'src/services/comment'
 
-import type { CommentType, GetComment } from 'src/services/comment/types'
+import type { CommentType, GetComments } from 'src/services/comment/types'
 
 const props = defineProps<{ type: CommentType; id: number }>()
 const $q = useQuasar()
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
-const comment = ref<GetComment.Response>()
+const comment = ref<GetComments.Response>()
 
 const isActive = computed(
   () =>
@@ -225,7 +225,7 @@ const parentId = ref<number>()
 const replyId = ref<number>()
 
 const request = async () => {
-  comment.value = await getComment({ Type: props.type, Id: props.id, Page: currentPage.value })
+  comment.value = await getComments({ Type: props.type, Id: props.id, Page: currentPage.value })
   posting.value = false
 }
 

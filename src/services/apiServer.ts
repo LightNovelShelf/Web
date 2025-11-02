@@ -11,12 +11,12 @@ const apiServerOptions = [
 if (process.env.DEV) {
   apiServerOptions.unshift({
     label: '开发服务器',
-    value: 'http://localhost:5000',
+    value: 'http://localhost:5204',
   })
 }
 
 const apiServer = useStorage(
-  (process.env.VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V5',
+  (process.env.VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V6',
   apiServerOptions[0].value,
 )
 
