@@ -12,8 +12,8 @@
                 :src="item.Cover"
                 :ratio="2 / 3"
               >
-                <template v-if="item.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
-                  <blur-hash :blurhash="item.Placeholder" />
+                <template v-if="getPlaceholder(item.Cover) && generalSetting.enableBlurHash" v-slot:loading>
+                  <blur-hash :blurhash="getPlaceholder(item.Cover)" />
                 </template>
               </q-img>
             </div>
@@ -40,6 +40,8 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+
+import { getPlaceholder } from 'src/utils/url'
 
 import { useBookListStore } from 'stores/bookListData'
 import { useSettingStore } from 'stores/setting'
