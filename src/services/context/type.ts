@@ -10,7 +10,7 @@ export interface OnlineInfo {
 export interface Announcement {
   Id: number
   Title: string
-  CreateTime: Date | string
+  CreatedAt: Date | string
   Content: string
 }
 

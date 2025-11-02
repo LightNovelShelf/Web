@@ -82,7 +82,7 @@
                   v-ripple
                 >
                   <q-item-section>
-                    [{{ announcement.Create.format('YYYY-MM-DD') }}] {{ announcement.Title }}
+                    [{{ announcement.CreatedAt.format('YYYY-MM-DD') }}] {{ announcement.Title }}
                   </q-item-section>
                 </q-item>
               </q-list>

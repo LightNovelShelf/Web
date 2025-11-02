@@ -3,7 +3,7 @@
     <q-card>
       <q-card-section>
         <div v-if="isActive" class="text-h6">
-          [{{ announcement.Create.format('YYYY-MM-DD') }}] {{ announcement.Title }}
+          [{{ announcement.CreatedAt.format('YYYY-MM-DD') }}] {{ announcement.Title }}
         </div>
       </q-card-section>
 
