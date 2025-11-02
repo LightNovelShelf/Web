@@ -97,7 +97,7 @@ const requestHistory = useTimeoutFn(async () => {
   await getReadHistory()
     .then((res) => {
       if (res) {
-        history.value = res
+        history.value = res.Novel
         scroll.value.resume()
         scroll.value.poll()
       }
