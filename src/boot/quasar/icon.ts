@@ -25,6 +25,7 @@ export {
   mdiAccountCircle,
   mdiAccountOutline,
   mdiEmail,
+  mdiEmailOutline,
   mdiLock,
   mdiSend,
   mdiEye,

@@ -22,7 +22,7 @@
         >
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              [{{ announcement.Create.format('YYYY-MM-DD') }}] {{ announcement.Title }}
+              [{{ announcement.CreatedAt.format('YYYY-MM-DD') }}] {{ announcement.Title }}
             </q-item-label>
             <q-item-label caption>
               {{ announcement.PreviewContent }}

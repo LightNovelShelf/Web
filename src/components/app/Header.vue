@@ -41,14 +41,16 @@
 
       <div class="q-gutter-sm row items-center no-wrap">
         <q-btn v-if="$q.screen.gt.xs" round dense flat>
-          <!-- <q-badge color="red" floating> 22 </q-badge>-->
+          <!-- <q-badge color="red" floating> 1 </q-badge> -->
           <q-tooltip>通知</q-tooltip>
           <q-icon name="mdiBell"></q-icon>
         </q-btn>
 
-        <q-btn v-if="$q.screen.gt.xs" round dense flat>
-          <!-- <q-badge color="red" floating> 99+ </q-badge>-->
-          <q-tooltip>通知</q-tooltip>
+        <q-btn v-if="$q.screen.gt.xs" round dense flat @click="goToNotification">
+          <q-badge v-if="user && user.UnreadNotificationCount > 0" color="red" floating>
+            {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
+          </q-badge>
+          <q-tooltip>消息</q-tooltip>
           <q-icon name="mdiMessageText"></q-icon>
         </q-btn>
 
@@ -250,6 +252,9 @@ function onSearch(keywords: string, exact: boolean) {
 }
 function changAppName() {
   appStore.asyncReverse()
+}
+function goToNotification() {
+  router.push({ name: 'Notification' })
 }
 function logout() {
   $q.dialog({
