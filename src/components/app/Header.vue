@@ -46,7 +46,7 @@
           <q-icon name="mdiBell"></q-icon>
         </q-btn>
 
-        <q-btn v-if="$q.screen.gt.xs" round dense flat @click="goToNotification">
+        <q-btn round dense flat @click="goToNotification">
           <q-badge v-if="user && user.UnreadNotificationCount > 0" color="red" floating>
             {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
           </q-badge>
