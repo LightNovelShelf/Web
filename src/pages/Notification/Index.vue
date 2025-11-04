@@ -156,7 +156,7 @@ const router = useRouter()
 const appStore = useAppStore()
 const notifications = ref<GetNotifications.Notification[]>([])
 const currentPage = ref(1)
-const totalPages = ref(1)
+const totalPages = ref(0)
 const pageSize = 20
 const loading = ref(false)
 const infiniteScroll = ref()
@@ -186,12 +186,6 @@ const loadNotifications = async (page: number) => {
 
 // 滚动加载
 const onLoad = async (index: number, done: () => void) => {
-  if (index > totalPages.value) {
-    infiniteScroll.value?.stop()
-    done()
-    return
-  }
-
   const result = await loadNotifications(index)
 
   if (index === 1) {
