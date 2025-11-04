@@ -41,6 +41,7 @@ $tooltip-mobile-fontsize: 10px !default;
 }
 
 .q-badge--floating {
+  z-index: 1;
   right: unset !important;
   left: 100% !important;
   transform: translateX(-50%);

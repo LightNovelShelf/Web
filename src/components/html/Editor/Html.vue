@@ -6,8 +6,8 @@
       :toolbar="toolbar"
       v-model="htmlContent"
       :definitions="definitions"
-      @compositionstart="composing = true"
-      @compositionend="composing = false"
+      @compositionstart="onCompositionStart"
+      @compositionend="onCompositionEnd"
     />
   </div>
 </template>
@@ -40,6 +40,14 @@ const htmlContent = computed<string>({
 })
 
 let composing = false
+
+function onCompositionStart() {
+  composing = true
+}
+
+function onCompositionEnd() {
+  composing = false
+}
 let history = []
 let historyIndex = -1
 const setHistory = debounce((newValue) => {
