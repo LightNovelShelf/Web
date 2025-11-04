@@ -46,7 +46,7 @@
           <q-icon name="mdiBell"></q-icon>
         </q-btn>
 
-        <q-btn v-if="$q.screen.gt.xs" round dense flat>
+        <q-btn v-if="$q.screen.gt.xs" round dense flat @click="goToNotification">
           <q-badge v-if="user && user.UnreadNotificationCount > 0" color="red" floating>
             {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
           </q-badge>
@@ -252,6 +252,9 @@ function onSearch(keywords: string, exact: boolean) {
 }
 function changAppName() {
   appStore.asyncReverse()
+}
+function goToNotification() {
+  router.push({ name: 'Notification' })
 }
 function logout() {
   $q.dialog({

@@ -133,4 +133,5 @@ Use `@typescript-eslint/consistent-type-imports` - prefer `import type` for type
 
 ### 其他项目指南
 
-- 运行项目使用 `npm run dev` 命令，默认端口是9000
+- 运行项目使用 `npm run dev` 命令，默认端口是 9000
+- 项目已有时间格式化工具 `toNow(parseTime(timeString))` 在 `time.ts`，不要重复实现时间格式化逻辑。

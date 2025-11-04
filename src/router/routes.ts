@@ -134,6 +134,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/History.vue'),
   },
   {
+    path: '/notification',
+    name: 'Notification',
+    meta: { requiresAuth: true },
+    component: () => import('../pages/Notification/Index.vue'),
+  },
+  {
     /** @query {{ keywords?: string, exact?: string }} */
     path: '/search/result',
     name: 'Search',
