@@ -143,3 +143,13 @@ export async function quickCreateNovel(req: Types.QuickCreateNovel.Request) {
 export async function uploadImage(req: Types.UploadImage.Request) {
   return requestWithSignalr<Types.UploadImage.Response>('UploadImage', req)
 }
+
+/** 获取通知列表 */
+export async function getNotifications(req: Types.GetNotifications.Request) {
+  return requestWithSignalr<Types.GetNotifications.Response>('GetNotifications', req)
+}
+
+/** 标记通知为已读 */
+export async function markNotifications(req: Types.MarkNotifications.Request) {
+  return requestWithSignalr<Types.MarkNotifications.Response>('MarkNotifications', req)
+}

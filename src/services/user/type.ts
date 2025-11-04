@@ -60,3 +60,39 @@ export namespace UploadImage {
   }
   export type Response = string
 }
+
+export namespace GetNotifications {
+  export interface Request {
+    Page: number
+    Size: number
+  }
+
+  export interface Response {
+    TotalPages: number
+    Page: number
+    Data: Notification[]
+  }
+
+  export interface Notification {
+    Id: number
+    Actor: {
+      Id: number
+      UserName: string
+      Avatar: string
+    }
+    Type: string
+    ObjectType: string
+    ObjectId: number
+    IsRead: boolean
+    CreatedAt: string
+    Extra: Record<string, any>
+  }
+}
+
+export namespace MarkNotifications {
+  export interface Request {
+    Ids: number[]
+  }
+
+  export type Response = void
+}
