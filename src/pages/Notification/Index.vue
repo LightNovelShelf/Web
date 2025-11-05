@@ -2,8 +2,9 @@
   <q-page padding>
     <div class="notification-page">
       <!-- 标题栏 -->
-      <div class="page-header q-mb-md">
-        <div class="text-h5 text-weight-medium">消息中心</div>
+      <div class="q-mb-md">
+        <div class="text-h5 text-weight-medium q-mb-sm">消息中心</div>
+        <q-separator />
       </div>
 
       <!-- 消息列表 -->
@@ -238,9 +239,6 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
         params: { id: notification.ObjectId },
       })
     }
-    // 可以扩展其他类型的通知跳转
-    // else if (notification.Type === 'Like') { ... }
-    // else if (notification.Type === 'Follow') { ... }
   }
 }
 
@@ -268,11 +266,6 @@ const markAllAsRead = async () => {
 .notification-page {
   max-width: 900px;
   margin: 0 auto;
-}
-
-.page-header {
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .notification-item {
