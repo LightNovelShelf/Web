@@ -25,18 +25,18 @@ A multi-platform online novel reading application built with **Quasar (Vue 3 + T
 - Settings persisted to IndexedDB via `localforage` (`src/utils/storage/db/`)
 - Dark mode managed by `Dark` utility, not stored on server
 
-### Routing & Auth
+### 路由与认证
 
-- Vue Router history mode with route-level auth via `meta.requiresAuth`
-- Unauthorized requests trigger `unAuthenticationNotify` (pub-sub pattern)
-- Routes lazy-loaded with dynamic imports (`import('../pages/...')`)
+- Vue Router 启用 history 模式，并通过 `meta.requiresAuth` 实现路由级认证
+- 未授权的请求会触发 `unAuthenticationNotify`（发布/订阅模式）
+- 路由采用延迟加载，并使用动态导入（`import('../pages/...')`）
 
 ## Development Patterns
 
 ### Component Conventions
 
 - **Auto-imports** enabled for Vue/Router/Pinia APIs (via `unplugin-auto-import`)
-- Icons: Use `mdi-js` (Material Design Icons JS), NOT `material-icons`
+- Icons: Use `mdi-js` (Material Design Icons JS), import from `src/boot/quasar/icon.ts`
 - Quasar components/directives imported automatically
 - Custom directives: Use `createDirective<Element, Value>` helper (e.g., `longPress.ts`)
 
@@ -70,68 +70,58 @@ Use `@typescript-eslint/consistent-type-imports` - prefer `import type` for type
 
 ## Build & Development
 
-### Commands
+## 构建与开发
 
-- `quasar dev` - Start dev server with HMR
-- `quasar build` - Build for web
-- `quasar build -m pwa` - Build PWA (workbox service worker, 3MB cache limit)
-- `quasar build -m capacitor -T android|ios` - Build mobile apps
-- `npm run lint:fix` - Auto-fix linting issues (import ordering, etc.)
+### 命令
 
-### Configuration
+- `npm run dev` - 启动带有 HMR 的开发服务器
+- `npm run build` - 构建 Web 应用
+- `npm run build -m pwa` - 构建 PWA（使用 Workbox Service Worker，缓存限制为 3MB）
+- `npm run build -m capacitor -T android|ios` - 构建移动应用
+- `npm run lint:fix` - 自动修复代码检查问题（例如导入顺序等）
 
-- **quasar.config.ts**: Boot files order: `app → quasar → v-viewer → dayjs → md-editor`
-- **Build targets**: ES2022, modern browsers (Chrome/Firefox 115+, Safari 14+)
-- **Code splitting**: Vendor chunks split by `md-editor-v3/codemirror` vs other node_modules
-- **Environment**: `VUE_COMMIT_SHA` injected from Git (7 chars)
+### 配置
 
-## Key Files & Patterns
+- **quasar.config.ts**：启动文件顺序：`app → quasar → v-viewer → dayjs → md-editor`
+- **构建目标**：ES2022，现代浏览器（Chrome/Firefox 115+，Safari 14+）
+- **代码分割**：根据 `md-editor-v3/codemirror` 与其他 node_modules 进行代码块分割
+- **环境**：从 Git 注入 `VUE_COMMIT_SHA`（7 个字符）
 
-### Multi-Platform Support
+## 关键文件和模式
 
-- `src-pwa/`: PWA service worker + manifest
-- `src-capacitor/`: Mobile app configuration
-- `src-electron/`: Desktop app entry points
-- Shared codebase with platform-specific builds
+### 多平台支持
 
-### Composition Utilities
+- `src-pwa/`：PWA 服务工作线程 + 清单文件
+- `src-capacitor/`：移动应用配置
+- `src-electron/`：桌面应用入口点
+- 共享代码库，包含平台专属构建
 
-- `useResizeObserver`, `useMasonry`, `useMedia` - UI utilities
-- `useTimeoutFn`, `useIsActivated` - Lifecycle helpers
-- `useToNowRef` - Reactive time-based formatting (with dayjs)
+### 组合工具
 
-### Critical Conventions
+- `useResizeObserver`、`useMasonry`、`useMedia`：UI 工具
+- `useTimeoutFn`、`useIsActivated`：生命周期辅助函数
+- `useToNowRef`：响应式时间格式化（使用 dayjs）
 
-- **No test files exist** - focus on runtime behavior verification
-- TypeScript strict mode **disabled** (`strict: false`)
-- Session management: `longTermToken` (persistent) → refresh → `sessionToken` (memory)
-- Sanitization: Use `sanitizeHtml` from utils, DOMPurify for HTML content
-- BBCode support: Custom parser in `utils/bbcode/`
+## 常见任务
 
-## Common Tasks
+### 添加新的 API 端点
 
-### Adding a New API Endpoint
+1. 在 `src/services/<domain>/types.ts` 中定义类型
+2. 使用 `requestWithSignalr` 将方法添加到 `src/services/<domain>/index.ts`
 
-1. Define types in `src/services/<domain>/types.ts`
-2. Add method to `src/services/<domain>/index.ts` using `requestWithSignalr`
-3. Handle cache via `updateResponseCache` if needed
-4. Test disconnection scenario (cache fallback)
+### 创建新页面
 
-### Creating a New Page
+1. 使用 `meta.requiresAuth` 将路由添加到 `src/router/routes.ts`
+2. 在 `src/pages/<feature>/` 中创建页面
+3. 如果需要加载数据：使用带有路由激活感知的 `useInitRequest`
+4. 如果需要本地状态：在 `src/pages/<feature>/store.ts` 中创建名为 `page.<feature>` 的 store
 
-1. Add route to `src/router/routes.ts` with `meta.requiresAuth`
-2. Create page in `src/pages/<feature>/`
-3. If needs data loading: Use `useInitRequest` with route activation awareness
-4. If needs local state: Create store at `src/pages/<feature>/store.ts` named `page.<feature>`
+### Debugging
 
-### Debugging SignalR Issues
-
-- Set `VUE_TRACE_SERVER=true` env variable
-- Check `SignalrInspector` logs in console
-- Verify `connectState` ref (Disconnected/Connecting/Connected)
-- Test cache behavior: Disconnect network, check if cache returns data
+- 先运行项目，查看运行端口, 然后启动浏览器
+- 没有登录的，要求用户手动进行登录
+- 随后查看浏览器控制台，寻找 Api 调用日志
 
 ### 其他项目指南
 
-- 运行项目使用 `npm run dev` 命令，默认端口是 9000
 - 项目已有时间格式化工具 `toNow(parseTime(timeString))` 在 `time.ts`，不要重复实现时间格式化逻辑。
