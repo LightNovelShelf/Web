@@ -7,56 +7,122 @@ type ParallelLimiterConfig = {
 }
 
 type ParallelLimiterInst = {
-  lock(): ParallelLimiterContex
+  acquire(): ParallelLimiterLocker
 }
 
-type ParallelLimiterContex = {
-  // TODO: 需要记录更多信息逻辑才能自洽，比如消费了和还没消费的release是不一样的
-
+type ParallelLimiterLocker = {
   ready: Promise<void>
 
   release(): void
 }
 
-function createParallelLimiter(cfg: ParallelLimiterConfig): ParallelLimiterInst {
-  const state = {
-    /** @alias parallelism */
-    p: 0,
+type ParallelLimiterInternalState = {
+  total: number
+  used: number
 
-    waitQueue: [] as ParallelLimiterContex[],
+  running: WeakSet<Promise<void>>
+  /** FIFO 队列 */
+  wait: WithResolversReturn<void>[]
+}
+
+/** 根据 state 进行队列消费
+ *
+ * @description
+ * 把 used 放 comsume 内实现，避免 acquire/release 里重复代码
+ *
+ * @description
+ * 把 state 放入参纯粹为了降低
+ */
+function comsume(state: ParallelLimiterInternalState) {
+  if (state.used >= state.total) return
+
+  const next = state.wait.shift()
+  if (!next) return
+
+  // 这几个调用都是内部实现，没有报错可能
+  // 省掉了复杂的 原子性 逻辑实现
+  state.running.add(next.promise)
+  state.used += 1
+  next.resolve()
+}
+
+function createParallelLimiter(cfg: ParallelLimiterConfig): ParallelLimiterInst {
+  const state: ParallelLimiterInternalState = {
+    /** @alias parallelism */
+    total: cfg.parallelism,
+    used: 0,
+
+    running: new WeakSet(),
+    wait: [],
   }
 
-  return {
-    lock(): ParallelLimiterContex {
-      const { promise, resolve } = withResolvers<void>()
+  /** inst mean instance */
+  const inst: ParallelLimiterInst = {
+    acquire(): ParallelLimiterLocker {
+      const resolver = withResolvers<void>()
 
-      const context: ParallelLimiterContex = {
-        ready: promise,
+      const locker: ParallelLimiterLocker = {
+        ready: resolver.promise,
 
         release() {
-          state.p -= 1
-          if (state.p < 0) state.p = 0
+          // waiting: 直接移除
+          const idx = state.wait.indexOf(resolver)
+          if (idx > -1) {
+            // 直接移除等待
+            const [item] = state.wait.splice(idx, 1)
 
-          // 先进先出
-          const next = state.waitQueue.shift()
-          if (!next) return
+            // 防呆: 保证 ready 不会被意外 resolve
+            item.reject()
 
-          // next.
+            return
+          }
+
+          const promise = locker.ready
+
+          // double-release: 忽略
+          if (!state.running.has(promise)) {
+            return
+          }
+
+          // 确实在running中，正常释放
+          state.running.delete(promise)
+          state.used -= 1
+
+          // 继续消费队列
+          comsume(state)
         },
       }
 
-      if (state.p < cfg.parallelism) {
-        state.p += 1
-        resolve()
-      } else {
-        state.waitQueue.push(context)
-      }
+      // 统一压入队列等待消费
+      state.wait.push(resolver)
 
-      return context
+      // 保证初次启动
+      comsume(state)
+
+      return locker
     },
   }
+
+  return inst
 }
 
+/**
+ * @example
+ * ```ts
+ * import { parallelLimiter } from '.'
+ *
+ * async function () {
+ *   const locker = parallelLimiter.acquire()
+ *
+ *   try {
+ *      await locker.ready;
+ *     // 执行并发受限的操作
+ *   } finally {
+ *     locker.release()
+ *   }
+ * }
+ * ```
+ */
 const parallelLimiter = createParallelLimiter({ parallelism: 6 })
 
 export { parallelLimiter }
