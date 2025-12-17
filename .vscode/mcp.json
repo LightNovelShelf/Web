@@ -3,6 +3,10 @@
     "chrome-devtools": {
       "command": "npx",
       "args": ["chrome-devtools-mcp@latest"]
+    },
+    "quasar Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/quasarframework/quasar"
     }
   }
 }

@@ -18,7 +18,11 @@
       </q-grid-item>
       <q-grid-item span="2" xs="1" sm="1" md="1">
         <div class="q-gutter-sm">
-          <q-input label="封面地址" placeholder="https://" v-model="book['Cover']" />
+          <q-input label="封面地址" placeholder="https://" v-model="book['Cover']" @paste="onPaste">
+            <template v-slot:append>
+              <q-icon name="mdiImage" @click="pickImage" class="cursor-pointer" />
+            </template>
+          </q-input>
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
@@ -41,6 +45,7 @@
         </q-fab-action>
       </q-fab>
     </drag-page-sticky>
+    <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="onFileChange" />
   </q-page>
 </template>
 
@@ -59,6 +64,7 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { getBookEditInfo, editBook } from 'src/services/book'
+import { uploadImage } from 'src/services/user'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)
@@ -81,6 +87,55 @@ const request = useTimeoutFn(async () => {
 })
 
 const $q = useQuasar()
+
+const fileInputRef = ref<HTMLInputElement>()
+
+const pickImage = () => {
+  fileInputRef.value?.click()
+}
+
+const handleUpload = async (file: File) => {
+  const notif = $q.notify({
+    group: false,
+    timeout: 0,
+    spinner: true,
+    message: '上传中...',
+  })
+
+  try {
+    const url = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
+    book.value['Cover'] = url
+    notif({
+      icon: 'mdiCheck',
+      spinner: false,
+      message: '上传完成',
+      timeout: 1000,
+    })
+  } catch (error) {
+    notif({
+      type: 'negative',
+      message: '上传失败',
+      timeout: 2000,
+    })
+  }
+}
+
+const onFileChange = async (e: Event) => {
+  const files = (e.target as HTMLInputElement).files
+  if (!files || files.length === 0) return
+  await handleUpload(files[0])
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+}
+
+const onPaste = async (evt: ClipboardEvent) => {
+  const files = evt.clipboardData?.files
+  if (files && files.length > 0) {
+    evt.preventDefault()
+    await handleUpload(files[0])
+  }
+}
 
 async function save() {
   $q.dialog({
