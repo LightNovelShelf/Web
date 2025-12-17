@@ -68,7 +68,7 @@
         <q-form @submit="createBook">
           <q-card-section style="padding-top: 0">
             <div class="q-gutter-sm">
-              <q-input
+              <image-input
                 label="封面链接"
                 :rules="[(val) => val.startsWith('https://') || '必须是一个https链接']"
                 v-model="createBookData.Cover"
@@ -121,6 +121,7 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 
 import BookCard from 'components/BookCard.vue'
 import { QGrid, QGridItem } from 'components/grid'
+import { ImageInput } from 'components'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
