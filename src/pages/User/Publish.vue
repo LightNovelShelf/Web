@@ -8,9 +8,23 @@
       </q-tabs>
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="Book">
-          <div class="text-right q-gutter-x-sm">
-            <q-btn color="primary" @click="uploadBookShow = true"> 上传书籍 </q-btn>
-            <q-btn color="primary" @click="createBookShow = true"> 发布新书 </q-btn>
+          <div class="flex justify-between items-center gap-8">
+            <q-input
+              dense
+              outlined
+              v-model="searchKeyword"
+              placeholder="搜索书籍"
+              @keyup.enter="searchBook"
+              style="width: 250px"
+            >
+              <template v-slot:append>
+                <q-icon name="mdiMagnify" class="cursor-pointer" @click="searchBook" />
+              </template>
+            </q-input>
+            <div class="q-gutter-x-sm">
+              <q-btn color="primary" @click="uploadBookShow = true"> 上传书籍 </q-btn>
+              <q-btn color="primary" @click="createBookShow = true"> 发布新书 </q-btn>
+            </div>
           </div>
 
           <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
@@ -162,6 +176,7 @@ const pageData = ref({ totalPage: 1 })
 const _page = ref(1)
 const createBookShow = ref(false)
 const uploadBookShow = ref(false)
+const searchKeyword = ref('')
 const categoryOptions = ref([
   {
     label: '录入完成',
@@ -215,12 +230,18 @@ const currentPage = computed({
 })
 
 const request = useTimeoutFn(function (page = currentPage.value) {
-  return getMyBooks({ Page: page, Size: 24 }).then((serverData) => {
+  return getMyBooks({ Page: page, Size: 24, KeyWords: searchKeyword.value }).then((serverData) => {
     bookData.value = serverData.Data
     pageData.value.totalPage = serverData.TotalPages
     _page.value = serverData.Page
   })
 })
+
+function searchBook() {
+  _page.value = 1
+  request(1)
+}
+
 function delBook(bid: number, index: number) {
   $q.dialog({
     title: '提示',
