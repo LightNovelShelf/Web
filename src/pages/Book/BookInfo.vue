@@ -51,7 +51,7 @@
 
               <div class="text-subtitle1 text-weight-bold">《{{ book['Title'] }}》</div>
               <div style="margin-top: 24px">作者：{{ book['Author'] }}</div>
-              <div>最后更新：{{ book['LastUpdate'] }}</div>
+              <div>最后更新：{{ book['LastUpdatedChapter'] }}</div>
               <div>更新时间：{{ dateFormat(book['LastUpdatedAt']) }} ({{ LastUpdateTimeDesc }})</div>
               <div>上次阅读：{{ lastReadTitle }}</div>
               <div style="margin-top: 24px">
