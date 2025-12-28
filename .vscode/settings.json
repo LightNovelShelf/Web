@@ -8,5 +8,11 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "files.associations": {
     ".npmrc": "ini"
+  },
+
+  "files.readonlyFromPermissions": true,
+  "files.readonlyInclude": {
+    "node_modules/**": true,
+    "src/types/vite/**": true
   }
 }

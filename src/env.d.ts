@@ -1,3 +1,10 @@
+/* eslint-disable @typescript-eslint/triple-slash-reference */
+
+// https://vite.dev/guide/features#client-types
+// https://cdn.jsdelivr.net/npm/vite@7.2.0/client.d.ts
+// node_modules\@quasar\app-vite\node_modules\vite
+/// <reference path="./types/vite/client.d.ts" />
+
 declare namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: string
@@ -20,4 +27,9 @@ declare namespace NodeJS {
     VUE_TRACE_SERVER: string
     VUE_COMMIT_SHA: string
   }
+}
+
+interface ImportMetaEnv {
+  // import.env
+  // if need
 }
