@@ -18,7 +18,7 @@
       </q-grid-item>
       <q-grid-item span="2" xs="1" sm="1" md="1">
         <div class="q-gutter-sm">
-          <q-input label="封面地址" placeholder="https://" v-model="book['Cover']" />
+          <image-input v-model="book['Cover']" />
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
@@ -52,7 +52,7 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 
 import { useSettingStore } from 'stores/setting'
 
-import { HtmlEditor, BlurHash, DragPageSticky } from 'components'
+import { HtmlEditor, BlurHash, DragPageSticky, ImageInput } from 'components'
 import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
