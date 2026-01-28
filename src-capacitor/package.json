@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "@capacitor/app": "^6.0.0",
-    "@capacitor/cli": "^6.0.0",
+    "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^6.0.0"
   }
 }
