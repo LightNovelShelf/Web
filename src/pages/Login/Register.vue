@@ -58,7 +58,7 @@
               <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
             </template>
           </q-input>
-          <q-input v-model="inviteCode" :rules="[(val) => !!val || '无效的邀请码']" label="邀请码">
+          <q-input v-model="inviteCode" label="邀请码">
             <template v-slot:prepend>
               <q-icon name="mdiLockPlus" />
             </template>
