@@ -125,4 +125,5 @@ export {
   mdiCommentMultiple,
   mdiCircleDouble,
   mdiLockPlus,
+  mdiReplay,
 } from '@quasar/extras/mdi-v7'
