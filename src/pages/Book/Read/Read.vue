@@ -60,20 +60,21 @@
       </div>
     </div>
 
-    <drag-page-sticky v-slot="{ isDragging }">
-      <q-fab icon="mdiPlus" direction="up" color="accent" :disable="isDragging">
-        <q-fab-action @click="next" color="primary" icon="mdiArrowRight" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
-            下一章
-          </q-tooltip>
-        </q-fab-action>
-        <q-fab-action @click="prev" color="primary" icon="mdiArrowLeft" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
-            上一章
-          </q-tooltip>
-        </q-fab-action>
-        <q-fab-action @click="showCatalog = true" color="primary" icon="mdiFormatListBulleted" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+    <Teleport to="body">
+      <drag-page-sticky v-slot="{ isDragging }">
+        <q-fab icon="mdiPlus" direction="up" color="accent" :disable="isDragging">
+          <q-fab-action @click="next" color="primary" icon="mdiArrowRight" :disable="isDragging">
+            <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+              下一章
+            </q-tooltip>
+          </q-fab-action>
+          <q-fab-action @click="prev" color="primary" icon="mdiArrowLeft" :disable="isDragging">
+            <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+              上一章
+            </q-tooltip>
+          </q-fab-action>
+          <q-fab-action @click="showCatalog = true" color="primary" icon="mdiFormatListBulleted" :disable="isDragging">
+            <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             目录
           </q-tooltip>
         </q-fab-action>
@@ -110,6 +111,7 @@
         </q-fab-action>
       </q-fab>
     </drag-page-sticky>
+    </Teleport>
 
     <q-dialog v-model="showCatalog">
       <q-card style="min-width: 300px">
@@ -254,7 +256,6 @@ let isPanning = false
 
 function onPointerDown(evt: PointerEvent) {
   if (!isHorizontalMode.value || evt.button !== 0) return
-  if ((evt.target as Element).closest?.('.q-page-sticky')) return
   panStartX = evt.clientX
   panPointerId = evt.pointerId
   isPanning = false
