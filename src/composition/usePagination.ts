@@ -64,14 +64,16 @@ export function usePagination(
     const el = contentRef.value
     if (!el || !enabled.value || !columnWidth.value) return
 
-    const estimatedPageWidth = columnWidth.value + COLUMN_GAP
-    const newTotal = Math.max(1, Math.round(el.scrollWidth / estimatedPageWidth))
+    const step = columnWidth.value + COLUMN_GAP
+    // scrollWidth = N * columnWidth + (N-1) * gap = N * step - gap
+    // 减去少量像素容差，避免浏览器亚像素舍入导致多算一页
+    const newTotal = Math.max(1, Math.round((el.scrollWidth - 2 + COLUMN_GAP) / step))
     totalPages.value = newTotal
 
     if (newTotal > 1) {
       pageWidth.value = (el.scrollWidth - columnWidth.value) / (newTotal - 1)
     } else {
-      pageWidth.value = estimatedPageWidth
+      pageWidth.value = step
     }
 
     if (currentPage.value >= newTotal) {
@@ -93,8 +95,40 @@ export function usePagination(
     nextTick(() => {
       requestAnimationFrame(() => {
         measurePages()
+        waitForResources()
       })
     })
+  }
+
+  // ---- 等待字体 & 图片加载完成后重新计算分页（之前计算的时候忘记了字体加载这回事来着） ----
+  let imageCleanups: (() => void)[] = []
+
+  function waitForResources() {
+    cleanupImageListeners()
+    // 字体加载完成（含解密字体）后重新测量
+    document.fonts.ready.then(() => measurePages())
+    // 图片加载完成后重新测量
+    const el = contentRef.value
+    if (!el) return
+    for (const img of el.querySelectorAll('img')) {
+      if (img.complete) continue
+      const onDone = () => {
+        img.removeEventListener('load', onDone)
+        img.removeEventListener('error', onDone)
+        measurePages()
+      }
+      img.addEventListener('load', onDone)
+      img.addEventListener('error', onDone)
+      imageCleanups.push(() => {
+        img.removeEventListener('load', onDone)
+        img.removeEventListener('error', onDone)
+      })
+    }
+  }
+
+  function cleanupImageListeners() {
+    imageCleanups.forEach((fn) => fn())
+    imageCleanups = []
   }
 
   // ---- 拖拽翻页 ----
@@ -234,6 +268,7 @@ export function usePagination(
       observer.disconnect()
       observer = null
     }
+    cleanupImageListeners()
   }
 
   watch(

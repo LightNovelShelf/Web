@@ -10,6 +10,7 @@
     </div>
     <div
       v-else
+      :style="isHorizontalMode ? { touchAction: 'none' } : undefined"
       @pointerdown="onPointerDown"
       @pointermove="onPointerMove"
       @pointerup="onPointerUp"
@@ -253,7 +254,7 @@ let isPanning = false
 
 function onPointerDown(evt: PointerEvent) {
   if (!isHorizontalMode.value || evt.button !== 0) return
-  if (!readViewport.value?.contains(evt.target as Node)) return
+  if ((evt.target as Element).closest?.('.q-page-sticky')) return
   panStartX = evt.clientX
   panPointerId = evt.pointerId
   isPanning = false
