@@ -253,6 +253,7 @@ let isPanning = false
 
 function onPointerDown(evt: PointerEvent) {
   if (!isHorizontalMode.value || evt.button !== 0) return
+  if (!readViewport.value?.contains(evt.target as Node)) return
   panStartX = evt.clientX
   panPointerId = evt.pointerId
   isPanning = false
