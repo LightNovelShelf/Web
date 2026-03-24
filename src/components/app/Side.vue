@@ -116,7 +116,6 @@ const menuOptions: Array<Record<string, any>> = [
     label: '社区',
     key: 'Community',
     route: 'ForumList',
-    disabled: true,
     icon: 'mdiForum',
   },
   {
