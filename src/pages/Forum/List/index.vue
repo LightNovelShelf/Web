@@ -1,14 +1,19 @@
 <template>
-  <q-page class="community-home">
+  <q-page class="community-home" :style="pageStyle">
     <div class="community-home__shell">
       <div class="community-home__grid">
-        <community-board-rail
-          class="community-home__left"
-          :boards="boards"
-          :selected-board-key="boardKey"
-          :sticky-top="stickyTop"
-          @select="handleBoardSelect"
-        />
+        <div ref="leftRailSlot" class="community-home__left">
+          <community-board-rail
+            :boards="boards"
+            :selected-board-key="boardKey"
+            :fixed-enabled="fixedRailEnabled"
+            :rail-top="railTop"
+            :rail-offset="leftRailOffset"
+            :rail-width="leftRailWidth"
+            :max-height="railMaxHeight"
+            @select="handleBoardSelect"
+          />
+        </div>
 
         <main class="community-home__center">
           <section class="community-hero">
@@ -55,18 +60,24 @@
           />
         </main>
 
-        <community-right-rail
-          class="community-home__right"
-          :hot-threads="payload?.hotThreads ?? []"
-          :active-users="payload?.activeUsers ?? []"
-          :sticky-top="stickyTop"
-        />
+        <div ref="rightRailSlot" class="community-home__right">
+          <community-right-rail
+            :hot-threads="payload?.hotThreads ?? []"
+            :active-users="payload?.activeUsers ?? []"
+            :fixed-enabled="fixedRailEnabled"
+            :rail-top="railTop"
+            :rail-offset="rightRailOffset"
+            :rail-width="rightRailWidth"
+            :max-height="railMaxHeight"
+          />
+        </div>
       </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
+import { useElementBounding, useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 
 import { useAppStore } from 'stores/app'
@@ -96,9 +107,24 @@ const order = ref<CommunityFeedOrder>('latest')
 const scope = ref<CommunityFeedScope>('all')
 const payload = ref<CommunityHomePayload>()
 const loading = ref(true)
+const pagePaddingTop = 26
 
 const layout = useLayout()
-const stickyTop = computed(() => layout.headerOffset.value + 18)
+const { width: viewportWidth } = useWindowSize()
+const leftRailSlot = ref<HTMLElement>()
+const rightRailSlot = ref<HTMLElement>()
+const leftRailBounds = useElementBounding(leftRailSlot)
+const rightRailBounds = useElementBounding(rightRailSlot)
+const pageStyle = computed(() => ({
+  '--community-page-padding-top': `${pagePaddingTop}px`,
+}))
+const fixedRailEnabled = computed(() => viewportWidth.value > 1180)
+const railTop = computed(() => layout.headerHeight.value + pagePaddingTop)
+const railMaxHeight = computed(() => `calc(100vh - ${railTop.value + 24}px)`)
+const leftRailOffset = computed(() => leftRailBounds.left.value)
+const rightRailOffset = computed(() => Math.max(0, viewportWidth.value - rightRailBounds.right.value))
+const leftRailWidth = computed(() => leftRailBounds.width.value || (viewportWidth.value > 1320 ? 260 : 240))
+const rightRailWidth = computed(() => rightRailBounds.width.value || (viewportWidth.value > 1320 ? 320 : 292))
 
 const boards = computed(() => payload.value?.boards ?? [])
 const feedItems = computed(() => payload.value?.feed ?? [])
@@ -141,7 +167,7 @@ onMounted(() => {
   --community-text-soft: #475569;
   --community-text-muted: #94a3b8;
   min-height: 100%;
-  padding: 26px 22px 40px;
+  padding: var(--community-page-padding-top) 22px 0;
   background:
     radial-gradient(circle at top left, rgba(147, 197, 253, 0.16), transparent 24%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 52%, #f8fafc 100%);
@@ -163,6 +189,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  padding-bottom: 40px;
 }
 
 .community-hero {

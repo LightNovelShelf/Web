@@ -1,54 +1,111 @@
 <template>
-  <aside class="board-rail" :style="{ top: `${stickyTop}px` }">
-    <div class="board-rail__header">
-      <div class="board-rail__eyebrow">Community</div>
-      <h2 class="board-rail__title">社区</h2>
-      <p class="board-rail__summary">按板块快速切换讨论主题，先看内容，再决定要不要参与。</p>
-    </div>
-
-    <button
-      v-for="board in boards"
-      :key="board.key"
-      class="board-rail__item"
-      :class="{ 'board-rail__item--active': board.key === selectedBoardKey }"
-      type="button"
-      @click="$emit('select', board.key)"
+  <aside class="board-rail" :style="placeholderStyle">
+    <overlay-scrollbars-component
+      class="board-rail__scroll"
+      :class="{ 'board-rail__scroll--fixed': fixedEnabled }"
+      :style="scrollStyle"
+      :options="scrollbarOptions"
+      defer
     >
-      <span class="board-rail__icon">
-        <q-icon :name="board.icon" size="19px" />
-      </span>
-      <span class="board-rail__content">
-        <span class="board-rail__name">{{ board.title }}</span>
-        <span class="board-rail__description">{{ board.description }}</span>
-      </span>
-      <span class="board-rail__meta">
-        <span class="board-rail__count">{{ board.todayPosts }}</span>
-        <span class="board-rail__heat">{{ board.heatLabel }}</span>
-      </span>
-    </button>
+      <div class="board-rail__content-wrap">
+        <div class="board-rail__header">
+          <div class="board-rail__eyebrow">Community</div>
+          <h2 class="board-rail__title">社区</h2>
+          <p class="board-rail__summary">按板块快速切换讨论主题，先看内容，再决定要不要参与。</p>
+        </div>
+
+        <button
+          v-for="board in boards"
+          :key="board.key"
+          class="board-rail__item"
+          :class="{ 'board-rail__item--active': board.key === selectedBoardKey }"
+          type="button"
+          @click="$emit('select', board.key)"
+        >
+          <span class="board-rail__icon">
+            <q-icon :name="board.icon" size="19px" />
+          </span>
+          <span class="board-rail__content">
+            <span class="board-rail__name">{{ board.title }}</span>
+            <span class="board-rail__description">{{ board.description }}</span>
+          </span>
+          <span class="board-rail__meta">
+            <span class="board-rail__count">{{ board.todayPosts }}</span>
+            <span class="board-rail__heat">{{ board.heatLabel }}</span>
+          </span>
+        </button>
+      </div>
+    </overlay-scrollbars-component>
   </aside>
 </template>
 
 <script setup lang="ts">
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
+import { useQuasar } from 'quasar'
+
 import type { CommunityBoardKey, CommunityBoardSummary } from 'src/services/forum/types'
 
-defineProps<{
+const props = defineProps<{
   boards: CommunityBoardSummary[]
   selectedBoardKey: CommunityBoardKey
-  stickyTop: number
+  fixedEnabled: boolean
+  railTop: number
+  railOffset: number
+  railWidth: number
+  maxHeight: string
 }>()
 
 defineEmits<{
   select: [key: CommunityBoardKey]
 }>()
+
+const $q = useQuasar()
+
+const scrollbarOptions = computed(() => ({
+  scrollbars: {
+    theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+    autoHide: 'move' as const,
+    autoHideDelay: 300,
+    autoHideSuspend: false,
+  },
+ }))
+
+const placeholderStyle = computed(() => (props.fixedEnabled ? { height: props.maxHeight } : undefined))
+
+const scrollStyle = computed(() => ({
+  '--community-rail-max-height': props.maxHeight,
+  ...(props.fixedEnabled
+    ? {
+        top: `${props.railTop}px`,
+        left: `${props.railOffset}px`,
+        width: `${props.railWidth}px`,
+      }
+    : {}),
+}))
 </script>
 
 <style scoped lang="scss">
 .board-rail {
-  position: sticky;
+  min-width: 0;
+}
+
+.board-rail__scroll {
+  width: 100%;
+  max-height: var(--community-rail-max-height);
+  padding-right: 12px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.board-rail__scroll--fixed {
+  position: fixed;
+}
+
+.board-rail__content-wrap {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  box-sizing: border-box;
 }
 
 .board-rail__header {
@@ -96,7 +153,7 @@ defineEmits<{
 .board-rail__item:hover {
   transform: translateY(-1px);
   border-color: rgba(59, 130, 246, 0.22);
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 2px 2px 3px rgba(15, 23, 42, 0.08);
 }
 
 .board-rail__item--active {
@@ -104,7 +161,7 @@ defineEmits<{
   background:
     linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.96)),
     rgba(255, 255, 255, 0.96);
-  box-shadow: 0 20px 36px rgba(59, 130, 246, 0.12);
+  box-shadow: 2px 2px 4px rgba(59, 130, 246, 0.12);
 }
 
 .board-rail__icon {

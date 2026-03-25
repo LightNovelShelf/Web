@@ -198,7 +198,7 @@ function filterByScope(items: CommunityFeedItem[], scope: CommunityFeedScope) {
 function buildHotThreads(items: CommunityFeedItem[]): CommunityHotRankItem[] {
   return [...items]
     .sort((a, b) => b.heat - a.heat)
-    .slice(0, 10)
+    .slice(0, 5)
     .map((item, index) => ({
       id: item.id,
       title: item.title,

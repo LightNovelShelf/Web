@@ -1,62 +1,103 @@
 <template>
-  <aside class="right-rail" :style="{ top: `${stickyTop}px` }">
-    <section class="rail-panel">
-      <div class="rail-panel__header">
-        <div>
-          <div class="rail-panel__eyebrow">Hot Threads</div>
-          <h3 class="rail-panel__title">热帖榜</h3>
-        </div>
-        <q-icon name="mdiFire" size="22px" color="negative" />
-      </div>
-
-      <div class="rank-list">
-        <div v-for="(item, index) in hotThreads" :key="item.id" class="rank-item">
-          <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
-          <div class="rank-item__copy">
-            <div class="rank-item__title">{{ item.title }}</div>
-            <div class="rank-item__meta">{{ item.boardName }} · {{ item.deltaLabel }}</div>
-          </div>
-          <div class="rank-item__value">{{ item.heat }}</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="rail-panel">
-      <div class="rail-panel__header">
-        <div>
-          <div class="rail-panel__eyebrow">Active Users</div>
-          <h3 class="rail-panel__title">活跃榜</h3>
-        </div>
-        <q-icon name="mdiAccountMultiple" size="20px" color="primary" />
-      </div>
-
-      <div class="user-list">
-        <div v-for="user in activeUsers" :key="user.id" class="user-item">
-          <q-avatar size="42px" :style="{ background: avatarBackground(user.name), color: '#fff' }">
-            {{ user.name.slice(0, 1) }}
-          </q-avatar>
-          <div class="user-item__copy">
-            <div class="user-item__name-row">
-              <span class="user-item__name">{{ user.name }}</span>
-              <span class="user-item__badge">{{ user.badge }}</span>
+  <aside class="right-rail" :style="placeholderStyle">
+    <overlay-scrollbars-component
+      class="right-rail__scroll"
+      :class="{ 'right-rail__scroll--fixed': fixedEnabled }"
+      :style="scrollStyle"
+      :options="scrollbarOptions"
+      defer
+    >
+      <div class="right-rail__content-wrap">
+        <section class="rail-panel">
+          <div class="rail-panel__header">
+            <div>
+              <div class="rail-panel__eyebrow">Hot Threads</div>
+              <h3 class="rail-panel__title">热帖榜</h3>
             </div>
-            <div class="user-item__summary">{{ user.summary }}</div>
+            <q-icon name="mdiFire" size="22px" color="negative" />
           </div>
-          <div class="user-item__score">{{ user.score }}</div>
-        </div>
+
+          <div class="rank-list">
+            <div v-for="(item, index) in hotThreads" :key="item.id" class="rank-item">
+              <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
+              <div class="rank-item__copy">
+                <div class="rank-item__title">{{ item.title }}</div>
+                <div class="rank-item__meta">{{ item.boardName }} · {{ item.deltaLabel }}</div>
+              </div>
+              <div class="rank-item__value">{{ item.heat }}</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rail-panel">
+          <div class="rail-panel__header">
+            <div>
+              <div class="rail-panel__eyebrow">Active Users</div>
+              <h3 class="rail-panel__title">活跃榜</h3>
+            </div>
+            <q-icon name="mdiAccountMultiple" size="20px" color="primary" />
+          </div>
+
+          <div class="user-list">
+            <div v-for="user in activeUsers" :key="user.id" class="user-item">
+              <q-avatar size="42px" :style="{ background: avatarBackground(user.name), color: '#fff' }">
+                {{ user.name.slice(0, 1) }}
+              </q-avatar>
+              <div class="user-item__copy">
+                <div class="user-item__name-row">
+                  <span class="user-item__name">{{ user.name }}</span>
+                  <span class="user-item__badge">{{ user.badge }}</span>
+                </div>
+                <div class="user-item__summary">{{ user.summary }}</div>
+              </div>
+              <div class="user-item__score">{{ user.score }}</div>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </overlay-scrollbars-component>
   </aside>
 </template>
 
 <script setup lang="ts">
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
+import { useQuasar } from 'quasar'
+
 import type { CommunityActiveUserItem, CommunityHotRankItem } from 'src/services/forum/types'
 
-defineProps<{
+const props = defineProps<{
   hotThreads: CommunityHotRankItem[]
   activeUsers: CommunityActiveUserItem[]
-  stickyTop: number
+  fixedEnabled: boolean
+  railTop: number
+  railOffset: number
+  railWidth: number
+  maxHeight: string
 }>()
+
+const $q = useQuasar()
+
+const scrollbarOptions = computed(() => ({
+  scrollbars: {
+    theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+    autoHide: 'move' as const,
+    autoHideDelay: 300,
+    autoHideSuspend: false,
+  },
+}))
+
+const placeholderStyle = computed(() => (props.fixedEnabled ? { height: props.maxHeight } : undefined))
+
+const scrollStyle = computed(() => ({
+  '--community-rail-max-height': props.maxHeight,
+  ...(props.fixedEnabled
+    ? {
+        top: `${props.railTop}px`,
+        right: `${props.railOffset}px`,
+        width: `${props.railWidth}px`,
+      }
+    : {}),
+}))
 
 const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#0891b2']
 
@@ -68,20 +109,36 @@ function avatarBackground(seed: string) {
 
 <style scoped lang="scss">
 .right-rail {
-  position: sticky;
+  min-width: 0;
+}
+
+.right-rail__scroll {
+  width: 100%;
+  max-height: var(--community-rail-max-height);
+  padding-right: 12px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.right-rail__scroll--fixed {
+  position: fixed;
+}
+
+.right-rail__content-wrap {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  box-sizing: border-box;
 }
 
 .rail-panel {
+  width: 100%;
+  box-sizing: border-box;
   padding: 20px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95)),
-    rgba(255, 255, 255, 0.96);
-  box-shadow: 0 20px 38px rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95)), rgba(255, 255, 255, 0.96);
+  box-shadow: 2px 2px 4px rgba(15, 23, 42, 0.08);
 }
 
 .rail-panel__header {
