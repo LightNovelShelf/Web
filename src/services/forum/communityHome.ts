@@ -275,20 +275,35 @@ function normalizeParagraphs(content: string) {
     .filter(Boolean)
 }
 
+function getPlainTextFromHtml(html: string) {
+  const div = document.createElement('div')
+  div.innerHTML = sanitizerHtml(html)
+  const text = div.textContent ?? ''
+  div.remove()
+  return text
+}
+
 function buildBodyHtml(paragraphs: string[]) {
   return paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')
 }
 
 function htmlToParagraphs(html: string) {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '• ')
-    .replace(/<[^>]+>/g, '')
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+  const div = document.createElement('div')
+  div.innerHTML = sanitizerHtml(html)
+
+  const paragraphs = Array.from(div.querySelectorAll('p, li, blockquote, h1, h2, h3, h4, h5, h6'))
+    .map((element) => element.textContent?.replace(/\s+/g, ' ').trim() ?? '')
     .filter(Boolean)
+
+  const plainText = getPlainTextFromHtml(html).replace(/\s+/g, ' ').trim()
+
+  div.remove()
+
+  if (paragraphs.length > 0) {
+    return paragraphs
+  }
+
+  return plainText ? normalizeParagraphs(plainText) : []
 }
 
 function inferTags(boardKey: Exclude<CommunityBoardKey, 'all'>, title: string, paragraphs: string[]) {

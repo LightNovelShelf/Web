@@ -89,6 +89,8 @@
 </template>
 
 <script setup lang="ts">
+import sanitizerHtml from 'src/utils/sanitizeHtml'
+
 import HtmlEditor from 'components/html/HtmlEditor.vue'
 
 import type { CommunityBoardKey, CreateCommunityThreadRequest } from 'src/services/forum/types'
@@ -115,7 +117,7 @@ const boardOptions = [
   { label: '站务', value: 'website' },
 ] as const
 
-const plainText = computed(() => stripHtml(contentHtml.value))
+const plainText = computed(() => getPlainTextFromHtml(contentHtml.value))
 const plainTextLength = computed(() => plainText.value.replace(/\s+/g, '').length)
 const canSubmit = computed(() => title.value.trim().length >= 6 && plainTextLength.value >= 20)
 
@@ -129,13 +131,12 @@ watch(
   { immediate: true },
 )
 
-function stripHtml(html: string) {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/\n{2,}/g, '\n')
-    .trim()
+function getPlainTextFromHtml(html: string) {
+  const div = document.createElement('div')
+  div.innerHTML = sanitizerHtml(html)
+  const text = div.textContent?.trim() ?? ''
+  div.remove()
+  return text
 }
 
 function resetForm() {
