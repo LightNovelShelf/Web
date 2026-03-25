@@ -48,7 +48,11 @@
             <q-btn flat no-caps color="primary" label="查看板块" :to="payload?.announcementLink" />
           </section>
 
-          <community-composer :user="user" />
+          <community-composer
+            :user="user"
+            :selected-board-key="boardKey"
+            @create="handleThreadCreate"
+          />
 
           <community-feed-list
             :items="feedItems"
@@ -79,18 +83,20 @@
 <script setup lang="ts">
 import { useElementBounding, useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import { useQuasar } from 'quasar'
 
 import { useAppStore } from 'stores/app'
 
 import { useLayout } from 'src/components/app/useLayout'
 
-import { getCommunityHomePayload } from 'src/services/forum/communityHome'
+import { createCommunityThread, getCommunityHomePayload } from 'src/services/forum/communityHome'
 
 import type {
   CommunityBoardKey,
   CommunityFeedOrder,
   CommunityFeedScope,
   CommunityHomePayload,
+  CreateCommunityThreadRequest,
 } from 'src/services/forum/types'
 
 import CommunityBlueprintCanvas from './components/CommunityBlueprintCanvas.vue'
@@ -101,6 +107,8 @@ import CommunityRightRail from './components/CommunityRightRail.vue'
 
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
+const $q = useQuasar()
+const router = useRouter()
 
 const boardKey = ref<CommunityBoardKey>('all')
 const order = ref<CommunityFeedOrder>('latest')
@@ -149,6 +157,25 @@ function handleOrderChange(nextOrder: CommunityFeedOrder) {
 
 function handleScopeChange(nextScope: CommunityFeedScope) {
   scope.value = nextScope
+}
+
+function resolveAuthorName() {
+  return user.value?.UserName || user.value?.Name || '你'
+}
+
+async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadRequest, 'authorName'>) {
+  const created = await createCommunityThread({
+    ...payloadDraft,
+    authorName: resolveAuthorName(),
+  })
+
+  $q.notify({
+    type: 'positive',
+    message: '帖子已发布',
+  })
+
+  await loadCommunityHome()
+  await router.push({ name: 'ForumThread', params: { id: created.id } })
 }
 
 watch([boardKey, order, scope], () => {

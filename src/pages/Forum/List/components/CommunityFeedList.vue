@@ -47,7 +47,13 @@
     </div>
 
     <div v-else-if="items.length" class="feed__list">
-      <article v-for="item in items" :key="item.id" class="feed-item">
+      <router-link
+        v-for="item in items"
+        :key="item.id"
+        class="feed-item-link"
+        :to="{ name: 'ForumThread', params: { id: item.id } }"
+      >
+        <article class="feed-item">
         <div class="feed-item__topline">
           <span class="feed-item__board">{{ item.boardName }}</span>
           <span v-if="item.pinned" class="feed-item__flag feed-item__flag--pinned">置顶</span>
@@ -79,7 +85,8 @@
         <div class="feed-item__tags">
           <span v-for="tag in item.tags" :key="tag" class="feed-item__tag">{{ tag }}</span>
         </div>
-      </article>
+        </article>
+      </router-link>
     </div>
 
     <div v-else class="feed__empty">
@@ -173,6 +180,13 @@ function avatarBackground(seed: string) {
   gap: 14px;
 }
 
+.feed-item-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 24px;
+}
+
 .feed-item {
   padding: 22px 22px 18px;
   border: 1px solid rgba(148, 163, 184, 0.18);
@@ -181,10 +195,21 @@ function avatarBackground(seed: string) {
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)),
     rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .feed-item--loading {
   min-height: 178px;
+}
+
+.feed-item-link:hover .feed-item,
+.feed-item-link:focus-visible .feed-item {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 22px 40px rgba(37, 99, 235, 0.12);
 }
 
 .feed-item__topline,

@@ -1,24 +1,28 @@
 import type {
   CommunityActiveUserItem,
+  CommunityBoardKey,
   CommunityBoardSummary,
   CommunityFeedItem,
   CommunityFeedOrder,
   CommunityFeedScope,
   CommunityHomePayload,
   CommunityHotRankItem,
+  CommunityThreadDetail,
+  CommunityThreadReply,
+  CreateCommunityThreadRequest,
   GetCommunityHomePayloadRequest,
 } from './types'
 
 const boards: CommunityBoardSummary[] = [
   { id: 0, key: 'all', title: '全部讨论', description: '一眼看到今天最热和最新的社区内容', icon: 'mdiForum', todayPosts: 42, heatLabel: '热度 8.6k' },
   { id: 1, key: 'anime', title: '动画', description: '新番、作画、剧情考据和角色讨论', icon: 'mdiVideo', todayPosts: 12, heatLabel: '热度 2.4k' },
-  { id: 2, key: 'comic', title: '漫画', description: '连载追更、分镜表现和作家杂谈', icon: 'mdiImage', todayPosts: 8, heatLabel: '热度 1.8k' },
+  { id: 2, key: 'comic', title: '漫画', description: '连载追更、分镜表现和作者杂谈', icon: 'mdiImage', todayPosts: 8, heatLabel: '热度 1.8k' },
   { id: 3, key: 'game', title: '游戏', description: 'Gal、JRPG、抽卡玩法和剧情线讨论', icon: 'mdiController', todayPosts: 9, heatLabel: '热度 2.1k' },
   { id: 4, key: 'novel', title: '小说', description: '轻小说、网文和章节更新的读后感', icon: 'mdiBook', todayPosts: 14, heatLabel: '热度 3.2k' },
   { id: 5, key: 'website', title: '站务', description: '功能建议、站点反馈和社区活动公告', icon: 'mdiBullhorn', todayPosts: 3, heatLabel: '热度 0.9k' },
 ]
 
-const feed: CommunityFeedItem[] = [
+const seedFeed: CommunityFeedItem[] = [
   {
     id: 101,
     boardKey: 'anime',
@@ -39,8 +43,8 @@ const feed: CommunityFeedItem[] = [
     boardKey: 'novel',
     boardName: '小说',
     title: '这本恋爱轻小说的后半段节奏突然提速，你们觉得是优点还是缺点？',
-    excerpt: '前四卷都是日常拉扯，第五卷开始连续推进主线，有人觉得终于进入正题，也有人觉得失去了前面慢热铺陈的味道。',
-    authorName: '纸鹤',
+    excerpt: '前四卷都是日常铺陈，第五卷开始连续推进主线，有人觉得终于进入正题，也有人觉得失去了前面慢热铺垫的味道。',
+    authorName: '纸鸢',
     authorAvatar: 'https://i.pravatar.cc/96?img=12',
     publishedAt: '42 分钟前',
     replies: 56,
@@ -142,7 +146,7 @@ const feed: CommunityFeedItem[] = [
     boardName: '漫画',
     title: '有没有那种每次更新都想暂停几分钟回味结尾页面的连载？',
     excerpt: '',
-    authorName: '薄荷',
+    authorName: '荷叶',
     authorAvatar: 'https://i.pravatar.cc/96?img=30',
     publishedAt: '昨天',
     replies: 22,
@@ -167,12 +171,56 @@ const feed: CommunityFeedItem[] = [
 ]
 
 const activeUsers: CommunityActiveUserItem[] = [
-  { id: 1, name: '阿澈', avatar: 'https://i.pravatar.cc/96?img=41', badge: '周活跃作者', score: 1280, summary: '本周发布 6 篇长评' },
-  { id: 2, name: '琥珀', avatar: 'https://i.pravatar.cc/96?img=44', badge: '追更达人', score: 1120, summary: '连续 12 天参与讨论' },
+  { id: 1, name: '阿澄', avatar: 'https://i.pravatar.cc/96?img=41', badge: '周活跃作者', score: 1280, summary: '本周发布 6 篇长评' },
+  { id: 2, name: '玲珑', avatar: 'https://i.pravatar.cc/96?img=44', badge: '追更达人', score: 1120, summary: '连续 12 天参与讨论' },
   { id: 3, name: '弥生', avatar: 'https://i.pravatar.cc/96?img=47', badge: '小说区常驻', score: 1030, summary: '贡献 54 条高赞回复' },
   { id: 4, name: '一木', avatar: 'https://i.pravatar.cc/96?img=49', badge: '动画区版主', score: 980, summary: '整理 3 个集中讨论帖' },
   { id: 5, name: '澪', avatar: 'https://i.pravatar.cc/96?img=52', badge: '新人观察员', score: 860, summary: '本周新增 18 个收藏' },
 ]
+
+const threadReplies: Record<number, CommunityThreadReply[]> = {
+  101: [
+    { id: 1, authorName: '空白页', authorBadge: '动画区常驻', publishedAt: '8 分钟前', content: '我会先押那部群像剧，第一集信息量很大，但镜头组织非常稳。', likes: 24, liked: false },
+    { id: 2, authorName: '微光', authorBadge: '追番达人', publishedAt: '4 分钟前', content: '校园向那两部观感更好入口，但黑马相其实已经有了。', likes: 12, liked: false },
+  ],
+  102: [
+    { id: 3, authorName: '折返线', authorBadge: '小说区常驻', publishedAt: '15 分钟前', content: '我更喜欢后半段提速，不然前面的关系推进会显得太松。', likes: 19, liked: false },
+    { id: 4, authorName: '白川', publishedAt: '6 分钟前', content: '问题不是提速，而是情绪回收不够细，所以会觉得断层。', likes: 9, liked: false },
+  ],
+}
+
+const customThreads: CommunityThreadDetail[] = []
+
+function getBoard(boardKey: CommunityBoardKey) {
+  return boards.find((board) => board.key === boardKey)
+}
+
+function getFeedSource() {
+  return [
+    ...customThreads.map(threadToFeedItem),
+    ...seedFeed,
+  ]
+}
+
+function threadToFeedItem(thread: CommunityThreadDetail): CommunityFeedItem {
+  return {
+    id: thread.id,
+    boardKey: thread.boardKey,
+    boardName: thread.boardName,
+    title: thread.title,
+    excerpt: thread.excerpt,
+    authorName: thread.authorName,
+    authorAvatar: `https://i.pravatar.cc/96?u=community-${thread.id}`,
+    publishedAt: thread.publishedAt,
+    replies: thread.replies,
+    views: thread.views,
+    heat: thread.heat,
+    tags: thread.tags,
+    featured: thread.featured,
+    pinned: thread.pinned,
+    locked: thread.locked,
+  }
+}
 
 function sortFeed(items: CommunityFeedItem[], order: CommunityFeedOrder) {
   const cloned = [...items]
@@ -180,6 +228,7 @@ function sortFeed(items: CommunityFeedItem[], order: CommunityFeedOrder) {
   if (order === 'featured') {
     return cloned.sort((a, b) => Number(b.pinned || b.featured) - Number(a.pinned || a.featured) || b.heat - a.heat)
   }
+
   return cloned.sort((a, b) => {
     const aWeight = Number(a.pinned) * 1000 + Number(a.featured) * 100
     const bWeight = Number(b.pinned) * 1000 + Number(b.featured) * 100
@@ -189,9 +238,11 @@ function sortFeed(items: CommunityFeedItem[], order: CommunityFeedOrder) {
 
 function filterByScope(items: CommunityFeedItem[], scope: CommunityFeedScope) {
   if (scope === 'today') {
-    return items.filter((item) => item.publishedAt.includes('今天') || item.publishedAt.includes('分钟') || item.publishedAt.includes('小时'))
+    return items.filter((item) => item.publishedAt.includes('今天') || item.publishedAt.includes('分钟') || item.publishedAt.includes('小时') || item.publishedAt.includes('刚刚'))
   }
-  if (scope === 'week') return items.filter((item) => !item.publishedAt.includes('上周'))
+  if (scope === 'week') {
+    return items.filter((item) => !item.publishedAt.includes('上周'))
+  }
   return items
 }
 
@@ -208,13 +259,93 @@ function buildHotThreads(items: CommunityFeedItem[]): CommunityHotRankItem[] {
     }))
 }
 
+function escapeHtml(text: string) {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+function normalizeParagraphs(content: string) {
+  return content
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+}
+
+function buildBodyHtml(paragraphs: string[]) {
+  return paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('')
+}
+
+function htmlToParagraphs(html: string) {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+}
+
+function inferTags(boardKey: Exclude<CommunityBoardKey, 'all'>, title: string, paragraphs: string[]) {
+  const tags: string[] = []
+  const plain = `${title} ${paragraphs.join(' ')}`.toLowerCase()
+  const boardTitle = getBoard(boardKey)?.title
+
+  if (boardTitle) {
+    tags.push(boardTitle)
+  }
+
+  if (/[？?]|为什么|如何|怎么|求/.test(title)) {
+    tags.push('提问')
+  }
+
+  if (/安利|推荐|入坑|补番/.test(plain)) {
+    tags.push('安利')
+  }
+
+  if (/分析|复盘|长评|拆解|评价/.test(plain)) {
+    tags.push('长评')
+  }
+
+  if (boardKey === 'anime' && /新番|作画|追更/.test(plain)) tags.push('新番')
+  if (boardKey === 'comic' && /分镜|连载/.test(plain)) tags.push('分镜')
+  if (boardKey === 'game' && /剧情|gal|jrpg/.test(plain)) tags.push('剧情向')
+  if (boardKey === 'novel' && /轻小说|章节|共读/.test(plain)) tags.push('轻小说')
+  if (boardKey === 'website' && /反馈|建议|功能/.test(plain)) tags.push('站务')
+
+  return [...new Set(tags)].slice(0, 4)
+}
+
+function buildMockBody(current: CommunityFeedItem) {
+  const paragraphs = [
+    `${current.excerpt || '这是一条来自社区首页的示例帖子详情，用来承接从帖子流进入具体页面的阅读路径。'} 详情页会优先保留标题、板块、作者和互动信息，让用户确认自己点进来的就是同一篇帖子。`,
+    '第二段用于模拟正文展开后的阅读节奏。这里通常会放作者的完整观点、举例、背景说明，以及和楼内讨论相关的上下文信息。',
+    '这版先使用 mock 数据完成交互闭环，后续接真实接口时只需要把详情查询替换到数据层，不需要改路由和页面结构。',
+  ]
+
+  return {
+    body: paragraphs,
+    bodyHtml: [
+      '<p><strong>正文示例</strong></p>',
+      buildBodyHtml(paragraphs),
+      '<blockquote><p>这版先用 HtmlReader 渲染帖子内容，后续接真实富文本时可以直接替换数据源。</p></blockquote>',
+    ].join(''),
+  }
+}
+
 export async function getCommunityHomePayload(
   req: GetCommunityHomePayloadRequest = {},
 ): Promise<CommunityHomePayload> {
   const order = req.order ?? 'latest'
   const scope = req.scope ?? 'all'
   const boardKey = req.boardKey ?? 'all'
-  const boardFiltered = boardKey === 'all' ? feed : feed.filter((item) => item.boardKey === boardKey)
+  const allItems = getFeedSource()
+  const boardFiltered = boardKey === 'all' ? allItems : allItems.filter((item) => item.boardKey === boardKey)
   const orderedFeed = sortFeed(filterByScope(boardFiltered, scope), order)
 
   await new Promise((resolve) => setTimeout(resolve, 180))
@@ -224,11 +355,81 @@ export async function getCommunityHomePayload(
     subtitle: '围绕动画、漫画、游戏、小说和站内话题展开更轻量的交流。',
     announcement: '社区首页原型已开放，欢迎从“站务”板块集中反馈体验问题。',
     announcementLink: '/forum/5',
-    todayThreads: boards.reduce((sum, board) => sum + board.todayPosts, 0),
+    todayThreads: boards.reduce((sum, board) => sum + board.todayPosts, 0) + customThreads.length,
     onlineUsers: 286,
     boards,
     feed: orderedFeed,
-    hotThreads: buildHotThreads(feed),
+    hotThreads: buildHotThreads(allItems),
     activeUsers,
   }
+}
+
+export async function getCommunityThreadDetail(id: number): Promise<CommunityThreadDetail | null> {
+  const customThread = customThreads.find((item) => item.id === id)
+  if (customThread) {
+    return {
+      ...customThread,
+      relatedThreads: getFeedSource()
+        .filter((item) => item.id !== id && item.boardKey === customThread.boardKey)
+        .slice(0, 3),
+    }
+  }
+
+  const current = seedFeed.find((item) => item.id === id)
+  if (!current) {
+    return null
+  }
+
+  const body = buildMockBody(current)
+
+  await new Promise((resolve) => setTimeout(resolve, 120))
+
+  return {
+    ...current,
+    likes: Math.max(18, Math.round(current.heat * 1.6 + current.replies / 2)),
+    favorites: Math.max(6, Math.round(current.heat * 0.7 + current.replies / 3)),
+    liked: false,
+    favorited: false,
+    body: body.body,
+    bodyHtml: body.bodyHtml,
+    repliesPreview: threadReplies[id] ?? [
+      { id: 1000 + id, authorName: '示例用户', publishedAt: '刚刚', content: '这条回复是默认占位，用于验证详情页在回复较少时的样式。', likes: 3, liked: false },
+    ],
+    relatedThreads: getFeedSource()
+      .filter((item) => item.id !== id && item.boardKey === current.boardKey)
+      .slice(0, 3),
+  }
+}
+
+export async function createCommunityThread(req: CreateCommunityThreadRequest): Promise<CommunityThreadDetail> {
+  const board = getBoard(req.boardKey)
+  const paragraphs = htmlToParagraphs(req.contentHtml)
+  const excerpt = (paragraphs[0] ?? req.title).slice(0, 120)
+  const nowId = Date.now()
+
+  const created: CommunityThreadDetail = {
+    id: nowId,
+    boardKey: req.boardKey,
+    boardName: board?.title ?? '社区',
+    title: req.title.trim(),
+    excerpt,
+    authorName: req.authorName,
+    publishedAt: '刚刚',
+    replies: 0,
+    views: 1,
+    heat: 18,
+    likes: 0,
+    favorites: 0,
+    tags: inferTags(req.boardKey, req.title, paragraphs),
+    liked: false,
+    favorited: false,
+    body: paragraphs,
+    bodyHtml: req.contentHtml,
+    repliesPreview: [],
+    relatedThreads: [],
+  }
+
+  customThreads.unshift(created)
+  await new Promise((resolve) => setTimeout(resolve, 160))
+  return created
 }

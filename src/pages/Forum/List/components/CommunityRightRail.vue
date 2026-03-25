@@ -18,14 +18,21 @@
           </div>
 
           <div class="rank-list">
-            <div v-for="(item, index) in hotThreads" :key="item.id" class="rank-item">
+            <router-link
+              v-for="(item, index) in hotThreads"
+              :key="item.id"
+              class="rank-item-link"
+              :to="{ name: 'ForumThread', params: { id: item.id } }"
+            >
+              <div class="rank-item">
               <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
               <div class="rank-item__copy">
                 <div class="rank-item__title">{{ item.title }}</div>
                 <div class="rank-item__meta">{{ item.boardName }} · {{ item.deltaLabel }}</div>
               </div>
               <div class="rank-item__value">{{ item.heat }}</div>
-            </div>
+              </div>
+            </router-link>
           </div>
         </section>
 
@@ -169,6 +176,13 @@ function avatarBackground(seed: string) {
   gap: 12px;
 }
 
+.rank-item-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 16px;
+}
+
 .rank-item,
 .user-item {
   display: grid;
@@ -178,6 +192,19 @@ function avatarBackground(seed: string) {
 .rank-item {
   grid-template-columns: auto 1fr auto;
   gap: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rank-item-link:hover .rank-item,
+.rank-item-link:focus-visible .rank-item {
+  transform: translateY(-1px);
+  background: rgba(241, 245, 249, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
 }
 
 .rank-item__index {

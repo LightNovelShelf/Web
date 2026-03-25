@@ -93,3 +93,45 @@ export interface GetCommunityHomePayloadRequest {
   order?: CommunityFeedOrder
   scope?: CommunityFeedScope
 }
+
+export interface CreateCommunityThreadRequest {
+  boardKey: Exclude<CommunityBoardKey, 'all'>
+  title: string
+  contentHtml: string
+  authorName: string
+}
+
+export interface CommunityThreadReply {
+  id: number
+  authorName: string
+  authorBadge?: string
+  publishedAt: string
+  content: string
+  likes: number
+  liked?: boolean
+}
+
+export interface CommunityThreadDetail {
+  id: number
+  boardKey: CommunityBoardKey
+  boardName: string
+  title: string
+  excerpt: string
+  authorName: string
+  publishedAt: string
+  replies: number
+  views: number
+  heat: number
+  likes: number
+  favorites: number
+  tags: string[]
+  featured?: boolean
+  pinned?: boolean
+  locked?: boolean
+  liked?: boolean
+  favorited?: boolean
+  body: string[]
+  bodyHtml: string
+  repliesPreview: CommunityThreadReply[]
+  relatedThreads: CommunityFeedItem[]
+}
