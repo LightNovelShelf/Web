@@ -64,12 +64,6 @@
             />
           </div>
         </q-tab-panel>
-
-        <q-tab-panel name="Form">
-          <div class="q-pa-md">
-            <div>Form</div>
-          </div>
-        </q-tab-panel>
       </q-tab-panels>
     </div>
 
@@ -158,13 +152,6 @@ const tabOptions: Array<Record<string, any>> = [
     label: '书籍',
     icon: 'mdiBook',
     disable: false,
-  },
-  {
-    name: 'Form',
-    key: 'Form',
-    label: '社区',
-    icon: 'mdiForum',
-    disable: true,
   },
 ]
 

@@ -3,6 +3,7 @@
     <div class="composer__copy">
       <div class="composer__eyebrow">Publish</div>
       <div class="composer__title">发布帖子</div>
+      <div class="composer__hint">先把核心观点写出来，再进详情页继续展开讨论。</div>
     </div>
 
     <div v-if="user" class="composer__actions">
@@ -12,13 +13,20 @@
         color="primary"
         icon="mdiSquareEditOutline"
         label="打开发帖弹框"
+        :loading="submitting"
         @click="dialogOpen = true"
       />
     </div>
 
     <div v-else class="composer__actions">
-      <div class="composer__hint">登录后可发布新帖并进入详情页继续讨论。</div>
-      <q-btn unelevated no-caps color="primary" label="登录后参与讨论" />
+      <div class="composer__hint">登录后可发布新帖并参与回复、点赞和收藏。</div>
+      <q-btn
+        unelevated
+        no-caps
+        color="primary"
+        label="登录后参与讨论"
+        :to="{ name: 'Login', query: { redirect: route.fullPath } }"
+      />
     </div>
 
     <q-dialog v-model="dialogOpen" persistent transition-show="fade" transition-hide="fade">
@@ -62,7 +70,10 @@
           </div>
 
           <div class="composer-dialog__editor">
-            <div class="composer-dialog__editor-label">内容</div>
+            <div class="composer-dialog__editor-row">
+              <div class="composer-dialog__editor-label">内容</div>
+              <div class="composer-dialog__editor-hint">标题至少 6 个字，正文至少 20 个字。</div>
+            </div>
             <div class="composer-dialog__editor-shell">
               <html-editor v-if="dialogOpen" v-model:html="contentHtml" mode="common" />
             </div>
@@ -78,7 +89,8 @@
               color="primary"
               icon="mdiSend"
               label="发布帖子"
-              :disable="!canSubmit"
+              :disable="!canSubmit || submitting"
+              :loading="submitting"
               @click="submit"
             />
           </div>
@@ -93,17 +105,19 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import HtmlEditor from 'components/html/HtmlEditor.vue'
 
-import type { CommunityBoardKey, CreateCommunityThreadRequest } from 'src/services/forum/types'
+import type { CommunityBoardKey, CreateCommunityThreadRequest } from 'src/services/forum'
 
 const props = defineProps<{
   user: any
   selectedBoardKey: CommunityBoardKey
+  submitting: boolean
 }>()
 
 const emit = defineEmits<{
   create: [payload: Omit<CreateCommunityThreadRequest, 'authorName'>]
 }>()
 
+const route = useRoute()
 const dialogOpen = ref(false)
 const title = ref('')
 const contentHtml = ref('<p></p>')
@@ -131,6 +145,15 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => props.submitting,
+  (nextSubmitting) => {
+    if (!nextSubmitting && dialogOpen.value && !title.value && plainTextLength.value === 0) {
+      dialogOpen.value = false
+    }
+  },
+)
+
 function getPlainTextFromHtml(html: string) {
   const div = document.createElement('div')
   div.innerHTML = sanitizerHtml(html)
@@ -145,12 +168,16 @@ function resetForm() {
 }
 
 function handleClose() {
+  if (props.submitting) {
+    return
+  }
+
   dialogOpen.value = false
   resetForm()
 }
 
 function submit() {
-  if (!canSubmit.value) {
+  if (!canSubmit.value || props.submitting) {
     return
   }
 
@@ -196,9 +223,17 @@ function submit() {
   font-weight: 700;
 }
 
+.composer__hint,
+.composer-dialog__editor-hint {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 12px;
+}
+
 .composer__actions,
 .composer-dialog__footer,
-.composer-dialog__footer-actions {
+.composer-dialog__footer-actions,
+.composer-dialog__editor-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -267,8 +302,12 @@ function submit() {
   overflow: hidden;
 }
 
-.composer-dialog__editor-label {
+.composer-dialog__editor-row {
+  justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.composer-dialog__editor-label {
   color: #334155;
   font-size: 13px;
   font-weight: 700;
@@ -316,7 +355,8 @@ function submit() {
 @media (max-width: 900px) {
   .composer,
   .composer__actions,
-  .composer-dialog__footer {
+  .composer-dialog__footer,
+  .composer-dialog__editor-row {
     flex-direction: column;
     align-items: flex-start;
   }

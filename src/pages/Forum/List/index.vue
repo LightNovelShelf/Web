@@ -1,16 +1,11 @@
 <template>
-  <q-page class="community-home" :style="pageStyle">
+  <q-page class="community-home">
     <div class="community-home__shell">
       <div class="community-home__grid">
-        <div ref="leftRailSlot" class="community-home__left">
+        <div class="community-home__left">
           <community-board-rail
             :boards="boards"
             :selected-board-key="boardKey"
-            :fixed-enabled="fixedRailEnabled"
-            :rail-top="railTop"
-            :rail-offset="leftRailOffset"
-            :rail-width="leftRailWidth"
-            :max-height="railMaxHeight"
             @select="handleBoardSelect"
           />
         </div>
@@ -51,28 +46,29 @@
           <community-composer
             :user="user"
             :selected-board-key="boardKey"
+            :submitting="creatingThread"
             @create="handleThreadCreate"
           />
 
           <community-feed-list
             :items="feedItems"
             :loading="loading"
+            :loading-more="loadingMore"
+            :error="error"
             :order="order"
             :scope="scope"
+            :pagination="pagination"
             @update:order="handleOrderChange"
             @update:scope="handleScopeChange"
+            @load-more="handleLoadMore"
+            @retry="handleRetry"
           />
         </main>
 
-        <div ref="rightRailSlot" class="community-home__right">
+        <div class="community-home__right">
           <community-right-rail
             :hot-threads="payload?.hotThreads ?? []"
             :active-users="payload?.activeUsers ?? []"
-            :fixed-enabled="fixedRailEnabled"
-            :rail-top="railTop"
-            :rail-offset="rightRailOffset"
-            :rail-width="rightRailWidth"
-            :max-height="railMaxHeight"
           />
         </div>
       </div>
@@ -81,23 +77,22 @@
 </template>
 
 <script setup lang="ts">
-import { useElementBounding, useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 
 import { useAppStore } from 'stores/app'
 
-import { useLayout } from 'src/components/app/useLayout'
-
-import { createCommunityThread, getCommunityHomePayload } from 'src/services/forum/communityHome'
+import { createCommunityThread, getCommunityHome } from 'src/services/forum'
 
 import type {
   CommunityBoardKey,
+  CommunityFeedItem,
   CommunityFeedOrder,
   CommunityFeedScope,
   CommunityHomePayload,
+  CommunityPagination,
   CreateCommunityThreadRequest,
-} from 'src/services/forum/types'
+} from 'src/services/forum'
 
 import CommunityBlueprintCanvas from './components/CommunityBlueprintCanvas.vue'
 import CommunityBoardRail from './components/CommunityBoardRail.vue'
@@ -109,54 +104,128 @@ const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const $q = useQuasar()
 const router = useRouter()
+const route = useRoute()
 
-const boardKey = ref<CommunityBoardKey>('all')
-const order = ref<CommunityFeedOrder>('latest')
-const scope = ref<CommunityFeedScope>('all')
 const payload = ref<CommunityHomePayload>()
+const feedItems = ref<CommunityFeedItem[]>([])
 const loading = ref(true)
-const pagePaddingTop = 26
+const loadingMore = ref(false)
+const creatingThread = ref(false)
+const error = ref('')
+const currentPage = ref(1)
+const latestRequestId = ref(0)
 
-const layout = useLayout()
-const { width: viewportWidth } = useWindowSize()
-const leftRailSlot = ref<HTMLElement>()
-const rightRailSlot = ref<HTMLElement>()
-const leftRailBounds = useElementBounding(leftRailSlot)
-const rightRailBounds = useElementBounding(rightRailSlot)
-const pageStyle = computed(() => ({
-  '--community-page-padding-top': `${pagePaddingTop}px`,
-}))
-const fixedRailEnabled = computed(() => viewportWidth.value > 1180)
-const railTop = computed(() => layout.headerHeight.value + pagePaddingTop)
-const railMaxHeight = computed(() => `calc(100vh - ${railTop.value + 24}px)`)
-const leftRailOffset = computed(() => leftRailBounds.left.value)
-const rightRailOffset = computed(() => Math.max(0, viewportWidth.value - rightRailBounds.right.value))
-const leftRailWidth = computed(() => leftRailBounds.width.value || (viewportWidth.value > 1320 ? 260 : 240))
-const rightRailWidth = computed(() => rightRailBounds.width.value || (viewportWidth.value > 1320 ? 320 : 292))
+const emptyPagination: CommunityPagination = {
+  page: 1,
+  size: 6,
+  total: 0,
+  totalPages: 1,
+  hasMore: false,
+}
+
+const boardKey = computed<CommunityBoardKey>(() => {
+  const value = route.query.board
+  if (typeof value !== 'string') return 'all'
+  return ['all', 'anime', 'comic', 'game', 'novel', 'website'].includes(value) ? (value as CommunityBoardKey) : 'all'
+})
+
+const order = computed<CommunityFeedOrder>(() => {
+  const value = route.query.order
+  if (typeof value !== 'string') return 'latest'
+  return ['latest', 'hot', 'featured'].includes(value) ? (value as CommunityFeedOrder) : 'latest'
+})
+
+const scope = computed<CommunityFeedScope>(() => {
+  const value = route.query.scope
+  if (typeof value !== 'string') return 'all'
+  return ['all', 'today', 'week'].includes(value) ? (value as CommunityFeedScope) : 'all'
+})
 
 const boards = computed(() => payload.value?.boards ?? [])
-const feedItems = computed(() => payload.value?.feed ?? [])
+const pagination = computed(() => payload.value?.feedPage ?? emptyPagination)
 
-async function loadCommunityHome() {
-  loading.value = true
-  payload.value = await getCommunityHomePayload({
-    boardKey: boardKey.value,
-    order: order.value,
-    scope: scope.value,
-  })
-  loading.value = false
+async function loadCommunityHome(options: { append?: boolean } = {}) {
+  const append = options.append ?? false
+  const page = append ? currentPage.value + 1 : 1
+  const requestId = ++latestRequestId.value
+
+  error.value = ''
+  if (append) {
+    loadingMore.value = true
+  } else {
+    loading.value = true
+    currentPage.value = 1
+  }
+
+  try {
+    const nextPayload = await getCommunityHome({
+      boardKey: boardKey.value,
+      order: order.value,
+      scope: scope.value,
+      page,
+      size: 6,
+    })
+
+    if (requestId !== latestRequestId.value) {
+      return
+    }
+
+    payload.value = nextPayload
+    currentPage.value = page
+    feedItems.value = append ? [...feedItems.value, ...nextPayload.feed] : nextPayload.feed
+  } catch (err) {
+    if (requestId !== latestRequestId.value) {
+      return
+    }
+
+    error.value = err instanceof Error ? err.message : '请稍后再试'
+    if (!append) {
+      feedItems.value = []
+    }
+  } finally {
+    if (requestId === latestRequestId.value) {
+      loading.value = false
+      loadingMore.value = false
+    }
+  }
+}
+
+function updateQuery(next: Partial<Record<'board' | 'order' | 'scope', string | undefined>>) {
+  const query = { ...route.query }
+
+  for (const [key, value] of Object.entries(next)) {
+    if (!value || (key === 'board' && value === 'all') || (key === 'order' && value === 'latest') || (key === 'scope' && value === 'all')) {
+      delete query[key]
+    } else {
+      query[key] = value
+    }
+  }
+
+  void router.replace({ name: 'ForumList', query })
 }
 
 function handleBoardSelect(key: CommunityBoardKey) {
-  boardKey.value = key
+  updateQuery({ board: key })
 }
 
 function handleOrderChange(nextOrder: CommunityFeedOrder) {
-  order.value = nextOrder
+  updateQuery({ order: nextOrder })
 }
 
 function handleScopeChange(nextScope: CommunityFeedScope) {
-  scope.value = nextScope
+  updateQuery({ scope: nextScope })
+}
+
+function handleLoadMore() {
+  if (!pagination.value.hasMore || loadingMore.value) {
+    return
+  }
+
+  void loadCommunityHome({ append: true })
+}
+
+function handleRetry() {
+  void loadCommunityHome()
 }
 
 function resolveAuthorName() {
@@ -164,27 +233,47 @@ function resolveAuthorName() {
 }
 
 async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadRequest, 'authorName'>) {
-  const created = await createCommunityThread({
-    ...payloadDraft,
-    authorName: resolveAuthorName(),
-  })
+  if (!user.value) {
+    $q.notify({
+      type: 'warning',
+      message: '请先登录后再发帖',
+    })
+    void router.push({ name: 'Login', query: { redirect: route.fullPath } })
+    return
+  }
 
-  $q.notify({
-    type: 'positive',
-    message: '帖子已发布',
-  })
+  creatingThread.value = true
 
-  await loadCommunityHome()
-  await router.push({ name: 'ForumThread', params: { id: created.id } })
+  try {
+    const created = await createCommunityThread({
+      ...payloadDraft,
+      authorName: resolveAuthorName(),
+    })
+
+    $q.notify({
+      type: 'positive',
+      message: '帖子已发布',
+    })
+
+    await loadCommunityHome()
+    await router.push({ name: 'ForumThread', params: { id: created.id } })
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: err instanceof Error ? err.message : '发布失败',
+    })
+  } finally {
+    creatingThread.value = false
+  }
 }
 
-watch([boardKey, order, scope], () => {
-  void loadCommunityHome()
-})
-
-onMounted(() => {
-  void loadCommunityHome()
-})
+watch(
+  () => [boardKey.value, order.value, scope.value].join(':'),
+  () => {
+    void loadCommunityHome()
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped lang="scss">
@@ -193,8 +282,9 @@ onMounted(() => {
   --community-text: #0f172a;
   --community-text-soft: #475569;
   --community-text-muted: #94a3b8;
+  --community-sticky-top: 84px;
   min-height: 100%;
-  padding: var(--community-page-padding-top) 22px 0;
+  padding: 26px 22px 0;
   background:
     radial-gradient(circle at top left, rgba(147, 197, 253, 0.16), transparent 24%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 52%, #f8fafc 100%);
@@ -210,6 +300,13 @@ onMounted(() => {
   grid-template-columns: 260px minmax(0, 1fr) 320px;
   gap: 22px;
   align-items: start;
+}
+
+.community-home__left,
+.community-home__right {
+  position: sticky;
+  top: var(--community-sticky-top);
+  align-self: start;
 }
 
 .community-home__center {

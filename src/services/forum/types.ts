@@ -1,34 +1,24 @@
-import type { ListResult } from '../types'
-
-export enum ForumType {
-  Anime = 'Anime',
-  Comic = 'Comic',
-  Game = 'Game',
-  Novel = 'Novel',
-  Website = 'Website',
-}
-
-export namespace GetForumList {
-  export interface Request {
-    Page: number
-    Size: number
-    ForumType: ForumType
-  }
-  export type Response = ListResult<any>
-}
-
-export namespace GetForumInfo {
-  export interface Request {
-    Id: number
-  }
-  export type Response = any
-}
-
 export type CommunityBoardKey = 'all' | 'anime' | 'comic' | 'game' | 'novel' | 'website'
 
 export type CommunityFeedOrder = 'latest' | 'hot' | 'featured'
 
 export type CommunityFeedScope = 'all' | 'today' | 'week'
+
+export interface CommunityPagination {
+  page: number
+  size: number
+  total: number
+  totalPages: number
+  hasMore: boolean
+}
+
+export interface CommunityListQuery {
+  boardKey?: CommunityBoardKey
+  order?: CommunityFeedOrder
+  scope?: CommunityFeedScope
+  page?: number
+  size?: number
+}
 
 export interface CommunityBoardSummary {
   id: number
@@ -42,7 +32,7 @@ export interface CommunityBoardSummary {
 
 export interface CommunityFeedItem {
   id: number
-  boardKey: CommunityBoardKey
+  boardKey: Exclude<CommunityBoardKey, 'all'>
   boardName: string
   title: string
   excerpt: string
@@ -52,10 +42,14 @@ export interface CommunityFeedItem {
   replies: number
   views: number
   heat: number
+  likes: number
+  favorites: number
   tags: string[]
   featured?: boolean
   pinned?: boolean
   locked?: boolean
+  liked?: boolean
+  favorited?: boolean
 }
 
 export interface CommunityHotRankItem {
@@ -75,6 +69,33 @@ export interface CommunityActiveUserItem {
   summary: string
 }
 
+export interface CommunityReplyTarget {
+  id: number
+  authorName: string
+}
+
+export interface CommunityThreadReply {
+  id: number
+  authorName: string
+  authorBadge?: string
+  authorAvatar: string
+  publishedAt: string
+  content: string
+  likes: number
+  liked?: boolean
+  replyTo?: CommunityReplyTarget
+  childReplies: CommunityThreadReply[]
+  childPage: CommunityPagination
+}
+
+export interface CommunityThreadDetail extends CommunityFeedItem {
+  body: string[]
+  bodyHtml: string
+  repliesPage: CommunityPagination
+  replyItems: CommunityThreadReply[]
+  relatedThreads: CommunityFeedItem[]
+}
+
 export interface CommunityHomePayload {
   title: string
   subtitle: string
@@ -84,14 +105,9 @@ export interface CommunityHomePayload {
   onlineUsers: number
   boards: CommunityBoardSummary[]
   feed: CommunityFeedItem[]
+  feedPage: CommunityPagination
   hotThreads: CommunityHotRankItem[]
   activeUsers: CommunityActiveUserItem[]
-}
-
-export interface GetCommunityHomePayloadRequest {
-  boardKey?: CommunityBoardKey
-  order?: CommunityFeedOrder
-  scope?: CommunityFeedScope
 }
 
 export interface CreateCommunityThreadRequest {
@@ -101,37 +117,34 @@ export interface CreateCommunityThreadRequest {
   authorName: string
 }
 
-export interface CommunityThreadReply {
-  id: number
-  authorName: string
-  authorBadge?: string
-  publishedAt: string
+export interface CreateCommunityReplyRequest {
+  threadId: number
   content: string
-  likes: number
-  liked?: boolean
+  authorName: string
+  replyToId?: number
 }
 
-export interface CommunityThreadDetail {
+export interface GetCommunityReplyChildrenRequest {
+  threadId: number
+  parentReplyId: number
+  page?: number
+  size?: number
+}
+
+export interface CommunityMyReplyItem {
   id: number
-  boardKey: CommunityBoardKey
+  threadId: number
+  threadTitle: string
   boardName: string
-  title: string
-  excerpt: string
-  authorName: string
+  content: string
   publishedAt: string
-  replies: number
-  views: number
-  heat: number
   likes: number
-  favorites: number
-  tags: string[]
-  featured?: boolean
-  pinned?: boolean
-  locked?: boolean
-  liked?: boolean
-  favorited?: boolean
-  body: string[]
-  bodyHtml: string
-  repliesPreview: CommunityThreadReply[]
-  relatedThreads: CommunityFeedItem[]
+  replyToName?: string
+}
+
+export interface CommunityMyOverview {
+  authorName: string
+  publishedThreads: CommunityFeedItem[]
+  participatedReplies: CommunityMyReplyItem[]
+  favoriteThreads: CommunityFeedItem[]
 }

@@ -150,7 +150,6 @@ const routes: RouteRecordRaw[] = [
     path: '/forum/list',
     name: 'ForumList',
     meta: { requiresAuth: false },
-    props: true,
     component: () => import('../pages/Forum/List/index.vue'),
   },
   {
@@ -159,13 +158,6 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false },
     props: true,
     component: () => import('../pages/Forum/Thread.vue'),
-  },
-  {
-    path: '/forum/:id',
-    name: 'Forum',
-    meta: { requiresAuth: false },
-    props: true,
-    component: () => import('../pages/Forum/index.vue'),
   },
 ]
 

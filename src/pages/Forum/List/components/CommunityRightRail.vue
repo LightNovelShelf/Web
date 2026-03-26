@@ -1,9 +1,7 @@
 <template>
-  <aside class="right-rail" :style="placeholderStyle">
+  <aside class="right-rail">
     <overlay-scrollbars-component
       class="right-rail__scroll"
-      :class="{ 'right-rail__scroll--fixed': fixedEnabled }"
-      :style="scrollStyle"
       :options="scrollbarOptions"
       defer
     >
@@ -70,16 +68,11 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
-import type { CommunityActiveUserItem, CommunityHotRankItem } from 'src/services/forum/types'
+import type { CommunityActiveUserItem, CommunityHotRankItem } from 'src/services/forum'
 
 const props = defineProps<{
   hotThreads: CommunityHotRankItem[]
   activeUsers: CommunityActiveUserItem[]
-  fixedEnabled: boolean
-  railTop: number
-  railOffset: number
-  railWidth: number
-  maxHeight: string
 }>()
 
 const $q = useQuasar()
@@ -91,19 +84,6 @@ const scrollbarOptions = computed(() => ({
     autoHideDelay: 300,
     autoHideSuspend: false,
   },
-}))
-
-const placeholderStyle = computed(() => (props.fixedEnabled ? { height: props.maxHeight } : undefined))
-
-const scrollStyle = computed(() => ({
-  '--community-rail-max-height': props.maxHeight,
-  ...(props.fixedEnabled
-    ? {
-        top: `${props.railTop}px`,
-        right: `${props.railOffset}px`,
-        width: `${props.railWidth}px`,
-      }
-    : {}),
 }))
 
 const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#0891b2']
@@ -121,14 +101,10 @@ function avatarBackground(seed: string) {
 
 .right-rail__scroll {
   width: 100%;
-  max-height: var(--community-rail-max-height);
+  max-height: calc(100vh - var(--community-sticky-top) - 24px);
   padding-right: 12px;
   padding-bottom: 8px;
   box-sizing: border-box;
-}
-
-.right-rail__scroll--fixed {
-  position: fixed;
 }
 
 .right-rail__content-wrap {
@@ -173,7 +149,7 @@ function avatarBackground(seed: string) {
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .rank-item-link {

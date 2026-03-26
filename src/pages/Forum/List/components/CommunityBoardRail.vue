@@ -1,9 +1,7 @@
 <template>
-  <aside class="board-rail" :style="placeholderStyle">
+  <aside class="board-rail">
     <overlay-scrollbars-component
       class="board-rail__scroll"
-      :class="{ 'board-rail__scroll--fixed': fixedEnabled }"
-      :style="scrollStyle"
       :options="scrollbarOptions"
       defer
     >
@@ -43,16 +41,11 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
-import type { CommunityBoardKey, CommunityBoardSummary } from 'src/services/forum/types'
+import type { CommunityBoardKey, CommunityBoardSummary } from 'src/services/forum'
 
 const props = defineProps<{
   boards: CommunityBoardSummary[]
   selectedBoardKey: CommunityBoardKey
-  fixedEnabled: boolean
-  railTop: number
-  railOffset: number
-  railWidth: number
-  maxHeight: string
 }>()
 
 defineEmits<{
@@ -68,19 +61,6 @@ const scrollbarOptions = computed(() => ({
     autoHideDelay: 300,
     autoHideSuspend: false,
   },
- }))
-
-const placeholderStyle = computed(() => (props.fixedEnabled ? { height: props.maxHeight } : undefined))
-
-const scrollStyle = computed(() => ({
-  '--community-rail-max-height': props.maxHeight,
-  ...(props.fixedEnabled
-    ? {
-        top: `${props.railTop}px`,
-        left: `${props.railOffset}px`,
-        width: `${props.railWidth}px`,
-      }
-    : {}),
 }))
 </script>
 
@@ -91,14 +71,10 @@ const scrollStyle = computed(() => ({
 
 .board-rail__scroll {
   width: 100%;
-  max-height: var(--community-rail-max-height);
+  max-height: calc(100vh - var(--community-sticky-top) - 24px);
   padding-right: 12px;
   padding-bottom: 8px;
   box-sizing: border-box;
-}
-
-.board-rail__scroll--fixed {
-  position: fixed;
 }
 
 .board-rail__content-wrap {
