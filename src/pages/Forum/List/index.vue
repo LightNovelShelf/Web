@@ -78,6 +78,8 @@ import { useQuasar } from 'quasar'
 
 import { useAppStore } from 'stores/app'
 
+import { useIsActivated } from 'src/composition/useIsActivated'
+
 import { createCommunityThread, getCommunityHome } from 'src/services/forum'
 
 import type {
@@ -101,6 +103,7 @@ const { user } = storeToRefs(appStore)
 const $q = useQuasar()
 const router = useRouter()
 const route = useRoute()
+const isActivated = useIsActivated()
 
 const payload = ref<CommunityHomePayload>()
 const feedItems = ref<CommunityFeedItem[]>([])
@@ -110,6 +113,7 @@ const creatingThread = ref(false)
 const error = ref('')
 const currentPage = ref(1)
 const latestRequestId = ref(0)
+const lastLoadedQueryKey = ref('')
 
 const emptyPagination: CommunityPagination = {
   page: 1,
@@ -146,6 +150,7 @@ const scope = computed<CommunityFeedScope>(() => {
 
 const boards = computed(() => payload.value?.boards ?? [])
 const pagination = computed(() => payload.value?.feedPage ?? emptyPagination)
+const routeQueryKey = computed(() => [boardKey.value, order.value, scope.value, subCategoryKey.value].join(':'))
 
 async function loadCommunityHome(options: { append?: boolean } = {}) {
   const append = options.append ?? false
@@ -177,6 +182,9 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
     payload.value = nextPayload
     currentPage.value = page
     feedItems.value = append ? [...feedItems.value, ...nextPayload.feed] : nextPayload.feed
+    if (!append) {
+      lastLoadedQueryKey.value = routeQueryKey.value
+    }
   } catch (err) {
     if (requestId !== latestRequestId.value) {
       return
@@ -192,6 +200,18 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
       loadingMore.value = false
     }
   }
+}
+
+function requestCommunityHomeIfNeeded() {
+  if (!isActivated.value) {
+    return
+  }
+
+  if (payload.value && lastLoadedQueryKey.value === routeQueryKey.value) {
+    return
+  }
+
+  void loadCommunityHome()
 }
 
 function updateQuery(next: Partial<Record<'board' | 'order' | 'scope' | 'category', string | undefined>>) {
@@ -280,13 +300,17 @@ async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadReques
   }
 }
 
-watch(
-  () => [boardKey.value, order.value, scope.value, subCategoryKey.value].join(':'),
-  () => {
-    void loadCommunityHome()
-  },
-  { immediate: true },
-)
+onMounted(() => {
+  requestCommunityHomeIfNeeded()
+})
+
+onActivated(() => {
+  requestCommunityHomeIfNeeded()
+})
+
+watch(routeQueryKey, () => {
+  requestCommunityHomeIfNeeded()
+})
 </script>
 
 <style scoped lang="scss">
