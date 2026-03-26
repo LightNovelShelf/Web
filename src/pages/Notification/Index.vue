@@ -29,87 +29,28 @@
               <div class="notification-content flex-1">
                 <div class="notification-header row items-center q-mb-xs">
                   <span class="text-weight-medium">{{ notification.Actor.UserName }}</span>
-                  <!-- 根据不同类型显示不同的文案 -->
                   <span class="text-grey-7 q-ml-xs">
-                    <!-- 回复评论 -->
-                    <template v-if="notification.Type === 'CommentReply'">回复了你的评论</template>
-                    <!-- 回复书籍 -->
-                    <template v-else-if="notification.Type === 'Comment'">回复了你的书籍</template>
-                    <!-- 其他类型 -->
-                    <template v-else>{{ notification.Type }}</template>
+                    {{ getNotificationLabel(notification) }}
                   </span>
                   <q-space />
                   <span class="text-grey-6 text-caption">{{ formatTime(notification.CreatedAt) }}</span>
                 </div>
 
-                <!-- 关联内容预览 -->
                 <div v-if="notification.Extra" class="notification-preview-container">
-                  <!-- 回复书籍：显示书籍标题 + 回复内容 -->
-                  <template v-if="notification.Type === 'Comment'">
-                    <div v-if="notification.Extra.book_title" class="text-caption text-grey-7 q-mb-xs">
-                      《{{ notification.Extra.book_title }}》
+                  <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders">
+                    <div v-if="notification.Extra.object_title" class="text-caption text-grey-7 q-mb-xs">
+                      《{{ notification.Extra.object_title }}》
                     </div>
-                    <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders">
-                      <div v-if="notification.Extra.preview" class="text-body2 text-grey-8">
-                        {{ notification.Extra.preview }}
-                      </div>
+                    <div
+                      v-if="notification.Extra.reply_preview"
+                      class="notification-preview__reply q-mb-xs text-body2 text-grey-7"
+                    >
+                      回复：{{ notification.Extra.reply_preview }}
                     </div>
-                  </template>
-
-                  <!-- 回复评论（无reply_preview）：显示parent评论内容 + 回复内容 -->
-                  <template
-                    v-else-if="
-                      notification.Type === 'CommentReply' &&
-                      notification.Extra.parent_preview &&
-                      !notification.Extra.reply_preview
-                    "
-                  >
-                    <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders q-mb-xs">
-                      <div class="text-body2 text-grey-7">
-                        {{ notification.Extra.parent_preview }}
-                      </div>
+                    <div v-if="notification.Extra.preview" class="text-body2 text-grey-8">
+                      {{ notification.Extra.preview }}
                     </div>
-                    <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders">
-                      <div v-if="notification.Extra.preview" class="text-body2 text-grey-8">
-                        {{ notification.Extra.preview }}
-                      </div>
-                    </div>
-                  </template>
-
-                  <!-- 回复评论（有reply_preview）：显示reply评论内容 + 回复内容 + parent预览（右侧） -->
-                  <template v-else-if="notification.Type === 'CommentReply' && notification.Extra.reply_preview">
-                    <div class="row q-gutter-sm">
-                      <div class="col notification-preview-left">
-                        <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders q-mb-xs">
-                          <div class="text-body2 text-grey-7">
-                            {{ notification.Extra.reply_preview }}
-                          </div>
-                        </div>
-                        <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders">
-                          <div v-if="notification.Extra.preview" class="text-body2 text-grey-8">
-                            {{ notification.Extra.preview }}
-                          </div>
-                        </div>
-                      </div>
-                      <div v-if="notification.Extra.parent_preview" class="notification-preview-right">
-                        <div class="notification-preview q-pa-xs bg-grey-3 rounded-borders text-caption text-grey-7">
-                          {{ notification.Extra.parent_preview }}
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-
-                  <!-- 其他类型：兼容原有逻辑 -->
-                  <template v-else>
-                    <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders">
-                      <div v-if="notification.Extra.book_title" class="text-caption text-grey-7 q-mb-xs">
-                        《{{ notification.Extra.book_title }}》
-                      </div>
-                      <div v-if="notification.Extra.preview" class="text-body2 text-grey-8">
-                        {{ notification.Extra.preview }}
-                      </div>
-                    </div>
-                  </template>
+                  </div>
                 </div>
               </div>
 
@@ -223,23 +164,34 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     }
   }
 
-  // 根据通知类型跳转
-  if (notification.Extra) {
-    // 评论类型通知
-    if (notification.ObjectType === 'Book' && notification.ObjectId) {
-      router.push({
-        name: 'BookInfo',
-        params: { bid: notification.ObjectId },
-      })
-    }
-    // 公告类型通知
-    else if (notification.ObjectType === 'Announcement' && notification.ObjectId) {
-      router.push({
-        name: 'AnnouncementDetail',
-        params: { id: notification.ObjectId },
-      })
-    }
+  if (notification.ObjectType === 'Book' && notification.Extra.object_id) {
+    router.push({
+      name: 'BookInfo',
+      params: { bid: notification.Extra.object_id },
+    })
+    return
   }
+
+  if (notification.ObjectType === 'Announcement' && notification.Extra.object_id) {
+    router.push({
+      name: 'AnnouncementDetail',
+      params: { id: notification.Extra.object_id },
+    })
+    return
+  }
+
+}
+
+const getNotificationLabel = (notification: GetNotifications.Notification) => {
+  if (notification.Type === 'Comment') {
+    return notification.ObjectType === 'Announcement' ? '评论了你的公告' : '评论了你的书籍'
+  }
+
+  if (notification.Type === 'CommentReply') {
+    return notification.ObjectType === 'Announcement' ? '回复了你的评论' : '回复了你的评论'
+  }
+
+  return notification.Type
 }
 
 // 全部标记为已读
@@ -296,6 +248,14 @@ const markAllAsRead = async () => {
   .notification-preview {
     border-left: 3px solid #2196f3;
     font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .notification-preview__reply {
+    padding-left: 10px;
+    border-left: 2px solid #cbd5e1;
+    color: #475569;
+    font-size: 12px;
     line-height: 1.5;
   }
 
