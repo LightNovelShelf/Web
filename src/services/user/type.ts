@@ -62,6 +62,22 @@ export namespace UploadImage {
 }
 
 export namespace GetNotifications {
+  export type NotificationType =
+    | 'Comment'
+    | 'CommentReply'
+
+  export type NotificationObjectType = 'Book' | 'Announcement'
+
+  export interface NotificationExtra {
+    object_id: number
+    object_title: string
+    preview: string
+    reply_id?: number | null
+    parent_reply_id?: number | null
+    reply_to_reply_id?: number | null
+    reply_preview?: string | null
+  }
+
   export interface Request {
     Page: number
     Size: number
@@ -80,12 +96,12 @@ export namespace GetNotifications {
       UserName: string
       Avatar: string
     }
-    Type: string
-    ObjectType: string
+    Type: NotificationType
+    ObjectType: NotificationObjectType
     ObjectId: number
     IsRead: boolean
     CreatedAt: string
-    Extra: Record<string, any>
+    Extra: NotificationExtra
   }
 }
 
