@@ -11,7 +11,10 @@
       <template v-else-if="thread">
         <q-breadcrumbs class="thread-page__breadcrumbs">
           <q-breadcrumbs-el label="社区" :to="{ name: 'ForumList' }" />
-          <q-breadcrumbs-el :label="thread.boardName" :to="{ name: 'ForumList', query: { board: thread.boardKey } }" />
+          <q-breadcrumbs-el
+            :label="thread.boardName"
+            :to="{ name: 'ForumList', query: { board: thread.boardKey, category: thread.subCategoryKey } }"
+          />
           <q-breadcrumbs-el label="帖子详情" />
         </q-breadcrumbs>
 
@@ -21,6 +24,7 @@
               <div class="thread-card__topline">
                 <div class="thread-card__topline-meta">
                   <span class="thread-card__board">{{ thread.boardName }}</span>
+                  <span v-if="thread.subCategoryLabel" class="thread-card__sub-category">{{ thread.subCategoryLabel }}</span>
                   <span v-if="thread.pinned" class="thread-card__flag thread-card__flag--pinned">置顶</span>
                   <span v-if="thread.featured" class="thread-card__flag thread-card__flag--featured">精华</span>
                   <span v-if="thread.locked" class="thread-card__flag thread-card__flag--locked">已锁定</span>
@@ -273,7 +277,13 @@
             <section class="side-panel">
               <div class="side-panel__eyebrow">Back</div>
               <h3>继续浏览</h3>
-              <q-btn unelevated no-caps color="primary" label="返回社区首页" :to="{ name: 'ForumList', query: { board: thread.boardKey } }" />
+              <q-btn
+                unelevated
+                no-caps
+                color="primary"
+                label="返回社区首页"
+                :to="{ name: 'ForumList', query: { board: thread.boardKey, category: thread.subCategoryKey } }"
+              />
             </section>
 
             <section class="side-panel">
@@ -774,6 +784,7 @@ watch(
 }
 
 .thread-card__board,
+.thread-card__sub-category,
 .thread-card__flag,
 .thread-card__tag,
 .reply-item__badge,
@@ -789,6 +800,12 @@ watch(
   padding: 6px 11px;
   color: #2563eb;
   background: rgba(59, 130, 246, 0.08);
+}
+
+.thread-card__sub-category {
+  padding: 6px 11px;
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.08);
 }
 
 .thread-card__flag {

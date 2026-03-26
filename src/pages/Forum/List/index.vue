@@ -46,6 +46,7 @@
           <community-composer
             :user="user"
             :selected-board-key="boardKey"
+            :selected-sub-category-key="payload?.selectedSubCategoryKey ?? ''"
             :submitting="creatingThread"
             @create="handleThreadCreate"
           />
@@ -57,9 +58,12 @@
             :error="error"
             :order="order"
             :scope="scope"
+            :sub-categories="payload?.subCategories ?? []"
+            :selected-sub-category-key="payload?.selectedSubCategoryKey ?? ''"
             :pagination="pagination"
             @update:order="handleOrderChange"
             @update:scope="handleScopeChange"
+            @update:sub-category="handleSubCategoryChange"
             @load-more="handleLoadMore"
             @retry="handleRetry"
           />
@@ -129,6 +133,13 @@ const boardKey = computed<CommunityBoardKey>(() => {
   return ['all', 'anime', 'comic', 'game', 'novel', 'website'].includes(value) ? (value as CommunityBoardKey) : 'all'
 })
 
+const subCategoryKey = computed(() => {
+  const value = route.query.category
+  if (typeof value !== 'string') return ''
+  const normalized = value.trim()
+  return normalized === 'all' ? '' : normalized
+})
+
 const order = computed<CommunityFeedOrder>(() => {
   const value = route.query.order
   if (typeof value !== 'string') return 'latest'
@@ -160,6 +171,7 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
   try {
     const nextPayload = await getCommunityHome({
       boardKey: boardKey.value,
+      subCategoryKey: subCategoryKey.value || undefined,
       order: order.value,
       scope: scope.value,
       page,
@@ -190,11 +202,16 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
   }
 }
 
-function updateQuery(next: Partial<Record<'board' | 'order' | 'scope', string | undefined>>) {
+function updateQuery(next: Partial<Record<'board' | 'order' | 'scope' | 'category', string | undefined>>) {
   const query = { ...route.query }
 
   for (const [key, value] of Object.entries(next)) {
-    if (!value || (key === 'board' && value === 'all') || (key === 'order' && value === 'latest') || (key === 'scope' && value === 'all')) {
+    if (
+      !value
+      || (key === 'board' && value === 'all')
+      || (key === 'order' && value === 'latest')
+      || (key === 'scope' && value === 'all')
+    ) {
       delete query[key]
     } else {
       query[key] = value
@@ -205,7 +222,7 @@ function updateQuery(next: Partial<Record<'board' | 'order' | 'scope', string | 
 }
 
 function handleBoardSelect(key: CommunityBoardKey) {
-  updateQuery({ board: key })
+  updateQuery({ board: key, category: undefined })
 }
 
 function handleOrderChange(nextOrder: CommunityFeedOrder) {
@@ -214,6 +231,10 @@ function handleOrderChange(nextOrder: CommunityFeedOrder) {
 
 function handleScopeChange(nextScope: CommunityFeedScope) {
   updateQuery({ scope: nextScope })
+}
+
+function handleSubCategoryChange(nextSubCategoryKey: string) {
+  updateQuery({ category: nextSubCategoryKey || undefined })
 }
 
 function handleLoadMore() {
@@ -268,7 +289,7 @@ async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadReques
 }
 
 watch(
-  () => [boardKey.value, order.value, scope.value].join(':'),
+  () => [boardKey.value, order.value, scope.value, subCategoryKey.value].join(':'),
   () => {
     void loadCommunityHome()
   },

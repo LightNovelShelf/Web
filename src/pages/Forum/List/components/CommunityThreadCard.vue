@@ -3,6 +3,7 @@
     <article class="feed-item">
       <div class="feed-item__topline">
         <span class="feed-item__board">{{ item.boardName }}</span>
+        <span v-if="item.subCategoryLabel" class="feed-item__sub-category">{{ item.subCategoryLabel }}</span>
         <span v-if="item.pinned" class="feed-item__flag feed-item__flag--pinned">置顶</span>
         <span v-if="item.featured" class="feed-item__flag feed-item__flag--featured">精华</span>
         <span v-if="item.locked" class="feed-item__flag feed-item__flag--locked">已锁定</span>
@@ -92,6 +93,7 @@ function avatarBackground(seed: string) {
 }
 
 .feed-item__board,
+.feed-item__sub-category,
 .feed-item__flag,
 .feed-item__tag {
   display: inline-flex;
@@ -105,6 +107,12 @@ function avatarBackground(seed: string) {
   padding: 6px 11px;
   color: var(--community-accent);
   background: rgba(59, 130, 246, 0.08);
+}
+
+.feed-item__sub-category {
+  padding: 6px 11px;
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.08);
 }
 
 .feed-item__flag {

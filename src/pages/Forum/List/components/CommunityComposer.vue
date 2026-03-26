@@ -50,20 +50,36 @@
 
         <div class="composer-dialog__body">
           <div class="composer-dialog__meta">
-            <q-select
-              v-model="boardKey"
-              outlined
-              emit-value
-              map-options
-              label="板块"
-              :options="boardOptions"
-            />
+            <div class="composer-dialog__meta-row">
+              <q-select
+                v-model="boardKey"
+                class="composer-dialog__field"
+                dense
+                outlined
+                emit-value
+                map-options
+                label="板块"
+                :options="boardOptions"
+              />
+
+              <q-select
+                v-if="subCategoryOptions.length"
+                v-model="subCategoryKey"
+                class="composer-dialog__field"
+                dense
+                outlined
+                emit-value
+                map-options
+                label="子分类"
+                :options="subCategoryOptions"
+              />
+            </div>
 
             <q-input
               v-model="title"
+              class="composer-dialog__field composer-dialog__field--title"
               outlined
               maxlength="60"
-              counter
               label="标题"
               placeholder="先把这一帖的核心问题或观点写清楚"
             />
@@ -110,6 +126,7 @@ import type { CommunityBoardKey, CreateCommunityThreadRequest } from 'src/servic
 const props = defineProps<{
   user: any
   selectedBoardKey: CommunityBoardKey
+  selectedSubCategoryKey: string
   submitting: boolean
 }>()
 
@@ -122,6 +139,7 @@ const dialogOpen = ref(false)
 const title = ref('')
 const contentHtml = ref('<p></p>')
 const boardKey = ref<Exclude<CommunityBoardKey, 'all'>>('anime')
+const subCategoryKey = ref('')
 
 const boardOptions = [
   { label: '动画', value: 'anime' },
@@ -131,19 +149,55 @@ const boardOptions = [
   { label: '站务', value: 'website' },
 ] as const
 
+const boardSubCategoryOptions: Record<Exclude<CommunityBoardKey, 'all'>, Array<{ label: string; value: string }>> = {
+  anime: [{ label: '其他', value: 'other' }],
+  comic: [{ label: '其他', value: 'other' }],
+  game: [{ label: '其他', value: 'other' }],
+  novel: [
+    { label: '其他', value: 'other' },
+    { label: 'EPUB', value: 'epub' },
+  ],
+  website: [{ label: '其他', value: 'other' }],
+}
+
+const subCategoryOptions = computed(() => boardSubCategoryOptions[boardKey.value] ?? [])
+
 const plainText = computed(() => getPlainTextFromHtml(contentHtml.value))
 const plainTextLength = computed(() => plainText.value.replace(/\s+/g, '').length)
 const canSubmit = computed(() => title.value.trim().length >= 6 && plainTextLength.value >= 20)
 
+function syncBoardFromProps() {
+  boardKey.value = props.selectedBoardKey && props.selectedBoardKey !== 'all' ? props.selectedBoardKey : 'anime'
+  syncSubCategoryForBoard()
+}
+
+function syncSubCategoryForBoard() {
+  const matched = subCategoryOptions.value.find((item) => item.value === props.selectedSubCategoryKey)
+  subCategoryKey.value = (matched?.value as string) ?? (subCategoryOptions.value[0]?.value as string) ?? ''
+}
+
 watch(
-  () => props.selectedBoardKey,
-  (nextBoardKey) => {
-    if (nextBoardKey && nextBoardKey !== 'all') {
-      boardKey.value = nextBoardKey
+  () => dialogOpen.value,
+  (open) => {
+    if (open) {
+      syncBoardFromProps()
+    }
+  },
+)
+
+watch(
+  () => [props.selectedBoardKey, props.selectedSubCategoryKey].join(':'),
+  () => {
+    if (!dialogOpen.value) {
+      syncBoardFromProps()
     }
   },
   { immediate: true },
 )
+
+watch(boardKey, () => {
+  syncSubCategoryForBoard()
+})
 
 watch(
   () => props.submitting,
@@ -183,6 +237,7 @@ function submit() {
 
   emit('create', {
     boardKey: boardKey.value,
+    subCategoryKey: subCategoryKey.value || undefined,
     title: title.value.trim(),
     contentHtml: contentHtml.value,
   })
@@ -201,9 +256,7 @@ function submit() {
   padding: 22px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96)),
-    rgba(255, 255, 255, 0.96);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96)), rgba(255, 255, 255, 0.96);
   box-shadow: 0 22px 40px rgba(15, 23, 42, 0.08);
 }
 
@@ -290,9 +343,25 @@ function submit() {
 }
 
 .composer-dialog__meta {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+}
+
+.composer-dialog__meta-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 170px) minmax(150px, 170px);
+  gap: 12px;
+  align-items: start;
+}
+
+.composer-dialog__field {
+  width: 100%;
+  min-width: 0;
+}
+
+.composer-dialog__field--title {
+  max-width: 100%;
 }
 
 .composer-dialog__editor {
@@ -373,6 +442,10 @@ function submit() {
   }
 
   .composer-dialog__meta {
+    gap: 10px;
+  }
+
+  .composer-dialog__meta-row {
     grid-template-columns: 1fr;
   }
 

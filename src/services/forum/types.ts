@@ -4,6 +4,12 @@ export type CommunityFeedOrder = 'latest' | 'hot' | 'featured'
 
 export type CommunityFeedScope = 'all' | 'today' | 'week'
 
+export interface CommunitySubCategorySummary {
+  key: string
+  label: string
+  count: number
+}
+
 export interface CommunityPagination {
   page: number
   size: number
@@ -14,6 +20,7 @@ export interface CommunityPagination {
 
 export interface CommunityListQuery {
   boardKey?: CommunityBoardKey
+  subCategoryKey?: string
   order?: CommunityFeedOrder
   scope?: CommunityFeedScope
   page?: number
@@ -34,6 +41,8 @@ export interface CommunityFeedItem {
   id: number
   boardKey: Exclude<CommunityBoardKey, 'all'>
   boardName: string
+  subCategoryKey?: string
+  subCategoryLabel?: string
   title: string
   excerpt: string
   authorName: string
@@ -104,6 +113,8 @@ export interface CommunityHomePayload {
   todayThreads: number
   onlineUsers: number
   boards: CommunityBoardSummary[]
+  subCategories: CommunitySubCategorySummary[]
+  selectedSubCategoryKey: string
   feed: CommunityFeedItem[]
   feedPage: CommunityPagination
   hotThreads: CommunityHotRankItem[]
@@ -112,6 +123,7 @@ export interface CommunityHomePayload {
 
 export interface CreateCommunityThreadRequest {
   boardKey: Exclude<CommunityBoardKey, 'all'>
+  subCategoryKey?: string
   title: string
   contentHtml: string
   authorName: string

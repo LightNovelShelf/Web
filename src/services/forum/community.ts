@@ -21,17 +21,24 @@ import type {
 
 type BoardRecordKey = Exclude<CommunityBoardKey, 'all'>
 
+interface SubCategoryRecord {
+  key: string
+  label: string
+}
+
 interface BoardRecord {
   id: number
   key: BoardRecordKey
   title: string
   description: string
   icon: string
+  subCategories: SubCategoryRecord[]
 }
 
 interface ThreadRecord {
   id: number
   boardKey: BoardRecordKey
+  subCategoryKey?: string
   title: string
   excerpt: string
   authorName: string
@@ -62,11 +69,49 @@ interface ReplyRecord {
 }
 
 const boardRecords: BoardRecord[] = [
-  { id: 1, key: 'anime', title: '动画', description: '新番、作画、剧情考据和角色讨论', icon: 'mdiVideo' },
-  { id: 2, key: 'comic', title: '漫画', description: '连载追更、分镜表现和作者杂谈', icon: 'mdiImage' },
-  { id: 3, key: 'game', title: '游戏', description: 'Gal、JRPG、抽卡玩法和剧情线讨论', icon: 'mdiController' },
-  { id: 4, key: 'novel', title: '小说', description: '轻小说、网文和章节更新的读后感', icon: 'mdiBook' },
-  { id: 5, key: 'website', title: '站务', description: '功能建议、站点反馈和社区活动公告', icon: 'mdiBullhorn' },
+  {
+    id: 1,
+    key: 'anime',
+    title: '动画',
+    description: '新番、作画、剧情考据和角色讨论',
+    icon: 'mdiVideo',
+    subCategories: [{ key: 'other', label: '其他' }],
+  },
+  {
+    id: 2,
+    key: 'comic',
+    title: '漫画',
+    description: '连载追更、分镜表现和作者杂谈',
+    icon: 'mdiImage',
+    subCategories: [{ key: 'other', label: '其他' }],
+  },
+  {
+    id: 3,
+    key: 'game',
+    title: '游戏',
+    description: 'Gal、JRPG、抽卡玩法和剧情线讨论',
+    icon: 'mdiController',
+    subCategories: [{ key: 'other', label: '其他' }],
+  },
+  {
+    id: 4,
+    key: 'novel',
+    title: '小说',
+    description: '轻小说、电子书和章节更新的读后感',
+    icon: 'mdiBook',
+    subCategories: [
+      { key: 'other', label: '其他' },
+      { key: 'epub', label: 'EPUB' },
+    ],
+  },
+  {
+    id: 5,
+    key: 'website',
+    title: '站务',
+    description: '功能建议、站点反馈和社区活动公告',
+    icon: 'mdiBullhorn',
+    subCategories: [{ key: 'other', label: '其他' }],
+  },
 ]
 
 const activeUsers: CommunityActiveUserItem[] = [
@@ -84,6 +129,7 @@ const threads: ThreadRecord[] = [
   {
     id: 101,
     boardKey: 'anime',
+    subCategoryKey: 'other',
     title: '四月新番里最值得追更的三部作品，大家目前最看好哪一部？',
     excerpt: '从第一集演出到原作改编节奏都很稳，目前讨论热度最高的还是两部校园向作品，但这季真正的黑马可能是那部开局不太起眼的群像剧。',
     authorName: '白露',
@@ -104,6 +150,7 @@ const threads: ThreadRecord[] = [
   {
     id: 102,
     boardKey: 'novel',
+    subCategoryKey: 'epub',
     title: '这本恋爱轻小说的后半段节奏突然提速，你们觉得是优点还是缺点？',
     excerpt: '前四卷都是日常铺陈，第五卷开始连续推进主线，有人觉得终于进入正题，也有人觉得失去了前面慢热铺垫的味道。',
     authorName: '纸鸢',
@@ -124,6 +171,7 @@ const threads: ThreadRecord[] = [
   {
     id: 103,
     boardKey: 'website',
+    subCategoryKey: 'other',
     title: '社区首页原型第一版开放讨论，欢迎集中反馈排版、阅读密度和功能优先级',
     excerpt: '这次会先把 PC 社区首页做成内容优先的结构，移动端后续单独适配。希望大家重点聊三个问题：左侧板块是否清晰、中间帖子流是否顺手、右侧榜单是否有用。',
     authorName: '站务娘',
@@ -145,6 +193,7 @@ const threads: ThreadRecord[] = [
   {
     id: 104,
     boardKey: 'game',
+    subCategoryKey: 'other',
     title: '最近有哪些剧情体验很强但讨论度还不够高的日式游戏？',
     excerpt: '不是单纯推荐大作，更想找一些剧情完整、角色塑造足、玩完会想写长评的作品，平台不限。',
     authorName: '七海',
@@ -163,6 +212,7 @@ const threads: ThreadRecord[] = [
   {
     id: 105,
     boardKey: 'comic',
+    subCategoryKey: 'other',
     title: '这部作品的分镜看着平静，但情绪推进非常狠，适合做一次完整拆解',
     excerpt: '很多人第一次看会觉得对白不多、节奏不快，但它在跨页、留白和角色视线的处理上非常成熟，越回味越能看到设计。',
     authorName: '折木',
@@ -182,6 +232,7 @@ const threads: ThreadRecord[] = [
   {
     id: 106,
     boardKey: 'novel',
+    subCategoryKey: 'other',
     title: '如果社区增加书单共读功能，你最希望它先解决哪种阅读体验问题？',
     excerpt: '我个人最想要的是按章节串联讨论，其次是书单里能直接看到更新节奏和已读进度，这样跟读体验会比现在顺很多。',
     authorName: '花镜',
@@ -201,6 +252,7 @@ const threads: ThreadRecord[] = [
   {
     id: 107,
     boardKey: 'anime',
+    subCategoryKey: 'other',
     title: '这条标题故意做得很长，用来验证社区首页帖子流在桌面端的两行截断和信息层级是否稳定且仍然保持阅读舒适度',
     excerpt: '长标题场景下，帖子摘要应该自然退到第二层，不应该把回复数和板块标签挤压到难以扫描的位置。',
     authorName: '小春',
@@ -219,6 +271,7 @@ const threads: ThreadRecord[] = [
   {
     id: 108,
     boardKey: 'game',
+    subCategoryKey: 'other',
     title: 'Galgame 里最打动你的告白场景是哪一段？',
     excerpt: '不限经典还是新作，只要是你现在还能复述出镜头和配乐的那一段都算。欢迎带原因，不必担心剧透格式，我来整理。',
     authorName: '流火',
@@ -237,6 +290,7 @@ const threads: ThreadRecord[] = [
   {
     id: 109,
     boardKey: 'comic',
+    subCategoryKey: 'other',
     title: '有没有那种每次更新都想暂停几分钟回味结尾页面的连载？',
     excerpt: '想找一些结尾页调度特别强的作品，不一定要神作，只要每次都能把情绪收得很准就行。',
     authorName: '荷叶',
@@ -255,6 +309,7 @@ const threads: ThreadRecord[] = [
   {
     id: 110,
     boardKey: 'website',
+    subCategoryKey: 'other',
     title: '反馈收集：你最希望右侧榜单新增什么信息维度？',
     excerpt: '我们正在评估“本周涨幅”“新晋活跃用户”和“版主推荐”这几类榜单形态，欢迎只选一个最有价值的方向。',
     authorName: '管理员',
@@ -429,8 +484,47 @@ function getBoard(boardKey: BoardRecordKey) {
   return boardRecords.find((board) => board.key === boardKey)
 }
 
+function getBoardSubCategories(boardKey: CommunityBoardKey) {
+  if (boardKey === 'all') {
+    return []
+  }
+
+  return getBoard(boardKey)?.subCategories ?? []
+}
+
+function getDefaultSubCategoryKey(boardKey: CommunityBoardKey) {
+  return getBoardSubCategories(boardKey)[0]?.key ?? ''
+}
+
 function normalizeBoardKey(boardKey?: CommunityBoardKey): CommunityBoardKey {
   return boardKey && ['all', ...boardRecords.map((board) => board.key)].includes(boardKey) ? boardKey : 'all'
+}
+
+function normalizeSubCategoryKey(boardKey: CommunityBoardKey, subCategoryKey?: string) {
+  if (boardKey === 'all') {
+    return ''
+  }
+
+  const subCategories = getBoardSubCategories(boardKey)
+  if (!subCategories.length) {
+    return ''
+  }
+
+  const normalized = subCategoryKey?.trim()
+  if (!normalized || normalized === 'all') {
+    return ''
+  }
+
+  return subCategories.some((item) => item.key === normalized) ? normalized : ''
+}
+
+function getSubCategoryLabel(boardKey: CommunityBoardKey, subCategoryKey?: string) {
+  const normalized = normalizeSubCategoryKey(boardKey, subCategoryKey)
+  if (!normalized) {
+    return ''
+  }
+
+  return getBoardSubCategories(boardKey).find((item) => item.key === normalized)?.label ?? ''
 }
 
 function relativeTime(date: number) {
@@ -512,10 +606,13 @@ function getAuthorAvatar(seed: string) {
 
 function toFeedItem(thread: ThreadRecord): CommunityFeedItem {
   const board = getBoard(thread.boardKey)
+  const resolvedSubCategoryKey = normalizeSubCategoryKey(thread.boardKey, thread.subCategoryKey)
   return {
     id: thread.id,
     boardKey: thread.boardKey,
     boardName: board?.title ?? '社区',
+    subCategoryKey: resolvedSubCategoryKey || undefined,
+    subCategoryLabel: getSubCategoryLabel(thread.boardKey, resolvedSubCategoryKey),
     title: thread.title,
     excerpt: thread.excerpt,
     authorName: thread.authorName,
@@ -636,6 +733,18 @@ function sortByOrder(items: ThreadRecord[], order: CommunityFeedOrder) {
   })
 }
 
+function buildSubCategorySummaries(boardKey: CommunityBoardKey, items: ThreadRecord[]) {
+  if (boardKey === 'all') {
+    return []
+  }
+
+  return getBoardSubCategories(boardKey).map((subCategory) => ({
+    key: subCategory.key,
+    label: subCategory.label,
+    count: items.filter((item) => normalizeSubCategoryKey(item.boardKey, item.subCategoryKey) === subCategory.key).length,
+  }))
+}
+
 function buildBoardSummaries(): CommunityBoardSummary[] {
   const allThreads = threads.map(toFeedItem)
   const allTodayPosts = threads.filter((item) => Date.now() - item.createdAt < 24 * hour).length
@@ -681,12 +790,14 @@ function buildHotThreads(): CommunityHotRankItem[] {
     }))
 }
 
-function inferTags(boardKey: BoardRecordKey, title: string, paragraphs: string[]) {
+function inferTags(boardKey: BoardRecordKey, title: string, paragraphs: string[], subCategoryKey?: string) {
   const tags: string[] = []
   const plain = `${title} ${paragraphs.join(' ')}`.toLowerCase()
   const boardTitle = getBoard(boardKey)?.title
+  const subCategoryLabel = getSubCategoryLabel(boardKey, subCategoryKey)
 
   if (boardTitle) tags.push(boardTitle)
+  if (subCategoryLabel) tags.push(subCategoryLabel)
   if (/[？?]|为什么|如何|怎么|求/.test(title)) tags.push('提问')
   if (/安利|推荐|入坑|补番/.test(plain)) tags.push('安利')
   if (/分析|复盘|长评|拆解|评价/.test(plain)) tags.push('长评')
@@ -708,11 +819,16 @@ export async function getCommunityHome(query: CommunityListQuery = {}): Promise<
   const boardKey = normalizeBoardKey(query.boardKey)
   const order = query.order ?? 'latest'
   const scope = query.scope ?? 'all'
+  const subCategoryKey = normalizeSubCategoryKey(boardKey, query.subCategoryKey)
   const page = Math.max(1, query.page ?? 1)
   const size = Math.max(1, query.size ?? HOME_PAGE_SIZE)
 
   const boardFiltered = boardKey === 'all' ? threads : threads.filter((item) => item.boardKey === boardKey)
-  const filtered = sortByOrder(filterByScope(boardFiltered, scope), order)
+  const scoped = filterByScope(boardFiltered, scope)
+  const categoryFiltered = subCategoryKey
+    ? scoped.filter((item) => normalizeSubCategoryKey(item.boardKey, item.subCategoryKey) === subCategoryKey)
+    : scoped
+  const filtered = sortByOrder(categoryFiltered, order)
   const paged = paginate(filtered, page, size)
 
   await sleep(140)
@@ -725,6 +841,8 @@ export async function getCommunityHome(query: CommunityListQuery = {}): Promise<
     todayThreads: threads.filter((item) => Date.now() - item.createdAt < 24 * hour).length,
     onlineUsers: 286,
     boards: buildBoardSummaries(),
+    subCategories: buildSubCategorySummaries(boardKey, scoped),
+    selectedSubCategoryKey: subCategoryKey,
     feed: paged.map(toFeedItem),
     feedPage: toPagination(page, size, filtered.length),
     hotThreads: buildHotThreads(),
@@ -770,9 +888,11 @@ export async function getCommunityThread(
 
 export async function createCommunityThread(req: CreateCommunityThreadRequest): Promise<CommunityThreadDetail> {
   const paragraphs = htmlToParagraphs(req.contentHtml)
+  const subCategoryKey = normalizeSubCategoryKey(req.boardKey, req.subCategoryKey)
   const created: ThreadRecord = {
     id: threadIdSeed++,
     boardKey: req.boardKey,
+    subCategoryKey: subCategoryKey || getDefaultSubCategoryKey(req.boardKey) || undefined,
     title: req.title.trim(),
     excerpt: buildExcerpt(req.title, req.contentHtml),
     authorName: req.authorName,
@@ -782,7 +902,7 @@ export async function createCommunityThread(req: CreateCommunityThreadRequest): 
     favorites: 0,
     liked: false,
     favorited: false,
-    tags: inferTags(req.boardKey, req.title, paragraphs),
+    tags: inferTags(req.boardKey, req.title, paragraphs, subCategoryKey || getDefaultSubCategoryKey(req.boardKey) || undefined),
     bodyHtml: req.contentHtml,
   }
 

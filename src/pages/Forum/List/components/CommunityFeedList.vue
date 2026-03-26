@@ -33,6 +33,33 @@
       </div>
     </div>
 
+    <div v-if="subCategories.length" class="feed__subcategories">
+      <div class="feed__subcategories-label">子分类</div>
+      <div class="feed__subcategories-list">
+        <button
+          type="button"
+          class="feed__subcategories-item"
+          :class="{ 'feed__subcategories-item--active': !selectedSubCategoryKey }"
+          @click="$emit('update:sub-category', '')"
+        >
+          <span class="feed__subcategories-name">全部</span>
+          <span class="feed__subcategories-count">{{ subCategories.reduce((sum, item) => sum + item.count, 0) }}</span>
+        </button>
+
+        <button
+          v-for="subCategory in subCategories"
+          :key="subCategory.key"
+          type="button"
+          class="feed__subcategories-item"
+          :class="{ 'feed__subcategories-item--active': selectedSubCategoryKey === subCategory.key }"
+          @click="$emit('update:sub-category', subCategory.key)"
+        >
+          <span class="feed__subcategories-name">{{ subCategory.label }}</span>
+          <span class="feed__subcategories-count">{{ subCategory.count }}</span>
+        </button>
+      </div>
+    </div>
+
     <div v-if="loading && !items.length" class="feed__list">
       <div v-for="index in 4" :key="index" class="feed-item feed-item--loading">
         <q-skeleton type="text" width="35%" />
@@ -89,7 +116,13 @@
 </template>
 
 <script setup lang="ts">
-import type { CommunityFeedItem, CommunityFeedOrder, CommunityFeedScope, CommunityPagination } from 'src/services/forum'
+import type {
+  CommunityFeedItem,
+  CommunityFeedOrder,
+  CommunityFeedScope,
+  CommunityPagination,
+  CommunitySubCategorySummary,
+} from 'src/services/forum'
 
 import CommunityThreadCard from './CommunityThreadCard.vue'
 
@@ -100,12 +133,15 @@ defineProps<{
   error: string
   order: CommunityFeedOrder
   scope: CommunityFeedScope
+  subCategories: CommunitySubCategorySummary[]
+  selectedSubCategoryKey: string
   pagination: CommunityPagination
 }>()
 
 defineEmits<{
   'update:order': [order: CommunityFeedOrder]
   'update:scope': [scope: CommunityFeedScope]
+  'update:sub-category': [subCategoryKey: string]
   'load-more': []
   retry: []
 }>()
@@ -153,6 +189,67 @@ const scopeOptions = [
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.feed__subcategories {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 2px 2px;
+  flex-wrap: wrap;
+}
+
+.feed__subcategories-label {
+  color: var(--community-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feed__subcategories-list {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.feed__subcategories-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--community-text-soft);
+  font-size: 13px;
+  font-weight: 600;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.feed__subcategories-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(59, 130, 246, 0.24);
+}
+
+.feed__subcategories-item--active {
+  border-color: rgba(59, 130, 246, 0.32);
+  color: var(--community-accent);
+  background: rgba(239, 246, 255, 0.92);
+}
+
+.feed__subcategories-count {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  color: inherit;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .feed__toggle {
