@@ -1,15 +1,10 @@
 <template>
   <aside class="right-rail">
-    <overlay-scrollbars-component
-      class="right-rail__scroll"
-      :options="scrollbarOptions"
-      defer
-    >
+    <overlay-scrollbars-component class="right-rail__scroll" :options="scrollbarOptions" defer>
       <div class="right-rail__content-wrap">
         <section class="rail-panel">
           <div class="rail-panel__header">
             <div>
-              <div class="rail-panel__eyebrow">Hot Threads</div>
               <h3 class="rail-panel__title">热帖榜</h3>
             </div>
             <q-icon name="mdiFire" size="22px" color="negative" />
@@ -23,12 +18,12 @@
               :to="{ name: 'ForumThread', params: { id: item.id } }"
             >
               <div class="rank-item">
-              <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
-              <div class="rank-item__copy">
-                <div class="rank-item__title">{{ item.title }}</div>
-                <div class="rank-item__meta">{{ item.boardName }} · {{ item.deltaLabel }}</div>
-              </div>
-              <div class="rank-item__value">{{ item.heat }}</div>
+                <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
+                <div class="rank-item__copy">
+                  <div class="rank-item__title">{{ item.title }}</div>
+                  <div class="rank-item__meta">{{ item.boardName }} · {{ item.deltaLabel }}</div>
+                </div>
+                <div class="rank-item__value">{{ item.heat }}</div>
               </div>
             </router-link>
           </div>
@@ -37,7 +32,6 @@
         <section class="rail-panel">
           <div class="rail-panel__header">
             <div>
-              <div class="rail-panel__eyebrow">Active Users</div>
               <h3 class="rail-panel__title">活跃榜</h3>
             </div>
             <q-icon name="mdiAccountMultiple" size="20px" color="primary" />
@@ -132,16 +126,8 @@ function avatarBackground(seed: string) {
   margin-bottom: 16px;
 }
 
-.rail-panel__eyebrow {
-  color: var(--community-text-muted);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
 .rail-panel__title {
-  margin: 6px 0 0;
+  margin: 0;
   font-size: 22px;
 }
 

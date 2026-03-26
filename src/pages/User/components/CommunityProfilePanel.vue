@@ -2,7 +2,6 @@
   <section class="community-panel">
     <div class="community-panel__header">
       <div>
-        <div class="community-panel__eyebrow">Community</div>
         <h2 class="community-panel__title">我的社区</h2>
       </div>
       <q-btn flat no-caps color="primary" label="进入社区" :to="{ name: 'ForumList' }" />
@@ -148,16 +147,8 @@ watch(
   gap: 16px;
 }
 
-.community-panel__eyebrow {
-  color: #2563eb;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 .community-panel__title {
-  margin: 8px 0 0;
+  margin: 0;
   color: #0f172a;
   font-size: 28px;
 }

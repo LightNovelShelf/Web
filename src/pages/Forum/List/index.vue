@@ -3,11 +3,7 @@
     <div class="community-home__shell">
       <div class="community-home__grid">
         <div class="community-home__left">
-          <community-board-rail
-            :boards="boards"
-            :selected-board-key="boardKey"
-            @select="handleBoardSelect"
-          />
+          <community-board-rail :boards="boards" :selected-board-key="boardKey" @select="handleBoardSelect" />
         </div>
 
         <main class="community-home__center">
@@ -16,7 +12,6 @@
 
             <div class="community-hero__content">
               <div class="community-hero__copy">
-                <div class="community-hero__eyebrow">Discussion Hub</div>
                 <h1 class="community-hero__title">{{ payload?.title ?? '社区讨论中心' }}</h1>
                 <p class="community-hero__subtitle">{{ payload?.subtitle }}</p>
               </div>
@@ -70,10 +65,7 @@
         </main>
 
         <div class="community-home__right">
-          <community-right-rail
-            :hot-threads="payload?.hotThreads ?? []"
-            :active-users="payload?.activeUsers ?? []"
-          />
+          <community-right-rail :hot-threads="payload?.hotThreads ?? []" :active-users="payload?.activeUsers ?? []" />
         </div>
       </div>
     </div>
@@ -207,10 +199,10 @@ function updateQuery(next: Partial<Record<'board' | 'order' | 'scope' | 'categor
 
   for (const [key, value] of Object.entries(next)) {
     if (
-      !value
-      || (key === 'board' && value === 'all')
-      || (key === 'order' && value === 'latest')
-      || (key === 'scope' && value === 'all')
+      !value ||
+      (key === 'board' && value === 'all') ||
+      (key === 'order' && value === 'latest') ||
+      (key === 'scope' && value === 'all')
     ) {
       delete query[key]
     } else {
@@ -344,9 +336,7 @@ watch(
   padding: 26px 28px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 30px;
-  background:
-    linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)),
-    rgba(255, 255, 255, 0.96);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)), rgba(255, 255, 255, 0.96);
   box-shadow: 0 28px 48px rgba(15, 23, 42, 0.08);
 }
 
@@ -359,16 +349,8 @@ watch(
   gap: 24px;
 }
 
-.community-hero__eyebrow {
-  color: var(--community-accent);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
 .community-hero__title {
-  margin: 12px 0 0;
+  margin: 0;
   font-size: 38px;
   line-height: 1.05;
   color: var(--community-text);

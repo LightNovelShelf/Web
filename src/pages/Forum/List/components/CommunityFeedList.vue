@@ -80,11 +80,7 @@
         <q-btn flat no-caps color="primary" label="重试加载更多" @click="$emit('retry')" />
       </div>
 
-      <community-thread-card
-        v-for="item in items"
-        :key="item.id"
-        :item="item"
-      />
+      <community-thread-card v-for="item in items" :key="item.id" :item="item" />
     </div>
 
     <div v-else-if="error" class="feed__state">
@@ -101,7 +97,9 @@
     </div>
 
     <div v-if="items.length" class="feed__footer">
-      <div class="feed__page">第 {{ pagination.page }} / {{ pagination.totalPages }} 页，共 {{ pagination.total }} 条</div>
+      <div class="feed__page">
+        第 {{ pagination.page }} / {{ pagination.totalPages }} 页，共 {{ pagination.total }} 条
+      </div>
       <q-btn
         v-if="pagination.hasMore"
         unelevated
@@ -272,9 +270,7 @@ const scopeOptions = [
   padding: 22px 22px 18px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)),
-    rgba(255, 255, 255, 0.96);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
 }
 

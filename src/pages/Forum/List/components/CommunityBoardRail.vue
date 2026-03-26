@@ -1,13 +1,8 @@
 <template>
   <aside class="board-rail">
-    <overlay-scrollbars-component
-      class="board-rail__scroll"
-      :options="scrollbarOptions"
-      defer
-    >
+    <overlay-scrollbars-component class="board-rail__scroll" :options="scrollbarOptions" defer>
       <div class="board-rail__content-wrap">
         <div class="board-rail__header">
-          <div class="board-rail__eyebrow">Community</div>
           <h2 class="board-rail__title">社区</h2>
           <p class="board-rail__summary">按板块快速切换讨论主题，先看内容，再决定要不要参与。</p>
         </div>
@@ -88,16 +83,8 @@ const scrollbarOptions = computed(() => ({
   padding: 4px 2px 10px;
 }
 
-.board-rail__eyebrow {
-  color: var(--community-accent);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
 .board-rail__title {
-  margin: 6px 0;
+  margin: 0 0 6px;
   font-size: 28px;
   line-height: 1.1;
 }
@@ -134,9 +121,7 @@ const scrollbarOptions = computed(() => ({
 
 .board-rail__item--active {
   border-color: rgba(59, 130, 246, 0.35);
-  background:
-    linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.96)),
-    rgba(255, 255, 255, 0.96);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.96)), rgba(255, 255, 255, 0.96);
   box-shadow: 2px 2px 4px rgba(59, 130, 246, 0.12);
 }
 

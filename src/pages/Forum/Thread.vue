@@ -24,7 +24,9 @@
               <div class="thread-card__topline">
                 <div class="thread-card__topline-meta">
                   <span class="thread-card__board">{{ thread.boardName }}</span>
-                  <span v-if="thread.subCategoryLabel" class="thread-card__sub-category">{{ thread.subCategoryLabel }}</span>
+                  <span v-if="thread.subCategoryLabel" class="thread-card__sub-category">{{
+                    thread.subCategoryLabel
+                  }}</span>
                   <span v-if="thread.pinned" class="thread-card__flag thread-card__flag--pinned">置顶</span>
                   <span v-if="thread.featured" class="thread-card__flag thread-card__flag--featured">精华</span>
                   <span v-if="thread.locked" class="thread-card__flag thread-card__flag--locked">已锁定</span>
@@ -198,7 +200,10 @@
                     >
                       <div class="reply-child__header">
                         <div class="reply-item__author">
-                          <q-avatar size="30px" :style="{ background: avatarBackground(child.authorName), color: '#fff' }">
+                          <q-avatar
+                            size="30px"
+                            :style="{ background: avatarBackground(child.authorName), color: '#fff' }"
+                          >
                             {{ child.authorName.slice(0, 1) }}
                           </q-avatar>
                           <div>
@@ -275,19 +280,22 @@
 
           <aside class="thread-page__aside">
             <section class="side-panel">
-              <div class="side-panel__eyebrow">Back</div>
-              <h3>继续浏览</h3>
-              <q-btn
-                unelevated
-                no-caps
-                color="primary"
-                label="返回社区首页"
-                :to="{ name: 'ForumList', query: { board: thread.boardKey, category: thread.subCategoryKey } }"
-              />
+              <h3>近期阅读</h3>
+              <div v-if="recentThreadItems.length" class="related-list">
+                <router-link
+                  v-for="item in recentThreadItems"
+                  :key="item.id"
+                  class="related-item"
+                  :to="{ name: 'ForumThread', params: { id: item.id } }"
+                >
+                  <div class="related-item__title">{{ item.title }}</div>
+                  <div class="related-item__meta">{{ item.boardName }} · {{ item.viewedAtLabel }}</div>
+                </router-link>
+              </div>
+              <div v-else class="side-panel__empty">你最近浏览过的帖子会显示在这里。</div>
             </section>
 
             <section class="side-panel">
-              <div class="side-panel__eyebrow">Related</div>
               <h3>相关帖子</h3>
               <div class="related-list">
                 <router-link
@@ -334,9 +342,27 @@ import {
   toggleThreadLike,
 } from 'src/services/forum'
 
-import type { CommunityPagination, CommunityReplyTarget, CommunityThreadDetail, CommunityThreadReply } from 'src/services/forum'
+import type {
+  CommunityPagination,
+  CommunityReplyTarget,
+  CommunityThreadDetail,
+  CommunityThreadReply,
+} from 'src/services/forum'
 
 const props = defineProps<{ id: string }>()
+const RECENT_THREAD_STORAGE_KEY = 'community.recentThreads'
+const RECENT_THREAD_LIMIT = 6
+
+interface RecentThreadHistoryItem {
+  id: number
+  title: string
+  boardName: string
+  viewedAt: number
+}
+
+interface RecentThreadCardItem extends RecentThreadHistoryItem {
+  viewedAtLabel: string
+}
 
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
@@ -359,6 +385,7 @@ const replyError = ref('')
 const replyPage = ref(1)
 const replyTarget = ref<CommunityReplyTarget | null>(null)
 const replyComposerRef = ref<HTMLElement | null>(null)
+const recentThreadItems = ref<RecentThreadCardItem[]>([])
 
 const emptyPagination: CommunityPagination = {
   page: 1,
@@ -387,6 +414,62 @@ const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#
 function avatarBackground(seed: string) {
   const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
+}
+
+function formatRecentViewedAt(viewedAt: number) {
+  const diff = Date.now() - viewedAt
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+
+  if (diff < hour) {
+    return `${Math.max(1, Math.floor(diff / minute))} 分钟前`
+  }
+
+  if (diff < day) {
+    return `${Math.floor(diff / hour)} 小时前`
+  }
+
+  return `${Math.floor(diff / day)} 天前`
+}
+
+function readRecentThreadHistory() {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  try {
+    const raw = window.localStorage.getItem(RECENT_THREAD_STORAGE_KEY)
+    const parsed = raw ? (JSON.parse(raw) as RecentThreadHistoryItem[]) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function writeRecentThreadHistory(items: RecentThreadHistoryItem[]) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(RECENT_THREAD_STORAGE_KEY, JSON.stringify(items.slice(0, RECENT_THREAD_LIMIT)))
+}
+
+function syncRecentThreadItems(currentThreadId?: number) {
+  recentThreadItems.value = readRecentThreadHistory()
+    .filter((item) => item.id !== currentThreadId)
+    .sort((a, b) => b.viewedAt - a.viewedAt)
+    .slice(0, 4)
+    .map((item) => ({
+      ...item,
+      viewedAtLabel: formatRecentViewedAt(item.viewedAt),
+    }))
+}
+
+function pushRecentThreadHistory(item: RecentThreadHistoryItem) {
+  const nextItems = [item, ...readRecentThreadHistory().filter((historyItem) => historyItem.id !== item.id)]
+  writeRecentThreadHistory(nextItems)
+  syncRecentThreadItems(item.id)
 }
 
 function requireLogin() {
@@ -544,7 +627,7 @@ async function scrollToReply(replyId: number) {
   focusReply(replyId)
 }
 
-async function loadThread(options: { appendReplies?: boolean, trackView?: boolean } = {}) {
+async function loadThread(options: { appendReplies?: boolean; trackView?: boolean } = {}) {
   const appendReplies = options.appendReplies ?? false
   const nextReplyPage = appendReplies ? replyPage.value + 1 : 1
 
@@ -574,6 +657,12 @@ async function loadThread(options: { appendReplies?: boolean, trackView?: boolea
   thread.value = data
   replyPage.value = nextReplyPage
   replyItems.value = appendReplies ? [...replyItems.value, ...data.replyItems] : data.replyItems
+  pushRecentThreadHistory({
+    id: data.id,
+    title: data.title,
+    boardName: data.boardName,
+    viewedAt: Date.now(),
+  })
   loading.value = false
   loadingMoreReplies.value = false
 }
@@ -700,6 +789,10 @@ watch(
   },
   { immediate: true },
 )
+
+onMounted(() => {
+  syncRecentThreadItems(Number(props.id))
+})
 </script>
 
 <style scoped lang="scss">
@@ -921,7 +1014,6 @@ watch(
 }
 
 .reply-panel__header span,
-.side-panel__eyebrow,
 .related-item__meta,
 .reply-item__time,
 .reply-item__like-btn,
@@ -982,7 +1074,7 @@ watch(
 }
 
 .reply-item {
-  padding: 16px 0;
+  padding: 16px 0 0 0;
 }
 
 .reply-item + .reply-item {
@@ -1087,10 +1179,11 @@ watch(
   padding: 20px;
 }
 
-.side-panel__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 8px;
+.side-panel__empty {
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .related-list {

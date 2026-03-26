@@ -1,7 +1,6 @@
 <template>
   <section class="composer">
     <div class="composer__copy">
-      <div class="composer__eyebrow">Publish</div>
       <div class="composer__title">发布帖子</div>
       <div class="composer__hint">先把核心观点写出来，再进详情页继续展开讨论。</div>
     </div>
@@ -33,7 +32,6 @@
       <q-card class="composer-dialog">
         <div class="composer-dialog__header">
           <div>
-            <div class="composer-dialog__eyebrow">Create Thread</div>
             <h2 class="composer-dialog__title">发布新帖子</h2>
           </div>
 
@@ -260,17 +258,7 @@ function submit() {
   box-shadow: 0 22px 40px rgba(15, 23, 42, 0.08);
 }
 
-.composer__eyebrow,
-.composer-dialog__eyebrow {
-  color: var(--community-accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 .composer__title {
-  margin-top: 8px;
   color: var(--community-text);
   font-size: 24px;
   font-weight: 700;
@@ -300,9 +288,11 @@ function submit() {
 .composer-dialog {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  width: min(1100px, calc(100vw - 48px));
+  width: min(1100px, 96vw);
   max-width: 1100px;
-  height: min(860px, calc(100vh - 48px));
+  height: 92vh;
+  min-height: 720px;
+  max-height: 860px;
   margin: auto;
   border-radius: 30px;
   overflow: hidden;
@@ -327,17 +317,18 @@ function submit() {
 }
 
 .composer-dialog__title {
-  margin: 8px 0 0;
+  margin: 0;
   color: #0f172a;
   font-size: 28px;
   line-height: 1.1;
 }
 
 .composer-dialog__body {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 18px;
   padding: 20px 24px 24px;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
 }
@@ -367,6 +358,7 @@ function submit() {
 .composer-dialog__editor {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
 }
@@ -384,8 +376,6 @@ function submit() {
 
 .composer-dialog__editor-shell {
   flex: 1 1 auto;
-  min-height: 0;
-  height: min(460px, calc(100vh - 340px));
   overflow: hidden;
 }
 
@@ -433,7 +423,9 @@ function submit() {
   .composer-dialog {
     width: 100vw;
     height: 100vh;
+    min-height: 100vh;
     max-width: none;
+    max-height: none;
     border-radius: 0;
   }
 
@@ -447,10 +439,6 @@ function submit() {
 
   .composer-dialog__meta-row {
     grid-template-columns: 1fr;
-  }
-
-  .composer-dialog__editor-shell {
-    height: min(52vh, calc(100vh - 300px));
   }
 }
 </style>

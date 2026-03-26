@@ -65,9 +65,7 @@ function avatarBackground(seed: string) {
   padding: 22px 22px 18px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)),
-    rgba(255, 255, 255, 0.96);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
   transition:
     transform 0.2s ease,
