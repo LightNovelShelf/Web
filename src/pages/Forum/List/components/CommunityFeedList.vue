@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <div v-if="loading && !items.length" class="feed__list">
+    <div v-if="loading" class="feed__list">
       <div v-for="index in 4" :key="index" class="feed-item feed-item--loading">
         <q-skeleton type="text" width="35%" />
         <q-skeleton type="text" width="85%" class="q-mt-sm" />
