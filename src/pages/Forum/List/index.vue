@@ -40,6 +40,7 @@
 
           <community-composer
             :user="user"
+            :ready="initialRequestCompleted"
             :catalog-boards="payload?.CatalogBoards ?? []"
             :selected-board-key="boardKey"
             :selected-sub-category-key="payload?.SelectedSubCategoryKey ?? ''"
@@ -113,6 +114,7 @@ const creatingThread = ref(false)
 const error = ref('')
 const currentPage = ref(1)
 const latestRequestId = ref(0)
+const initialRequestCompleted = ref(false)
 
 const emptyPagination: CommunityPagination = {
   Page: 1,
@@ -279,8 +281,9 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
   }
 }
 
-function requestCommunityHomeOnEnter() {
-  void loadCommunityHome()
+async function requestCommunityHomeOnEnter() {
+  await loadCommunityHome()
+  initialRequestCompleted.value = true
 }
 
 function requestCommunityFeedForQueryChange() {

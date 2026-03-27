@@ -5,26 +5,16 @@
       <div class="composer__hint">先把核心观点写出来，再进详情页继续展开讨论。</div>
     </div>
 
-    <div v-if="user" class="composer__actions">
+    <div class="composer__actions">
       <q-btn
         unelevated
         no-caps
         color="primary"
         icon="mdiSquareEditOutline"
-        label="打开发帖弹框"
+        label="发布帖子"
+        :disable="!ready || submitting"
         :loading="submitting"
-        @click="dialogOpen = true"
-      />
-    </div>
-
-    <div v-else class="composer__actions">
-      <div class="composer__hint">登录后可发布新帖并参与回复、点赞和收藏。</div>
-      <q-btn
-        unelevated
-        no-caps
-        color="primary"
-        label="登录后参与讨论"
-        :to="{ name: 'Login', query: { from: encodeURIComponent(route.fullPath) } }"
+        @click="handlePrimaryAction"
       />
     </div>
 
@@ -123,6 +113,7 @@ import type { CommunityBoardKey, CommunityCatalogBoard, CreateCommunityThreadReq
 
 const props = defineProps<{
   user: any
+  ready: boolean
   catalogBoards: CommunityCatalogBoard[]
   selectedBoardKey: CommunityBoardKey
   selectedSubCategoryKey: string
@@ -229,6 +220,14 @@ function resetForm() {
   contentHtml.value = '<p></p>'
 }
 
+function handlePrimaryAction() {
+  if (!props.ready || props.submitting) {
+    return
+  }
+
+  dialogOpen.value = true
+}
+
 function handleClose() {
   if (props.submitting) {
     return
@@ -293,6 +292,7 @@ function submit() {
 
 .composer__actions {
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 .composer-dialog {
