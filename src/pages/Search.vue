@@ -158,13 +158,6 @@ const tabOptions: Array<Record<string, any>> = [
     disable: false,
   },
   {
-    name: 'Form',
-    key: 'Form',
-    label: '社区',
-    icon: 'mdiForum',
-    disable: true,
-  },
-  {
     name: 'User',
     key: 'User',
     label: '用户',

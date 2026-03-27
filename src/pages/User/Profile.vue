@@ -28,6 +28,8 @@
             </q-item>
           </template>
         </q-list>
+
+        <community-profile-panel :author-name="user?.UserName || user?.Name" />
       </div>
     </div>
 
@@ -92,6 +94,9 @@ import { parseTime } from 'src/utils/time'
 import { useAppStore } from 'stores/app'
 
 import { setAvatar, getMyInfo } from 'src/services/user'
+
+import CommunityProfilePanel from './components/CommunityProfilePanel.vue'
+
 
 const avatar = computed(() => appStore.avatar)
 

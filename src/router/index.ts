@@ -9,6 +9,17 @@ import type { HistoryState, RouteRecordNameGeneric } from 'vue-router'
 
 import routes from './routes'
 
+const localApiServerStorageKey = `${process.env.VUE_APP_NAME || 'LightNovelShelf'}_Api_Server_V7`
+
+function canBypassAuthForLocalCommunity(to: { name?: RouteRecordNameGeneric }) {
+  if (!process.env.DEV || process.env.SERVER || to.name !== 'UserProfile') {
+    return false
+  }
+
+  const selectedApiServer = window.localStorage.getItem(localApiServerStorageKey) || 'http://localhost:5204'
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(selectedApiServer)
+}
+
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -52,6 +63,11 @@ export default defineRouter(function (/* { store, ssrContext } */) {
         if (savedPosition) {
           return savedPosition
         } else {
+          // 同一路由仅更新 query / params 时，保留当前位置，避免筛选场景被强制滚到顶部
+          if (to.name === from.name && to.path === from.path) {
+            return false
+          }
+
           return { top: 0 }
         }
       }
@@ -76,6 +92,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
     // 显式声明不需要授权
     if (to.meta.requiresAuth === false) {
+      return
+    }
+
+    if (canBypassAuthForLocalCommunity(to)) {
       return
     }
 

@@ -26,6 +26,11 @@ async function requestWithFetch<Res = unknown, Data = any>(
   const headers = new Headers()
   headers.append('Accept', 'application/json')
   headers.append('x-id', visitorId)
+  if (options.headers) {
+    new Headers(options.headers).forEach((value, key) => {
+      headers.set(key, value)
+    })
+  }
 
   // 简化payload声明
   // get就只有param（浏览器发出请求时也会忽略get请求的body）

@@ -12,6 +12,7 @@ export interface RequestConfig<Data> {
   /** 请求方法 @default 'POST' */
   method?: RequestMethod
   auth?: boolean
+  headers?: HeadersInit
 }
 
 /** 列表请求 */

@@ -149,14 +149,21 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/forum/list',
     name: 'ForumList',
-    props: true,
+    meta: { requiresAuth: true },
     component: () => import('../pages/Forum/List/index.vue'),
   },
   {
-    path: '/forum/:id',
-    name: 'Forum',
+    path: '/forum/thread/:id',
+    name: 'ForumThread',
+    meta: { requiresAuth: true },
     props: true,
-    component: () => import('../pages/Forum/index.vue'),
+    component: () => import('../pages/Forum/Thread.vue'),
+  },
+  {
+    path: '/forum/mine',
+    name: 'ForumMine',
+    meta: { requiresAuth: true },
+    component: () => import('../pages/Forum/Mine.vue'),
   },
 ]
 

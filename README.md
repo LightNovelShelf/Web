@@ -1,43 +1,43 @@
 # 轻书架 (light_novel_shelf)
 
-A Online Novel Reading Project
+A PWA-focused online novel reading project built with Quasar.
 
-## Install the dependencies
+## Install dependencies
 
 ```bash
-yarn
-# or
 npm install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+## Start development
 
 ```bash
-quasar dev
+npm run dev
 ```
 
-### Lint the files
+## Lint
 
 ```bash
-yarn lint
-# or
 npm run lint
 ```
 
-### Format the files
+## Format
 
 ```bash
-yarn format
-# or
 npm run format
 ```
 
-### Build the app for production
+## Build
 
 ```bash
-quasar build
+npm run build
 ```
 
-### Customize the configuration
+## Build PWA
 
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+```bash
+npm run build:pwa
+```
+
+## Configuration
+
+See the Quasar config documentation for customization details.
