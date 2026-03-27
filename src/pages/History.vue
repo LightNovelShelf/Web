@@ -11,7 +11,7 @@
         <q-tab-panels v-model="tab" animated>
           <q-tab-panel name="Novel">
             <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
-              <q-grid-item v-for="book in bookData" :key="book['Id']">
+              <q-grid-item v-for="book in bookData.filter((x) => !!x)" :key="book['Id']">
                 <book-card :book="book"></book-card>
               </q-grid-item>
             </q-grid>

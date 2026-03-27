@@ -13,9 +13,6 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
-    "build:android": "quasar build -m capacitor -T android",
-    "build:ios": "quasar build -m capacitor -T ios",
-    "build:electron": "quasar build -m electron",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
@@ -49,7 +46,6 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@electron/packager": "^18.4.4",
     "@eslint/js": "^9.39.2",
     "@quasar/app-vite": "^2.4.0",
     "@types/lodash.isequal": "^4.5.8",
@@ -61,7 +57,6 @@
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.6.0",
     "autoprefixer": "^10.4.23",
-    "electron": "^39.2.7",
     "eslint": "^9.39.2",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
@@ -80,7 +75,7 @@
     "workbox-strategies": "^7.4.0"
   },
   "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
+    "node": "^28 || ^26 || ^24 || ^22",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   }

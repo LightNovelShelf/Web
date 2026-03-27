@@ -38,7 +38,7 @@
             <div class="content row full-width">
               <div class="col-3">
                 <div class="text-opacity">当前在线</div>
-                <div class="text-h6">{{ onlineInfo?.OnlineCount }}</div>
+                <div class="text-h6">{{ onlineInfo?.OnlineUserCount }}</div>
               </div>
               <div class="col-3">
                 <div class="text-opacity">今日总数</div>

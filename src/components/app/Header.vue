@@ -40,12 +40,6 @@
       <q-space />
 
       <div class="q-gutter-sm row items-center no-wrap">
-        <q-btn v-if="$q.screen.gt.xs" round dense flat>
-          <!-- <q-badge color="red" floating> 1 </q-badge> -->
-          <q-tooltip>通知</q-tooltip>
-          <q-icon name="mdiBell"></q-icon>
-        </q-btn>
-
         <q-btn round dense flat @click="goToNotification">
           <q-badge v-if="user && user.UnreadNotificationCount > 0" color="red" floating>
             {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
@@ -131,7 +125,7 @@
                     "
                   >
                     <q-item-section avatar>
-                      <q-icon size="18px" :name="option.i" />
+                      <q-icon size="18px" :name="option.icon" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ option.label }}</q-item-label>
@@ -237,6 +231,12 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
     key: 'MyShelf',
     route: 'MyShelf',
     icon: 'mdiFolderHeartOutline',
+  },
+  {
+    label: '我的社区',
+    key: 'ForumMine',
+    route: 'ForumMine',
+    icon: 'mdiAccountBoxOutline',
   },
   {
     label: '网站设置',

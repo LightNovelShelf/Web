@@ -22,13 +22,14 @@
             <q-card-section horizontal>
               <!-- 用户头像 -->
               <q-avatar size="48px" class="q-mr-md">
-                <img :src="notification.Actor.Avatar" />
+                <img v-if="notification.Actor?.Avatar" :src="notification.Actor.Avatar" />
+                <q-icon v-else name="mdiAccountCircle" size="48px" color="grey-5" />
               </q-avatar>
 
               <!-- 消息内容 -->
               <div class="notification-content flex-1">
                 <div class="notification-header row items-center q-mb-xs">
-                  <span class="text-weight-medium">{{ notification.Actor.UserName }}</span>
+                  <span class="text-weight-medium">{{ notification.Actor?.UserName || '系统' }}</span>
                   <span class="text-grey-7 q-ml-xs">
                     {{ getNotificationLabel(notification) }}
                   </span>
@@ -90,7 +91,9 @@ import { parseTime, toNow } from 'src/utils/time'
 
 import { useAppStore } from 'stores/app'
 
-import { getNotifications, markNotifications } from 'src/services/user'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+
+import { getMyInfo, getNotifications, markNotifications } from 'src/services/user'
 
 import type { GetNotifications } from 'src/services/user/type'
 
@@ -106,6 +109,18 @@ const infiniteScroll = ref()
 const unreadIds = computed(() => {
   return notifications.value.filter((n) => !n.IsRead).map((n) => n.Id)
 })
+
+const refreshUnreadCount = async () => {
+  if (!appStore.user) {
+    return
+  }
+
+  try {
+    appStore.user = await getMyInfo()
+  } catch {
+    // 保持通知页主流程可用，badge 刷新失败不阻断跳转
+  }
+}
 
 // 格式化时间 - 使用项目统一的时间格式化函数
 const formatTime = (time: string) => {
@@ -148,6 +163,19 @@ const onLoad = async (index: number, done: () => void) => {
   done()
 }
 
+const requestNotifications = async () => {
+  notifications.value = []
+  currentPage.value = 1
+  totalPages.value = 0
+
+  infiniteScroll.value?.reset()
+  infiniteScroll.value?.resume()
+  infiniteScroll.value?.trigger()
+
+  await refreshUnreadCount()
+  await nextTick()
+}
+
 // 点击通知
 const handleNotificationClick = async (notification: GetNotifications.Notification) => {
   // 根据已读状态动态调用标记API
@@ -155,16 +183,13 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     try {
       await markNotifications({ Ids: [notification.Id] })
       notification.IsRead = true
-      // 更新 store 中的未读数量
-      if (appStore.user && appStore.user.UnreadNotificationCount > 0) {
-        appStore.user.UnreadNotificationCount--
-      }
+      await refreshUnreadCount()
     } catch (error) {
       // 标记失败不影响跳转，静默处理
     }
   }
 
-  if (notification.ObjectType === 'Book' && notification.Extra.object_id) {
+  if (notification.ObjectType === 'Book' && notification.Extra?.object_id) {
     router.push({
       name: 'BookInfo',
       params: { bid: notification.Extra.object_id },
@@ -172,7 +197,7 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     return
   }
 
-  if (notification.ObjectType === 'Announcement' && notification.Extra.object_id) {
+  if (notification.ObjectType === 'Announcement' && notification.Extra?.object_id) {
     router.push({
       name: 'AnnouncementDetail',
       params: { id: notification.Extra.object_id },
@@ -180,6 +205,16 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     return
   }
 
+  if (notification.ObjectType === 'CommunityThread' && notification.Extra?.object_id) {
+    router.push({
+      name: 'ForumThread',
+      params: { id: notification.Extra.object_id },
+      query: {
+        replyId: notification.Extra.reply_id ? String(notification.Extra.reply_id) : undefined,
+        parentReplyId: notification.Extra.parent_reply_id ? String(notification.Extra.parent_reply_id) : undefined,
+      },
+    })
+  }
 }
 
 const getNotificationLabel = (notification: GetNotifications.Notification) => {
@@ -188,7 +223,15 @@ const getNotificationLabel = (notification: GetNotifications.Notification) => {
   }
 
   if (notification.Type === 'CommentReply') {
-    return notification.ObjectType === 'Announcement' ? '回复了你的评论' : '回复了你的评论'
+    return notification.ObjectType === 'Announcement' ? '回复了你的公告评论' : '回复了你的书籍评论'
+  }
+
+  if (notification.Type === 'CommunityThreadReply') {
+    return '回复了你的帖子'
+  }
+
+  if (notification.Type === 'CommunityThreadChildReply') {
+    return '回复了你的社区评论'
   }
 
   return notification.Type
@@ -207,11 +250,10 @@ const markAllAsRead = async () => {
     }
   })
 
-  // 更新 store 中的未读数量
-  if (appStore.user) {
-    appStore.user.UnreadNotificationCount = 0
-  }
+  await refreshUnreadCount()
 }
+
+useInitRequest(requestNotifications)
 </script>
 
 <style scoped lang="scss">

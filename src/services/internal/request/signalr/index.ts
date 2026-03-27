@@ -26,6 +26,7 @@ export const connectState = ref<HubConnectionState>(HubConnectionState.Disconnec
 /** 最后一次重连定时器句柄 */
 const lastReConnect = ref<number>(0)
 const isStart = ref<boolean>(false)
+const subscriptions = new Map<string, Set<(res: unknown) => void>>()
 
 const setState = () => (connectState.value = hub.state)
 
@@ -63,6 +64,11 @@ function buildHub(url: string) {
   h.onclose(setState)
   h.onreconnecting(setState)
   h.onreconnected(setState)
+  for (const [methodName, callbacks] of subscriptions.entries()) {
+    for (const callback of callbacks) {
+      h.on(methodName, callback)
+    }
+  }
   return h
 }
 
@@ -228,10 +234,17 @@ export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res
     }
   }
 
-  // 直接on就好
+  const callbacks = subscriptions.get(methodName) ?? new Set<(res: unknown) => void>()
+  callbacks.add(_cb as (res: unknown) => void)
+  subscriptions.set(methodName, callbacks)
   hub.on(methodName, _cb)
 
   return function () {
+    const currentCallbacks = subscriptions.get(methodName)
+    currentCallbacks?.delete(_cb as (res: unknown) => void)
+    if (currentCallbacks?.size === 0) {
+      subscriptions.delete(methodName)
+    }
     hub.off(methodName, _cb)
   }
 }

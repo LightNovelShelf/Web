@@ -1,7 +1,7 @@
 import type { ListResult } from 'src/services/types'
 
 export interface OnlineInfo {
-  OnlineCount: number
+  OnlineUserCount: number
   MaxOnline: number
   DayCount: number
   DayRegister: number
