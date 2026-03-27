@@ -223,15 +223,15 @@ const getNotificationLabel = (notification: GetNotifications.Notification) => {
   }
 
   if (notification.Type === 'CommentReply') {
-    return notification.ObjectType === 'Announcement' ? '回复了你的评论' : '回复了你的评论'
+    return notification.ObjectType === 'Announcement' ? '回复了你的公告评论' : '回复了你的书籍评论'
   }
 
-  if (notification.Type === 'CommunityReply') {
+  if (notification.Type === 'CommunityThreadReply') {
     return '回复了你的帖子'
   }
 
-  if (notification.Type === 'CommunityReplyReply') {
-    return '回复了你的社区回复'
+  if (notification.Type === 'CommunityThreadChildReply') {
+    return '回复了你的社区评论'
   }
 
   return notification.Type

@@ -65,8 +65,8 @@ export namespace GetNotifications {
   export type NotificationType =
     | 'Comment'
     | 'CommentReply'
-    | 'CommunityReply'
-    | 'CommunityReplyReply'
+    | 'CommunityThreadReply'
+    | 'CommunityThreadChildReply'
 
   export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread'
 
