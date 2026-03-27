@@ -1,6 +1,7 @@
 import { requestWithSignalr } from 'src/services/internal/request'
 
 import type {
+  CommunityFeedPayload,
   CommunityHomePayload,
   CommunityListQuery,
   CommunityMyOverview,
@@ -13,6 +14,17 @@ import type {
 
 export async function getCommunityHome(query: CommunityListQuery = {}): Promise<CommunityHomePayload> {
   return requestWithSignalr<CommunityHomePayload>('GetCommunityHome', {
+    BoardKey: query.boardKey ?? 'all',
+    SubCategoryKey: query.subCategoryKey ?? '',
+    Order: query.order ?? 'latest',
+    Scope: query.scope ?? 'all',
+    Page: Math.max(1, query.page ?? 1),
+    Size: Math.max(1, query.size ?? 6),
+  })
+}
+
+export async function getCommunityFeed(query: CommunityListQuery = {}): Promise<CommunityFeedPayload> {
+  return requestWithSignalr<CommunityFeedPayload>('GetCommunityFeed', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
     Order: query.order ?? 'latest',
@@ -54,28 +66,28 @@ export async function createCommunityReply(req: CreateCommunityReplyRequest): Pr
 }
 
 export async function toggleThreadLike(id: number) {
-  return requestWithSignalr<{ liked: boolean; likes: number }>('ToggleCommunityThreadLike', {
+  return requestWithSignalr<{ Liked: boolean; Likes: number }>('ToggleCommunityThreadLike', {
     ThreadId: id,
   })
 }
 
 export async function toggleThreadFavorite(id: number) {
-  return requestWithSignalr<{ favorited: boolean; favorites: number }>('ToggleCommunityThreadFavorite', {
+  return requestWithSignalr<{ Favorited: boolean; Favorites: number }>('ToggleCommunityThreadFavorite', {
     ThreadId: id,
   })
 }
 
 export async function toggleReplyLike(threadId: number, replyId: number) {
   void threadId
-  return requestWithSignalr<{ liked: boolean; likes: number }>('ToggleCommunityReplyLike', {
+  return requestWithSignalr<{ Liked: boolean; Likes: number }>('ToggleCommunityReplyLike', {
     ReplyId: replyId,
   })
 }
 
 export async function getCommunityReplyChildren(req: GetCommunityReplyChildrenRequest) {
   return requestWithSignalr<{
-    items: CommunityThreadReply[]
-    page: CommunityThreadDetail['repliesPage']
+    Items: CommunityThreadReply[]
+    Page: CommunityThreadDetail['RepliesPage']
   }>('GetCommunityReplyChildren', {
     ThreadId: req.threadId,
     ParentReplyId: req.parentReplyId,

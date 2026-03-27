@@ -119,12 +119,11 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import HtmlEditor from 'components/html/HtmlEditor.vue'
 
-import { communityCatalogBoards, getCommunityCatalogBoard } from 'src/services/forum/catalog'
-
-import type { CommunityBoardKey, CreateCommunityThreadRequest } from 'src/services/forum'
+import type { CommunityBoardKey, CommunityCatalogBoard, CreateCommunityThreadRequest } from 'src/services/forum'
 
 const props = defineProps<{
   user: any
+  catalogBoards: CommunityCatalogBoard[]
   selectedBoardKey: CommunityBoardKey
   selectedSubCategoryKey: string
   submitting: boolean
@@ -138,27 +137,35 @@ const route = useRoute()
 const dialogOpen = ref(false)
 const title = ref('')
 const contentHtml = ref('<p></p>')
-const boardKey = ref<Exclude<CommunityBoardKey, 'all'>>('anime')
+const boardKey = ref<Exclude<CommunityBoardKey, 'all'>>('')
 const subCategoryKey = ref('')
 
-const boardOptions = communityCatalogBoards.map((item) => ({
-  label: item.label,
-  value: item.key,
-}))
+const catalogBoardMap = computed(() => new Map(props.catalogBoards.map((item) => [item.Key, item])))
+const defaultBoardKey = computed(() => props.catalogBoards[0]?.Key ?? '')
+
+const boardOptions = computed(() =>
+  props.catalogBoards.map((item) => ({
+    label: item.Title,
+    value: item.Key,
+  })),
+)
 
 const subCategoryOptions = computed(() =>
-  (getCommunityCatalogBoard(boardKey.value)?.subCategories ?? []).map((item) => ({
-    label: item.label,
-    value: item.key,
+  (catalogBoardMap.value.get(boardKey.value)?.SubCategories ?? []).map((item) => ({
+    label: item.Label,
+    value: item.Key,
   })),
 )
 
 const plainText = computed(() => getPlainTextFromHtml(contentHtml.value))
 const plainTextLength = computed(() => plainText.value.replace(/\s+/g, '').length)
-const canSubmit = computed(() => title.value.trim().length >= 6 && plainTextLength.value >= 20)
+const canSubmit = computed(() => !!boardKey.value && title.value.trim().length >= 6 && plainTextLength.value >= 20)
 
 function syncBoardFromProps() {
-  boardKey.value = props.selectedBoardKey && props.selectedBoardKey !== 'all' ? props.selectedBoardKey : 'anime'
+  boardKey.value =
+    props.selectedBoardKey && props.selectedBoardKey !== 'all' && catalogBoardMap.value.has(props.selectedBoardKey)
+      ? props.selectedBoardKey
+      : defaultBoardKey.value
   syncSubCategoryForBoard()
 }
 
@@ -189,6 +196,16 @@ watch(
 watch(boardKey, () => {
   syncSubCategoryForBoard()
 })
+
+watch(
+  () => props.catalogBoards.map((item) => item.Key).join(':'),
+  () => {
+    if (!catalogBoardMap.value.has(boardKey.value)) {
+      syncBoardFromProps()
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   () => props.submitting,

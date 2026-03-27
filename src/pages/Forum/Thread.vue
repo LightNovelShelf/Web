@@ -12,8 +12,8 @@
         <q-breadcrumbs class="thread-page__breadcrumbs">
           <q-breadcrumbs-el label="社区" :to="{ name: 'ForumList' }" />
           <q-breadcrumbs-el
-            :label="thread.boardName"
-            :to="{ name: 'ForumList', query: { board: thread.boardKey, category: thread.subCategoryKey } }"
+            :label="thread.BoardName"
+            :to="{ name: 'ForumList', query: { board: thread.BoardKey, category: thread.SubCategoryKey } }"
           />
           <q-breadcrumbs-el label="帖子详情" />
         </q-breadcrumbs>
@@ -23,68 +23,80 @@
             <article class="thread-card">
               <div class="thread-card__topline">
                 <div class="thread-card__topline-meta">
-                  <span class="thread-card__board">{{ thread.boardName }}</span>
-                  <span v-if="thread.subCategoryLabel" class="thread-card__sub-category">{{
-                    thread.subCategoryLabel
+                  <span class="thread-card__board">{{ thread.BoardName }}</span>
+                  <span v-if="thread.SubCategoryLabel" class="thread-card__sub-category">{{
+                    thread.SubCategoryLabel
                   }}</span>
-                  <span v-if="thread.pinned" class="thread-card__flag thread-card__flag--pinned">置顶</span>
-                  <span v-if="thread.featured" class="thread-card__flag thread-card__flag--featured">精华</span>
-                  <span v-if="thread.locked" class="thread-card__flag thread-card__flag--locked">已锁定</span>
+                  <span v-if="thread.Pinned" class="thread-card__flag thread-card__flag--pinned">置顶</span>
+                  <span v-if="thread.Featured" class="thread-card__flag thread-card__flag--featured">精华</span>
+                  <span v-if="thread.Locked" class="thread-card__flag thread-card__flag--locked">已锁定</span>
                 </div>
 
                 <div class="thread-card__actions thread-card__actions--top">
                   <q-btn
                     unelevated
                     class="thread-card__action-btn"
-                    :class="{ 'thread-card__action-btn--active': thread.favorited }"
-                    :icon="thread.favorited ? 'mdiBookmark' : 'mdiBookmarkOutline'"
-                    :label="`${thread.favorites}`"
-                    :disable="thread.locked || togglingFavorite"
+                    :class="{ 'thread-card__action-btn--active': thread.Favorited }"
+                    :icon="thread.Favorited ? 'mdiBookmark' : 'mdiBookmarkOutline'"
+                    :label="`${thread.Favorites}`"
+                    :disable="thread.Locked || togglingFavorite"
                     :loading="togglingFavorite"
-                    :aria-label="thread.favorited ? '已收藏' : '收藏'"
+                    :aria-label="thread.Favorited ? '已收藏' : '收藏'"
                     @click="handleToggleFavorite"
                   />
                   <q-btn
                     unelevated
                     class="thread-card__action-btn"
-                    :class="{ 'thread-card__action-btn--active': thread.liked }"
-                    :icon="thread.liked ? 'mdiThumbUp' : 'mdiThumbUpOutline'"
-                    :label="`${thread.likes}`"
-                    :disable="thread.locked || togglingLike"
+                    :class="{ 'thread-card__action-btn--active': thread.Liked }"
+                    :icon="thread.Liked ? 'mdiThumbUp' : 'mdiThumbUpOutline'"
+                    :label="`${thread.Likes}`"
+                    :disable="thread.Locked || togglingLike"
                     :loading="togglingLike"
-                    :aria-label="thread.liked ? '已点赞' : '点赞'"
+                    :aria-label="thread.Liked ? '已点赞' : '点赞'"
                     @click="handleToggleThreadLike"
                   />
                 </div>
               </div>
 
-              <h1 class="thread-card__title">{{ thread.title }}</h1>
+              <h1 class="thread-card__title">{{ thread.Title }}</h1>
 
               <div class="thread-card__meta">
                 <div class="thread-card__author">
-                  <q-avatar size="42px" :style="thread.authorAvatar ? undefined : { background: avatarBackground(thread.authorName), color: '#fff' }">
-                    <img v-if="thread.authorAvatar" class="community-avatar__image" :src="thread.authorAvatar" :alt="thread.authorName" />
-                    <template v-else>{{ thread.authorName.slice(0, 1) }}</template>
+                  <q-avatar
+                    size="42px"
+                    :style="
+                      thread.AuthorAvatar
+                        ? undefined
+                        : { background: avatarBackground(thread.AuthorName), color: '#fff' }
+                    "
+                  >
+                    <img
+                      v-if="thread.AuthorAvatar"
+                      class="community-avatar__image"
+                      :src="thread.AuthorAvatar"
+                      :alt="thread.AuthorName"
+                    />
+                    <template v-else>{{ thread.AuthorName.slice(0, 1) }}</template>
                   </q-avatar>
                   <div>
-                    <div class="thread-card__author-name">{{ thread.authorName }}</div>
-                    <div class="thread-card__author-time">{{ thread.publishedAt }}</div>
+                    <div class="thread-card__author-name">{{ thread.AuthorName }}</div>
+                    <div class="thread-card__author-time">{{ formatPublishedAt(thread.PublishedAt) }}</div>
                   </div>
                 </div>
 
                 <div class="thread-card__stats">
-                  <span>评论 {{ thread.replies }}</span>
-                  <span>浏览 {{ thread.views }}</span>
-                  <span>热度 {{ thread.heat }}</span>
+                  <span>评论 {{ thread.Replies }}</span>
+                  <span>浏览 {{ thread.Views }}</span>
+                  <span>热度 {{ thread.Heat }}</span>
                 </div>
               </div>
 
               <div class="thread-card__body">
-                <html-reader :html="sanitizerHtml(thread.bodyHtml)" />
+                <html-reader :html="sanitizerHtml(thread.BodyHtml)" />
               </div>
 
               <div class="thread-card__tags">
-                <span v-for="tag in thread.tags" :key="tag" class="thread-card__tag">{{ tag }}</span>
+                <span v-for="tag in thread.Tags" :key="tag" class="thread-card__tag">{{ tag }}</span>
               </div>
             </article>
 
@@ -92,14 +104,14 @@
               <div class="reply-panel__header">
                 <div>
                   <h2>回复</h2>
-                  <span>当前已加载 {{ replyItems.length }} / {{ replyPagination.total }} 个楼层</span>
+                  <span>当前已加载 {{ replyItems.length }} / {{ replyPagination.Total }} 个楼层</span>
                 </div>
-                <div v-if="thread.locked" class="reply-panel__lock">当前帖子已锁定，只能浏览。</div>
+                <div v-if="thread.Locked" class="reply-panel__lock">当前帖子已锁定，只能浏览。</div>
               </div>
 
               <div ref="replyComposerRef" class="reply-composer">
                 <div v-if="replyTarget" class="reply-composer__target">
-                  正在回复 <strong>{{ replyTarget.authorName }}</strong>
+                  正在回复 <strong>{{ replyTarget.AuthorName }}</strong>
                   <q-btn flat dense no-caps color="primary" label="取消" @click="replyTarget = null" />
                 </div>
 
@@ -108,13 +120,13 @@
                   autogrow
                   outlined
                   class="reply-composer__input"
-                  :disable="thread.locked"
+                  :disable="thread.Locked"
                   :placeholder="replyPlaceholder"
                 />
 
                 <div class="reply-composer__actions">
                   <div class="reply-composer__hint">
-                    {{ thread.locked ? '锁帖后不能继续回复。' : '支持回复楼主，也支持对某条回复发起二级回应。' }}
+                    {{ thread.Locked ? '锁帖后不能继续回复。' : '支持回复楼主，也支持对某条回复发起二级回应。' }}
                   </div>
                   <q-btn
                     unelevated
@@ -122,7 +134,7 @@
                     color="primary"
                     icon="mdiSend"
                     label="发布回复"
-                    :disable="thread.locked || !draftReply.trim()"
+                    :disable="thread.Locked || !draftReply.trim()"
                     :loading="submittingReply"
                     @click="handleSubmitReply"
                   />
@@ -137,39 +149,43 @@
               <div class="reply-list">
                 <article
                   v-for="reply in replyItems"
-                  :id="replyDomId(reply.id)"
-                  :key="reply.id"
+                  :id="replyDomId(reply.Id)"
+                  :key="reply.Id"
                   class="reply-item"
-                  :class="{ 'reply-item--focused': focusedReplyId === reply.id }"
+                  :class="{ 'reply-item--focused': focusedReplyId === reply.Id }"
                 >
                   <div class="reply-item__header">
                     <div class="reply-item__author">
                       <q-avatar
                         size="34px"
-                        :style="reply.authorAvatar ? undefined : { background: avatarBackground(reply.authorName), color: '#fff' }"
+                        :style="
+                          reply.AuthorAvatar
+                            ? undefined
+                            : { background: avatarBackground(reply.AuthorName), color: '#fff' }
+                        "
                       >
                         <img
-                          v-if="reply.authorAvatar"
+                          v-if="reply.AuthorAvatar"
                           class="community-avatar__image"
-                          :src="reply.authorAvatar"
-                          :alt="reply.authorName"
+                          :src="reply.AuthorAvatar"
+                          :alt="reply.AuthorName"
                         />
-                        <template v-else>{{ reply.authorName.slice(0, 1) }}</template>
+                        <template v-else>{{ reply.AuthorName.slice(0, 1) }}</template>
                       </q-avatar>
                       <div>
                         <div class="reply-item__name-row">
-                          <span class="reply-item__name">{{ reply.authorName }}</span>
-                          <span v-if="reply.authorBadge" class="reply-item__badge">{{ reply.authorBadge }}</span>
+                          <span class="reply-item__name">{{ reply.AuthorName }}</span>
+                          <span v-if="reply.AuthorBadge" class="reply-item__badge">{{ reply.AuthorBadge }}</span>
                           <button
-                            v-if="reply.replyTo"
+                            v-if="reply.ReplyTo"
                             type="button"
                             class="reply-item__reply-to reply-item__reply-to--clickable"
-                            @click="scrollToReply(reply.replyTo.id)"
+                            @click="scrollToReply(reply.ReplyTo.Id)"
                           >
-                            回复 {{ reply.replyTo.authorName }}
+                            回复 {{ reply.ReplyTo.AuthorName }}
                           </button>
                         </div>
-                        <div class="reply-item__time">{{ reply.publishedAt }}</div>
+                        <div class="reply-item__time">{{ formatPublishedAt(reply.PublishedAt) }}</div>
                       </div>
                     </div>
 
@@ -181,61 +197,65 @@
                         class="reply-item__tool-btn"
                         icon="mdiReplyOutline"
                         label="回应"
-                        :disable="thread.locked"
-                        @click="handleStartReply(reply.id, reply.authorName)"
+                        :disable="thread.Locked"
+                        @click="handleStartReply(reply.Id, reply.AuthorName)"
                       />
                       <q-btn
                         flat
                         no-caps
                         dense
                         class="reply-item__like-btn"
-                        :class="{ 'reply-item__like-btn--active': reply.liked }"
-                        :icon="reply.liked ? 'mdiThumbUp' : 'mdiThumbUpOutline'"
-                        :label="`${reply.likes}`"
-                        :disable="thread.locked || togglingReplyIds.has(reply.id)"
-                        @click="handleToggleReplyLike(reply.id)"
+                        :class="{ 'reply-item__like-btn--active': reply.Liked }"
+                        :icon="reply.Liked ? 'mdiThumbUp' : 'mdiThumbUpOutline'"
+                        :label="`${reply.Likes}`"
+                        :disable="thread.Locked || togglingReplyIds.has(reply.Id)"
+                        @click="handleToggleReplyLike(reply.Id)"
                       />
                     </div>
                   </div>
 
-                  <p class="reply-item__content">{{ reply.content }}</p>
+                  <p class="reply-item__content">{{ reply.Content }}</p>
 
-                  <div v-if="reply.childReplies.length" class="reply-children">
+                  <div v-if="reply.ChildReplies.length" class="reply-children">
                     <article
-                      v-for="child in reply.childReplies"
-                      :id="replyDomId(child.id)"
-                      :key="child.id"
+                      v-for="child in reply.ChildReplies"
+                      :id="replyDomId(child.Id)"
+                      :key="child.Id"
                       class="reply-child"
-                      :class="{ 'reply-child--focused': focusedReplyId === child.id }"
+                      :class="{ 'reply-child--focused': focusedReplyId === child.Id }"
                     >
                       <div class="reply-child__header">
                         <div class="reply-item__author">
                           <q-avatar
                             size="30px"
-                            :style="child.authorAvatar ? undefined : { background: avatarBackground(child.authorName), color: '#fff' }"
+                            :style="
+                              child.AuthorAvatar
+                                ? undefined
+                                : { background: avatarBackground(child.AuthorName), color: '#fff' }
+                            "
                           >
                             <img
-                              v-if="child.authorAvatar"
+                              v-if="child.AuthorAvatar"
                               class="community-avatar__image"
-                              :src="child.authorAvatar"
-                              :alt="child.authorName"
+                              :src="child.AuthorAvatar"
+                              :alt="child.AuthorName"
                             />
-                            <template v-else>{{ child.authorName.slice(0, 1) }}</template>
+                            <template v-else>{{ child.AuthorName.slice(0, 1) }}</template>
                           </q-avatar>
                           <div>
                             <div class="reply-item__name-row">
-                              <span class="reply-item__name">{{ child.authorName }}</span>
-                              <span v-if="child.authorBadge" class="reply-item__badge">{{ child.authorBadge }}</span>
+                              <span class="reply-item__name">{{ child.AuthorName }}</span>
+                              <span v-if="child.AuthorBadge" class="reply-item__badge">{{ child.AuthorBadge }}</span>
                               <button
-                                v-if="child.replyTo"
+                                v-if="child.ReplyTo"
                                 type="button"
                                 class="reply-item__reply-to reply-item__reply-to--clickable"
-                                @click="scrollToReply(child.replyTo.id)"
+                                @click="scrollToReply(child.ReplyTo.Id)"
                               >
-                                回复 {{ child.replyTo.authorName }}
+                                回复 {{ child.ReplyTo.AuthorName }}
                               </button>
                             </div>
-                            <div class="reply-item__time">{{ child.publishedAt }}</div>
+                            <div class="reply-item__time">{{ formatPublishedAt(child.PublishedAt) }}</div>
                           </div>
                         </div>
 
@@ -247,41 +267,41 @@
                             class="reply-item__tool-btn"
                             icon="mdiReplyOutline"
                             label="回应"
-                            :disable="thread.locked"
-                            @click="handleStartReply(child.id, child.authorName)"
+                            :disable="thread.Locked"
+                            @click="handleStartReply(child.Id, child.AuthorName)"
                           />
                           <q-btn
                             flat
                             no-caps
                             dense
                             class="reply-item__like-btn"
-                            :class="{ 'reply-item__like-btn--active': child.liked }"
-                            :icon="child.liked ? 'mdiThumbUp' : 'mdiThumbUpOutline'"
-                            :label="`${child.likes}`"
-                            :disable="thread.locked || togglingReplyIds.has(child.id)"
-                            @click="handleToggleReplyLike(child.id)"
+                            :class="{ 'reply-item__like-btn--active': child.Liked }"
+                            :icon="child.Liked ? 'mdiThumbUp' : 'mdiThumbUpOutline'"
+                            :label="`${child.Likes}`"
+                            :disable="thread.Locked || togglingReplyIds.has(child.Id)"
+                            @click="handleToggleReplyLike(child.Id)"
                           />
                         </div>
                       </div>
 
-                      <p class="reply-child__content">{{ child.content }}</p>
+                      <p class="reply-child__content">{{ child.Content }}</p>
                     </article>
                   </div>
 
-                  <div v-if="reply.childPage.hasMore" class="reply-children__footer">
+                  <div v-if="reply.ChildPage.HasMore" class="reply-children__footer">
                     <q-btn
                       flat
                       no-caps
                       color="primary"
-                      :loading="loadingChildReplyIds.has(reply.id)"
+                      :loading="loadingChildReplyIds.has(reply.Id)"
                       label="加载更多楼中楼"
-                      @click="handleLoadMoreChildReplies(reply.id)"
+                      @click="handleLoadMoreChildReplies(reply.Id)"
                     />
                   </div>
                 </article>
               </div>
 
-              <div v-if="replyPagination.hasMore" class="reply-panel__footer">
+              <div v-if="replyPagination.HasMore" class="reply-panel__footer">
                 <q-btn
                   outline
                   no-caps
@@ -315,13 +335,13 @@
               <h3>相关帖子</h3>
               <div class="related-list">
                 <router-link
-                  v-for="item in thread.relatedThreads"
-                  :key="item.id"
+                  v-for="item in thread.RelatedThreads"
+                  :key="item.Id"
                   class="related-item"
-                  :to="{ name: 'ForumThread', params: { id: item.id } }"
+                  :to="{ name: 'ForumThread', params: { id: item.Id } }"
                 >
-                  <div class="related-item__title">{{ item.title }}</div>
-                  <div class="related-item__meta">{{ item.boardName }} · 评论 {{ item.replies }}</div>
+                  <div class="related-item__title">{{ item.Title }}</div>
+                  <div class="related-item__meta">{{ item.BoardName }} · 评论 {{ item.Replies }}</div>
                 </router-link>
               </div>
             </section>
@@ -344,6 +364,7 @@ import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
+import { parseTime, toNow } from 'src/utils/time'
 
 import { useAppStore } from 'stores/app'
 
@@ -407,14 +428,14 @@ const replyComposerRef = ref<HTMLElement | null>(null)
 const recentThreadItems = ref<RecentThreadCardItem[]>([])
 
 const emptyPagination: CommunityPagination = {
-  page: 1,
-  size: 5,
-  total: 0,
-  totalPages: 1,
-  hasMore: false,
+  Page: 1,
+  Size: 5,
+  Total: 0,
+  TotalPages: 1,
+  HasMore: false,
 }
 
-const replyPagination = computed(() => thread.value?.repliesPage ?? emptyPagination)
+const replyPagination = computed(() => thread.value?.RepliesPage ?? emptyPagination)
 const focusedReplyId = ref<number | null>(null)
 const threadId = computed(() => {
   const parsed = Number(props.id)
@@ -440,14 +461,14 @@ const notificationFocusKey = computed(() => {
   return `${props.id}:${notificationReplyId.value ?? ''}:${notificationParentReplyId.value ?? ''}`
 })
 const handledNotificationFocusKey = ref('')
-const isActive = computed(() => thread.value?.id === threadId.value)
+const isActive = computed(() => thread.value?.Id === threadId.value)
 const replyPlaceholder = computed(() => {
-  if (thread.value?.locked) {
+  if (thread.value?.Locked) {
     return '当前帖子已锁定'
   }
 
   if (replyTarget.value) {
-    return `回复 ${replyTarget.value.authorName}...`
+    return `回复 ${replyTarget.value.AuthorName}...`
   }
 
   return '写下你的看法，补充观点或者回应楼主。'
@@ -458,6 +479,10 @@ const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#
 function avatarBackground(seed: string) {
   const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
+}
+
+function formatPublishedAt(value: string) {
+  return toNow(parseTime(value))
 }
 
 function formatRecentViewedAt(viewedAt: number) {
@@ -531,11 +556,11 @@ function requireLogin() {
 
 function findReplyById(replyId: number) {
   for (const reply of replyItems.value) {
-    if (reply.id === replyId) {
+    if (reply.Id === replyId) {
       return reply
     }
 
-    const child = reply.childReplies.find((item) => item.id === replyId)
+    const child = reply.ChildReplies.find((item) => item.Id === replyId)
     if (child) {
       return child
     }
@@ -546,7 +571,7 @@ function findReplyById(replyId: number) {
 
 function findRootReply(replyId: number) {
   for (const reply of replyItems.value) {
-    if (reply.id === replyId || reply.childReplies.some((item) => item.id === replyId)) {
+    if (reply.Id === replyId || reply.ChildReplies.some((item) => item.Id === replyId)) {
       return reply
     }
   }
@@ -555,7 +580,7 @@ function findRootReply(replyId: number) {
 }
 
 async function handleStartReply(replyId: number, authorName: string) {
-  replyTarget.value = { id: replyId, authorName }
+  replyTarget.value = { Id: replyId, AuthorName: authorName }
 
   await nextTick()
 
@@ -579,8 +604,8 @@ async function loadMoreChildReplies(parentReplyId: number) {
     return false
   }
 
-  const target = replyItems.value.find((item) => item.id === parentReplyId)
-  if (!target || !target.childPage.hasMore) {
+  const target = replyItems.value.find((item) => item.Id === parentReplyId)
+  if (!target || !target.ChildPage.HasMore) {
     return false
   }
 
@@ -588,14 +613,14 @@ async function loadMoreChildReplies(parentReplyId: number) {
 
   try {
     const next = await getCommunityReplyChildren({
-      threadId: thread.value.id,
+      threadId: thread.value.Id,
       parentReplyId,
-      page: target.childPage.page + 1,
-      size: target.childPage.size,
+      page: target.ChildPage.Page + 1,
+      size: target.ChildPage.Size,
     })
 
-    target.childReplies = [...target.childReplies, ...next.items]
-    target.childPage = next.page
+    target.ChildReplies = [...target.ChildReplies, ...next.Items]
+    target.ChildPage = next.Page
     return true
   } finally {
     const nextIds = new Set(loadingChildReplyIds.value)
@@ -609,7 +634,7 @@ async function ensureRootReplyVisible(parentReplyId: number) {
     return true
   }
 
-  while (thread.value?.repliesPage.hasMore) {
+  while (thread.value?.RepliesPage.HasMore) {
     await loadThread({ appendReplies: true, trackView: false })
     if (findReplyById(parentReplyId)) {
       return true
@@ -635,8 +660,8 @@ async function ensureReplyVisible(replyId: number, parentReplyId?: number | null
       return false
     }
 
-    while (rootReply.childPage.hasMore) {
-      await loadMoreChildReplies(rootReply.id)
+    while (rootReply.ChildPage.HasMore) {
+      await loadMoreChildReplies(rootReply.Id)
       if (findReplyById(replyId)) {
         return true
       }
@@ -650,8 +675,8 @@ async function ensureReplyVisible(replyId: number, parentReplyId?: number | null
   }
 
   for (const reply of replyItems.value) {
-    while (reply.childPage.hasMore) {
-      await loadMoreChildReplies(reply.id)
+    while (reply.ChildPage.HasMore) {
+      await loadMoreChildReplies(reply.Id)
       if (findReplyById(replyId)) {
         return true
       }
@@ -701,7 +726,11 @@ async function scrollToReply(replyId: number, parentReplyId?: number | null) {
 }
 
 async function focusReplyFromNotification() {
-  if (!thread.value || !notificationFocusKey.value || handledNotificationFocusKey.value === notificationFocusKey.value) {
+  if (
+    !thread.value ||
+    !notificationFocusKey.value ||
+    handledNotificationFocusKey.value === notificationFocusKey.value
+  ) {
     return
   }
 
@@ -743,11 +772,11 @@ async function loadThread(options: { appendReplies?: boolean; trackView?: boolea
 
   thread.value = data
   replyPage.value = nextReplyPage
-  replyItems.value = appendReplies ? [...replyItems.value, ...data.replyItems] : data.replyItems
+  replyItems.value = appendReplies ? [...replyItems.value, ...data.ReplyItems] : data.ReplyItems
   pushRecentThreadHistory({
-    id: data.id,
-    title: data.title,
-    boardName: data.boardName,
+    id: data.Id,
+    title: data.Title,
+    boardName: data.BoardName,
     viewedAt: Date.now(),
   })
   await nextTick()
@@ -757,48 +786,48 @@ async function loadThread(options: { appendReplies?: boolean; trackView?: boolea
 }
 
 async function handleToggleThreadLike() {
-  if (!thread.value || thread.value.locked || !requireLogin()) {
+  if (!thread.value || thread.value.Locked || !requireLogin()) {
     return
   }
 
   togglingLike.value = true
   try {
-    const nextState = await toggleThreadLike(thread.value.id)
-    thread.value.liked = nextState.liked
-    thread.value.likes = nextState.likes
+    const nextState = await toggleThreadLike(thread.value.Id)
+    thread.value.Liked = nextState.Liked
+    thread.value.Likes = nextState.Likes
   } finally {
     togglingLike.value = false
   }
 }
 
 async function handleToggleFavorite() {
-  if (!thread.value || thread.value.locked || !requireLogin()) {
+  if (!thread.value || thread.value.Locked || !requireLogin()) {
     return
   }
 
   togglingFavorite.value = true
   try {
-    const nextState = await toggleThreadFavorite(thread.value.id)
-    thread.value.favorited = nextState.favorited
-    thread.value.favorites = nextState.favorites
+    const nextState = await toggleThreadFavorite(thread.value.Id)
+    thread.value.Favorited = nextState.Favorited
+    thread.value.Favorites = nextState.Favorites
   } finally {
     togglingFavorite.value = false
   }
 }
 
 async function handleToggleReplyLike(replyId: number) {
-  if (!thread.value || thread.value.locked || !requireLogin()) {
+  if (!thread.value || thread.value.Locked || !requireLogin()) {
     return
   }
 
   togglingReplyIds.value = new Set(togglingReplyIds.value).add(replyId)
 
   try {
-    const nextState = await toggleReplyLike(thread.value.id, replyId)
+    const nextState = await toggleReplyLike(thread.value.Id, replyId)
     const target = findReplyById(replyId)
     if (target) {
-      target.liked = nextState.liked
-      target.likes = nextState.likes
+      target.Liked = nextState.Liked
+      target.Likes = nextState.Likes
     }
   } finally {
     const nextIds = new Set(togglingReplyIds.value)
@@ -808,7 +837,7 @@ async function handleToggleReplyLike(replyId: number) {
 }
 
 async function handleSubmitReply() {
-  if (!thread.value || thread.value.locked || !draftReply.value.trim() || !requireLogin()) {
+  if (!thread.value || thread.value.Locked || !draftReply.value.trim() || !requireLogin()) {
     return
   }
 
@@ -817,33 +846,33 @@ async function handleSubmitReply() {
 
   try {
     const created = await createCommunityReply({
-      threadId: thread.value.id,
+      threadId: thread.value.Id,
       content: draftReply.value,
-      replyToId: replyTarget.value?.id,
+      replyToId: replyTarget.value?.Id,
     })
 
     if (replyTarget.value) {
-      const rootReply = findRootReply(replyTarget.value.id)
+      const rootReply = findRootReply(replyTarget.value.Id)
       if (rootReply) {
-        rootReply.childReplies = [...rootReply.childReplies, created]
-        const total = rootReply.childPage.total + 1
-        const visible = rootReply.childReplies.length
-        rootReply.childPage = {
-          ...rootReply.childPage,
-          total,
-          hasMore: visible < total,
+        rootReply.ChildReplies = [...rootReply.ChildReplies, created]
+        const total = rootReply.ChildPage.Total + 1
+        const visible = rootReply.ChildReplies.length
+        rootReply.ChildPage = {
+          ...rootReply.ChildPage,
+          Total: total,
+          HasMore: visible < total,
         }
       }
     } else {
       replyItems.value = [created, ...replyItems.value]
-      thread.value.repliesPage = {
+      thread.value.RepliesPage = {
         ...replyPagination.value,
-        total: replyPagination.value.total + 1,
-        hasMore: replyItems.value.length < replyPagination.value.total + 1,
+        Total: replyPagination.value.Total + 1,
+        HasMore: replyItems.value.length < replyPagination.value.Total + 1,
       }
     }
 
-    thread.value.replies += 1
+    thread.value.Replies += 1
     draftReply.value = ''
     replyTarget.value = null
 
@@ -863,7 +892,7 @@ async function handleLoadMoreChildReplies(parentReplyId: number) {
 }
 
 function handleLoadMoreReplies() {
-  if (loadingMoreReplies.value || !replyPagination.value.hasMore) {
+  if (loadingMoreReplies.value || !replyPagination.value.HasMore) {
     return
   }
 
@@ -897,7 +926,7 @@ watch(
 
     handledNotificationFocusKey.value = ''
 
-    if (thread.value?.id === threadId.value) {
+    if (thread.value?.Id === threadId.value) {
       void loadThread({ trackView: false })
       return
     }
@@ -905,10 +934,6 @@ watch(
     void focusReplyFromNotification()
   },
 )
-
-onMounted(() => {
-  syncRecentThreadItems(threadId.value)
-})
 </script>
 
 <style scoped lang="scss">
@@ -1227,7 +1252,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 14px 0 0 46px;
+  margin: 6px 0 0 46px;
   padding-left: 14px;
   border-left: 2px solid rgba(219, 234, 254, 0.9);
 }

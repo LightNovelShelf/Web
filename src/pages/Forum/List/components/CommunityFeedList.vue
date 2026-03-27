@@ -43,19 +43,19 @@
           @click="$emit('update:sub-category', '')"
         >
           <span class="feed__subcategories-name">全部</span>
-          <span class="feed__subcategories-count">{{ subCategories.reduce((sum, item) => sum + item.count, 0) }}</span>
+          <span class="feed__subcategories-count">{{ subCategories.reduce((sum, item) => sum + item.Count, 0) }}</span>
         </button>
 
         <button
           v-for="subCategory in subCategories"
-          :key="subCategory.key"
+          :key="subCategory.Key"
           type="button"
           class="feed__subcategories-item"
-          :class="{ 'feed__subcategories-item--active': selectedSubCategoryKey === subCategory.key }"
-          @click="$emit('update:sub-category', subCategory.key)"
+          :class="{ 'feed__subcategories-item--active': selectedSubCategoryKey === subCategory.Key }"
+          @click="$emit('update:sub-category', subCategory.Key)"
         >
-          <span class="feed__subcategories-name">{{ subCategory.label }}</span>
-          <span class="feed__subcategories-count">{{ subCategory.count }}</span>
+          <span class="feed__subcategories-name">{{ subCategory.Label }}</span>
+          <span class="feed__subcategories-count">{{ subCategory.Count }}</span>
         </button>
       </div>
     </div>
@@ -80,7 +80,7 @@
         <q-btn flat no-caps color="primary" label="重试加载更多" @click="$emit('retry')" />
       </div>
 
-      <community-thread-card v-for="item in items" :key="item.id" :item="item" />
+      <community-thread-card v-for="item in items" :key="item.Id" :item="item" />
     </div>
 
     <div v-else-if="error" class="feed__state">
@@ -98,10 +98,10 @@
 
     <div v-if="items.length" class="feed__footer">
       <div class="feed__page">
-        第 {{ pagination.page }} / {{ pagination.totalPages }} 页，共 {{ pagination.total }} 条
+        第 {{ pagination.Page }} / {{ pagination.TotalPages }} 页，共 {{ pagination.Total }} 条
       </div>
       <q-btn
-        v-if="pagination.hasMore"
+        v-if="pagination.HasMore"
         unelevated
         no-caps
         color="primary"

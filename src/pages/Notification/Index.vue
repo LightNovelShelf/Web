@@ -91,6 +91,8 @@ import { parseTime, toNow } from 'src/utils/time'
 
 import { useAppStore } from 'stores/app'
 
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+
 import { getMyInfo, getNotifications, markNotifications } from 'src/services/user'
 
 import type { GetNotifications } from 'src/services/user/type'
@@ -159,6 +161,19 @@ const onLoad = async (index: number, done: () => void) => {
   }
 
   done()
+}
+
+const requestNotifications = async () => {
+  notifications.value = []
+  currentPage.value = 1
+  totalPages.value = 0
+
+  infiniteScroll.value?.reset()
+  infiniteScroll.value?.resume()
+  infiniteScroll.value?.trigger()
+
+  await refreshUnreadCount()
+  await nextTick()
 }
 
 // 点击通知
@@ -237,6 +252,8 @@ const markAllAsRead = async () => {
 
   await refreshUnreadCount()
 }
+
+useInitRequest(requestNotifications)
 </script>
 
 <style scoped lang="scss">

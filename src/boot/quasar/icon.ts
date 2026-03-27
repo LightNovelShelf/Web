@@ -26,6 +26,7 @@ export {
   mdiSkipPrevious,
   mdiAccountCircle,
   mdiAccountOutline,
+  mdiAccountBoxOutline,
   mdiEmail,
   mdiEmailOutline,
   mdiLock,

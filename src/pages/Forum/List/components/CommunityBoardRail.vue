@@ -9,22 +9,22 @@
 
         <button
           v-for="board in boards"
-          :key="board.key"
+          :key="board.Key"
           class="board-rail__item"
-          :class="{ 'board-rail__item--active': board.key === selectedBoardKey }"
+          :class="{ 'board-rail__item--active': board.Key === selectedBoardKey }"
           type="button"
-          @click="$emit('select', board.key)"
+          @click="$emit('select', board.Key)"
         >
           <span class="board-rail__icon">
-            <q-icon :name="board.icon" size="19px" />
+            <q-icon :name="board.Icon" size="19px" />
           </span>
           <span class="board-rail__content">
-            <span class="board-rail__name">{{ board.title }}</span>
-            <span class="board-rail__description">{{ board.description }}</span>
+            <span class="board-rail__name">{{ board.Title }}</span>
+            <span class="board-rail__description">{{ board.Description }}</span>
           </span>
           <span class="board-rail__meta">
-            <span class="board-rail__count">{{ board.todayPosts }}</span>
-            <span class="board-rail__heat">{{ board.heatLabel }}</span>
+            <span class="board-rail__count">{{ board.TodayPosts }}</span>
+            <span class="board-rail__heat">{{ board.HeatLabel }}</span>
           </span>
         </button>
       </div>

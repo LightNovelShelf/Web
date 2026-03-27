@@ -1,22 +1,22 @@
-export type { CommunityBoardKey } from './catalog'
-import type { CommunityBoardKey } from './catalog'
+export type { CommunityBoardKey, CommunityCatalogBoard, CommunityCatalogSubCategory } from './catalog'
+import type { CommunityBoardKey, CommunityCatalogBoard } from './catalog'
 
 export type CommunityFeedOrder = 'latest' | 'hot' | 'featured'
 
 export type CommunityFeedScope = 'all' | 'today' | 'week'
 
 export interface CommunitySubCategorySummary {
-  key: string
-  label: string
-  count: number
+  Key: string
+  Label: string
+  Count: number
 }
 
 export interface CommunityPagination {
-  page: number
-  size: number
-  total: number
-  totalPages: number
-  hasMore: boolean
+  Page: number
+  Size: number
+  Total: number
+  TotalPages: number
+  HasMore: boolean
 }
 
 export interface CommunityListQuery {
@@ -29,97 +29,104 @@ export interface CommunityListQuery {
 }
 
 export interface CommunityBoardSummary {
-  id: number
-  key: CommunityBoardKey
-  title: string
-  description: string
-  icon: string
-  todayPosts: number
-  heatLabel: string
+  Id: number
+  Key: CommunityBoardKey
+  Title: string
+  Description: string
+  Icon: string
+  TodayPosts: number
+  HeatLabel: string
 }
 
 export interface CommunityFeedItem {
-  id: number
-  boardKey: Exclude<CommunityBoardKey, 'all'>
-  boardName: string
-  subCategoryKey?: string
-  subCategoryLabel?: string
-  title: string
-  excerpt: string
-  authorName: string
-  authorAvatar: string
-  publishedAt: string
-  replies: number
-  views: number
-  heat: number
-  likes: number
-  favorites: number
-  tags: string[]
-  featured?: boolean
-  pinned?: boolean
-  locked?: boolean
-  liked?: boolean
-  favorited?: boolean
+  Id: number
+  BoardKey: Exclude<CommunityBoardKey, 'all'>
+  BoardName: string
+  SubCategoryKey?: string
+  SubCategoryLabel?: string
+  Title: string
+  Excerpt: string
+  AuthorName: string
+  AuthorAvatar: string
+  PublishedAt: string
+  Replies: number
+  Views: number
+  Heat: number
+  Likes: number
+  Favorites: number
+  Tags: string[]
+  Featured?: boolean
+  Pinned?: boolean
+  Locked?: boolean
 }
 
 export interface CommunityHotRankItem {
-  id: number
-  title: string
-  boardName: string
-  heat: number
-  deltaLabel: string
+  Id: number
+  Title: string
+  BoardName: string
+  Heat: number
+  PublishedAt: string
 }
 
 export interface CommunityActiveUserItem {
-  id: number
-  name: string
-  avatar: string
-  badge: string
-  score: number
-  summary: string
+  Id: number
+  Name: string
+  Avatar: string
+  Badge: string
+  Score: number
+  Summary: string
 }
 
 export interface CommunityReplyTarget {
-  id: number
-  authorName: string
+  Id: number
+  AuthorName: string
 }
 
 export interface CommunityThreadReply {
-  id: number
-  authorName: string
-  authorBadge?: string
-  authorAvatar: string
-  publishedAt: string
-  content: string
-  likes: number
-  liked?: boolean
-  replyTo?: CommunityReplyTarget
-  childReplies: CommunityThreadReply[]
-  childPage: CommunityPagination
+  Id: number
+  AuthorName: string
+  AuthorBadge?: string
+  AuthorAvatar: string
+  PublishedAt: string
+  Content: string
+  Likes: number
+  Liked?: boolean
+  ReplyTo?: CommunityReplyTarget
+  ChildReplies: CommunityThreadReply[]
+  ChildPage: CommunityPagination
 }
 
 export interface CommunityThreadDetail extends CommunityFeedItem {
-  body: string[]
-  bodyHtml: string
-  repliesPage: CommunityPagination
-  replyItems: CommunityThreadReply[]
-  relatedThreads: CommunityFeedItem[]
+  Liked?: boolean
+  Favorited?: boolean
+  BodyHtml: string
+  RepliesPage: CommunityPagination
+  ReplyItems: CommunityThreadReply[]
+  RelatedThreads: CommunityFeedItem[]
 }
 
 export interface CommunityHomePayload {
-  title: string
-  subtitle: string
-  announcement: string
-  announcementLink: string
-  todayThreads: number
-  onlineUsers: number
-  boards: CommunityBoardSummary[]
-  subCategories: CommunitySubCategorySummary[]
-  selectedSubCategoryKey: string
-  feed: CommunityFeedItem[]
-  feedPage: CommunityPagination
-  hotThreads: CommunityHotRankItem[]
-  activeUsers: CommunityActiveUserItem[]
+  Title: string
+  Subtitle: string
+  Announcement: string
+  AnnouncementLink: string
+  TodayThreads: number
+  OnlineUserCount: number
+  CatalogBoards: CommunityCatalogBoard[]
+  Boards: CommunityBoardSummary[]
+  SubCategories: CommunitySubCategorySummary[]
+  SelectedSubCategoryKey: string
+  Feed: CommunityFeedItem[]
+  FeedPage: CommunityPagination
+  HotThreads: CommunityHotRankItem[]
+  ActiveUsers: CommunityActiveUserItem[]
+}
+
+export interface CommunityFeedPayload {
+  SubCategories: CommunitySubCategorySummary[]
+  SelectedSubCategoryKey: string
+  Feed: CommunityFeedItem[]
+  FeedPage: CommunityPagination
 }
 
 export interface CreateCommunityThreadRequest {
@@ -143,19 +150,19 @@ export interface GetCommunityReplyChildrenRequest {
 }
 
 export interface CommunityMyReplyItem {
-  id: number
-  threadId: number
-  threadTitle: string
-  boardName: string
-  content: string
-  publishedAt: string
-  likes: number
-  replyToName?: string
+  Id: number
+  ThreadId: number
+  ThreadTitle: string
+  BoardName: string
+  Content: string
+  PublishedAt: string
+  Likes: number
+  ReplyToName?: string
 }
 
 export interface CommunityMyOverview {
-  authorName: string
-  publishedThreads: CommunityFeedItem[]
-  participatedReplies: CommunityMyReplyItem[]
-  favoriteThreads: CommunityFeedItem[]
+  AuthorName: string
+  PublishedThreads: CommunityFeedItem[]
+  ParticipatedReplies: CommunityMyReplyItem[]
+  FavoriteThreads: CommunityFeedItem[]
 }

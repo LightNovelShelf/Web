@@ -12,18 +12,18 @@
 
             <div class="community-hero__content">
               <div class="community-hero__copy">
-                <h1 class="community-hero__title">{{ payload?.title ?? '社区讨论中心' }}</h1>
-                <p class="community-hero__subtitle">{{ payload?.subtitle }}</p>
+                <h1 class="community-hero__title">{{ payload?.Title ?? '社区讨论中心' }}</h1>
+                <p class="community-hero__subtitle">{{ payload?.Subtitle }}</p>
               </div>
 
               <div class="community-hero__stats">
                 <div class="community-hero__stat">
                   <span class="community-hero__stat-label">今日新增</span>
-                  <strong>{{ payload?.todayThreads ?? 0 }}</strong>
+                  <strong>{{ payload?.TodayThreads ?? 0 }}</strong>
                 </div>
                 <div class="community-hero__stat">
                   <span class="community-hero__stat-label">在线用户</span>
-                  <strong>{{ payload?.onlineUsers ?? 0 }}</strong>
+                  <strong>{{ payload?.OnlineUserCount ?? 0 }}</strong>
                 </div>
               </div>
             </div>
@@ -34,14 +34,15 @@
               <q-icon name="mdiBullhorn" size="18px" />
               公告
             </div>
-            <div class="community-notice__text">{{ payload?.announcement }}</div>
-            <q-btn flat no-caps color="primary" label="查看板块" :to="payload?.announcementLink" />
+            <div class="community-notice__text">{{ payload?.Announcement }}</div>
+            <q-btn flat no-caps color="primary" label="查看板块" :to="payload?.AnnouncementLink" />
           </section>
 
           <community-composer
             :user="user"
+            :catalog-boards="payload?.CatalogBoards ?? []"
             :selected-board-key="boardKey"
-            :selected-sub-category-key="payload?.selectedSubCategoryKey ?? ''"
+            :selected-sub-category-key="payload?.SelectedSubCategoryKey ?? ''"
             :submitting="creatingThread"
             @create="handleThreadCreate"
           />
@@ -53,8 +54,8 @@
             :error="error"
             :order="order"
             :scope="scope"
-            :sub-categories="payload?.subCategories ?? []"
-            :selected-sub-category-key="payload?.selectedSubCategoryKey ?? ''"
+            :sub-categories="payload?.SubCategories ?? []"
+            :selected-sub-category-key="payload?.SelectedSubCategoryKey ?? ''"
             :pagination="pagination"
             @update:order="handleOrderChange"
             @update:scope="handleScopeChange"
@@ -65,7 +66,7 @@
         </main>
 
         <div class="community-home__right">
-          <community-right-rail :hot-threads="payload?.hotThreads ?? []" :active-users="payload?.activeUsers ?? []" />
+          <community-right-rail :hot-threads="payload?.HotThreads ?? []" :active-users="payload?.ActiveUsers ?? []" />
         </div>
       </div>
     </div>
@@ -78,9 +79,9 @@ import { useQuasar } from 'quasar'
 
 import { useAppStore } from 'stores/app'
 
-import { useIsActivated } from 'src/composition/useIsActivated'
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
 
-import { createCommunityThread, getCommunityHome } from 'src/services/forum'
+import { createCommunityThread, getCommunityFeed, getCommunityHome } from 'src/services/forum'
 
 import type {
   CommunityBoardKey,
@@ -103,7 +104,6 @@ const { user } = storeToRefs(appStore)
 const $q = useQuasar()
 const router = useRouter()
 const route = useRoute()
-const isActivated = useIsActivated()
 
 const payload = ref<CommunityHomePayload>()
 const feedItems = ref<CommunityFeedItem[]>([])
@@ -113,20 +113,20 @@ const creatingThread = ref(false)
 const error = ref('')
 const currentPage = ref(1)
 const latestRequestId = ref(0)
-const lastLoadedQueryKey = ref('')
 
 const emptyPagination: CommunityPagination = {
-  page: 1,
-  size: 6,
-  total: 0,
-  totalPages: 1,
-  hasMore: false,
+  Page: 1,
+  Size: 6,
+  Total: 0,
+  TotalPages: 1,
+  HasMore: false,
 }
 
 const boardKey = computed<CommunityBoardKey>(() => {
   const value = route.query.board
   if (typeof value !== 'string') return 'all'
-  return ['all', 'anime', 'comic', 'game', 'novel', 'website'].includes(value) ? (value as CommunityBoardKey) : 'all'
+  const normalized = value.trim()
+  return normalized || 'all'
 })
 
 const subCategoryKey = computed(() => {
@@ -148,8 +148,8 @@ const scope = computed<CommunityFeedScope>(() => {
   return ['all', 'today', 'week'].includes(value) ? (value as CommunityFeedScope) : 'all'
 })
 
-const boards = computed(() => payload.value?.boards ?? [])
-const pagination = computed(() => payload.value?.feedPage ?? emptyPagination)
+const boards = computed(() => payload.value?.Boards ?? [])
+const pagination = computed(() => payload.value?.FeedPage ?? emptyPagination)
 const routeQueryKey = computed(() => [boardKey.value, order.value, scope.value, subCategoryKey.value].join(':'))
 
 async function loadCommunityHome(options: { append?: boolean } = {}) {
@@ -181,10 +181,7 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
 
     payload.value = nextPayload
     currentPage.value = page
-    feedItems.value = append ? [...feedItems.value, ...nextPayload.feed] : nextPayload.feed
-    if (!append) {
-      lastLoadedQueryKey.value = routeQueryKey.value
-    }
+    feedItems.value = append ? [...feedItems.value, ...nextPayload.Feed] : nextPayload.Feed
   } catch (err) {
     if (requestId !== latestRequestId.value) {
       return
@@ -202,16 +199,92 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
   }
 }
 
-function requestCommunityHomeIfNeeded() {
-  if (!isActivated.value) {
-    return
+async function loadCommunityFeed(options: { append?: boolean } = {}) {
+  const append = options.append ?? false
+  const page = append ? currentPage.value + 1 : 1
+  const requestId = ++latestRequestId.value
+
+  error.value = ''
+  if (append) {
+    loadingMore.value = true
+  } else {
+    loading.value = true
+    currentPage.value = 1
   }
 
-  if (payload.value && lastLoadedQueryKey.value === routeQueryKey.value) {
-    return
-  }
+  try {
+    const nextPayload = await getCommunityFeed({
+      boardKey: boardKey.value,
+      subCategoryKey: subCategoryKey.value || undefined,
+      order: order.value,
+      scope: scope.value,
+      page,
+      size: 6,
+    })
 
+    if (requestId !== latestRequestId.value) {
+      return
+    }
+
+    if (!payload.value) {
+      payload.value = {
+        Title: '社区讨论中心',
+        Subtitle: '',
+        Announcement: '',
+        AnnouncementLink: '',
+        TodayThreads: 0,
+        OnlineUserCount: 0,
+        CatalogBoards: [],
+        Boards: [],
+        SubCategories: nextPayload.SubCategories,
+        SelectedSubCategoryKey: nextPayload.SelectedSubCategoryKey,
+        Feed: nextPayload.Feed,
+        FeedPage: nextPayload.FeedPage,
+        HotThreads: [],
+        ActiveUsers: [],
+      }
+    } else {
+      payload.value = {
+        ...payload.value,
+        SubCategories: nextPayload.SubCategories,
+        SelectedSubCategoryKey: nextPayload.SelectedSubCategoryKey,
+        Feed: nextPayload.Feed,
+        FeedPage: nextPayload.FeedPage,
+      }
+    }
+
+    currentPage.value = page
+    feedItems.value = append ? [...feedItems.value, ...nextPayload.Feed] : nextPayload.Feed
+  } catch (err) {
+    if (requestId !== latestRequestId.value) {
+      return
+    }
+
+    error.value = err instanceof Error ? err.message : '请稍后再试'
+    if (!append) {
+      feedItems.value = []
+      if (payload.value) {
+        payload.value = {
+          ...payload.value,
+          Feed: [],
+          FeedPage: emptyPagination,
+        }
+      }
+    }
+  } finally {
+    if (requestId === latestRequestId.value) {
+      loading.value = false
+      loadingMore.value = false
+    }
+  }
+}
+
+function requestCommunityHomeOnEnter() {
   void loadCommunityHome()
+}
+
+function requestCommunityFeedForQueryChange() {
+  void loadCommunityFeed()
 }
 
 function updateQuery(next: Partial<Record<'board' | 'order' | 'scope' | 'category', string | undefined>>) {
@@ -250,15 +323,25 @@ function handleSubCategoryChange(nextSubCategoryKey: string) {
 }
 
 function handleLoadMore() {
-  if (!pagination.value.hasMore || loadingMore.value) {
+  if (!pagination.value.HasMore || loadingMore.value) {
     return
   }
 
-  void loadCommunityHome({ append: true })
+  if (!payload.value) {
+    void loadCommunityHome({ append: true })
+    return
+  }
+
+  void loadCommunityFeed({ append: true })
 }
 
 function handleRetry() {
-  void loadCommunityHome()
+  if (!payload.value) {
+    void loadCommunityHome()
+    return
+  }
+
+  void loadCommunityFeed()
 }
 
 async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadRequest, 'authorName'>) {
@@ -282,7 +365,7 @@ async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadReques
     })
 
     await loadCommunityHome()
-    await router.push({ name: 'ForumThread', params: { id: created.id } })
+    await router.push({ name: 'ForumThread', params: { id: created.Id } })
   } catch (err) {
     $q.notify({
       type: 'negative',
@@ -293,16 +376,10 @@ async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadReques
   }
 }
 
-onMounted(() => {
-  requestCommunityHomeIfNeeded()
-})
-
-onActivated(() => {
-  requestCommunityHomeIfNeeded()
-})
+useInitRequest(requestCommunityHomeOnEnter)
 
 watch(routeQueryKey, () => {
-  requestCommunityHomeIfNeeded()
+  requestCommunityFeedForQueryChange()
 })
 </script>
 
@@ -349,8 +426,7 @@ watch(routeQueryKey, () => {
 .community-hero {
   position: relative;
   overflow: hidden;
-  min-height: 190px;
-  padding: 26px 28px;
+  padding: 24px 28px 18px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 30px;
   background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)), rgba(255, 255, 255, 0.96);
@@ -361,7 +437,7 @@ watch(routeQueryKey, () => {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
 }

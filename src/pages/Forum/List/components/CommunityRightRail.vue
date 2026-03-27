@@ -13,17 +13,17 @@
           <div class="rank-list">
             <router-link
               v-for="(item, index) in hotThreads"
-              :key="item.id"
+              :key="item.Id"
               class="rank-item-link"
-              :to="{ name: 'ForumThread', params: { id: item.id } }"
+              :to="{ name: 'ForumThread', params: { id: item.Id } }"
             >
               <div class="rank-item">
                 <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
                 <div class="rank-item__copy">
-                  <div class="rank-item__title">{{ item.title }}</div>
-                  <div class="rank-item__meta">{{ item.boardName }} · {{ item.deltaLabel }}</div>
+                  <div class="rank-item__title">{{ item.Title }}</div>
+                  <div class="rank-item__meta">{{ item.BoardName }} · {{ formatPublishedAt(item.PublishedAt) }}</div>
                 </div>
-                <div class="rank-item__value">{{ item.heat }}</div>
+                <div class="rank-item__value">{{ item.Heat }}</div>
               </div>
             </router-link>
           </div>
@@ -38,19 +38,19 @@
           </div>
 
           <div class="user-list">
-            <div v-for="user in activeUsers" :key="user.id" class="user-item">
-              <q-avatar size="42px" :style="user.avatar ? undefined : { background: avatarBackground(user.name), color: '#fff' }">
-                <img v-if="user.avatar" class="community-avatar__image" :src="user.avatar" :alt="user.name" />
-                <template v-else>{{ user.name.slice(0, 1) }}</template>
+            <div v-for="user in activeUsers" :key="user.Id" class="user-item">
+              <q-avatar size="42px" :style="user.Avatar ? undefined : { background: avatarBackground(user.Name), color: '#fff' }">
+                <img v-if="user.Avatar" class="community-avatar__image" :src="user.Avatar" :alt="user.Name" />
+                <template v-else>{{ user.Name.slice(0, 1) }}</template>
               </q-avatar>
               <div class="user-item__copy">
                 <div class="user-item__name-row">
-                  <span class="user-item__name">{{ user.name }}</span>
-                  <span class="user-item__badge">{{ user.badge }}</span>
+                  <span class="user-item__name">{{ user.Name }}</span>
+                  <span class="user-item__badge">{{ user.Badge }}</span>
                 </div>
-                <div class="user-item__summary">{{ user.summary }}</div>
+                <div class="user-item__summary">{{ user.Summary }}</div>
               </div>
-              <div class="user-item__score">{{ user.score }}</div>
+              <div class="user-item__score">{{ user.Score }}</div>
             </div>
           </div>
         </section>
@@ -62,6 +62,8 @@
 <script setup lang="ts">
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
+
+import { parseTime, toNow } from 'src/utils/time'
 
 import type { CommunityActiveUserItem, CommunityHotRankItem } from 'src/services/forum'
 
@@ -86,6 +88,10 @@ const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#
 function avatarBackground(seed: string) {
   const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
+}
+
+function formatPublishedAt(value: string) {
+  return toNow(parseTime(value))
 }
 </script>
 

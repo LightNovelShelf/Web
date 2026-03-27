@@ -33,12 +33,12 @@
         <q-btn unelevated no-caps color="primary" label="重新加载" @click="loadOverview" />
       </div>
 
-      <q-tab-panels v-else v-model="tab" animated class="community-panel__panels">
-        <q-tab-panel name="threads" class="community-panel__panel">
-          <div v-if="overview?.publishedThreads.length" class="community-panel__list">
+        <q-tab-panels v-else v-model="tab" animated class="community-panel__panels">
+          <q-tab-panel name="threads" class="community-panel__panel">
+          <div v-if="overview?.PublishedThreads.length" class="community-panel__list">
             <community-thread-card
-              v-for="item in overview?.publishedThreads"
-              :key="item.id"
+              v-for="item in overview?.PublishedThreads"
+              :key="item.Id"
               :item="item"
             />
           </div>
@@ -49,18 +49,18 @@
         </q-tab-panel>
 
         <q-tab-panel name="replies" class="community-panel__panel">
-          <div v-if="overview?.participatedReplies.length" class="community-replies">
+          <div v-if="overview?.ParticipatedReplies.length" class="community-replies">
             <router-link
-              v-for="reply in overview?.participatedReplies"
-              :key="reply.id"
+              v-for="reply in overview?.ParticipatedReplies"
+              :key="reply.Id"
               class="community-replies__item"
-              :to="{ name: 'ForumThread', params: { id: reply.threadId } }"
+              :to="{ name: 'ForumThread', params: { id: reply.ThreadId } }"
             >
-              <div class="community-replies__title">{{ reply.threadTitle }}</div>
-              <div class="community-replies__meta">{{ reply.boardName }} · {{ reply.publishedAt }}</div>
+              <div class="community-replies__title">{{ reply.ThreadTitle }}</div>
+              <div class="community-replies__meta">{{ reply.BoardName }} · {{ formatPublishedAt(reply.PublishedAt) }}</div>
               <div class="community-replies__content">
-                <span v-if="reply.replyToName" class="community-replies__reply-to">回复 {{ reply.replyToName }}：</span>
-                {{ reply.content }}
+                <span v-if="reply.ReplyToName" class="community-replies__reply-to">回复 {{ reply.ReplyToName }}：</span>
+                {{ reply.Content }}
               </div>
             </router-link>
           </div>
@@ -71,10 +71,10 @@
         </q-tab-panel>
 
         <q-tab-panel name="favorites" class="community-panel__panel">
-          <div v-if="overview?.favoriteThreads.length" class="community-panel__list">
+          <div v-if="overview?.FavoriteThreads.length" class="community-panel__list">
             <community-thread-card
-              v-for="item in overview?.favoriteThreads"
-              :key="item.id"
+              v-for="item in overview?.FavoriteThreads"
+              :key="item.Id"
               :item="item"
             />
           </div>
@@ -89,9 +89,10 @@
 </template>
 
 <script setup lang="ts">
+import { parseTime, toNow } from 'src/utils/time'
+
 import CommunityThreadCard from 'src/pages/Forum/List/components/CommunityThreadCard.vue'
 import { getMyCommunityOverview } from 'src/services/forum'
-
 
 import type { CommunityMyOverview } from 'src/services/forum'
 
@@ -103,6 +104,10 @@ const tab = ref<'threads' | 'replies' | 'favorites'>('threads')
 const overview = ref<CommunityMyOverview | null>(null)
 const loading = ref(false)
 const error = ref('')
+
+function formatPublishedAt(value: string) {
+  return toNow(parseTime(value))
+}
 
 async function loadOverview() {
   if (!props.authorName) {

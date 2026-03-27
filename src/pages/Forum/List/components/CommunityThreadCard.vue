@@ -1,45 +1,47 @@
 <template>
-  <router-link class="feed-item-link" :to="{ name: 'ForumThread', params: { id: item.id } }">
+  <router-link class="feed-item-link" :to="{ name: 'ForumThread', params: { id: item.Id } }">
     <article class="feed-item">
       <div class="feed-item__topline">
-        <span class="feed-item__board">{{ item.boardName }}</span>
-        <span v-if="item.subCategoryLabel" class="feed-item__sub-category">{{ item.subCategoryLabel }}</span>
-        <span v-if="item.pinned" class="feed-item__flag feed-item__flag--pinned">置顶</span>
-        <span v-if="item.featured" class="feed-item__flag feed-item__flag--featured">精华</span>
-        <span v-if="item.locked" class="feed-item__flag feed-item__flag--locked">已锁定</span>
+        <span class="feed-item__board">{{ item.BoardName }}</span>
+        <span v-if="item.SubCategoryLabel" class="feed-item__sub-category">{{ item.SubCategoryLabel }}</span>
+        <span v-if="item.Pinned" class="feed-item__flag feed-item__flag--pinned">置顶</span>
+        <span v-if="item.Featured" class="feed-item__flag feed-item__flag--featured">精华</span>
+        <span v-if="item.Locked" class="feed-item__flag feed-item__flag--locked">已锁定</span>
       </div>
 
-      <h4 class="feed-item__title">{{ item.title }}</h4>
-      <p v-if="item.excerpt" class="feed-item__excerpt">{{ item.excerpt }}</p>
+      <h4 class="feed-item__title">{{ item.Title }}</h4>
+      <p v-if="item.Excerpt" class="feed-item__excerpt">{{ item.Excerpt }}</p>
       <p v-else class="feed-item__excerpt feed-item__excerpt--empty">这条帖子暂时还没有摘要。</p>
 
       <div class="feed-item__footer">
         <div class="feed-item__author">
-          <q-avatar size="34px" :style="item.authorAvatar ? undefined : { background: avatarBackground(item.authorName), color: '#fff' }">
-            <img v-if="item.authorAvatar" class="community-avatar__image" :src="item.authorAvatar" :alt="item.authorName" />
-            <template v-else>{{ item.authorName.slice(0, 1) }}</template>
+          <q-avatar size="34px" :style="item.AuthorAvatar ? undefined : { background: avatarBackground(item.AuthorName), color: '#fff' }">
+            <img v-if="item.AuthorAvatar" class="community-avatar__image" :src="item.AuthorAvatar" :alt="item.AuthorName" />
+            <template v-else>{{ item.AuthorName.slice(0, 1) }}</template>
           </q-avatar>
           <div class="feed-item__author-copy">
-            <span class="feed-item__author-name">{{ item.authorName }}</span>
-            <span class="feed-item__author-time">{{ item.publishedAt }}</span>
+            <span class="feed-item__author-name">{{ item.AuthorName }}</span>
+            <span class="feed-item__author-time">{{ formatPublishedAt(item.PublishedAt) }}</span>
           </div>
         </div>
 
         <div class="feed-item__stats">
-          <span class="feed-item__stat">评论 {{ item.replies }}</span>
-          <span class="feed-item__stat">浏览 {{ item.views }}</span>
-          <span class="feed-item__stat">点赞 {{ item.likes }}</span>
+          <span class="feed-item__stat">评论 {{ item.Replies }}</span>
+          <span class="feed-item__stat">浏览 {{ item.Views }}</span>
+          <span class="feed-item__stat">点赞 {{ item.Likes }}</span>
         </div>
       </div>
 
       <div class="feed-item__tags">
-        <span v-for="tag in item.tags" :key="tag" class="feed-item__tag">{{ tag }}</span>
+        <span v-for="tag in item.Tags" :key="tag" class="feed-item__tag">{{ tag }}</span>
       </div>
     </article>
   </router-link>
 </template>
 
 <script setup lang="ts">
+import { parseTime, toNow } from 'src/utils/time'
+
 import type { CommunityFeedItem } from 'src/services/forum'
 
 defineProps<{
@@ -51,6 +53,10 @@ const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#
 function avatarBackground(seed: string) {
   const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
+}
+
+function formatPublishedAt(value: string) {
+  return toNow(parseTime(value))
 }
 </script>
 

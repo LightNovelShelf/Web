@@ -4,7 +4,7 @@
       <section class="community-mine__hero">
         <div>
           <div class="community-mine__eyebrow">个人概览</div>
-          <h1 class="community-mine__title">{{ overview?.authorName || '我的社区' }}</h1>
+          <h1 class="community-mine__title">{{ overview?.AuthorName || '我的社区' }}</h1>
           <p class="community-mine__subtitle">查看你最近发布的话题、参与过的回复，以及收藏中的帖子。</p>
         </div>
 
@@ -33,12 +33,12 @@
           <div class="community-mine__section-header">
             <div>
               <h2>我发布的帖子</h2>
-              <p>共 {{ overview.publishedThreads.length }} 条</p>
+              <p>共 {{ overview.PublishedThreads.length }} 条</p>
             </div>
           </div>
 
-          <div v-if="overview.publishedThreads.length" class="community-mine__cards">
-            <community-thread-card v-for="item in overview.publishedThreads" :key="item.id" :item="item" />
+          <div v-if="overview.PublishedThreads.length" class="community-mine__cards">
+            <community-thread-card v-for="item in overview.PublishedThreads" :key="item.Id" :item="item" />
           </div>
           <div v-else class="community-mine__empty">你还没有发布过帖子。</div>
         </section>
@@ -47,24 +47,24 @@
           <div class="community-mine__section-header">
             <div>
               <h2>我参与过的回复</h2>
-              <p>共 {{ overview.participatedReplies.length }} 条</p>
+              <p>共 {{ overview.ParticipatedReplies.length }} 条</p>
             </div>
           </div>
 
-          <div v-if="overview.participatedReplies.length" class="community-mine__reply-list">
+          <div v-if="overview.ParticipatedReplies.length" class="community-mine__reply-list">
             <router-link
-              v-for="item in overview.participatedReplies"
-              :key="item.id"
+              v-for="item in overview.ParticipatedReplies"
+              :key="item.Id"
               class="community-mine__reply-card"
-              :to="{ name: 'ForumThread', params: { id: item.threadId } }"
+              :to="{ name: 'ForumThread', params: { id: item.ThreadId } }"
             >
-              <div class="community-mine__reply-title">{{ item.threadTitle }}</div>
-              <div class="community-mine__reply-content">{{ item.content }}</div>
+              <div class="community-mine__reply-title">{{ item.ThreadTitle }}</div>
+              <div class="community-mine__reply-content">{{ item.Content }}</div>
               <div class="community-mine__reply-meta">
-                <span>{{ item.boardName }}</span>
-                <span>{{ item.publishedAt }}</span>
-                <span>点赞 {{ item.likes }}</span>
-                <span v-if="item.replyToName">回复 {{ item.replyToName }}</span>
+                <span>{{ item.BoardName }}</span>
+                <span>{{ formatPublishedAt(item.PublishedAt) }}</span>
+                <span>点赞 {{ item.Likes }}</span>
+                <span v-if="item.ReplyToName">回复 {{ item.ReplyToName }}</span>
               </div>
             </router-link>
           </div>
@@ -75,12 +75,12 @@
           <div class="community-mine__section-header">
             <div>
               <h2>我的收藏</h2>
-              <p>共 {{ overview.favoriteThreads.length }} 条</p>
+              <p>共 {{ overview.FavoriteThreads.length }} 条</p>
             </div>
           </div>
 
-          <div v-if="overview.favoriteThreads.length" class="community-mine__cards">
-            <community-thread-card v-for="item in overview.favoriteThreads" :key="item.id" :item="item" />
+          <div v-if="overview.FavoriteThreads.length" class="community-mine__cards">
+            <community-thread-card v-for="item in overview.FavoriteThreads" :key="item.Id" :item="item" />
           </div>
           <div v-else class="community-mine__empty">你还没有收藏帖子。</div>
         </section>
@@ -90,6 +90,10 @@
 </template>
 
 <script setup lang="ts">
+import { parseTime, toNow } from 'src/utils/time'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+
 import { getMyCommunityOverview } from 'src/services/forum'
 
 import type { CommunityMyOverview } from 'src/services/forum'
@@ -99,6 +103,10 @@ import CommunityThreadCard from './List/components/CommunityThreadCard.vue'
 const loading = ref(true)
 const error = ref('')
 const overview = ref<CommunityMyOverview>()
+
+function formatPublishedAt(value: string) {
+  return toNow(parseTime(value))
+}
 
 async function loadOverview() {
   loading.value = true
@@ -113,9 +121,7 @@ async function loadOverview() {
   }
 }
 
-onMounted(() => {
-  void loadOverview()
-})
+useInitRequest(loadOverview)
 </script>
 
 <style scoped lang="scss">
