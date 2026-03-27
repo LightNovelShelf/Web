@@ -24,7 +24,7 @@
         no-caps
         color="primary"
         label="登录后参与讨论"
-        :to="{ name: 'Login', query: { redirect: route.fullPath } }"
+        :to="{ name: 'Login', query: { from: encodeURIComponent(route.fullPath) } }"
       />
     </div>
 
@@ -119,6 +119,8 @@ import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import HtmlEditor from 'components/html/HtmlEditor.vue'
 
+import { communityCatalogBoards, getCommunityCatalogBoard } from 'src/services/forum/catalog'
+
 import type { CommunityBoardKey, CreateCommunityThreadRequest } from 'src/services/forum'
 
 const props = defineProps<{
@@ -139,26 +141,17 @@ const contentHtml = ref('<p></p>')
 const boardKey = ref<Exclude<CommunityBoardKey, 'all'>>('anime')
 const subCategoryKey = ref('')
 
-const boardOptions = [
-  { label: '动画', value: 'anime' },
-  { label: '漫画', value: 'comic' },
-  { label: '游戏', value: 'game' },
-  { label: '小说', value: 'novel' },
-  { label: '站务', value: 'website' },
-] as const
+const boardOptions = communityCatalogBoards.map((item) => ({
+  label: item.label,
+  value: item.key,
+}))
 
-const boardSubCategoryOptions: Record<Exclude<CommunityBoardKey, 'all'>, Array<{ label: string; value: string }>> = {
-  anime: [{ label: '其他', value: 'other' }],
-  comic: [{ label: '其他', value: 'other' }],
-  game: [{ label: '其他', value: 'other' }],
-  novel: [
-    { label: '其他', value: 'other' },
-    { label: 'EPUB', value: 'epub' },
-  ],
-  website: [{ label: '其他', value: 'other' }],
-}
-
-const subCategoryOptions = computed(() => boardSubCategoryOptions[boardKey.value] ?? [])
+const subCategoryOptions = computed(() =>
+  (getCommunityCatalogBoard(boardKey.value)?.subCategories ?? []).map((item) => ({
+    label: item.label,
+    value: item.key,
+  })),
+)
 
 const plainText = computed(() => getPlainTextFromHtml(contentHtml.value))
 const plainTextLength = computed(() => plainText.value.replace(/\s+/g, '').length)

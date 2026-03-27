@@ -11,7 +11,7 @@ import { useOverlayScrollbars } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { longTermToken } from 'src/utils/session'
+import { longTermToken, sessionToken } from 'src/utils/session'
 
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
@@ -37,6 +37,8 @@ $q.loadingBar.setDefaults({
 const appStore = useAppStore()
 const settingStore = useSettingStore()
 settingStore.init()
+const isRefreshingUser = ref(false)
+let pendingRefreshUser = false
 
 useServerNotify('OnMessage', (message: string) => {
   $q.notify({
@@ -70,10 +72,40 @@ useServerNotify('OnSuccess', (message: string) => {
   })
 })
 
+const refreshMyInfo = async () => {
+  if (isRefreshingUser.value) {
+    pendingRefreshUser = true
+    return
+  }
+
+  if (!sessionToken.get() && !(await longTermToken.get())) {
+    return
+  }
+
+  isRefreshingUser.value = true
+
+  try {
+    appStore.user = await getMyInfo()
+  } catch {
+    // 未授权和临时网络问题交给现有全局处理链路
+  } finally {
+    isRefreshingUser.value = false
+
+    if (pendingRefreshUser) {
+      pendingRefreshUser = false
+      void refreshMyInfo()
+    }
+  }
+}
+
+useServerNotify('OnNotificationRefresh', () => {
+  void refreshMyInfo()
+})
+
 const getUser = async () => {
   const token = await longTermToken.get()
   if (token) {
-    appStore.user = await getMyInfo()
+    await refreshMyInfo()
   }
 }
 getUser()

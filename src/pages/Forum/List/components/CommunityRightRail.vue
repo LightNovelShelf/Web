@@ -39,8 +39,9 @@
 
           <div class="user-list">
             <div v-for="user in activeUsers" :key="user.id" class="user-item">
-              <q-avatar size="42px" :style="{ background: avatarBackground(user.name), color: '#fff' }">
-                {{ user.name.slice(0, 1) }}
+              <q-avatar size="42px" :style="user.avatar ? undefined : { background: avatarBackground(user.name), color: '#fff' }">
+                <img v-if="user.avatar" class="community-avatar__image" :src="user.avatar" :alt="user.name" />
+                <template v-else>{{ user.name.slice(0, 1) }}</template>
               </q-avatar>
               <div class="user-item__copy">
                 <div class="user-item__name-row">
@@ -222,6 +223,12 @@ function avatarBackground(seed: string) {
 
 .user-item + .user-item {
   border-top: 1px solid rgba(226, 232, 240, 0.88);
+}
+
+.community-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-item__copy {

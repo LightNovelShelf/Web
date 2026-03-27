@@ -261,27 +261,20 @@ function handleRetry() {
   void loadCommunityHome()
 }
 
-function resolveAuthorName() {
-  return user.value?.UserName || user.value?.Name || '你'
-}
-
 async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadRequest, 'authorName'>) {
   if (!user.value) {
     $q.notify({
       type: 'warning',
       message: '请先登录后再发帖',
     })
-    void router.push({ name: 'Login', query: { redirect: route.fullPath } })
+    void router.push({ name: 'Login', query: { from: encodeURIComponent(route.fullPath) } })
     return
   }
 
   creatingThread.value = true
 
   try {
-    const created = await createCommunityThread({
-      ...payloadDraft,
-      authorName: resolveAuthorName(),
-    })
+    const created = await createCommunityThread(payloadDraft)
 
     $q.notify({
       type: 'positive',

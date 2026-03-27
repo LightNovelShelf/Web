@@ -62,8 +62,9 @@
 
               <div class="thread-card__meta">
                 <div class="thread-card__author">
-                  <q-avatar size="42px" :style="{ background: avatarBackground(thread.authorName), color: '#fff' }">
-                    {{ thread.authorName.slice(0, 1) }}
+                  <q-avatar size="42px" :style="thread.authorAvatar ? undefined : { background: avatarBackground(thread.authorName), color: '#fff' }">
+                    <img v-if="thread.authorAvatar" class="community-avatar__image" :src="thread.authorAvatar" :alt="thread.authorName" />
+                    <template v-else>{{ thread.authorName.slice(0, 1) }}</template>
                   </q-avatar>
                   <div>
                     <div class="thread-card__author-name">{{ thread.authorName }}</div>
@@ -143,8 +144,17 @@
                 >
                   <div class="reply-item__header">
                     <div class="reply-item__author">
-                      <q-avatar size="34px" :style="{ background: avatarBackground(reply.authorName), color: '#fff' }">
-                        {{ reply.authorName.slice(0, 1) }}
+                      <q-avatar
+                        size="34px"
+                        :style="reply.authorAvatar ? undefined : { background: avatarBackground(reply.authorName), color: '#fff' }"
+                      >
+                        <img
+                          v-if="reply.authorAvatar"
+                          class="community-avatar__image"
+                          :src="reply.authorAvatar"
+                          :alt="reply.authorName"
+                        />
+                        <template v-else>{{ reply.authorName.slice(0, 1) }}</template>
                       </q-avatar>
                       <div>
                         <div class="reply-item__name-row">
@@ -202,9 +212,15 @@
                         <div class="reply-item__author">
                           <q-avatar
                             size="30px"
-                            :style="{ background: avatarBackground(child.authorName), color: '#fff' }"
+                            :style="child.authorAvatar ? undefined : { background: avatarBackground(child.authorName), color: '#fff' }"
                           >
-                            {{ child.authorName.slice(0, 1) }}
+                            <img
+                              v-if="child.authorAvatar"
+                              class="community-avatar__image"
+                              :src="child.authorAvatar"
+                              :alt="child.authorName"
+                            />
+                            <template v-else>{{ child.authorName.slice(0, 1) }}</template>
                           </q-avatar>
                           <div>
                             <div class="reply-item__name-row">
@@ -333,6 +349,9 @@ import { useAppStore } from 'stores/app'
 
 import HtmlReader from 'components/html/HtmlReader.vue'
 
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+
 import {
   createCommunityReply,
   getCommunityReplyChildren,
@@ -397,6 +416,31 @@ const emptyPagination: CommunityPagination = {
 
 const replyPagination = computed(() => thread.value?.repliesPage ?? emptyPagination)
 const focusedReplyId = ref<number | null>(null)
+const threadId = computed(() => {
+  const parsed = Number(props.id)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0
+})
+const notificationReplyId = computed(() => {
+  const raw = route.query.replyId
+  const value = Array.isArray(raw) ? raw[0] : raw
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null
+})
+const notificationParentReplyId = computed(() => {
+  const raw = route.query.parentReplyId
+  const value = Array.isArray(raw) ? raw[0] : raw
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null
+})
+const notificationFocusKey = computed(() => {
+  if (!notificationReplyId.value && !notificationParentReplyId.value) {
+    return ''
+  }
+
+  return `${props.id}:${notificationReplyId.value ?? ''}:${notificationParentReplyId.value ?? ''}`
+})
+const handledNotificationFocusKey = ref('')
+const isActive = computed(() => thread.value?.id === threadId.value)
 const replyPlaceholder = computed(() => {
   if (thread.value?.locked) {
     return '当前帖子已锁定'
@@ -481,12 +525,8 @@ function requireLogin() {
     type: 'warning',
     message: '请先登录后再参与讨论',
   })
-  void router.push({ name: 'Login', query: { redirect: route.fullPath } })
+  void router.push({ name: 'Login', query: { from: encodeURIComponent(route.fullPath) } })
   return false
-}
-
-function resolveAuthorName() {
-  return user.value?.UserName || user.value?.Name || '你'
 }
 
 function findReplyById(replyId: number) {
@@ -564,16 +604,49 @@ async function loadMoreChildReplies(parentReplyId: number) {
   }
 }
 
-async function ensureReplyVisible(replyId: number) {
-  if (findReplyById(replyId)) {
+async function ensureRootReplyVisible(parentReplyId: number) {
+  if (findReplyById(parentReplyId)) {
     return true
   }
 
   while (thread.value?.repliesPage.hasMore) {
     await loadThread({ appendReplies: true, trackView: false })
-    if (findReplyById(replyId)) {
+    if (findReplyById(parentReplyId)) {
       return true
     }
+  }
+
+  return false
+}
+
+async function ensureReplyVisible(replyId: number, parentReplyId?: number | null) {
+  if (findReplyById(replyId)) {
+    return true
+  }
+
+  if (parentReplyId && parentReplyId !== replyId) {
+    const rootVisible = await ensureRootReplyVisible(parentReplyId)
+    if (!rootVisible) {
+      return false
+    }
+
+    const rootReply = findRootReply(parentReplyId)
+    if (!rootReply) {
+      return false
+    }
+
+    while (rootReply.childPage.hasMore) {
+      await loadMoreChildReplies(rootReply.id)
+      if (findReplyById(replyId)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  if (!(await ensureRootReplyVisible(replyId))) {
+    return false
   }
 
   for (const reply of replyItems.value) {
@@ -598,12 +671,12 @@ function focusReply(replyId: number) {
   }, 2600)
 }
 
-async function scrollToReply(replyId: number) {
+async function scrollToReply(replyId: number, parentReplyId?: number | null) {
   if (!thread.value) {
     return
   }
 
-  const visible = await ensureReplyVisible(replyId)
+  const visible = await ensureReplyVisible(replyId, parentReplyId)
   if (!visible) {
     $q.notify({
       type: 'warning',
@@ -627,6 +700,20 @@ async function scrollToReply(replyId: number) {
   focusReply(replyId)
 }
 
+async function focusReplyFromNotification() {
+  if (!thread.value || !notificationFocusKey.value || handledNotificationFocusKey.value === notificationFocusKey.value) {
+    return
+  }
+
+  const targetReplyId = notificationReplyId.value ?? notificationParentReplyId.value
+  if (!targetReplyId) {
+    return
+  }
+
+  await scrollToReply(targetReplyId, notificationParentReplyId.value)
+  handledNotificationFocusKey.value = notificationFocusKey.value
+}
+
 async function loadThread(options: { appendReplies?: boolean; trackView?: boolean } = {}) {
   const appendReplies = options.appendReplies ?? false
   const nextReplyPage = appendReplies ? replyPage.value + 1 : 1
@@ -642,7 +729,7 @@ async function loadThread(options: { appendReplies?: boolean; trackView?: boolea
     draftReply.value = ''
   }
 
-  const data = await getCommunityThread(Number(props.id), nextReplyPage, undefined, {
+  const data = await getCommunityThread(threadId.value, nextReplyPage, undefined, {
     trackView: options.trackView ?? !appendReplies,
   })
 
@@ -663,6 +750,8 @@ async function loadThread(options: { appendReplies?: boolean; trackView?: boolea
     boardName: data.boardName,
     viewedAt: Date.now(),
   })
+  await nextTick()
+  await focusReplyFromNotification()
   loading.value = false
   loadingMoreReplies.value = false
 }
@@ -730,7 +819,6 @@ async function handleSubmitReply() {
     const created = await createCommunityReply({
       threadId: thread.value.id,
       content: draftReply.value,
-      authorName: resolveAuthorName(),
       replyToId: replyTarget.value?.id,
     })
 
@@ -782,16 +870,44 @@ function handleLoadMoreReplies() {
   void loadThread({ appendReplies: true })
 }
 
+const requestThread = useTimeoutFn(async () => {
+  handledNotificationFocusKey.value = ''
+  await loadThread()
+})
+
+useInitRequest(requestThread, { isActive })
+
 watch(
-  () => props.id,
-  () => {
-    void loadThread()
+  () => threadId.value,
+  (current, previous) => {
+    if (current === previous || !route.meta.reload) {
+      return
+    }
+
+    void requestThread.syncCall()
   },
-  { immediate: true },
+)
+
+watch(
+  () => notificationFocusKey.value,
+  (current, previous) => {
+    if (!current || current === previous || !route.meta.reload) {
+      return
+    }
+
+    handledNotificationFocusKey.value = ''
+
+    if (thread.value?.id === threadId.value) {
+      void loadThread({ trackView: false })
+      return
+    }
+
+    void focusReplyFromNotification()
+  },
 )
 
 onMounted(() => {
-  syncRecentThreadItems(Number(props.id))
+  syncRecentThreadItems(threadId.value)
 })
 </script>
 
@@ -936,6 +1052,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.community-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .reply-item__header {

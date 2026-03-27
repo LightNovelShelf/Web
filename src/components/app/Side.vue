@@ -6,7 +6,6 @@
     :class="$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-2'"
     :width="240"
     :breakpoint="siderBreakpoint"
-    :behavior="['Forum'].includes(currentRouteName()) ? 'mobile' : 'default'"
   >
     <q-scroll-area class="fit">
       <q-list padding>

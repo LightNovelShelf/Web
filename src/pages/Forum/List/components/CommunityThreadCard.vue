@@ -15,8 +15,9 @@
 
       <div class="feed-item__footer">
         <div class="feed-item__author">
-          <q-avatar size="34px" :style="{ background: avatarBackground(item.authorName), color: '#fff' }">
-            {{ item.authorName.slice(0, 1) }}
+          <q-avatar size="34px" :style="item.authorAvatar ? undefined : { background: avatarBackground(item.authorName), color: '#fff' }">
+            <img v-if="item.authorAvatar" class="community-avatar__image" :src="item.authorAvatar" :alt="item.authorName" />
+            <template v-else>{{ item.authorName.slice(0, 1) }}</template>
           </q-avatar>
           <div class="feed-item__author-copy">
             <span class="feed-item__author-name">{{ item.authorName }}</span>
@@ -162,6 +163,12 @@ function avatarBackground(seed: string) {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.community-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .feed-item__author-copy {

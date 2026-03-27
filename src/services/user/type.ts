@@ -65,8 +65,10 @@ export namespace GetNotifications {
   export type NotificationType =
     | 'Comment'
     | 'CommentReply'
+    | 'CommunityReply'
+    | 'CommunityReplyReply'
 
-  export type NotificationObjectType = 'Book' | 'Announcement'
+  export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread'
 
   export interface NotificationExtra {
     object_id: number
@@ -95,7 +97,7 @@ export namespace GetNotifications {
       Id: number
       UserName: string
       Avatar: string
-    }
+    } | null
     Type: NotificationType
     ObjectType: NotificationObjectType
     ObjectId: number

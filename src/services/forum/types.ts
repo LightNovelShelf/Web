@@ -1,4 +1,5 @@
-export type CommunityBoardKey = 'all' | 'anime' | 'comic' | 'game' | 'novel' | 'website'
+export type { CommunityBoardKey } from './catalog'
+import type { CommunityBoardKey } from './catalog'
 
 export type CommunityFeedOrder = 'latest' | 'hot' | 'featured'
 
@@ -126,13 +127,11 @@ export interface CreateCommunityThreadRequest {
   subCategoryKey?: string
   title: string
   contentHtml: string
-  authorName: string
 }
 
 export interface CreateCommunityReplyRequest {
   threadId: number
   content: string
-  authorName: string
   replyToId?: number
 }
 

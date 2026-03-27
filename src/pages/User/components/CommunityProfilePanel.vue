@@ -114,7 +114,7 @@ async function loadOverview() {
   error.value = ''
 
   try {
-    overview.value = await getMyCommunityOverview(props.authorName)
+    overview.value = await getMyCommunityOverview()
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载失败'
   } finally {
