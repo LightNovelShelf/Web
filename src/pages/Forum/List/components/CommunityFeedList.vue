@@ -11,8 +11,8 @@
           unelevated
           no-caps
           toggle-color="primary"
-          color="white"
-          text-color="primary"
+          :color="$q.dark.isActive ? 'blue-grey-10' : 'white'"
+          :text-color="$q.dark.isActive ? 'grey-4' : 'primary'"
           class="feed__toggle"
           :model-value="order"
           :options="orderOptions"
@@ -23,8 +23,8 @@
           flat
           no-caps
           toggle-color="primary"
-          color="white"
-          text-color="grey-7"
+          :color="$q.dark.isActive ? 'blue-grey-10' : 'white'"
+          :text-color="$q.dark.isActive ? 'grey-4' : 'grey-7'"
           class="feed__toggle feed__toggle--scope"
           :model-value="scope"
           :options="scopeOptions"
@@ -114,6 +114,8 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
+
 import type {
   CommunityFeedItem,
   CommunityFeedOrder,
@@ -123,6 +125,8 @@ import type {
 } from 'src/services/forum'
 
 import CommunityThreadCard from './CommunityThreadCard.vue'
+
+const $q = useQuasar()
 
 defineProps<{
   items: CommunityFeedItem[]
@@ -217,9 +221,9 @@ const scopeOptions = [
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--community-card-bg-soft);
   color: var(--community-text-soft);
   font-size: 13px;
   font-weight: 600;
@@ -232,19 +236,19 @@ const scopeOptions = [
 
 .feed__subcategories-item:hover {
   transform: translateY(-1px);
-  border-color: rgba(59, 130, 246, 0.24);
+  border-color: var(--community-border-strong);
 }
 
 .feed__subcategories-item--active {
-  border-color: rgba(59, 130, 246, 0.32);
+  border-color: var(--community-border-strong);
   color: var(--community-accent);
-  background: rgba(239, 246, 255, 0.92);
+  background: var(--community-chip-bg-strong);
 }
 
 .feed__subcategories-count {
   padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.12);
+  background: var(--community-chip-bg);
   color: inherit;
   font-size: 12px;
   line-height: 1;
@@ -252,12 +256,12 @@ const scopeOptions = [
 
 .feed__toggle {
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.16);
+  background: var(--community-card-bg-soft);
+  box-shadow: inset 0 0 0 1px var(--community-border);
 }
 
 .feed__toggle--scope {
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+  box-shadow: inset 0 0 0 1px var(--community-border);
 }
 
 .feed__list {
@@ -268,10 +272,10 @@ const scopeOptions = [
 
 .feed-item {
   padding: 22px 22px 18px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  background: var(--community-card-bg);
+  box-shadow: var(--community-shadow);
 }
 
 .feed-item--loading {
@@ -284,9 +288,9 @@ const scopeOptions = [
   align-items: center;
   gap: 10px;
   padding: 52px 24px;
-  border: 1px dashed rgba(59, 130, 246, 0.28);
+  border: 1px dashed var(--community-border-strong);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--community-empty-bg);
   text-align: center;
 }
 
@@ -297,7 +301,7 @@ const scopeOptions = [
   padding: 12px 14px;
   border: 1px solid rgba(248, 113, 113, 0.22);
   border-radius: 16px;
-  background: rgba(254, 242, 242, 0.92);
+  background: color-mix(in srgb, var(--community-card-bg-soft) 78%, #7f1d1d 22%);
   flex-wrap: wrap;
 }
 

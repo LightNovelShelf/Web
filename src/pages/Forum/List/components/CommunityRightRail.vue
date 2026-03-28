@@ -119,10 +119,10 @@ function formatPublishedAt(value: string) {
   width: 100%;
   box-sizing: border-box;
   padding: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95)), rgba(255, 255, 255, 0.96);
-  box-shadow: 2px 2px 4px rgba(15, 23, 42, 0.08);
+  background: var(--community-card-bg);
+  box-shadow: var(--community-side-shadow);
 }
 
 .rail-panel__header {
@@ -172,8 +172,8 @@ function formatPublishedAt(value: string) {
 .rank-item-link:hover .rank-item,
 .rank-item-link:focus-visible .rank-item {
   transform: translateY(-1px);
-  background: rgba(241, 245, 249, 0.8);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
+  background: var(--community-hover-bg);
+  box-shadow: inset 0 0 0 1px var(--community-border-strong);
 }
 
 .rank-item__index {
@@ -183,7 +183,7 @@ function formatPublishedAt(value: string) {
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  background: rgba(226, 232, 240, 0.72);
+  background: var(--community-chip-bg);
   color: var(--community-text-soft);
   font-size: 12px;
   font-weight: 700;
@@ -228,7 +228,7 @@ function formatPublishedAt(value: string) {
 }
 
 .user-item + .user-item {
-  border-top: 1px solid rgba(226, 232, 240, 0.88);
+  border-top: 1px solid var(--community-border);
 }
 
 .community-avatar__image {
@@ -257,7 +257,7 @@ function formatPublishedAt(value: string) {
 .user-item__badge {
   padding: 2px 7px;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.08);
+  background: var(--community-chip-bg);
   color: var(--community-accent);
   font-size: 11px;
 }

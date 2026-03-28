@@ -1,5 +1,5 @@
 <template>
-  <section class="community-panel">
+  <section :class="['community-panel', { 'community-panel--dark': $q.dark.isActive }]">
     <div class="community-panel__header">
       <div>
         <h2 class="community-panel__title">我的社区</h2>
@@ -89,6 +89,8 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
+
 import { parseTime, toNow } from 'src/utils/time'
 
 import CommunityThreadCard from 'src/pages/Forum/List/components/CommunityThreadCard.vue'
@@ -100,6 +102,7 @@ const props = defineProps<{
   authorName?: string
 }>()
 
+const $q = useQuasar()
 const tab = ref<'threads' | 'replies' | 'favorites'>('threads')
 const overview = ref<CommunityMyOverview | null>(null)
 const loading = ref(false)
@@ -138,11 +141,34 @@ watch(
 
 <style scoped lang="scss">
 .community-panel {
+  --community-accent: #2563eb;
+  --community-text: #0f172a;
+  --community-text-soft: #64748b;
+  --community-text-muted: #94a3b8;
+  --community-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  --community-card-bg-soft: rgba(255, 255, 255, 0.92);
+  --community-chip-bg: rgba(226, 232, 240, 0.72);
+  --community-border: rgba(15, 23, 42, 0.08);
+  --community-border-strong: rgba(59, 130, 246, 0.3);
+  --community-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
   margin-top: 24px;
   padding: 22px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--community-border);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  background: var(--community-card-bg);
+}
+
+.community-panel--dark {
+  --community-accent: #60a5fa;
+  --community-text: #e2e8f0;
+  --community-text-soft: #94a3b8;
+  --community-text-muted: #64748b;
+  --community-card-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.88));
+  --community-card-bg-soft: rgba(15, 23, 42, 0.82);
+  --community-chip-bg: rgba(51, 65, 85, 0.76);
+  --community-border: rgba(148, 163, 184, 0.16);
+  --community-border-strong: rgba(96, 165, 250, 0.32);
+  --community-shadow: 0 24px 60px rgba(2, 6, 23, 0.38);
 }
 
 .community-panel__header {
@@ -154,7 +180,7 @@ watch(
 
 .community-panel__title {
   margin: 0;
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 28px;
 }
 
@@ -179,9 +205,9 @@ watch(
 
 .community-panel__skeleton {
   padding: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--community-card-bg-soft);
 }
 
 .community-panel__state {
@@ -190,35 +216,35 @@ watch(
   align-items: center;
   gap: 10px;
   padding: 36px 24px;
-  color: #64748b;
+  color: var(--community-text-soft);
   text-align: center;
 }
 
 .community-replies__item {
   display: block;
   padding: 16px 18px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--community-border);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--community-card-bg-soft);
   color: inherit;
   text-decoration: none;
 }
 
 .community-replies__title {
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 15px;
   font-weight: 700;
 }
 
 .community-replies__meta {
   margin-top: 6px;
-  color: #64748b;
+  color: var(--community-text-soft);
   font-size: 12px;
 }
 
 .community-replies__content {
   margin-top: 10px;
-  color: #334155;
+  color: var(--community-text-soft);
   font-size: 13px;
   line-height: 1.8;
 }

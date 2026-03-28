@@ -1,5 +1,5 @@
 <template>
-  <q-page class="community-mine">
+  <q-page :class="['community-mine', { 'community-mine--dark': $q.dark.isActive }]">
     <div class="community-mine__shell">
       <section class="community-mine__hero">
         <div>
@@ -90,6 +90,8 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
+
 import { parseTime, toNow } from 'src/utils/time'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
@@ -100,6 +102,7 @@ import type { CommunityMyOverview } from 'src/services/forum'
 
 import CommunityThreadCard from './List/components/CommunityThreadCard.vue'
 
+const $q = useQuasar()
 const loading = ref(true)
 const error = ref('')
 const overview = ref<CommunityMyOverview>()
@@ -126,11 +129,35 @@ useInitRequest(loadOverview)
 
 <style scoped lang="scss">
 .community-mine {
+  --community-accent: #2563eb;
+  --community-text: #0f172a;
+  --community-text-soft: #64748b;
+  --community-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
+  --community-card-bg-soft: rgba(248, 250, 252, 0.92);
+  --community-border: rgba(148, 163, 184, 0.18);
+  --community-border-strong: rgba(59, 130, 246, 0.3);
+  --community-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  --community-hover-bg: rgba(239, 246, 255, 0.96);
   min-height: 100%;
   padding: 26px 22px 40px;
   background:
     radial-gradient(circle at top left, rgba(147, 197, 253, 0.14), transparent 22%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 52%, #f8fafc 100%);
+}
+
+.community-mine--dark {
+  --community-accent: #60a5fa;
+  --community-text: #e2e8f0;
+  --community-text-soft: #94a3b8;
+  --community-card-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.9)), rgba(15, 23, 42, 0.92);
+  --community-card-bg-soft: rgba(15, 23, 42, 0.84);
+  --community-border: rgba(148, 163, 184, 0.16);
+  --community-border-strong: rgba(96, 165, 250, 0.34);
+  --community-shadow: 0 24px 60px rgba(2, 6, 23, 0.38);
+  --community-hover-bg: rgba(30, 41, 59, 0.94);
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.2), transparent 24%),
+    linear-gradient(180deg, #020617 0%, #0f172a 48%, #111827 100%);
 }
 
 .community-mine__shell {
@@ -144,10 +171,10 @@ useInitRequest(loadOverview)
 .community-mine__hero,
 .community-mine__section,
 .community-mine__state {
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  background: var(--community-card-bg);
+  box-shadow: var(--community-shadow);
 }
 
 .community-mine__hero {
@@ -159,7 +186,7 @@ useInitRequest(loadOverview)
 }
 
 .community-mine__eyebrow {
-  color: #2563eb;
+  color: var(--community-accent);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -168,7 +195,7 @@ useInitRequest(loadOverview)
 
 .community-mine__title {
   margin: 8px 0 0;
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 36px;
   line-height: 1.1;
 }
@@ -178,7 +205,7 @@ useInitRequest(loadOverview)
 .community-mine__reply-meta,
 .community-mine__state-text,
 .community-mine__empty {
-  color: #64748b;
+  color: var(--community-text-soft);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -203,7 +230,7 @@ useInitRequest(loadOverview)
 
 .community-mine__section-header h2 {
   margin: 0;
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 24px;
 }
 
@@ -222,7 +249,7 @@ useInitRequest(loadOverview)
   display: block;
   padding: 16px 18px;
   border-radius: 18px;
-  background: rgba(248, 250, 252, 0.92);
+  background: var(--community-card-bg-soft);
   color: inherit;
   text-decoration: none;
   transition:
@@ -234,19 +261,19 @@ useInitRequest(loadOverview)
 .community-mine__reply-card:hover,
 .community-mine__reply-card:focus-visible {
   transform: translateY(-1px);
-  background: rgba(239, 246, 255, 0.96);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
+  background: var(--community-hover-bg);
+  box-shadow: inset 0 0 0 1px var(--community-border-strong);
 }
 
 .community-mine__reply-title {
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 15px;
   font-weight: 700;
 }
 
 .community-mine__reply-content {
   margin-top: 8px;
-  color: #334155;
+  color: var(--community-text-soft);
   font-size: 14px;
   line-height: 1.8;
 }
@@ -268,7 +295,7 @@ useInitRequest(loadOverview)
 }
 
 .community-mine__state-title {
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 20px;
   font-weight: 700;
 }

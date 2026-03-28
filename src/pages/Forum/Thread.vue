@@ -1,5 +1,5 @@
 <template>
-  <q-page class="thread-page">
+  <q-page :class="['thread-page', { 'thread-page--dark': $q.dark.isActive }]">
     <div class="thread-page__shell">
       <div v-if="loading" class="thread-page__loading">
         <q-skeleton type="text" width="20%" />
@@ -938,11 +938,37 @@ watch(
 
 <style scoped lang="scss">
 .thread-page {
+  --community-accent: #2563eb;
+  --community-text: #0f172a;
+  --community-text-soft: #64748b;
+  --community-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
+  --community-card-bg-soft: rgba(248, 250, 252, 0.92);
+  --community-chip-bg: rgba(226, 232, 240, 0.72);
+  --community-border: rgba(148, 163, 184, 0.18);
+  --community-border-strong: rgba(59, 130, 246, 0.3);
+  --community-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  --community-hover-bg: rgba(239, 246, 255, 0.96);
   min-height: 100%;
   padding: 26px 22px 40px;
   background:
     radial-gradient(circle at top left, rgba(147, 197, 253, 0.14), transparent 22%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 52%, #f8fafc 100%);
+}
+
+.thread-page--dark {
+  --community-accent: #60a5fa;
+  --community-text: #e2e8f0;
+  --community-text-soft: #94a3b8;
+  --community-card-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.9)), rgba(15, 23, 42, 0.92);
+  --community-card-bg-soft: rgba(15, 23, 42, 0.84);
+  --community-chip-bg: rgba(51, 65, 85, 0.76);
+  --community-border: rgba(148, 163, 184, 0.16);
+  --community-border-strong: rgba(96, 165, 250, 0.34);
+  --community-shadow: 0 24px 60px rgba(2, 6, 23, 0.38);
+  --community-hover-bg: rgba(30, 41, 59, 0.94);
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.2), transparent 24%),
+    linear-gradient(180deg, #020617 0%, #0f172a 48%, #111827 100%);
 }
 
 .thread-page__shell {
@@ -952,7 +978,7 @@ watch(
 
 .thread-page__breadcrumbs {
   margin-bottom: 16px;
-  color: #64748b;
+  color: var(--community-text-soft);
 }
 
 .thread-page__grid {
@@ -972,10 +998,10 @@ watch(
 .reply-panel,
 .side-panel,
 .thread-page__empty {
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  background: var(--community-card-bg);
+  box-shadow: var(--community-shadow);
 }
 
 .thread-card {
@@ -1032,14 +1058,14 @@ watch(
 
 .thread-card__board {
   padding: 6px 11px;
-  color: #2563eb;
-  background: rgba(59, 130, 246, 0.08);
+  color: var(--community-accent);
+  background: var(--community-chip-bg);
 }
 
 .thread-card__sub-category {
   padding: 6px 11px;
-  color: #0f766e;
-  background: rgba(20, 184, 166, 0.08);
+  color: var(--community-text-soft);
+  background: var(--community-chip-bg);
 }
 
 .thread-card__flag {
@@ -1063,14 +1089,14 @@ watch(
   margin: 16px 0 0;
   font-size: 36px;
   line-height: 1.15;
-  color: #0f172a;
+  color: var(--community-text);
 }
 
 .thread-card__meta {
   justify-content: space-between;
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid rgba(226, 232, 240, 0.92);
+  border-top: 1px solid var(--community-border);
 }
 
 .thread-card__author {
@@ -1095,13 +1121,13 @@ watch(
 }
 
 .thread-card__author-name {
-  color: #0f172a;
+  color: var(--community-text);
   font-weight: 700;
 }
 
 .thread-card__author-time,
 .thread-card__stats {
-  color: #64748b;
+  color: var(--community-text-soft);
   font-size: 13px;
 }
 
@@ -1111,8 +1137,8 @@ watch(
 
 .thread-card__action-btn {
   border-radius: 999px;
-  color: #2563eb;
-  background: rgba(219, 234, 254, 0.84);
+  color: var(--community-accent);
+  background: var(--community-chip-bg);
 }
 
 .thread-card__action-btn--active {
@@ -1122,7 +1148,7 @@ watch(
 
 .thread-card__body {
   margin-top: 20px;
-  color: #1e293b;
+  color: var(--community-text-soft);
   font-size: 15px;
   line-height: 1.9;
 }
@@ -1139,8 +1165,8 @@ watch(
 .reply-item__badge,
 .reply-item__reply-to {
   padding: 5px 10px;
-  color: #475569;
-  background: rgba(226, 232, 240, 0.72);
+  color: var(--community-text-soft);
+  background: var(--community-chip-bg);
 }
 
 .reply-panel {
@@ -1155,7 +1181,7 @@ watch(
 .reply-panel__header h2,
 .side-panel h3 {
   margin: 0;
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 22px;
   line-height: 1.2;
 }
@@ -1167,21 +1193,21 @@ watch(
 .reply-composer__hint,
 .reply-panel__lock,
 .reply-item__tool-btn {
-  color: #64748b;
+  color: var(--community-text-soft);
   font-size: 12px;
 }
 
 .reply-panel__lock {
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(226, 232, 240, 0.78);
+  background: var(--community-chip-bg);
 }
 
 .reply-composer {
   padding: 16px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid var(--community-border);
   border-radius: 20px;
-  background: rgba(248, 250, 252, 0.9);
+  background: var(--community-card-bg-soft);
 }
 
 .reply-composer__target {
@@ -1191,8 +1217,8 @@ watch(
   margin-bottom: 12px;
   padding: 8px 10px;
   border-radius: 14px;
-  background: rgba(219, 234, 254, 0.7);
-  color: #1d4ed8;
+  background: var(--community-chip-bg);
+  color: var(--community-accent);
   font-size: 12px;
 }
 
@@ -1225,25 +1251,25 @@ watch(
 }
 
 .reply-item + .reply-item {
-  border-top: 1px solid rgba(226, 232, 240, 0.88);
+  border-top: 1px solid var(--community-border);
 }
 
 .reply-item--focused,
 .reply-child--focused {
   border-radius: 18px;
-  background: rgba(219, 234, 254, 0.24);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.18);
+  background: var(--community-hover-bg);
+  box-shadow: inset 0 0 0 1px var(--community-border-strong);
 }
 
 .reply-item__name {
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 13px;
   font-weight: 700;
 }
 
 .reply-item__content {
   margin: 12px 0 0 46px;
-  color: #334155;
+  color: var(--community-text-soft);
   font-size: 14px;
   line-height: 1.8;
 }
@@ -1254,13 +1280,13 @@ watch(
   gap: 10px;
   margin: 6px 0 0 46px;
   padding-left: 14px;
-  border-left: 2px solid rgba(219, 234, 254, 0.9);
+  border-left: 2px solid var(--community-border-strong);
 }
 
 .reply-child {
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(248, 250, 252, 0.92);
+  background: var(--community-card-bg-soft);
 }
 
 .reply-item__reply-to--clickable {
@@ -1274,8 +1300,8 @@ watch(
 
 .reply-item__reply-to--clickable:hover,
 .reply-item__reply-to--clickable:focus-visible {
-  color: #1d4ed8;
-  background: rgba(191, 219, 254, 0.95);
+  color: var(--community-accent);
+  background: var(--community-hover-bg);
   transform: translateY(-1px);
   outline: none;
 }
@@ -1289,7 +1315,7 @@ watch(
 
 .reply-child__content {
   margin: 10px 0 0 40px;
-  color: #334155;
+  color: var(--community-text-soft);
   font-size: 13px;
   line-height: 1.8;
 }
@@ -1304,8 +1330,8 @@ watch(
 }
 
 .reply-item__like-btn--active {
-  color: #2563eb;
-  background: rgba(219, 234, 254, 0.72);
+  color: var(--community-accent);
+  background: var(--community-chip-bg);
 }
 
 .reply-panel__footer {
@@ -1328,7 +1354,7 @@ watch(
 
 .side-panel__empty {
   margin-top: 14px;
-  color: #64748b;
+  color: var(--community-text-soft);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -1345,16 +1371,16 @@ watch(
   min-width: 0;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(248, 250, 252, 0.92);
+  background: var(--community-card-bg-soft);
   transition: background-color 0.18s ease;
 }
 
 .related-item:hover {
-  background: rgba(239, 246, 255, 0.96);
+  background: var(--community-hover-bg);
 }
 
 .related-item__title {
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 13px;
   font-weight: 700;
   line-height: 1.6;
@@ -1381,7 +1407,7 @@ watch(
 
 .thread-page__empty p {
   margin: 0 0 8px;
-  color: #64748b;
+  color: var(--community-text-soft);
 }
 
 @media (max-width: 1180px) {

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="community-home">
+  <q-page :class="['community-home', { 'community-home--dark': $q.dark.isActive }]">
     <div class="community-home__shell">
       <div class="community-home__grid">
         <div class="community-home__left">
@@ -392,12 +392,44 @@ watch(routeQueryKey, () => {
   --community-text: #0f172a;
   --community-text-soft: #475569;
   --community-text-muted: #94a3b8;
+  --community-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
+  --community-card-bg-soft: rgba(255, 255, 255, 0.82);
+  --community-card-bg-strong: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)), rgba(255, 255, 255, 0.96);
+  --community-empty-bg: rgba(255, 255, 255, 0.82);
+  --community-chip-bg: rgba(226, 232, 240, 0.72);
+  --community-chip-bg-strong: rgba(239, 246, 255, 0.92);
+  --community-border: rgba(148, 163, 184, 0.18);
+  --community-border-strong: rgba(59, 130, 246, 0.3);
+  --community-hover-bg: rgba(239, 246, 255, 0.96);
+  --community-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  --community-side-shadow: 2px 2px 4px rgba(15, 23, 42, 0.08);
   --community-sticky-top: 84px;
   min-height: 100%;
   padding: 26px 22px 0;
   background:
     radial-gradient(circle at top left, rgba(147, 197, 253, 0.16), transparent 24%),
     linear-gradient(180deg, #f8fbff 0%, #f4f7fb 52%, #f8fafc 100%);
+}
+
+.community-home--dark {
+  --community-accent: #60a5fa;
+  --community-text: #e2e8f0;
+  --community-text-soft: #94a3b8;
+  --community-text-muted: #64748b;
+  --community-card-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.9)), rgba(15, 23, 42, 0.92);
+  --community-card-bg-soft: rgba(15, 23, 42, 0.84);
+  --community-card-bg-strong: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94)), rgba(15, 23, 42, 0.96);
+  --community-empty-bg: rgba(17, 24, 39, 0.96);
+  --community-chip-bg: rgba(51, 65, 85, 0.76);
+  --community-chip-bg-strong: rgba(30, 41, 59, 0.92);
+  --community-border: rgba(148, 163, 184, 0.16);
+  --community-border-strong: rgba(96, 165, 250, 0.34);
+  --community-hover-bg: rgba(30, 41, 59, 0.94);
+  --community-shadow: 0 24px 60px rgba(2, 6, 23, 0.38);
+  --community-side-shadow: 2px 2px 6px rgba(2, 6, 23, 0.22);
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.2), transparent 24%),
+    linear-gradient(180deg, #020617 0%, #0f172a 48%, #111827 100%);
 }
 
 .community-home__shell {
@@ -430,10 +462,10 @@ watch(routeQueryKey, () => {
   position: relative;
   overflow: hidden;
   padding: 24px 28px 18px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--community-border);
   border-radius: 30px;
-  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)), rgba(255, 255, 255, 0.96);
-  box-shadow: 0 28px 48px rgba(15, 23, 42, 0.08);
+  background: var(--community-card-bg-strong);
+  box-shadow: var(--community-shadow);
 }
 
 .community-hero__content {
@@ -468,9 +500,9 @@ watch(routeQueryKey, () => {
 .community-hero__stat {
   min-width: 108px;
   padding: 14px 16px;
-  border: 1px solid rgba(59, 130, 246, 0.14);
+  border: 1px solid var(--community-border);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--community-card-bg-soft);
   backdrop-filter: blur(10px);
 }
 
@@ -493,9 +525,9 @@ watch(routeQueryKey, () => {
   gap: 14px;
   align-items: center;
   padding: 14px 18px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--community-border);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--community-card-bg-soft);
 }
 
 .community-notice__label {
