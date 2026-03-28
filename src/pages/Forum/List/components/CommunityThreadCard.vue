@@ -70,10 +70,10 @@ function formatPublishedAt(value: string) {
 
 .feed-item {
   padding: 22px 22px 18px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.07);
+  background: var(--community-card-bg);
+  box-shadow: var(--community-shadow);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -83,8 +83,8 @@ function formatPublishedAt(value: string) {
 .feed-item-link:hover .feed-item,
 .feed-item-link:focus-visible .feed-item {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 22px 40px rgba(37, 99, 235, 0.12);
+  border-color: var(--community-border-strong);
+  box-shadow: var(--community-shadow);
 }
 
 .feed-item__topline,
@@ -111,13 +111,13 @@ function formatPublishedAt(value: string) {
 .feed-item__board {
   padding: 6px 11px;
   color: var(--community-accent);
-  background: rgba(59, 130, 246, 0.08);
+  background: var(--community-chip-bg);
 }
 
 .feed-item__sub-category {
   padding: 6px 11px;
-  color: #0f766e;
-  background: rgba(20, 184, 166, 0.08);
+  color: var(--community-text-soft);
+  background: var(--community-chip-bg);
 }
 
 .feed-item__flag {
@@ -212,8 +212,8 @@ function formatPublishedAt(value: string) {
 
 .feed-item__tag {
   padding: 5px 10px;
-  color: #475569;
-  background: rgba(226, 232, 240, 0.72);
+  color: var(--community-text-soft);
+  background: var(--community-chip-bg);
 }
 
 @media (max-width: 1200px) {

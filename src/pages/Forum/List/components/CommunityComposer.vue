@@ -261,10 +261,10 @@ function submit() {
   justify-content: space-between;
   gap: 20px;
   padding: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid var(--community-border);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96)), rgba(255, 255, 255, 0.96);
-  box-shadow: 0 22px 40px rgba(15, 23, 42, 0.08);
+  background: var(--community-card-bg);
+  box-shadow: var(--community-shadow);
 }
 
 .composer__title {
@@ -276,7 +276,7 @@ function submit() {
 .composer__hint,
 .composer-dialog__editor-hint {
   margin-top: 8px;
-  color: #64748b;
+  color: var(--community-text-soft);
   font-size: 12px;
 }
 
@@ -306,13 +306,13 @@ function submit() {
   margin: auto;
   border-radius: 30px;
   overflow: hidden;
-  background: linear-gradient(180deg, #fbfdff 0%, #f8fafc 100%);
+  background: var(--community-card-bg);
 }
 
 .composer-dialog__header,
 .composer-dialog__footer {
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.92);
+  border-bottom: 1px solid var(--community-border);
 }
 
 .composer-dialog__header {
@@ -321,14 +321,14 @@ function submit() {
 }
 
 .composer-dialog__footer {
-  border-top: 1px solid rgba(226, 232, 240, 0.92);
+  border-top: 1px solid var(--community-border);
   border-bottom: 0;
   justify-content: flex-end;
 }
 
 .composer-dialog__title {
   margin: 0;
-  color: #0f172a;
+  color: var(--community-text);
   font-size: 28px;
   line-height: 1.1;
 }
@@ -379,7 +379,7 @@ function submit() {
 }
 
 .composer-dialog__editor-label {
-  color: #334155;
+  color: var(--community-text-soft);
   font-size: 13px;
   font-weight: 700;
 }

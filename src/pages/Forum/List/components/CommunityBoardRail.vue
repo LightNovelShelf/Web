@@ -102,9 +102,9 @@ const scrollbarOptions = computed(() => ({
   gap: 12px;
   width: 100%;
   padding: 16px 16px 15px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--community-border);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--community-card-bg-soft);
   text-align: left;
   transition:
     transform 0.18s ease,
@@ -115,14 +115,14 @@ const scrollbarOptions = computed(() => ({
 
 .board-rail__item:hover {
   transform: translateY(-1px);
-  border-color: rgba(59, 130, 246, 0.22);
-  box-shadow: 2px 2px 3px rgba(15, 23, 42, 0.08);
+  border-color: var(--community-border-strong);
+  box-shadow: var(--community-side-shadow);
 }
 
 .board-rail__item--active {
-  border-color: rgba(59, 130, 246, 0.35);
-  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.96)), rgba(255, 255, 255, 0.96);
-  box-shadow: 2px 2px 4px rgba(59, 130, 246, 0.12);
+  border-color: var(--community-border-strong);
+  background: var(--community-card-bg-strong);
+  box-shadow: var(--community-side-shadow);
 }
 
 .board-rail__icon {
@@ -132,7 +132,7 @@ const scrollbarOptions = computed(() => ({
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--community-chip-bg);
   color: var(--community-accent);
 }
 

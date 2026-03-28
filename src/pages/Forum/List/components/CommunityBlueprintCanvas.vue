@@ -28,7 +28,7 @@ function draw() {
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
   ctx.clearRect(0, 0, width, height)
 
-  ctx.strokeStyle = 'rgba(59, 130, 246, 0.12)'
+  ctx.strokeStyle = 'rgba(226, 232, 240, 0.12)'
   ctx.lineWidth = 1
 
   for (let x = 0; x < width; x += 32) {
@@ -53,17 +53,15 @@ function draw() {
     { x: width * 0.58, y: height * 0.58, w: width * 0.24, h: height * 0.2 },
   ]
 
-  ctx.strokeStyle = 'rgba(37, 99, 235, 0.18)'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.38)'
+  ctx.strokeStyle = 'rgba(226, 232, 240, 0.16)'
 
   for (const box of boxes) {
     ctx.beginPath()
     ctx.roundRect(box.x, box.y, box.w, box.h, 14)
-    ctx.fill()
     ctx.stroke()
   }
 
-  ctx.strokeStyle = 'rgba(14, 165, 233, 0.22)'
+  ctx.strokeStyle = 'rgba(226, 232, 240, 0.18)'
   ctx.beginPath()
   ctx.moveTo(80, height * 0.38)
   ctx.lineTo(width * 0.46, height * 0.38)
@@ -79,7 +77,7 @@ function draw() {
   ]
 
   for (const [x, y] of points) {
-    ctx.fillStyle = 'rgba(59, 130, 246, 0.65)'
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.55)'
     ctx.beginPath()
     ctx.arc(x, y, 4, 0, Math.PI * 2)
     ctx.fill()
