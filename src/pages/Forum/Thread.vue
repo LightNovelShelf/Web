@@ -909,10 +909,6 @@ useInitRequest(requestThread, { isActive })
 watch(
   () => threadId.value,
   (current, previous) => {
-    if (current === previous || !route.meta.reload) {
-      return
-    }
-
     void requestThread.syncCall()
   },
 )
@@ -941,7 +937,8 @@ watch(
   --community-accent: #2563eb;
   --community-text: #0f172a;
   --community-text-soft: #64748b;
-  --community-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
+  --community-card-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
   --community-card-bg-soft: rgba(248, 250, 252, 0.92);
   --community-chip-bg: rgba(226, 232, 240, 0.72);
   --community-border: rgba(148, 163, 184, 0.18);
@@ -1148,7 +1145,6 @@ watch(
 
 .thread-card__body {
   margin-top: 20px;
-  color: var(--community-text-soft);
   font-size: 15px;
   line-height: 1.9;
 }
@@ -1269,7 +1265,6 @@ watch(
 
 .reply-item__content {
   margin: 12px 0 0 46px;
-  color: var(--community-text-soft);
   font-size: 14px;
   line-height: 1.8;
 }
@@ -1286,7 +1281,6 @@ watch(
 .reply-child {
   padding: 12px 14px;
   border-radius: 16px;
-  background: var(--community-card-bg-soft);
 }
 
 .reply-item__reply-to--clickable {
@@ -1315,7 +1309,6 @@ watch(
 
 .reply-child__content {
   margin: 10px 0 0 40px;
-  color: var(--community-text-soft);
   font-size: 13px;
   line-height: 1.8;
 }
@@ -1385,7 +1378,6 @@ watch(
   font-weight: 700;
   line-height: 1.6;
   display: -webkit-box;
-  min-height: calc(1.6em * 2);
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
