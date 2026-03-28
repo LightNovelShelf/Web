@@ -19,7 +19,7 @@
     </div>
 
     <q-dialog v-model="dialogOpen" persistent transition-show="fade" transition-hide="fade">
-      <q-card class="composer-dialog">
+      <q-card flat bordered class="composer-dialog" :style="dialogCardStyle">
         <div class="composer-dialog__header">
           <div>
             <h2 class="composer-dialog__title">发布新帖子</h2>
@@ -105,6 +105,8 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
+
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import HtmlEditor from 'components/html/HtmlEditor.vue'
@@ -124,6 +126,7 @@ const emit = defineEmits<{
   create: [payload: Omit<CreateCommunityThreadRequest, 'authorName'>]
 }>()
 
+const $q = useQuasar()
 const route = useRoute()
 const dialogOpen = ref(false)
 const title = ref('')
@@ -151,6 +154,15 @@ const subCategoryOptions = computed(() =>
 const plainText = computed(() => getPlainTextFromHtml(contentHtml.value))
 const plainTextLength = computed(() => plainText.value.replace(/\s+/g, '').length)
 const canSubmit = computed(() => !!boardKey.value && title.value.trim().length >= 6 && plainTextLength.value >= 20)
+const dialogCardStyle = computed(() => ({
+  '--community-dialog-bg': $q.dark.isActive
+    ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.94))'
+    : 'linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96))',
+  '--community-dialog-border': $q.dark.isActive ? 'rgba(148, 163, 184, 0.16)' : 'rgba(148, 163, 184, 0.18)',
+  '--community-dialog-text': $q.dark.isActive ? '#e2e8f0' : '#0f172a',
+  '--community-dialog-text-soft': $q.dark.isActive ? '#94a3b8' : '#64748b',
+  color: $q.dark.isActive ? '#e2e8f0' : '#0f172a',
+}))
 
 function syncBoardFromProps() {
   boardKey.value =
@@ -306,13 +318,13 @@ function submit() {
   margin: auto;
   border-radius: 30px;
   overflow: hidden;
-  background: var(--community-card-bg);
+  background: var(--community-dialog-bg);
 }
 
 .composer-dialog__header,
 .composer-dialog__footer {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--community-border);
+  border-bottom: 1px solid var(--community-dialog-border);
 }
 
 .composer-dialog__header {
@@ -321,14 +333,14 @@ function submit() {
 }
 
 .composer-dialog__footer {
-  border-top: 1px solid var(--community-border);
+  border-top: 1px solid var(--community-dialog-border);
   border-bottom: 0;
   justify-content: flex-end;
 }
 
 .composer-dialog__title {
   margin: 0;
-  color: var(--community-text);
+  color: var(--community-dialog-text);
   font-size: 28px;
   line-height: 1.1;
 }
@@ -379,7 +391,7 @@ function submit() {
 }
 
 .composer-dialog__editor-label {
-  color: var(--community-text-soft);
+  color: var(--community-dialog-text-soft);
   font-size: 13px;
   font-weight: 700;
 }
