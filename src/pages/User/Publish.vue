@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1920px" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="q-mx-auto">
     <div class="q-gutter-y-md">
       <q-tabs dense v-model="tab" class="text-teal">
         <template v-for="option in tabOptions" :key="option.key">
@@ -33,11 +33,11 @@
                 <book-card :book="book"></book-card>
                 <div>
                   <div class="flex q-gutter-sm">
-                    <q-btn dense color="negative" class="flex-space" @click="delBook(book['Id'], index)">删除</q-btn>
+                    <q-btn dense color="negative" class="col" @click="delBook(book['Id'], index)">删除</q-btn>
                     <q-btn
                       dense
                       color="primary"
-                      class="flex-space"
+                      class="col"
                       :to="{ name: 'UserBookEditor', params: { bookId: book['Id'] } }"
                     >
                       管理

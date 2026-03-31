@@ -37,7 +37,7 @@
           网页版本：
           <a :href="`https://github.com/LightNovelShelf/Web/tree/${commitSha}`" target="_blank">{{ commitSha }}</a>
         </div>
-        <div class="row flex-align-center">
+        <div class="row items-center">
           <q-icon
             left
             v-if="connectState === HubConnectionState.Connected"
@@ -172,8 +172,8 @@ const currentRouteName = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .temp-box {
-  height: 50px;
+  height: 80px;
 }
 </style>

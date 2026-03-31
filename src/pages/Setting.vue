@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div class="q-pa-md mx-auto" :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`">
+    <div class="q-pa-md q-mx-auto" :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`">
       <div class="q-gutter-y-md">
         <q-tabs dense v-model="tab" class="text-teal">
           <template v-for="option in tabOptions" :key="option.key">

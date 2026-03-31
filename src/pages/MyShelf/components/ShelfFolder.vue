@@ -32,7 +32,7 @@
 
     <div class="text-grey-7" style="display: flex; padding: 0 4px; font-size: 12px">
       <div></div>
-      <div class="flex-space"></div>
+      <div class="col"></div>
       <div>{{ updateTime }}</div>
     </div>
   </div>
