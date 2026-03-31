@@ -3,13 +3,11 @@
   --read-line-height: 1.8;
   --read-paragraph-spacing: 0px;
   --read-paragraph-indent: 2em;
-  --read-letter-spacing: 0em;
 }
 
 :where(.html-reader, .md-editor-preview, .q-editor__content) {
   font-size: var(--read-font-size, 16px);
   line-height: var(--read-line-height, 1.8);
-  letter-spacing: var(--read-letter-spacing, 0em);
 }
 
 p {

@@ -14,7 +14,6 @@ export function useReadCssVars() {
       '--read-line-height': `${setting.lineHeight}`,
       '--read-paragraph-spacing': `${setting.paragraphSpacing}em`,
       '--read-paragraph-indent': `${setting.paragraphIndent}em`,
-      '--read-letter-spacing': `${setting.letterSpacing}em`,
     }
   })
 

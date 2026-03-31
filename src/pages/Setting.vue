@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <q-page class="setting-page">
     <div class="q-pa-md q-mx-auto" :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`">
       <div class="q-gutter-y-md">
         <q-tabs dense v-model="tab" class="text-teal">
@@ -82,19 +82,37 @@
               <q-separator />
               <div class="q-gutter-xs q-mt-md">
                 <div class="text-subtitle1">阅读样式</div>
-                <div v-for="option in readStyleOptions" :key="option.key" class="q-mt-sm">
+                <div v-for="option in readStyleOptions" :key="option.key" class="q-mt-sm read-style-row">
                   <div class="row items-center justify-between q-mb-xs">
                     <div>{{ option.label }}</div>
                     <div class="text-caption text-grey-7">{{ readStyleLabel(option) }}</div>
                   </div>
-                  <q-slider
-                    v-model.number="readSetting[option.key]"
-                    :min="option.min"
-                    :max="option.max"
-                    :step="option.step"
-                    label
-                    :label-value="readStyleLabel(option)"
-                  />
+                  <div class="row items-center q-gutter-sm read-style-control">
+                    <q-slider
+                      class="col"
+                      v-model.number="readSetting[option.key]"
+                      :min="option.min"
+                      :max="option.max"
+                      :step="option.step"
+                      label
+                      :label-value="readStyleLabel(option)"
+                    />
+                    <q-input
+                      dense
+                      outlined
+                      type="number"
+                      class="read-style-input"
+                      input-class="text-right"
+                      v-model.number="readSetting[option.key]"
+                      :min="option.min"
+                      :max="option.max"
+                      :step="option.step"
+                    >
+                      <template v-if="option.unit" #append>
+                        <div>{{ option.unit }}</div>
+                      </template>
+                    </q-input>
+                  </div>
                 </div>
               </div>
               <q-separator />
@@ -180,7 +198,7 @@ const settingStore = useSettingStore()
 const { dark } = storeToRefs(settingStore)
 const { readSetting, generalSetting, editorSetting } = settingStore
 
-type ReadSettingKey = 'lineHeight' | 'paragraphSpacing' | 'paragraphIndent' | 'letterSpacing'
+type ReadSettingKey = 'lineHeight' | 'paragraphSpacing' | 'paragraphIndent'
 type ReadStyleOption = {
   key: ReadSettingKey
   label: string
@@ -195,7 +213,6 @@ const readStyleOptions: ReadStyleOption[] = [
   { key: 'lineHeight', label: '行高', min: 1, max: 3, step: 0.05, precision: 2 },
   { key: 'paragraphSpacing', label: '段间距', min: 0, max: 2, step: 0.05, unit: 'em', precision: 2 },
   { key: 'paragraphIndent', label: '段首缩进', min: 0, max: 4, step: 0.25, unit: 'em', precision: 1 },
-  { key: 'letterSpacing', label: '字间距', min: -0.1, max: 0.5, step: 0.01, unit: 'em', precision: 2 },
 ]
 
 const readStyleLabel = (option: ReadStyleOption) =>
@@ -214,6 +231,23 @@ watch([readSetting, generalSetting, editorSetting], settingStore.save)
 </script>
 
 <style lang="scss" scoped>
+.setting-page {
+  overflow-x: hidden;
+}
+
+.read-style-row {
+  overflow-x: hidden;
+}
+
+.read-style-control {
+  flex-wrap: nowrap;
+}
+
+.read-style-input {
+  width: 96px;
+  flex: 0 0 96px;
+}
+
 .preview {
   @media screen and (min-width: $breakpoint-md-min) {
     width: var(--width);
