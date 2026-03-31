@@ -16,6 +16,10 @@ export const useSettingStore = defineStore('app.setting', {
     },
     readSetting: {
       fontSize: 16,
+      lineHeight: 1.8,
+      paragraphSpacing: 0,
+      paragraphIndent: 2,
+      letterSpacing: 0,
       bgType: 'none' as 'none' | 'paper' | 'custom',
       customColor: '#000000',
       convert: null as null | 't2s' | 's2t',

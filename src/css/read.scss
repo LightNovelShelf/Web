@@ -1,8 +1,22 @@
+:root {
+  --read-font-size: 16px;
+  --read-line-height: 1.8;
+  --read-paragraph-spacing: 0px;
+  --read-paragraph-indent: 2em;
+  --read-letter-spacing: 0em;
+}
+
+:where(.html-reader, .md-editor-preview, .q-editor__content) {
+  font-size: var(--read-font-size, 16px);
+  line-height: var(--read-line-height, 1.8);
+  letter-spacing: var(--read-letter-spacing, 0em);
+}
+
 p {
-  margin: 0;
+  margin: 0 0 var(--read-paragraph-spacing, 0px);
   padding: 0;
-  line-height: 1.8em;
-  text-indent: 2em;
+  line-height: var(--read-line-height, 1.8);
+  text-indent: var(--read-paragraph-indent, 2em);
 
   img {
     margin: 0 5px;

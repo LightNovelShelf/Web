@@ -81,6 +81,24 @@
               </div>
               <q-separator />
               <div class="q-gutter-xs q-mt-md">
+                <div class="text-subtitle1">阅读样式</div>
+                <div v-for="option in readStyleOptions" :key="option.key" class="q-mt-sm">
+                  <div class="row items-center justify-between q-mb-xs">
+                    <div>{{ option.label }}</div>
+                    <div class="text-caption text-grey-7">{{ readStyleLabel(option) }}</div>
+                  </div>
+                  <q-slider
+                    v-model.number="readSetting[option.key]"
+                    :min="option.min"
+                    :max="option.max"
+                    :step="option.step"
+                    label
+                    :label-value="readStyleLabel(option)"
+                  />
+                </div>
+              </div>
+              <q-separator />
+              <div class="q-gutter-xs q-mt-md">
                 <div class="text-subtitle1">
                   阅读页宽度{{ readSetting.widthType === 'custom' ? '（设为 0 时为全屏，只在大屏幕下生效）' : '' }}
                 </div>
@@ -161,6 +179,27 @@ const tabOptions: Array<Record<string, any>> = [
 const settingStore = useSettingStore()
 const { dark } = storeToRefs(settingStore)
 const { readSetting, generalSetting, editorSetting } = settingStore
+
+type ReadSettingKey = 'lineHeight' | 'paragraphSpacing' | 'paragraphIndent' | 'letterSpacing'
+type ReadStyleOption = {
+  key: ReadSettingKey
+  label: string
+  min: number
+  max: number
+  step: number
+  unit?: string
+  precision?: number
+}
+
+const readStyleOptions: ReadStyleOption[] = [
+  { key: 'lineHeight', label: '行高', min: 1, max: 3, step: 0.05, precision: 2 },
+  { key: 'paragraphSpacing', label: '段间距', min: 0, max: 2, step: 0.05, unit: 'em', precision: 2 },
+  { key: 'paragraphIndent', label: '段首缩进', min: 0, max: 4, step: 0.25, unit: 'em', precision: 1 },
+  { key: 'letterSpacing', label: '字间距', min: -0.1, max: 0.5, step: 0.01, unit: 'em', precision: 2 },
+]
+
+const readStyleLabel = (option: ReadStyleOption) =>
+  `${readSetting[option.key].toFixed(option.precision ?? 0)}${option.unit ?? ''}`
 
 const tab = ref('Setting')
 

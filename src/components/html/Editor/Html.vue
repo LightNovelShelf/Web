@@ -1,5 +1,5 @@
 <template>
-  <div :class="mode">
+  <div :class="mode" :style="readCssVars">
     <q-editor
       ref="editorRef"
       paragraph-tag="p"
@@ -24,6 +24,7 @@ import bbCodeParser from 'src/utils/bbcode/simple'
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import { useIsActivated } from 'src/composition/useIsActivated'
+import { useReadCssVars } from 'src/composition/useReadCssVars'
 
 import { uploadImage } from 'src/services/user'
 
@@ -32,6 +33,7 @@ import type { QEditor, QEditorCommand } from 'quasar'
 const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
 const emit = defineEmits(['update:html'])
+const { readCssVars } = useReadCssVars()
 let isInternalChange = false
 
 const processHtml = (html: string) => {
