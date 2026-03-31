@@ -8,12 +8,12 @@
               <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3">
                 <div class="absolute-bottom bottom-shadow">
                   <div class="row">
-                    <div class="row flex-align-center q-gutter-xs">
+                    <div class="row items-center q-gutter-xs">
                       <q-icon size="24px" name="mdiHeart" />
                       <span>{{ book.Favorite }}</span>
                     </div>
                     <q-space />
-                    <div class="row flex-align-center q-gutter-xs">
+                    <div class="row items-center q-gutter-xs">
                       <q-icon size="24px" name="mdiEye" />
                       <span>{{ book.Views }}</span>
                     </div>
@@ -30,7 +30,7 @@
           </q-grid-item>
           <q-grid-item span="2" xs="1" sm="1" md="1">
             <div v-if="isActive">
-              <div class="row flex-align-center">
+              <div class="row items-center">
                 <div class="introduction" style="margin: 24px 0">书籍信息</div>
 
                 <q-space />

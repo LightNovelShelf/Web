@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1920px" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="q-mx-auto">
     <div v-if="isActive">
       <div class="q-gutter-sm">
         <q-input label="标题" v-model="chapter['Title']" />

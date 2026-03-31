@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-list bordered separator class="rounded-borders title mx-auto">
+    <q-list bordered separator class="rounded-borders title q-mx-auto">
       <q-item>
         <q-item-section class="text-h6">网站支持度测试</q-item-section>
       </q-item>

@@ -34,9 +34,9 @@
         class="row justify-between q-gutter-md"
         style="margin-top: 24px; clear: both"
       >
-        <q-btn @click="prev" class="flex-space">上一章</q-btn>
-        <q-btn @click="back" class="flex-space">目录</q-btn>
-        <q-btn @click="next" class="flex-space">下一章</q-btn>
+        <q-btn @click="prev" class="col">上一章</q-btn>
+        <q-btn @click="back" class="col">目录</q-btn>
+        <q-btn @click="next" class="col">下一章</q-btn>
       </div>
     </div>
 

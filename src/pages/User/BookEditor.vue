@@ -1,5 +1,5 @@
 <template>
-  <q-page padding style="max-width: 1920px" class="mx-auto">
+  <q-page padding style="max-width: 1920px" class="q-mx-auto">
     <div v-if="isActive">
       <q-tab-panels v-model="tab">
         <q-tab-panel name="information">

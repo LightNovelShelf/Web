@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="title mx-auto">
+  <q-page padding class="title q-mx-auto">
     <q-card>
       <q-card-section>
         <div v-if="isActive" class="text-h6">

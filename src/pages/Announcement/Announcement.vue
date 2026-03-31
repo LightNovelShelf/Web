@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll">
-      <q-list bordered separator class="rounded-borders title mx-auto">
+      <q-list bordered separator class="rounded-borders title q-mx-auto">
         <q-item>
           <q-item-section class="text-h6">
             <div class="row flex-center">

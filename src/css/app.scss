@@ -1,29 +1,11 @@
 // app global css in SCSS form
 
-.flex-align-center {
-  display: flex;
-  align-items: center;
-}
-
-.flex-space {
-  flex: 1;
-}
-
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
 .m0 {
   margin: 0;
 }
 
 .p0 {
-  margin: 0;
+  padding: 0;
 }
 
 a {
@@ -40,6 +22,10 @@ body.desktop {
   opacity: 0.6;
 }
 
-.gap-8 {
-  gap: 8px;
+@for $i from 1 through 6 {
+  $gap: $i * 4;
+
+  .gap-#{$gap} {
+    gap: #{$gap}px;
+  }
 }
