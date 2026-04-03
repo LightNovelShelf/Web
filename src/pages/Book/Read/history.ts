@@ -45,12 +45,14 @@ export async function saveHistory(
   bookParam: {
     Id: number
     xpath: string
+    pageIndex?: number
   },
 ) {
   userReadPositionDB.set(`${uid}_${BookId}`, {
     cid: bookParam.Id,
     xPath: bookParam.xpath,
     top: document.scrollingElement!.scrollTop,
+    pageIndex: bookParam.pageIndex,
   })
   await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
 }
@@ -134,4 +136,28 @@ export async function syncReading(
       console.log(e)
     }
   }
+}
+
+/** 横向翻页模式的阅读位置同步：监听 currentPage 变化 */
+export async function syncReadingHorizontal(
+  uid: Ref<number>,
+  bookParam: {
+    BookId: Ref<number>
+    CId: Ref<number>
+  },
+  currentPage: Ref<number>,
+  getCurrentPageXPath: () => string | null,
+) {
+  const doSync = debounce(async () => {
+    const xpath = getCurrentPageXPath()
+    if (xpath) {
+      await saveHistory(uid.value, bookParam.BookId.value, {
+        Id: bookParam.CId.value,
+        xpath,
+        pageIndex: currentPage.value,
+      })
+    }
+  }, 500)
+
+  watch(currentPage, doSync)
 }
