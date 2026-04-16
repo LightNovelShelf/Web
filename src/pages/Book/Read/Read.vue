@@ -8,15 +8,32 @@
       <q-skeleton type="text" height="50px" />
       <q-skeleton type="text" height="100px" />
     </div>
-    <div v-else>
+    <div
+      v-else
+      :style="isHorizontalMode ? { touchAction: 'none' } : undefined"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerUp"
+      @click.capture="onViewportClick"
+      @dragstart.prevent
+    >
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
-      <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
+      <div
+        ref="readViewport"
+        class="read-page q-mx-auto"
+        :style="['--width:' + settingStore['buildReaderWidth'], viewportStyle]"
+      >
         <html-reader
           :html="chapterContent"
-          :style="readStyle"
+          :style="[readStyle, columnStyle]"
           style="position: relative; z-index: 1"
           ref="readerRef"
           class="read"
+          :class="{ 'read--horizontal': isHorizontalMode }"
+          :horizontal-mode="isHorizontalMode"
+          @prev-page="handlePrevPage"
+          @next-page="handleNextPage"
         ></html-reader>
         <q-tooltip
           :target="note.target"
@@ -29,8 +46,11 @@
           <div v-html="note.content" />
         </q-tooltip>
       </div>
+      <div v-if="isHorizontalMode && totalPages > 0" class="page-indicator">
+        {{ currentPage + 1 }} / {{ totalPages }}
+      </div>
       <div
-        v-if="readSetting['showButton']"
+        v-if="readSetting['showButton'] && !isHorizontalMode"
         class="row justify-between q-gutter-md"
         style="margin-top: 24px; clear: both"
       >
@@ -40,20 +60,21 @@
       </div>
     </div>
 
-    <drag-page-sticky v-slot="{ isDragging }">
-      <q-fab icon="mdiPlus" direction="up" color="accent" :disable="isDragging">
-        <q-fab-action @click="next" color="primary" icon="mdiArrowRight" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
-            下一章
-          </q-tooltip>
-        </q-fab-action>
-        <q-fab-action @click="prev" color="primary" icon="mdiArrowLeft" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
-            上一章
-          </q-tooltip>
-        </q-fab-action>
-        <q-fab-action @click="showCatalog = true" color="primary" icon="mdiFormatListBulleted" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+    <Teleport to="body">
+      <drag-page-sticky v-slot="{ isDragging }">
+        <q-fab icon="mdiPlus" direction="up" color="accent" :disable="isDragging">
+          <q-fab-action @click="next" color="primary" icon="mdiArrowRight" :disable="isDragging">
+            <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+              下一章
+            </q-tooltip>
+          </q-fab-action>
+          <q-fab-action @click="prev" color="primary" icon="mdiArrowLeft" :disable="isDragging">
+            <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+              上一章
+            </q-tooltip>
+          </q-fab-action>
+          <q-fab-action @click="showCatalog = true" color="primary" icon="mdiFormatListBulleted" :disable="isDragging">
+            <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
             目录
           </q-tooltip>
         </q-fab-action>
@@ -90,6 +111,7 @@
         </q-fab-action>
       </q-fab>
     </drag-page-sticky>
+    </Teleport>
 
     <q-dialog v-model="showCatalog">
       <q-card style="min-width: 300px">
@@ -140,6 +162,7 @@ import { DragPageSticky } from 'components'
 import { useLayout } from 'components/app/useLayout'
 import HtmlReader from 'components/html/HtmlReader.vue'
 
+import { usePagination } from 'src/composition/usePagination'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { NOOP } from 'src/const/empty'
@@ -147,7 +170,7 @@ import { PROVIDE } from 'src/const/provide'
 import { apiServer } from 'src/services/apiServer'
 import { getNovelContent } from 'src/services/chapter'
 
-import { syncReading, scrollToHistory, loadHistory } from './history'
+import { syncReading, syncReadingHorizontal, scrollToHistory, loadHistory } from './history'
 
 const props = defineProps<{
   bid: string
@@ -168,6 +191,7 @@ const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
 const chapter = ref<any>()
 const noteElement = ref()
 const readerRef = ref()
+const readViewport = ref<HTMLElement>()
 const note = reactive({
   target: '',
   content: '',
@@ -178,6 +202,97 @@ const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
 const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
+
+// 横向翻页模式
+const { readSetting } = settingStore
+const isHorizontalMode = computed(() => readSetting.pageMode === 'horizontal')
+const {
+  currentPage,
+  totalPages,
+  viewportStyle,
+  columnStyle,
+  startDrag,
+  moveDrag,
+  endDrag,
+  nextPage,
+  prevPage,
+  goToPage,
+  goToXPath,
+  getCurrentPageXPath,
+  recalculate,
+} = usePagination(
+  readViewport,
+  computed(() => readerRef.value?.contentRef),
+  isHorizontalMode,
+)
+
+// 横向翻页模式下锁定垂直滚动
+watch(
+  isHorizontalMode,
+  (isHorizontal) => {
+    if (isHorizontal) {
+      document.scrollingElement!.scrollTop = 0
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  },
+  { immediate: true },
+)
+
+function handleNextPage() {
+  if (!nextPage()) next()
+}
+
+function handlePrevPage() {
+  if (!prevPage()) prev()
+}
+
+// ---- 原生 pointer 事件拖拽翻页 ----
+let lastDragEnd = 0
+let panStartX = 0
+let panPointerId = -1
+let isPanning = false
+
+function onPointerDown(evt: PointerEvent) {
+  if (!isHorizontalMode.value || evt.button !== 0) return
+  panStartX = evt.clientX
+  panPointerId = evt.pointerId
+  isPanning = false
+}
+
+function onPointerMove(evt: PointerEvent) {
+  if (panPointerId === -1 || panPointerId !== evt.pointerId) return
+  const deltaX = evt.clientX - panStartX
+  if (!isPanning) {
+    if (Math.abs(deltaX) < 5) return
+    isPanning = true
+    // 超过阈值才捕获指针，避免影响普通点击
+    readViewport.value?.setPointerCapture(evt.pointerId)
+    startDrag()
+  }
+  moveDrag(deltaX)
+}
+
+function onPointerUp(evt: PointerEvent) {
+  if (panPointerId === -1 || panPointerId !== evt.pointerId) return
+  if (isPanning) {
+    endDrag(evt.clientX - panStartX)
+    lastDragEnd = Date.now()
+    if (readViewport.value?.hasPointerCapture(evt.pointerId)) {
+      readViewport.value.releasePointerCapture(evt.pointerId)
+    }
+  }
+  isPanning = false
+  panPointerId = -1
+}
+
+function onViewportClick(event: Event) {
+  if (Date.now() - lastDragEnd < 300) {
+    event.stopPropagation()
+    event.preventDefault()
+  }
+}
 
 const getContent = useTimeoutFn(async () => {
   try {
@@ -196,7 +311,13 @@ const getContent = useTimeoutFn(async () => {
       if (res.ReadPosition && res.ReadPosition.ChapterId === res.Chapter.Id) {
         await delay(200)
         await nextTick(() => {
-          scrollToHistory(readerRef.value!.contentRef, res.ReadPosition.Position, headerOffset)
+          if (isHorizontalMode.value) {
+            recalculate()
+            // 等分页计算完成后再定位
+            setTimeout(() => goToXPath(res.ReadPosition.Position), 200)
+          } else {
+            scrollToHistory(readerRef.value!.contentRef, res.ReadPosition.Position, headerOffset)
+          }
         })
       }
     })().then(NOOP)
@@ -219,7 +340,6 @@ if (!CSS.supports('line-break', 'anywhere')) {
   })
 }
 
-const { readSetting } = settingStore
 const bgStyle = computed(() => ({
   backgroundImage:
     readSetting.bgType === 'paper'
@@ -281,18 +401,42 @@ function back() {
 
 function manageKeydown(event: KeyboardEvent) {
   if (imagePreview.isShow) return // 显示图片时不予响应
-  if (event.code === 'ArrowRight') {
-    next()
-  } else if (event.code === 'ArrowLeft') {
-    prev()
+  if (isHorizontalMode.value) {
+    if (event.code === 'ArrowRight' || event.code === 'ArrowLeft') {
+      event.preventDefault() // 阻止浏览器默认水平滚动
+      event.stopPropagation()
+    }
+    if (event.code === 'ArrowRight') {
+      if (nextPage()) {
+        next.cancel()
+      } else if (!event.repeat) {
+        next()
+      }
+    } else if (event.code === 'ArrowLeft') {
+      if (prevPage()) {
+        prev.cancel()
+      } else if (!event.repeat) {
+        prev()
+      }
+    }
+  } else {
+    if (event.code === 'ArrowRight') {
+      next()
+    } else if (event.code === 'ArrowLeft') {
+      prev()
+    }
   }
 }
 
 onActivated(() => {
   document.addEventListener('keydown', manageKeydown)
+  if (isHorizontalMode.value) {
+    document.body.style.overflow = 'hidden'
+  }
 })
 onDeactivated(() => {
   document.removeEventListener('keydown', manageKeydown)
+  document.body.style.overflow = ''
 })
 
 onMounted(() => {
@@ -304,6 +448,7 @@ watch(
   async () => {
     note.showing = false
     note.target = ''
+    goToPage(0)
     await getContent()
   },
 )
@@ -330,7 +475,12 @@ watch(
           element.onmouseleave = () => (note.showing = false)
         }
       })
-      await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
+      if (isHorizontalMode.value) {
+        recalculate()
+        await syncReadingHorizontal(userId, { BookId: bid, CId: cid }, currentPage, getCurrentPageXPath)
+      } else {
+        await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
+      }
     })
   },
 )
@@ -361,10 +511,18 @@ onActivated(() => {
   if (sortNum.value === chapter.value?.SortNum && bid.value === chapter.value?.BookId) {
     const position = loadHistory(userId.value, bid.value)
     if (position && position.cid === cid.value) {
-      if (position.top) {
-        document.scrollingElement!.scrollTop = position.top
+      if (isHorizontalMode.value) {
+        if (position.pageIndex != null) {
+          goToPage(position.pageIndex)
+        } else if (position.xPath) {
+          goToXPath(position.xPath)
+        }
       } else {
-        scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+        if (position.top) {
+          document.scrollingElement!.scrollTop = position.top
+        } else {
+          scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+        }
       }
     }
   }
@@ -413,6 +571,33 @@ watch(
   * {
     line-break: anywhere;
   }
+
+  .illus,
+  .illu,
+  .duokan-image-single {
+    break-inside: avoid;
+  }
+
+  img {
+    break-inside: avoid;
+    -webkit-user-drag: none;
+  }
+}
+
+// 横向翻页模式下限制图片尺寸、保持比例、居中
+:deep(.read--horizontal) {
+  .illus,
+  .illu,
+  .duokan-image-single {
+    padding: 0;
+    gap: 0;
+  }
+
+  img {
+    max-width: var(--page-width) !important;
+    max-height: var(--page-height) !important;
+    object-fit: contain;
+  }
 }
 
 /*居中功能*/
@@ -422,5 +607,20 @@ watch(
     max-width: 100%;
     min-width: 300px;
   }
+}
+
+.page-indicator {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  z-index: 2;
+  pointer-events: none;
+  user-select: none;
 }
 </style>
