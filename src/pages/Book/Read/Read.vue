@@ -296,10 +296,23 @@ function onPointerUp(evt: PointerEvent) {
   panPointerId = -1
 }
 
-function onViewportClick(event: Event) {
+function onViewportClick(event: MouseEvent) {
   if (Date.now() - lastDragEnd < 300) {
     event.stopPropagation()
     event.preventDefault()
+    return
+  }
+
+  if (!isHorizontalMode.value) return
+  const target = event.target
+  const content = readerRef.value?.contentRef
+  if (target instanceof Node && content?.contains(target)) return
+
+  const width = window.innerWidth
+  if (event.clientX < width * 0.25) {
+    handlePrevPage()
+  } else if (event.clientX > width * 0.75) {
+    handleNextPage()
   }
 }
 
