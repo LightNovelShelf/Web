@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mx-auto container">
+  <q-page padding class="q-mx-auto container" :class="{ 'read-page-horizontal': isHorizontalMode }">
     <div v-if="loading">
       <q-skeleton type="text" height="50px" width="50%" />
       <q-skeleton type="text" />
@@ -10,6 +10,7 @@
     </div>
     <div
       v-else
+      class="read-content"
       :style="isHorizontalMode ? { touchAction: 'none' } : undefined"
       @pointerdown="onPointerDown"
       @pointermove="onPointerMove"
@@ -547,6 +548,30 @@ watch(
 <style scoped lang="scss">
 .read-bg {
   z-index: 0;
+}
+
+.read-page-horizontal {
+  display: flex;
+  flex-direction: column;
+  height: 0;
+}
+
+.read-page-horizontal .read-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.read-page-horizontal .read-page {
+  flex: 1;
+  height: 100% !important;
+  min-height: 0;
+}
+
+.read-page-horizontal :deep(.read--horizontal) {
+  height: 100% !important;
+  --page-height: 100% !important;
 }
 
 // 注释
