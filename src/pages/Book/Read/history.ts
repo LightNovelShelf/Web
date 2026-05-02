@@ -1,10 +1,11 @@
 import { debounce } from 'quasar'
+import { watch } from 'vue'
 
 import { userReadPositionDB } from 'src/utils/storage/db'
 
 import { saveReadPosition } from 'src/services/book'
 
-import type { Ref } from 'vue'
+import type { Ref, WatchStopHandle } from 'vue'
 
 function findElementNode(node: Node): Element {
   return node.nodeType === Node.ELEMENT_NODE ? (node as Element) : findElementNode(node.parentNode!)
@@ -139,7 +140,7 @@ export async function syncReading(
 }
 
 /** 横向翻页模式的阅读位置同步：监听 currentPage 变化 */
-export async function syncReadingHorizontal(
+export function syncReadingHorizontal(
   uid: Ref<number>,
   bookParam: {
     BookId: Ref<number>
@@ -147,7 +148,7 @@ export async function syncReadingHorizontal(
   },
   currentPage: Ref<number>,
   getCurrentPageXPath: () => string | null,
-) {
+): WatchStopHandle {
   const doSync = debounce(async () => {
     const xpath = getCurrentPageXPath()
     if (xpath) {
@@ -159,5 +160,10 @@ export async function syncReadingHorizontal(
     }
   }, 500)
 
-  watch(currentPage, doSync)
+  const stop = watch(currentPage, doSync)
+
+  return () => {
+    stop()
+    doSync.cancel()
+  }
 }

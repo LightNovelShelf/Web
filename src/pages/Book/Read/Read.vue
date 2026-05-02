@@ -146,6 +146,7 @@ import {
   onActivated,
   onDeactivated,
   onMounted,
+  onUnmounted,
   reactive,
   ref,
   watch,
@@ -226,6 +227,12 @@ const {
   computed(() => readerRef.value?.contentRef),
   isHorizontalMode,
 )
+let stopHorizontalSync: (() => void) | undefined
+
+function stopHorizontalReadingSync() {
+  stopHorizontalSync?.()
+  stopHorizontalSync = undefined
+}
 
 // 横向翻页模式下锁定垂直滚动
 watch(
@@ -235,6 +242,7 @@ watch(
       document.scrollingElement!.scrollTop = 0
       document.body.style.overflow = 'hidden'
     } else {
+      stopHorizontalReadingSync()
       document.body.style.overflow = ''
     }
   },
@@ -440,6 +448,10 @@ onDeactivated(() => {
   document.body.style.overflow = ''
 })
 
+onUnmounted(() => {
+  stopHorizontalReadingSync()
+})
+
 onMounted(() => {
   getContent.syncCall()
 })
@@ -449,6 +461,7 @@ watch(
   async () => {
     note.showing = false
     note.target = ''
+    stopHorizontalReadingSync()
     goToPage(0)
     await getContent()
   },
@@ -478,7 +491,8 @@ watch(
       })
       if (isHorizontalMode.value) {
         recalculate()
-        await syncReadingHorizontal(userId, { BookId: bid, CId: cid }, currentPage, getCurrentPageXPath)
+        stopHorizontalReadingSync()
+        stopHorizontalSync = syncReadingHorizontal(userId, { BookId: bid, CId: cid }, currentPage, getCurrentPageXPath)
       } else {
         await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
       }
