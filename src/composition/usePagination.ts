@@ -57,7 +57,9 @@ export function usePagination(
     const viewport = viewportRef.value
     if (!viewport) return
     const rect = viewport.getBoundingClientRect()
-    columnHeight.value = Math.floor(window.innerHeight - rect.top)
+    const availableHeight = Math.floor(window.innerHeight - rect.top)
+    const renderedHeight = viewport.clientHeight
+    columnHeight.value = renderedHeight > 0 ? Math.min(availableHeight, renderedHeight) : availableHeight
   }
 
   function measurePages() {

@@ -592,13 +592,15 @@ watch(
 
 .read-page-horizontal .read-page {
   flex: 1;
+  width: 100%;
+  max-width: 100%;
   height: 100% !important;
+  min-width: 0;
   min-height: 0;
 }
 
 .read-page-horizontal :deep(.read--horizontal) {
   height: 100% !important;
-  --page-height: 100% !important;
 }
 
 // 注释
