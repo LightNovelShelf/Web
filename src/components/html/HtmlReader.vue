@@ -21,7 +21,16 @@ const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
 const { headerOffset } = layout
 const { readSetting } = settingStore
 
-const props = defineProps<{ html: string }>()
+const props = defineProps<{
+  html: string
+  horizontalMode?: boolean
+}>()
+
+const emit = defineEmits<{
+  'prev-page': []
+  'next-page': []
+}>()
+
 const contentRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
 
@@ -94,12 +103,22 @@ function makeUrl(link: string) {
 }
 
 function manageScrollClick(event: any) {
-  if (readSetting.tapToScroll && !imagePreview.isShow) {
+  if (imagePreview.isShow) return
+
+  if (props.horizontalMode) {
+    // 横向翻页模式：点击左侧 25% 上一页，右侧 25% 下一页
+    const w = window.innerWidth
+    if (event.x < 0.25 * w) {
+      emit('prev-page')
+    } else if (event.x > 0.75 * w) {
+      emit('next-page')
+    }
+  } else if (readSetting.tapToScroll) {
     const h = window.innerHeight
     if (event.y < 0.25 * h || event.y > 0.75 * h) {
       const target = scroll.getScrollTarget(contentRef.value!)
       const offset = scroll.getVerticalScrollPosition(target)
-      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200) // 最后一个参数为duration
+      scroll.setVerticalScrollPosition(target, event.y < 0.25 * h ? offset - h * 0.75 : offset + h * 0.75, 200)
     }
   }
 }
