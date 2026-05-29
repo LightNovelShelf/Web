@@ -31,9 +31,7 @@
                   </q-grid>
                 </template>
                 <template v-else-if="!state.loading">
-                  <div class="row justify-center q-my-md text-center text-h5">
-                    无<template v-if="state.extra">精确</template>搜索结果
-                  </div>
+                  <div class="row justify-center q-my-md text-center text-h5">无{{ modeLabel }}搜索结果</div>
                 </template>
               </q-tab-panel>
             </q-tab-panels>
@@ -50,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useSettingStore } from 'src/stores/setting'
@@ -59,7 +57,15 @@ import BookCard from 'components/BookCard.vue'
 import { QGrid, QGridItem } from 'components/grid'
 import SearchInput from 'components/SearchInput.vue'
 
-import { getBookList } from 'src/services/book'
+import {
+  getBookList,
+  getBookListByTitle,
+  getBookListByAuthor,
+  getBookListByName,
+  getBookListByTags,
+} from 'src/services/book'
+
+import type { SearchMode } from 'src/services/book/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -74,8 +80,8 @@ const state = ref({
   // 部分组件会在setup初始化，所以不能等 onMounted 等周期再对state内容初始化
   /** 搜索关键词 @description 用户输入是啥就是啥 */
   searchKey: '' + (route.query?.keywords ?? ''),
-  /** 精确搜索 */
-  extra: !!route.query?.exact,
+  /** 搜索维度 @description 兼容旧 url 的 exact 参数 */
+  mode: ((route.query?.mode as SearchMode) || (route.query?.exact ? 'exact' : 'fuzzy')) as SearchMode,
 
   /** 当前tab */
   tab: 'Book',
@@ -88,18 +94,51 @@ const state = ref({
 })
 
 const searchInputWidth = () => '60vw'
+
+/** 各搜索维度对应的 service 调用 */
+const modeLabelMap: Record<SearchMode, string> = {
+  fuzzy: '',
+  exact: '精确',
+  title: '书名',
+  author: '作者',
+  name: '作品名',
+  tags: '标签',
+}
+const modeLabel = computed(() => modeLabelMap[state.value.mode] ?? '')
+
 const requestBook = async (index: number, done: (stop?: boolean) => void) => {
   state.value.loading = true
   try {
-    const KeyWords = state.value.extra ? `"${state.value.searchKey}"` : state.value.searchKey
-
-    const res = await getBookList({
+    const key = state.value.searchKey
+    const baseParam = {
       Page: index,
       Size: 24,
-      KeyWords: KeyWords,
       IgnoreJapanese: generalSetting.ignoreJapanese,
       IgnoreAI: generalSetting.ignoreAI,
-    })
+    }
+
+    let res
+    switch (state.value.mode) {
+      case 'title':
+        res = await getBookListByTitle({ ...baseParam, KeyWords: key })
+        break
+      case 'author':
+        res = await getBookListByAuthor({ ...baseParam, KeyWords: key })
+        break
+      case 'name':
+        res = await getBookListByName({ ...baseParam, KeyWords: key })
+        break
+      case 'tags':
+        res = await getBookListByTags({ ...baseParam, KeyWords: key })
+        break
+      case 'exact':
+        res = await getBookList({ ...baseParam, KeyWords: `"${key}"` })
+        break
+      default: // fuzzy
+        res = await getBookList({ ...baseParam, KeyWords: key })
+        break
+    }
+
     state.value.bookData.push(...res.Data)
     if (res.TotalPages === index || res.TotalPages === 0) scrollEleInstanceRef.value.stop()
     else done()
@@ -108,12 +147,12 @@ const requestBook = async (index: number, done: (stop?: boolean) => void) => {
   }
 }
 
-function onSearch(val: string, exact: boolean) {
+function onSearch(val: string, mode: SearchMode) {
   state.value.searchKey = val
-  state.value.extra = exact
+  state.value.mode = mode
 
   // sync state to url, so it can restore after refresh
-  router.replace({ name: 'Search', query: { keywords: val, exact: exact ? '1' : '' } })
+  router.replace({ name: 'Search', query: { keywords: val, mode } })
 
   triggerSearchReq()
 }
@@ -138,14 +177,14 @@ function triggerSearchReq() {
 /** 从url上提取搜索关键词，触发请求 @idempotent 对外幂等 */
 function tryResyncSearchStateFromUrl(toRoute = route) {
   const keyword = '' + (toRoute.query?.keywords ?? '')
-  const isExact = !!toRoute.query?.exact
+  const mode = ((toRoute.query?.mode as SearchMode) || (toRoute.query?.exact ? 'exact' : 'fuzzy')) as SearchMode
 
-  const isSameSearchQuery = keyword === state.value.searchKey && isExact === state.value.extra
+  const isSameSearchQuery = keyword === state.value.searchKey && mode === state.value.mode
   // 搜索条件对比url上的没变就不再触发
   if (isSameSearchQuery) return
 
   state.value.searchKey = keyword
-  state.value.extra = isExact
+  state.value.mode = mode
   triggerSearchReq()
 }
 

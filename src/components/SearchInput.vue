@@ -22,9 +22,9 @@
       }"
     >
       <q-list v-show="!!keyword">
-        <q-item id="exact" clickable>
+        <q-item v-for="opt in menuOptions" :key="opt.mode" :data-mode="opt.mode" clickable>
           <q-item-section>
-            <div class="ellipsis full-width">精确搜索: {{ keyword }}</div>
+            <div class="ellipsis full-width">{{ opt.label }}: {{ keyword }}</div>
           </q-item-section>
         </q-item>
       </q-list>
@@ -36,6 +36,9 @@
 import { computed, ref, toRefs } from 'vue'
 
 import { useMergeState } from 'src/composition/useMergeState'
+
+import type { SearchMode } from 'src/services/book/types'
+
 const props = withDefaults(
   defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),
   {
@@ -43,9 +46,18 @@ const props = withDefaults(
   },
 )
 const emits = defineEmits<{
-  (e: 'search', val: string, exact: boolean): void
+  (e: 'search', val: string, mode: SearchMode): void
   (e: 'update:modelValue', val: string): void
 }>()
+
+/** 下拉菜单的搜索维度选项 */
+const menuOptions: { mode: SearchMode; label: string }[] = [
+  { mode: 'exact', label: '精确搜索' },
+  { mode: 'title', label: '按书名' },
+  { mode: 'author', label: '按作者' },
+  { mode: 'name', label: '按系列名' },
+  { mode: 'tags', label: '按标签(逗号分隔多个)' },
+]
 
 const inputEleRef = ref<HTMLInputElement | null>(null)
 
@@ -74,9 +86,11 @@ function onOpenMenuIfCan() {
 
 // 在某次框架更新中，onblur事件比click触发早了，需要手动跳转
 function onBlur(evt: any) {
-  //onBlur时调用handle
-  if ((evt.relatedTarget as Element)?.id === 'exact') {
-    searchHandle(true)
+  //onBlur时调用handle：从被点击的菜单项 dataset 上取搜索维度
+  const item = (evt.relatedTarget as HTMLElement)?.closest?.('[data-mode]') as HTMLElement | null
+  const mode = item?.dataset?.mode as SearchMode | undefined
+  if (mode) {
+    searchHandle(mode)
   }
   visible.value = false
 }
@@ -90,10 +104,11 @@ function syncHandle(evt: string | number | null) {
   onOpenMenuIfCan()
 }
 
-function searchHandle(exact = false) {
+/** 触发搜索，默认回车走标题模糊搜索 */
+function searchHandle(mode: SearchMode = 'fuzzy') {
   emits('update:modelValue', keyword.value)
   if (!keyword.value) return
-  emits('search', keyword.value, !!exact)
+  emits('search', keyword.value, mode)
 
   // 因为点menu的话一定会blur没法避免，所以这里统一blur（即使是按回车触发的search）
   inputEleRef.value?.blur()
