@@ -58,6 +58,17 @@ export interface GetBookListRequest {
   IgnoreAI?: boolean
 }
 
+/**
+ * 搜索维度
+ * - fuzzy: 标题 bigm 模糊（默认，走 GetBookList）
+ * - exact: 精确（标题/作者 Contains，走 GetBookList 并以引号包裹关键词）
+ * - title: 按书名（卷标题）
+ * - author: 按作者
+ * - name: 按作品名/系列名（分类器）
+ * - tags: 按标签（分类器，逗号分隔多标签 AND 匹配）
+ */
+export type SearchMode = 'fuzzy' | 'exact' | 'title' | 'author' | 'name' | 'tags'
+
 export interface SaveReadPositionRequest {
   Bid: number
   Cid: number

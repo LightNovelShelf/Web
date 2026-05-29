@@ -10,6 +10,26 @@ export function getBookList(param: Types.GetBookListRequest) {
   return requestWithSignalr<Types.GetBookListRes>('GetBookList', param)
 }
 
+/** 按书名（卷标题）搜索 */
+export function getBookListByTitle(param: Types.GetBookListRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetBookListByTitle', param)
+}
+
+/** 按作者搜索 */
+export function getBookListByAuthor(param: Types.GetBookListRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetBookListByAuthor', param)
+}
+
+/** 按作品名/系列名搜索（分类器） */
+export function getBookListByName(param: Types.GetBookListRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetBookListByName', param)
+}
+
+/** 按标签搜索（分类器，KeyWords 传逗号分隔多标签，AND 匹配） */
+export function getBookListByTags(param: Types.GetBookListRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetBookListByTags', param)
+}
+
 /** 获取书籍信息 */
 export function getBookInfo(id: number) {
   return requestWithSignalr<Types.GetBookInfoRes>('GetBookInfo', { Id: id })
