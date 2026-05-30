@@ -1,5 +1,11 @@
 <template>
-  <div ref="contentRef" class="html-reader print-hide" v-html="props.html" @click="clickHandle" />
+  <div
+    ref="contentRef"
+    class="html-reader print-hide"
+    v-html="props.html"
+    :style="readCssVars"
+    @click="clickHandle"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -9,6 +15,8 @@ import { inject } from 'vue'
 import { useSettingStore } from 'stores/setting'
 
 import { useLayout } from 'components/app/useLayout'
+
+import { useReadCssVars } from 'src/composition/useReadCssVars'
 
 import { PROVIDE } from 'src/const/provide'
 
@@ -20,6 +28,7 @@ const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
 
 const { headerOffset } = layout
 const { readSetting } = settingStore
+const { readCssVars } = useReadCssVars()
 
 const props = defineProps<{ html: string }>()
 const contentRef = ref<HTMLElement>()

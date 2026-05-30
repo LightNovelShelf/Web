@@ -140,6 +140,7 @@ import { DragPageSticky } from 'components'
 import { useLayout } from 'components/app/useLayout'
 import HtmlReader from 'components/html/HtmlReader.vue'
 
+import { useReadCssVars } from 'src/composition/useReadCssVars'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { NOOP } from 'src/const/empty'
@@ -220,6 +221,7 @@ if (!CSS.supports('line-break', 'anywhere')) {
 }
 
 const { readSetting } = settingStore
+const { readCssVars } = useReadCssVars()
 const bgStyle = computed(() => ({
   backgroundImage:
     readSetting.bgType === 'paper'
@@ -244,7 +246,7 @@ function toggleDark() {
 }
 
 const readStyle = computed(() => ({
-  fontSize: readSetting.fontSize + 'px',
+  ...readCssVars.value,
   textAlign: readSetting.justify ? 'justify' : 'initial',
   color:
     readSetting.bgType === 'custom' ? (colors.brightness(readSetting.customColor) < 128 ? '#fff' : '#000') : 'inherit',

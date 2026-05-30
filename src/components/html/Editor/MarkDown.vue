@@ -1,5 +1,5 @@
 <template>
-  <div :class="mode">
+  <div :class="mode" :style="readCssVars">
     <md-editor
       ref="editorRef"
       v-model="markdownText"
@@ -42,6 +42,8 @@ import { ref, watch } from 'vue'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 
+import { useReadCssVars } from 'src/composition/useReadCssVars'
+
 import { uploadImage } from 'src/services/user'
 
 import type { ToolbarNames, ExposeParam } from 'md-editor-v3'
@@ -53,6 +55,7 @@ const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
 const $q = useQuasar()
 const editorRef = ref<ExposeParam>()
 const emit = defineEmits(['update:html'])
+const { readCssVars } = useReadCssVars()
 
 const mdToolBar: ToolbarNames[] = [
   'bold',
