@@ -62,11 +62,7 @@ export namespace UploadImage {
 }
 
 export namespace GetNotifications {
-  export type NotificationType =
-    | 'Comment'
-    | 'CommentReply'
-    | 'CommunityThreadReply'
-    | 'CommunityThreadChildReply'
+  export type NotificationType = 'Comment' | 'CommentReply' | 'CommunityThreadReply' | 'CommunityThreadChildReply'
 
   export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread'
 

@@ -15,8 +15,16 @@
 
       <div class="feed-item__footer">
         <div class="feed-item__author">
-          <q-avatar size="34px" :style="item.AuthorAvatar ? undefined : { background: avatarBackground(item.AuthorName), color: '#fff' }">
-            <img v-if="item.AuthorAvatar" class="community-avatar__image" :src="item.AuthorAvatar" :alt="item.AuthorName" />
+          <q-avatar
+            size="34px"
+            :style="item.AuthorAvatar ? undefined : { background: avatarBackground(item.AuthorName), color: '#fff' }"
+          >
+            <img
+              v-if="item.AuthorAvatar"
+              class="community-avatar__image"
+              :src="item.AuthorAvatar"
+              :alt="item.AuthorName"
+            />
             <template v-else>{{ item.AuthorName.slice(0, 1) }}</template>
           </q-avatar>
           <div class="feed-item__author-copy">

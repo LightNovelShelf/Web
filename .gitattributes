@@ -1,0 +1,2 @@
+# 全仓统一 LF 行尾（与 prettier endOfLine:lf 对齐），二进制由 text=auto 自动识别
+* text=auto eol=lf
