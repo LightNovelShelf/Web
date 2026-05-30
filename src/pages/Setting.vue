@@ -65,6 +65,12 @@
               </div>
               <q-separator />
               <div class="q-gutter-xs q-mt-md">
+                <div class="text-subtitle1">翻页模式</div>
+                <q-radio v-model="readSetting.pageMode" val="scroll" label="上下滚动" />
+                <q-radio v-model="readSetting.pageMode" val="horizontal" label="左右翻页" />
+              </div>
+              <q-separator />
+              <div class="q-gutter-xs q-mt-md">
                 <div class="text-subtitle1">其他选项</div>
                 <q-toggle v-model="readSetting.justify" label="两端对齐" />
                 <q-toggle

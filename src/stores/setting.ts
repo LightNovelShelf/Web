@@ -25,6 +25,7 @@ export const useSettingStore = defineStore('app.setting', {
       showButton: true,
       tapToScroll: false,
       hideFullScreen: false,
+      pageMode: 'scroll' as 'scroll' | 'horizontal',
     },
     editorSetting: {
       mode: 'markdown' as 'html' | 'markdown',
