@@ -135,7 +135,6 @@ const boardKey = ref<Exclude<CommunityBoardKey, 'all'>>('')
 const subCategoryKey = ref('')
 
 const catalogBoardMap = computed(() => new Map(props.catalogBoards.map((item) => [item.Key, item])))
-const defaultBoardKey = computed(() => props.catalogBoards[0]?.Key ?? '')
 
 const boardOptions = computed(() =>
   props.catalogBoards.map((item) => ({
@@ -165,16 +164,18 @@ const dialogCardStyle = computed(() => ({
 }))
 
 function syncBoardFromProps() {
+  // 默认不预选板块；仅当从具体板块进入时沿用该板块上下文，"全部"或无效则留空
   boardKey.value =
     props.selectedBoardKey && props.selectedBoardKey !== 'all' && catalogBoardMap.value.has(props.selectedBoardKey)
       ? props.selectedBoardKey
-      : defaultBoardKey.value
+      : ''
   syncSubCategoryForBoard()
 }
 
 function syncSubCategoryForBoard() {
+  // 默认不预选子分类；仅当 props 指定且匹配时沿用
   const matched = subCategoryOptions.value.find((item) => item.value === props.selectedSubCategoryKey)
-  subCategoryKey.value = (matched?.value as string) ?? (subCategoryOptions.value[0]?.value as string) ?? ''
+  subCategoryKey.value = (matched?.value as string) ?? ''
 }
 
 watch(
