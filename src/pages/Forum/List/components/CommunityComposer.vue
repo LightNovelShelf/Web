@@ -152,7 +152,14 @@ const subCategoryOptions = computed(() =>
 
 const plainText = computed(() => getPlainTextFromHtml(contentHtml.value))
 const plainTextLength = computed(() => plainText.value.replace(/\s+/g, '').length)
-const canSubmit = computed(() => !!boardKey.value && title.value.trim().length >= 6 && plainTextLength.value >= 20)
+const canSubmit = computed(
+  () =>
+    !!boardKey.value &&
+    // 板块有子分类时必填，无子分类的板块不强制
+    (!subCategoryOptions.value.length || !!subCategoryKey.value) &&
+    title.value.trim().length >= 6 &&
+    plainTextLength.value >= 20,
+)
 const dialogCardStyle = computed(() => ({
   '--community-dialog-bg': $q.dark.isActive
     ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.94))'
