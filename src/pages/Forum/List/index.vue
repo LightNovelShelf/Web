@@ -392,9 +392,11 @@ watch(routeQueryKey, () => {
   --community-text: #0f172a;
   --community-text-soft: #475569;
   --community-text-muted: #94a3b8;
-  --community-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
+  --community-card-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95)), rgba(255, 255, 255, 0.96);
   --community-card-bg-soft: rgba(255, 255, 255, 0.82);
-  --community-card-bg-strong: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)), rgba(255, 255, 255, 0.96);
+  --community-card-bg-strong:
+    linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98)), rgba(255, 255, 255, 0.96);
   --community-empty-bg: rgba(255, 255, 255, 0.82);
   --community-chip-bg: rgba(226, 232, 240, 0.72);
   --community-chip-bg-strong: rgba(239, 246, 255, 0.92);
@@ -418,7 +420,8 @@ watch(routeQueryKey, () => {
   --community-text-muted: #64748b;
   --community-card-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.9)), rgba(15, 23, 42, 0.92);
   --community-card-bg-soft: rgba(15, 23, 42, 0.84);
-  --community-card-bg-strong: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94)), rgba(15, 23, 42, 0.96);
+  --community-card-bg-strong:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94)), rgba(15, 23, 42, 0.96);
   --community-empty-bg: rgba(17, 24, 39, 0.96);
   --community-chip-bg: rgba(51, 65, 85, 0.76);
   --community-chip-bg-strong: rgba(30, 41, 59, 0.92);

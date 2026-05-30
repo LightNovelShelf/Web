@@ -39,7 +39,10 @@
 
           <div class="user-list">
             <div v-for="user in activeUsers" :key="user.Id" class="user-item">
-              <q-avatar size="42px" :style="user.Avatar ? undefined : { background: avatarBackground(user.Name), color: '#fff' }">
+              <q-avatar
+                size="42px"
+                :style="user.Avatar ? undefined : { background: avatarBackground(user.Name), color: '#fff' }"
+              >
                 <img v-if="user.Avatar" class="community-avatar__image" :src="user.Avatar" :alt="user.Name" />
                 <template v-else>{{ user.Name.slice(0, 1) }}</template>
               </q-avatar>
