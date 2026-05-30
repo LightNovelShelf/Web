@@ -188,6 +188,8 @@ import { rebootSignalr } from 'src/services/internal/request'
 import { useLayout } from './useLayout'
 import SearchInput from '../SearchInput.vue'
 
+import type { SearchMode } from 'src/services/book/types'
+
 const route = useRoute()
 
 const hideSearchBar = computed(() => route.meta.hideSearchBar)
@@ -246,8 +248,8 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
   },
 ]
 
-function onSearch(keywords: string, exact: boolean) {
-  router.push({ name: 'Search', query: { keywords: keywords, exact: exact ? '1' : '' } })
+function onSearch(keywords: string, mode: SearchMode) {
+  router.push({ name: 'Search', query: { keywords, mode } })
   searchKey.value = ''
 }
 function changAppName() {
