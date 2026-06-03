@@ -28,7 +28,10 @@
             <template v-else>{{ item.AuthorName.slice(0, 1) }}</template>
           </q-avatar>
           <div class="feed-item__author-copy">
-            <span class="feed-item__author-name">{{ item.AuthorName }}</span>
+            <span class="feed-item__author-name">
+              {{ item.AuthorName }}
+              <span v-if="item.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+            </span>
             <span class="feed-item__author-time">{{ formatPublishedAt(item.PublishedAt) }}</span>
           </div>
         </div>

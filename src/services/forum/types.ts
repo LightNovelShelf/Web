@@ -47,6 +47,7 @@ export interface CommunityFeedItem {
   Title: string
   Excerpt: string
   AuthorName: string
+  AuthorIsDeleted: boolean
   AuthorAvatar: string
   PublishedAt: string
   Replies: number
@@ -80,11 +81,13 @@ export interface CommunityActiveUserItem {
 export interface CommunityReplyTarget {
   Id: number
   AuthorName: string
+  AuthorIsDeleted: boolean
 }
 
 export interface CommunityThreadReply {
   Id: number
   AuthorName: string
+  AuthorIsDeleted: boolean
   AuthorBadge?: string
   AuthorAvatar: string
   PublishedAt: string

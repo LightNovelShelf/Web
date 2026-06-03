@@ -79,7 +79,10 @@
                     <template v-else>{{ thread.AuthorName.slice(0, 1) }}</template>
                   </q-avatar>
                   <div>
-                    <div class="thread-card__author-name">{{ thread.AuthorName }}</div>
+                    <div class="thread-card__author-name">
+                      {{ thread.AuthorName }}
+                      <span v-if="thread.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                    </div>
                     <div class="thread-card__author-time">{{ formatPublishedAt(thread.PublishedAt) }}</div>
                   </div>
                 </div>
@@ -111,7 +114,9 @@
 
               <div ref="replyComposerRef" class="reply-composer">
                 <div v-if="replyTarget" class="reply-composer__target">
-                  正在回复 <strong>{{ replyTarget.AuthorName }}</strong>
+                  正在回复
+                  <strong>{{ replyTarget.AuthorName }}</strong>
+                  <strong v-if="replyTarget.AuthorIsDeleted" class="text-negative">（被封禁）</strong>
                   <q-btn flat dense no-caps color="primary" label="取消" @click="replyTarget = null" />
                 </div>
 
@@ -174,7 +179,10 @@
                       </q-avatar>
                       <div>
                         <div class="reply-item__name-row">
-                          <span class="reply-item__name">{{ reply.AuthorName }}</span>
+                          <span class="reply-item__name">
+                            {{ reply.AuthorName }}
+                            <span v-if="reply.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                          </span>
                           <span v-if="reply.AuthorBadge" class="reply-item__badge">{{ reply.AuthorBadge }}</span>
                           <button
                             v-if="reply.ReplyTo"
@@ -182,7 +190,8 @@
                             class="reply-item__reply-to reply-item__reply-to--clickable"
                             @click="scrollToReply(reply.ReplyTo.Id)"
                           >
-                            回复 {{ reply.ReplyTo.AuthorName }}
+                            回复 {{ reply.ReplyTo.AuthorName
+                            }}<span v-if="reply.ReplyTo.AuthorIsDeleted" class="text-negative">（被封禁）</span>
                           </button>
                         </div>
                         <div class="reply-item__time">{{ formatPublishedAt(reply.PublishedAt) }}</div>
@@ -198,7 +207,7 @@
                         icon="mdiReplyOutline"
                         label="回应"
                         :disable="thread.Locked"
-                        @click="handleStartReply(reply.Id, reply.AuthorName)"
+                        @click="handleStartReply(reply.Id, reply.AuthorName, reply.AuthorIsDeleted)"
                       />
                       <q-btn
                         flat
@@ -244,7 +253,10 @@
                           </q-avatar>
                           <div>
                             <div class="reply-item__name-row">
-                              <span class="reply-item__name">{{ child.AuthorName }}</span>
+                              <span class="reply-item__name">
+                                {{ child.AuthorName }}
+                                <span v-if="child.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                              </span>
                               <span v-if="child.AuthorBadge" class="reply-item__badge">{{ child.AuthorBadge }}</span>
                               <button
                                 v-if="child.ReplyTo"
@@ -252,7 +264,8 @@
                                 class="reply-item__reply-to reply-item__reply-to--clickable"
                                 @click="scrollToReply(child.ReplyTo.Id)"
                               >
-                                回复 {{ child.ReplyTo.AuthorName }}
+                                回复 {{ child.ReplyTo.AuthorName
+                                }}<span v-if="child.ReplyTo.AuthorIsDeleted" class="text-negative">（被封禁）</span>
                               </button>
                             </div>
                             <div class="reply-item__time">{{ formatPublishedAt(child.PublishedAt) }}</div>
@@ -268,7 +281,7 @@
                             icon="mdiReplyOutline"
                             label="回应"
                             :disable="thread.Locked"
-                            @click="handleStartReply(child.Id, child.AuthorName)"
+                            @click="handleStartReply(child.Id, child.AuthorName, child.AuthorIsDeleted)"
                           />
                           <q-btn
                             flat
@@ -579,8 +592,8 @@ function findRootReply(replyId: number) {
   return undefined
 }
 
-async function handleStartReply(replyId: number, authorName: string) {
-  replyTarget.value = { Id: replyId, AuthorName: authorName }
+async function handleStartReply(replyId: number, authorName: string, authorIsDeleted: boolean) {
+  replyTarget.value = { Id: replyId, AuthorName: authorName, AuthorIsDeleted: authorIsDeleted }
 
   await nextTick()
 
