@@ -18,6 +18,31 @@ export interface BookInList {
 
 export interface GetBookListRes extends ListResult<BookInList> {}
 
+/** 系列列表项（分类器分组结果） */
+export interface SeriesInList {
+  /** 系列名（中文名优先，空回落原名） */
+  Name: string
+  /** 代表封面 */
+  Cover: string
+  /** 系列内书籍数量 */
+  Count: number
+}
+
+export interface GetSeriesListRes extends ListResult<SeriesInList> {}
+
+export interface GetSeriesListRequest {
+  Type?: number
+  Page?: number
+  Size?: number
+  Order?: 'new' | 'view' | 'latest'
+  IgnoreJapanese?: boolean
+  IgnoreAI?: boolean
+}
+
+export interface GetBooksBySeriesRequest extends GetSeriesListRequest {
+  SeriesName: string
+}
+
 interface ChapterInfo {
   Title: string
   Id: number

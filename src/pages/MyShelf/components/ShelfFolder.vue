@@ -1,74 +1,43 @@
 <template>
   <div v-intersection.once="queryItem">
-    <router-link :to="{ name: 'MyShelf', params: { folderID: folderIDs } }">
-      <div class="book-cover">
-        <q-card>
-          <q-responsive :ratio="2 / 3">
-            <div class="books-group">
-              <q-img
-                class="books-group-cover"
-                v-for="item in limitedBooks"
-                :key="item.Id"
-                :src="item.Cover"
-                :ratio="2 / 3"
-              >
-                <template v-if="getPlaceholder(item.Cover) && generalSetting.enableBlurHash" v-slot:loading>
-                  <blur-hash :blurhash="getPlaceholder(item.Cover)" />
-                </template>
-              </q-img>
-            </div>
-          </q-responsive>
-        </q-card>
-      </div>
-    </router-link>
-
-    <div style="padding: 4px">
-      <div class="book-name">
-        <div class="book-name-text" :title="item.title">
-          {{ item.title }}
+    <folder-card :title="item.title" :covers="covers" :to="{ name: 'MyShelf', params: { folderID: folderIDs } }">
+      <template #footer>
+        <div class="text-grey-7" style="display: flex; padding: 0 4px; font-size: 12px">
+          <div></div>
+          <div class="col"></div>
+          <div>{{ updateTime }}</div>
         </div>
-      </div>
-    </div>
-
-    <div class="text-grey-7" style="display: flex; padding: 0 4px; font-size: 12px">
-      <div></div>
-      <div class="col"></div>
-      <div>{{ updateTime }}</div>
-    </div>
+      </template>
+    </folder-card>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { getPlaceholder } from 'src/utils/url'
-
 import { useBookListStore } from 'stores/bookListData'
-import { useSettingStore } from 'stores/setting'
 import { useShelfStore } from 'stores/shelf'
 
-import { BlurHash } from 'components'
+import FolderCard from 'components/FolderCard.vue'
 
 import { useToNowRef } from 'src/composition/useToNowRef'
 
 import { ShelfItemTypeEnum } from 'src/types/shelf'
 
-import type { BookInList } from 'src/services/book/types'
 import type { ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
 
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()
-const settingStore = useSettingStore()
-const { generalSetting } = settingStore
 const updateTime = useToNowRef(() => new Date(props.item.updateAt))
 const folderIDs = computed(() => [...props.item.parents, props.item.id])
 const listDataStore = useBookListStore()
-// 限制最多四本书
-const limitedBooks = computed<BookInList[]>(() =>
+// 限制最多四本书的封面
+const covers = computed<string[]>(() =>
   shelfStore
     .getItemsByParent(props.item.id)
     .filter((i): i is ShelfBookItem => i.type === ShelfItemTypeEnum.BOOK)
-    .map((i) => listDataStore.getBook(i.id))
+    .map((i) => listDataStore.getBook(i.id)?.Cover)
+    .filter((c): c is string => !!c)
     .slice(0, 4),
 )
 
@@ -87,38 +56,3 @@ function queryItem(entry: IntersectionObserverEntry) {
   return true
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/mixin';
-
-.book-cover {
-  position: relative;
-  box-sizing: border-box;
-}
-
-.books-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 10px;
-  padding: 10px;
-}
-
-.books-group-cover {
-  border-radius: 4px;
-}
-
-.book-name {
-  display: flex;
-  align-items: flex-start;
-  --font-size: 12px;
-  --line-height: 1.6;
-  line-height: var(--line-height);
-  font-size: var(--font-size);
-  height: calc(var(--font-size) * var(--line-height) * 2);
-
-  .book-name-text {
-    @include ellipsis(2);
-  }
-}
-</style>

@@ -7,7 +7,7 @@
         map-options
         filled
         dense
-        :model-value="'flat'"
+        :model-value="'series'"
         :options="viewOptions"
         label="展示方式"
         style="width: 160px"
@@ -28,8 +28,13 @@
     </div>
 
     <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-      <q-grid-item v-for="book in bookData" :key="book['Id']">
-        <book-card :book="book"></book-card>
+      <q-grid-item v-for="series in seriesData" :key="series.Name">
+        <folder-card
+          :title="series.Name"
+          :covers="[series.Cover]"
+          :count="series.Count"
+          :to="{ name: 'BookSeriesBooks', params: { name: series.Name, order: props.order, page: 1 } }"
+        />
       </q-grid-item>
     </q-grid>
 
@@ -58,33 +63,24 @@ import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
 import { useSettingStore } from 'stores/setting'
 
-import BookCard from 'components/BookCard.vue'
+import FolderCard from 'components/FolderCard.vue'
 import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { NOOP } from 'src/const/empty'
-import { getBookList } from 'src/services/book'
+import { getSeriesList } from 'src/services/book'
 
-import type { BookInList } from 'src/services/book/types'
+import type { SeriesInList } from 'src/services/book/types'
 
 defineComponent({ QGrid, QGridItem })
 const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
 
 const options = [
-  {
-    label: '最近更新',
-    value: 'latest',
-  },
-  {
-    label: '上架时间',
-    value: 'new',
-  },
-  {
-    label: '总点击量',
-    value: 'view',
-  },
+  { label: '最近更新', value: 'latest' },
+  { label: '上架时间', value: 'new' },
+  { label: '总点击量', value: 'view' },
 ]
 const viewOptions = [
   { label: '平铺', value: 'flat' },
@@ -93,7 +89,7 @@ const viewOptions = [
 
 const router = useRouter()
 const $q = useQuasar()
-const bookData = ref<BookInList[]>([])
+const seriesData = ref<SeriesInList[]>([])
 const pageData = ref({ totalPage: 1 })
 
 const currentPage = computed({
@@ -101,7 +97,7 @@ const currentPage = computed({
     return ~~props.page || 1
   },
   set(val: number) {
-    router.push({ name: 'BookList', params: { page: val } })
+    router.push({ name: 'BookSeries', params: { order: props.order, page: val } })
   },
 })
 const order = computed({
@@ -109,29 +105,29 @@ const order = computed({
     return props.order
   },
   set(val: string) {
-    router.push({ name: 'BookList', params: { page: 1, order: val } })
+    router.push({ name: 'BookSeries', params: { order: val, page: 1 } })
   },
 })
 
-/** 切换到系列视图 */
+/** 切回平铺视图 */
 function onViewChange(val: string) {
-  if (val === 'series') {
-    router.push({ name: 'BookSeries', params: { order: props.order, page: 1 } })
+  if (val === 'flat') {
+    router.push({ name: 'BookList', params: { order: props.order, page: 1 } })
   }
 }
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
 const request = useTimeoutFn(function (page = currentPage.value, order = props.order) {
-  return getBookList({
+  return getSeriesList({
     Page: page,
     Order: order,
     Size: 24,
     IgnoreJapanese: generalSetting.ignoreJapanese,
     IgnoreAI: generalSetting.ignoreAI,
-  }).then((serverData) => {
-    bookData.value = serverData.Data
-    pageData.value.totalPage = serverData.TotalPages
+  }).then((res) => {
+    seriesData.value = res.Data
+    pageData.value.totalPage = res.TotalPages
   })
 })
 

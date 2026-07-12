@@ -30,6 +30,16 @@ export function getBookListByTags(param: Types.GetBookListRequest) {
   return requestWithSignalr<Types.GetBookListRes>('GetBookListByTags', param)
 }
 
+/** 按系列分组列出（分类器） */
+export function getSeriesList(param: Types.GetSeriesListRequest) {
+  return requestWithSignalr<Types.GetSeriesListRes>('GetSeriesList', param)
+}
+
+/** 精确列出某个系列下的全部书籍（分类器） */
+export function getBooksBySeries(param: Types.GetBooksBySeriesRequest) {
+  return requestWithSignalr<Types.GetBookListRes>('GetBooksBySeries', param)
+}
+
 /** 获取书籍信息 */
 export function getBookInfo(id: number) {
   return requestWithSignalr<Types.GetBookInfoRes>('GetBookInfo', { Id: id })

@@ -1,18 +1,8 @@
 <template>
   <q-page padding style="max-width: 1920px" class="q-mx-auto">
     <div class="top-bar">
-      <q-select
-        :disable="loading"
-        emit-value
-        map-options
-        filled
-        dense
-        :model-value="'flat'"
-        :options="viewOptions"
-        label="展示方式"
-        style="width: 160px"
-        @update:model-value="onViewChange"
-      />
+      <q-btn flat dense no-caps icon="mdiChevronLeft" label="返回系列" @click="backToSeries" />
+      <div class="series-title" :title="props.name">{{ props.name }}</div>
       <q-space />
       <q-select
         :disable="loading"
@@ -65,30 +55,17 @@ import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { NOOP } from 'src/const/empty'
-import { getBookList } from 'src/services/book'
+import { getBooksBySeries } from 'src/services/book'
 
 import type { BookInList } from 'src/services/book/types'
 
 defineComponent({ QGrid, QGridItem })
-const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
+const props = defineProps<{ name: string; page: string; order: 'new' | 'view' | 'latest' }>()
 
 const options = [
-  {
-    label: '最近更新',
-    value: 'latest',
-  },
-  {
-    label: '上架时间',
-    value: 'new',
-  },
-  {
-    label: '总点击量',
-    value: 'view',
-  },
-]
-const viewOptions = [
-  { label: '平铺', value: 'flat' },
-  { label: '按系列', value: 'series' },
+  { label: '最近更新', value: 'latest' },
+  { label: '上架时间', value: 'new' },
+  { label: '总点击量', value: 'view' },
 ]
 
 const router = useRouter()
@@ -100,8 +77,9 @@ const currentPage = computed({
   get() {
     return ~~props.page || 1
   },
+  // 用 replace 而非 push：drill-in 内翻页不污染历史，保证 back 始终指向系列网格
   set(val: number) {
-    router.push({ name: 'BookList', params: { page: val } })
+    router.replace({ name: 'BookSeriesBooks', params: { name: props.name, order: props.order, page: val } })
   },
 })
 const order = computed({
@@ -109,29 +87,35 @@ const order = computed({
     return props.order
   },
   set(val: string) {
-    router.push({ name: 'BookList', params: { page: 1, order: val } })
+    router.replace({ name: 'BookSeriesBooks', params: { name: props.name, order: val, page: 1 } })
   },
 })
 
-/** 切换到系列视图 */
-function onViewChange(val: string) {
-  if (val === 'series') {
+/** 返回系列网格：上一条历史就是系列网格时直接后退（keep-alive 不刷新），否则 push */
+function backToSeries() {
+  const back = window.history.state?.back
+  if (typeof back === 'string' && back.includes('/book/series/')) {
+    router.go(-1)
+  } else {
     router.push({ name: 'BookSeries', params: { order: props.order, page: 1 } })
   }
 }
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
-const request = useTimeoutFn(function (page = currentPage.value, order = props.order) {
-  return getBookList({
+const request = useTimeoutFn(function (name = props.name, page = currentPage.value, order = props.order) {
+  bookData.value = []
+  pageData.value.totalPage = 1
+  return getBooksBySeries({
+    SeriesName: name,
     Page: page,
     Order: order,
     Size: 24,
     IgnoreJapanese: generalSetting.ignoreJapanese,
     IgnoreAI: generalSetting.ignoreAI,
-  }).then((serverData) => {
-    bookData.value = serverData.Data
-    pageData.value.totalPage = serverData.TotalPages
+  }).then((res) => {
+    bookData.value = res.Data
+    pageData.value.totalPage = res.TotalPages
   })
 })
 
@@ -145,7 +129,7 @@ watch(request.loading, (nextLoading) => {
 })
 
 onBeforeRouteUpdate((to, from, next) => {
-  request(~~to.params.page || 1, `${to.params.order}`).then(() => next(), NOOP)
+  request(`${to.params.name}`, ~~to.params.page || 1, `${to.params.order}`).then(() => next(), NOOP)
 })
 
 useInitRequest(request)
@@ -156,6 +140,15 @@ useInitRequest(request)
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.series-title {
+  font-size: 16px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
 }
 
 .pagination {

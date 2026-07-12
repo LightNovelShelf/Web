@@ -33,6 +33,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Book/BookList.vue'),
   },
   {
+    path: '/book/series/:order/:page?',
+    name: 'BookSeries',
+    props: true,
+    component: () => import('../pages/Book/BookSeries.vue'),
+  },
+  {
+    path: '/book/series-books/:name/:order/:page?',
+    name: 'BookSeriesBooks',
+    props: true,
+    component: () => import('../pages/Book/BookSeriesBooks.vue'),
+  },
+  {
     path: '/book/info/:bid',
     name: 'BookInfo',
     props: true,
