@@ -1,8 +1,7 @@
 import { produce } from 'immer'
-import isEqual from 'lodash.isequal'
 import { nanoid } from 'nanoid'
 import { defineStore } from 'pinia'
-import { Notify } from 'quasar'
+import { is, Notify } from 'quasar'
 import { toRaw } from 'vue'
 
 import { shelfDB, shelfStructVerDB } from 'src/utils/storage/db'
@@ -108,7 +107,7 @@ const shelfStore = defineStore('app.shelf', {
       return (parents: string[]) => {
         // 有可能是空字符串数组，过滤掉无效的那些空字符串
         const _parents = parents.filter((i) => !!i)
-        return toRaw(this.shelf).filter((i) => isEqual(i.parents, _parents))
+        return toRaw(this.shelf).filter((i) => is.deepEqual(i.parents, _parents))
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
@@ -304,7 +303,7 @@ const shelfStore = defineStore('app.shelf', {
           // 更新其它同层项目的index
           draft.forEach((item) => {
             const root: string[] = []
-            if (isEqual(item.parents, root)) {
+            if (is.deepEqual(item.parents, root)) {
               item.index += 1
             }
           })
@@ -353,7 +352,7 @@ const shelfStore = defineStore('app.shelf', {
             // 剩下的依次左移/右移
             draft.forEach((item, index) => {
               // 不是本层的，不要动
-              if (!isEqual(item.parents, parents)) {
+              if (!is.deepEqual(item.parents, parents)) {
                 return
               }
 
@@ -400,7 +399,7 @@ const shelfStore = defineStore('app.shelf', {
                 item.index = 0
 
                 item.parents = payload.parents
-              } else if (isEqual(item.parents, payload.parents)) {
+              } else if (is.deepEqual(item.parents, payload.parents)) {
                 item.index += 1
               }
             })
