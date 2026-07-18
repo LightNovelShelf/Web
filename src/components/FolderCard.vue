@@ -1,6 +1,12 @@
 <!-- 通用文件夹卡片：2×3 卡片内以 2×2 网格展示最多 4 张封面，右下角文件夹角标 + 可选数量徽标 -->
 <template>
-  <component :is="to ? 'router-link' : 'a'" :to="to" :href="to ? undefined : '#'" @click="onClick">
+  <component
+    :is="to ? 'router-link' : 'a'"
+    class="cursor-pointer"
+    :to="to"
+    :href="to ? undefined : '#'"
+    @click="onClick"
+  >
     <div class="folder-cover">
       <q-card>
         <q-responsive :ratio="2 / 3">
