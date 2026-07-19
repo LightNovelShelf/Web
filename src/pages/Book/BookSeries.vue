@@ -33,6 +33,7 @@
           :title="series.Name"
           :covers="[series.Cover]"
           :count="series.Count"
+          :updated-at="series.LastUpdatedAt"
           :to="{ name: 'BookSeriesBooks', params: { name: series.Name, order: props.order, page: 1 } }"
         />
       </q-grid-item>

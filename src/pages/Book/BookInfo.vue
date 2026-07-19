@@ -8,12 +8,12 @@
               <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3">
                 <div class="absolute-bottom bottom-shadow">
                   <div class="row">
-                    <div class="row items-center q-gutter-xs">
+                    <div class="row items-center cover-stat">
                       <q-icon size="24px" name="mdiHeart" />
                       <span>{{ book.Favorite }}</span>
                     </div>
                     <q-space />
-                    <div class="row items-center q-gutter-xs">
+                    <div class="row items-center cover-stat">
                       <q-icon size="24px" name="mdiEye" />
                       <span>{{ book.Views }}</span>
                     </div>
@@ -29,44 +29,69 @@
             </q-card>
           </q-grid-item>
           <q-grid-item span="2" xs="1" sm="1" md="1">
-            <div v-if="isActive">
-              <div class="row items-center">
-                <div class="introduction" style="margin: 24px 0">书籍信息</div>
+            <div v-if="isActive" class="book-info-content">
+              <div class="book-author-avatar">
+                <q-avatar>
+                  <img :src="book.User.Avatar" alt="book_user" />
+                </q-avatar>
 
-                <q-space />
-
-                <div>
-                  <q-avatar>
-                    <img :src="book.User.Avatar" alt="book_user" />
-                  </q-avatar>
-
-                  <!-- TODO 这个组件点击的行为非常奇怪 -->
-                  <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
-                    <q-card>
-                      <q-card-section> {{ book.User.UserName }} </q-card-section>
-                    </q-card>
-                  </q-menu>
-                </div>
+                <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
+                  <q-card>
+                    <q-card-section>{{ book.User.UserName }}</q-card-section>
+                  </q-card>
+                </q-menu>
               </div>
 
               <div class="text-subtitle1 text-weight-bold">《{{ book['Title'] }}》</div>
-              <div style="margin-top: 24px">作者：{{ book['Author'] }}</div>
+              <div style="margin-top: 24px">作者：{{ displayAuthor }}</div>
+              <div>
+                系列名：
+                <router-link
+                  v-if="classification.series_name"
+                  class="search-link"
+                  :to="{ name: 'Search', query: { keywords: classification.series_name, mode: 'name' } }"
+                >
+                  {{ classification.series_name }}
+                </router-link>
+                <span v-else>暂无</span>
+              </div>
+              <div>
+                系列中文名：
+                <router-link
+                  v-if="classification.series_name_cn"
+                  class="search-link"
+                  :to="{ name: 'Search', query: { keywords: classification.series_name_cn, mode: 'name' } }"
+                >
+                  {{ classification.series_name_cn }}
+                </router-link>
+                <span v-else>暂无</span>
+              </div>
               <div>最后更新：{{ book['LastUpdatedChapter'] }}</div>
               <div>更新时间：{{ dateFormat(book['LastUpdatedAt']) }} ({{ LastUpdateTimeDesc }})</div>
               <div>上次阅读：{{ lastReadTitle }}</div>
+              <div v-if="classification.tags?.length" class="row book-tags q-mt-md">
+                <router-link
+                  v-for="tag in classification.tags"
+                  :key="tag"
+                  class="tag-link"
+                  :to="{ name: 'Search', query: { keywords: tag, mode: 'tags' } }"
+                >
+                  <q-chip clickable dense outline color="primary">{{ tag }}</q-chip>
+                </router-link>
+              </div>
               <div style="margin-top: 24px">
                 <div>简介</div>
                 <div class="introduction" v-html="sanitizerHtml(book['Introduction'])"></div>
               </div>
               <div style="margin-top: 24px"></div>
 
-              <div class="row q-gutter-md" v-if="isActive">
+              <div class="row book-actions" v-if="isActive">
                 <add-to-shelf :book="bookInList" />
                 <q-btn color="primary" @click="startRead">{{ position ? '继续阅读' : '开始阅读' }}</q-btn>
                 <q-btn v-if="book.CanEdit" color="red" :to="{ name: 'EditBook', param: { bid: bid } }">快速编辑</q-btn>
               </div>
             </div>
-            <div v-else class="q-gutter-md">
+            <div v-else class="book-skeletons">
               <q-skeleton />
               <q-skeleton width="50%" />
               <q-skeleton />
@@ -75,7 +100,7 @@
               <q-skeleton height="150px" />
               <div></div>
               <div>
-                <div class="row q-gutter-x-md">
+                <div class="row skeleton-actions">
                   <q-skeleton type="QBtn" />
                   <q-skeleton type="QBtn" />
                 </div>
@@ -190,6 +215,8 @@ onActivated(() => {
 })
 
 const book = computed(() => bookInfo.value?.Book)
+const classification = computed(() => book.value?.Extra?.classification ?? {})
+const displayAuthor = computed(() => book.value?.Author || classification.value.author || '暂无')
 const bookInList = computed<BookInList | null>(() =>
   book.value
     ? ({
@@ -235,6 +262,47 @@ function commentBeShown(entries) {
 </script>
 
 <style scoped lang="scss">
+.book-info-content {
+  position: relative;
+  padding-right: 52px;
+}
+
+.book-author-avatar {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.cover-stat,
+.book-tags {
+  gap: 4px;
+}
+
+.book-actions,
+.skeleton-actions {
+  gap: 16px;
+}
+
+.book-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-link {
+  color: var(--q-primary);
+  text-decoration: none;
+}
+
+.search-link:hover {
+  text-decoration: underline;
+}
+
+.tag-link {
+  color: inherit;
+  text-decoration: none;
+}
+
 .introduction {
   opacity: 0.6;
   line-height: 1;

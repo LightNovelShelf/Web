@@ -59,7 +59,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   const Router = createRouter({
     scrollBehavior(to, from, savedPosition) {
       // Read 页面的滚动历史由页面自己处理
-      if (to.name !== 'Read') {
+      if (to.name !== 'Read' && to.name !== 'MangaReader') {
         if (savedPosition) {
           return savedPosition
         } else {

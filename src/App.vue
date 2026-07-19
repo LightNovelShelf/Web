@@ -1,7 +1,7 @@
 <template>
-  <q-layout view="hHh LpR fFf" :class="$q.dark.isActive ? '' : 'bg-grey-1'">
-    <app-header />
-    <app-side />
+  <q-layout view="hHh LpR fFf" :class="[$q.dark.isActive ? '' : 'bg-grey-1', { 'immersive-layout': isImmersiveRoute }]">
+    <app-header v-if="!isImmersiveRoute" />
+    <app-side v-if="!isImmersiveRoute" />
     <app-container v-if="settingStore.isInit" />
   </q-layout>
 </template>
@@ -27,6 +27,8 @@ import type { UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
 import 'overlayscrollbars/overlayscrollbars.css'
 
 const $q = useQuasar()
+const route = useRoute()
+const isImmersiveRoute = computed(() => route.meta.immersive === true)
 
 $q.loadingBar.setDefaults({
   color: 'purple',

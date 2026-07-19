@@ -185,10 +185,10 @@ import { useMedia } from 'src/composition/useMedia'
 
 import { rebootSignalr } from 'src/services/internal/request'
 
+import type { SearchMode } from 'src/services/book/types'
+
 import { useLayout } from './useLayout'
 import SearchInput from '../SearchInput.vue'
-
-import type { SearchMode } from 'src/services/book/types'
 
 const route = useRoute()
 

@@ -69,6 +69,26 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Book/BookRank.vue'),
   },
   {
+    path: '/manga',
+    name: 'MangaDiscover',
+    meta: { requiresAuth: false, hideSearchBar: true },
+    component: () => import('../pages/Manga/Discover.vue'),
+  },
+  {
+    path: '/manga/:mangaId',
+    name: 'MangaDetail',
+    props: true,
+    meta: { requiresAuth: false, hideSearchBar: true },
+    component: () => import('../pages/Manga/Detail.vue'),
+  },
+  {
+    path: '/manga/:mangaId/read/:chapterId',
+    name: 'MangaReader',
+    props: true,
+    meta: { requiresAuth: false, hideSearchBar: true, immersive: true },
+    component: () => import('../pages/Manga/Reader.vue'),
+  },
+  {
     path: '/read/:bid/:sortNum',
     name: 'Read',
     props: true,

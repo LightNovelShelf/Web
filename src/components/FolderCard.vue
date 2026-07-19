@@ -20,13 +20,7 @@
             </q-img>
             <!-- 多封面：2×2 网格 -->
             <div v-else class="books-group">
-              <q-img
-                v-for="(cover, i) in limitedCovers"
-                :key="i"
-                class="books-group-cover"
-                :src="cover"
-                :ratio="2 / 3"
-              >
+              <q-img v-for="(cover, i) in limitedCovers" :key="i" class="books-group-cover" :src="cover" :ratio="2 / 3">
                 <template v-if="getPlaceholder(cover) && generalSetting.enableBlurHash" v-slot:loading>
                   <blur-hash :blurhash="getPlaceholder(cover)" />
                 </template>
@@ -44,6 +38,7 @@
       <div class="folder-name">
         <div class="folder-name-text" :title="title">{{ title }}</div>
       </div>
+      <div v-if="updatedAt" class="folder-update-time">{{ updateTime }}</div>
     </div>
 
     <slot name="footer" />
@@ -59,6 +54,8 @@ import { useSettingStore } from 'stores/setting'
 
 import { BlurHash } from 'components'
 
+import { useToNowRef } from 'src/composition/useToNowRef'
+
 import type { RouteLocationRaw } from 'vue-router'
 
 const props = defineProps<{
@@ -68,6 +65,8 @@ const props = defineProps<{
   covers: string[]
   /** 数量徽标，不传则不展示 */
   count?: number
+  /** 最近更新时间，不传则不展示 */
+  updatedAt?: Date | string
   /** 点击跳转目标；不传则渲染为 <a> 并派发 click 事件 */
   to?: RouteLocationRaw
 }>()
@@ -77,6 +76,7 @@ const emit = defineEmits<{ click: [] }>()
 const { generalSetting } = useSettingStore()
 const limitedCovers = computed(() => (props.covers ?? []).filter(Boolean).slice(0, 4))
 const firstPlaceholder = computed(() => getPlaceholder(limitedCovers.value[0] ?? ''))
+const updateTime = useToNowRef(() => props.updatedAt)
 
 function onClick(evt: MouseEvent) {
   if (!props.to) {
@@ -98,11 +98,22 @@ function onClick(evt: MouseEvent) {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+}
+
+.single-cover,
+.books-group-cover {
+  transition: transform 0.25s ease;
 }
 
 .single-cover {
   width: 100%;
   height: 100%;
+}
+
+.cursor-pointer:hover .single-cover,
+.cursor-pointer:hover .books-group-cover {
+  transform: scale(1.025);
 }
 
 .books-group {
@@ -141,5 +152,13 @@ function onClick(evt: MouseEvent) {
   .folder-name-text {
     @include ellipsis(2);
   }
+}
+
+.folder-update-time {
+  height: 18px;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: right;
+  opacity: 0.6;
 }
 </style>

@@ -26,6 +26,8 @@ export interface SeriesInList {
   Cover: string
   /** 系列内书籍数量 */
   Count: number
+  /** 系列内书籍的最近更新时间 */
+  LastUpdatedAt: Date
 }
 
 export interface GetSeriesListRes extends ListResult<SeriesInList> {}
@@ -48,6 +50,14 @@ interface ChapterInfo {
   Id: number
 }
 
+interface BookClassification {
+  author?: string | null
+  series_name?: string | null
+  series_name_cn?: string | null
+  tags?: string[]
+  classified_at?: string
+}
+
 export interface GetBookInfoRes {
   Book: {
     Arthur: string
@@ -55,9 +65,12 @@ export interface GetBookInfoRes {
     Chapter: ChapterInfo[]
     Id: number
     Cover: string
-    ExtraInfo: any
+    Extra?: {
+      classification?: BookClassification
+      [key: string]: unknown
+    }
     Introduction: string
-    Author: string
+    Author: string | null
     LastUpdatedChapter: string
     LastUpdatedAt: Date
     CreatedAt: Date

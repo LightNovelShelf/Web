@@ -80,6 +80,18 @@ function onIntersection(entry: IntersectionObserverEntry) {
   box-sizing: border-box;
 }
 
+.book-cover :deep(.q-card) {
+  overflow: hidden;
+}
+
+.book-cover :deep(.q-img) {
+  transition: transform 0.25s ease;
+}
+
+.book-cover:hover :deep(.q-img) {
+  transform: scale(1.025);
+}
+
 .book-tag {
   position: absolute;
   top: 8px;
