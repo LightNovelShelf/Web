@@ -109,11 +109,20 @@
           </q-grid-item>
         </q-grid>
 
-        <q-list v-if="isActive" separator style="margin-top: 12px">
+        <div v-if="isActive" class="row items-center chapter-header">
+          <div>
+            <div class="text-h6">章节列表</div>
+            <div class="text-caption text-grey-7">共 {{ book.Chapter.length }} 章</div>
+          </div>
+          <q-space />
+          <q-btn flat dense no-caps :label="ascending ? '正序' : '倒序'" @click="ascending = !ascending" />
+        </div>
+        <q-separator v-if="isActive" />
+        <q-list v-if="isActive" separator>
           <q-item
-            v-for="(item, index) in book?.Chapter"
+            v-for="item in sortedChapters"
             :key="item.Id"
-            :to="{ name: 'Read', params: { bid: bid, sortNum: index + 1 } }"
+            :to="{ name: 'Read', params: { bid: bid, sortNum: item.sortNum } }"
             clickable
             v-ripple
           >
@@ -215,6 +224,11 @@ onActivated(() => {
 })
 
 const book = computed(() => bookInfo.value?.Book)
+const ascending = ref(true)
+const sortedChapters = computed(() => {
+  const chapters = (book.value?.Chapter ?? []).map((chapter, index) => ({ ...chapter, sortNum: index + 1 }))
+  return ascending.value ? chapters : chapters.reverse()
+})
 const classification = computed(() => book.value?.Extra?.classification ?? {})
 const displayAuthor = computed(() => book.value?.Author || classification.value.author || '暂无')
 const bookInList = computed<BookInList | null>(() =>
@@ -281,6 +295,11 @@ function commentBeShown(entries) {
 .book-actions,
 .skeleton-actions {
   gap: 16px;
+}
+
+.chapter-header {
+  margin-top: 12px;
+  padding: 16px 0;
 }
 
 .book-skeletons {

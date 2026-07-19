@@ -1,91 +1,86 @@
 <template>
   <q-page padding class="manga-detail q-mx-auto">
     <template v-if="manga">
-      <q-card flat bordered>
-      <q-card-section>
-        <div class="detail-layout">
-          <div>
-            <div class="cover-column">
-              <q-card class="cover-card">
-                <manga-cover :manga="manga" />
-                <div class="absolute-bottom bottom-shadow q-pa-sm text-white">
-                  <div class="row items-center">
-                    <div class="row items-center cover-stat">
-                      <q-icon size="22px" name="mdiHeart" />
-                      <span>{{ manga.followers }}</span>
-                    </div>
-                    <q-space />
-                    <div class="row items-center cover-stat">
-                      <q-icon size="22px" name="mdiEye" />
-                      <span>{{ manga.views }}</span>
+      <q-card>
+        <q-card-section>
+          <div class="detail-layout">
+            <div>
+              <div class="cover-column">
+                <q-card class="cover-card">
+                  <manga-cover :manga="manga" />
+                  <div class="absolute-bottom bottom-shadow q-pa-sm text-white">
+                    <div class="row items-center">
+                      <div class="row items-center cover-stat">
+                        <q-icon size="22px" name="mdiHeart" />
+                        <span>{{ manga.followers }}</span>
+                      </div>
+                      <q-space />
+                      <div class="row items-center cover-stat">
+                        <q-icon size="22px" name="mdiEye" />
+                        <span>{{ manga.views }}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </q-card>
+                </q-card>
+              </div>
+            </div>
+
+            <div>
+              <h1 class="text-subtitle1 text-weight-bold q-my-none">《{{ manga.title }}》</h1>
+
+              <div class="info-lines q-mt-lg text-caption">
+                <div>作者：{{ manga.author }}</div>
+                <div>系列名：{{ manga.subtitle }}</div>
+                <div>系列中文名：{{ manga.title }}</div>
+                <div>最后更新：{{ manga.latestUpdate }}</div>
+                <div>更新时间：{{ dateFormat(manga.updatedAt) }} ({{ updatedAtDesc }})</div>
+                <div>上次阅读：{{ lastReadText }}</div>
+              </div>
+
+              <div class="row tag-list q-mt-md">
+                <q-chip v-for="tag in manga.tags" :key="tag" dense outline color="primary">{{ tag }}</q-chip>
+              </div>
+
+              <div class="text-subtitle2 q-mt-lg q-mb-xs">简介</div>
+              <p class="description">{{ manga.description }}</p>
+
+              <div class="row items-center action-list q-mt-lg">
+                <q-btn color="primary" :label="progress[manga.id] ? '继续阅读' : '开始阅读'" :to="readerRoute" />
+                <q-btn outline color="primary" label="追漫" disable />
+              </div>
             </div>
           </div>
-
-          <div>
-            <h1 class="text-subtitle1 text-weight-bold q-my-none">《{{ manga.title }}》</h1>
-
-            <div class="info-lines q-mt-lg text-caption">
-              <div>作者：{{ manga.author }}</div>
-              <div>系列名：{{ manga.subtitle }}</div>
-              <div>系列中文名：{{ manga.title }}</div>
-              <div>最后更新：{{ manga.latestUpdate }}</div>
-              <div>更新时间：{{ dateFormat(manga.updatedAt) }} ({{ updatedAtDesc }})</div>
-              <div>上次阅读：{{ lastReadText }}</div>
+          <div class="row items-center chapter-header">
+            <div>
+              <div class="text-h6">章节列表</div>
+              <div class="text-caption text-grey-7">共 {{ manga.chapters.length }} 话</div>
             </div>
-
-            <div class="row tag-list q-mt-md">
-              <q-chip v-for="tag in manga.tags" :key="tag" dense outline color="primary">{{ tag }}</q-chip>
-            </div>
-
-            <div class="text-subtitle2 q-mt-lg q-mb-xs">简介</div>
-            <p class="description">{{ manga.description }}</p>
-
-            <div class="row items-center action-list q-mt-lg">
-              <q-btn color="primary" :label="progress[manga.id] ? '继续阅读' : '开始阅读'" :to="readerRoute" />
-              <q-btn outline color="primary" label="追漫" disable />
-            </div>
+            <q-space />
+            <q-btn flat dense no-caps :label="ascending ? '正序' : '倒序'" @click="ascending = !ascending" />
           </div>
-        </div>
-      </q-card-section>
-      </q-card>
-
-      <q-card flat bordered class="q-mt-md">
-      <q-card-section class="row items-center">
-        <div>
-          <div class="text-h6">分卷列表</div>
-          <div class="text-caption text-grey-7">共 {{ manga.chapters.length }} 卷</div>
-        </div>
-        <q-space />
-        <q-btn flat dense no-caps :label="ascending ? '正序' : '倒序'" @click="ascending = !ascending" />
-      </q-card-section>
-      <q-separator />
-      <q-card-section>
-        <div class="chapter-grid">
-          <q-item
-            v-for="chapter in sortedChapters"
-            :key="chapter.id"
-            clickable
-            v-ripple
-            bordered
-            class="chapter-item rounded-borders"
-            :active="progress[manga.id]?.chapterId === chapter.id"
-            active-class="bg-primary text-white"
-            :to="{ name: 'MangaReader', params: { mangaId: manga.id, chapterId: chapter.id } }"
-          >
-            <q-item-section avatar>
-              <q-avatar color="grey-3" text-color="grey-8" size="36px">{{ chapter.number }}</q-avatar>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label lines="1">{{ chapter.title }}</q-item-label>
-              <q-item-label caption>{{ chapterDateFormat(chapter.publishedAt) }} · {{ chapter.pages }}P</q-item-label>
-            </q-item-section>
-          </q-item>
-        </div>
-      </q-card-section>
+          <q-separator />
+          <div class="chapter-grid">
+            <q-item
+              v-for="chapter in sortedChapters"
+              :key="chapter.id"
+              clickable
+              v-ripple
+              bordered
+              class="chapter-item rounded-borders"
+              :active="progress[manga.id]?.chapterId === chapter.id"
+              active-class="bg-primary text-white"
+              :to="{ name: 'MangaReader', params: { mangaId: manga.id, chapterId: chapter.id } }"
+            >
+              <q-item-section avatar>
+                <q-avatar color="grey-3" text-color="grey-8" size="36px">{{ chapter.number }}</q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label lines="1">{{ chapter.title }}</q-item-label>
+                <q-item-label caption>{{ chapterDateFormat(chapter.publishedAt) }} · {{ chapter.pages }}P</q-item-label>
+              </q-item-section>
+            </q-item>
+          </div>
+        </q-card-section>
       </q-card>
 
       <comment class="q-mt-md" :type="CommentType.Book" :id="Number(manga.id)" />
@@ -229,6 +224,11 @@ function chapterDateFormat(time: string) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  padding-top: 16px;
+}
+.chapter-header {
+  margin-top: 12px;
+  padding: 16px 0;
 }
 .chapter-item {
   min-width: 0;
