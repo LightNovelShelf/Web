@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="manga-detail q-mx-auto">
-    <template v-if="manga">
+    <template v-if="isActive">
       <q-card>
         <q-card-section>
           <div class="detail-layout">
@@ -86,9 +86,27 @@
       <comment class="q-mt-md" :type="CommentType.Book" :id="Number(manga.id)" />
     </template>
     <div v-else-if="loadError" class="detail-state text-negative">{{ loadError }}</div>
-    <q-inner-loading :showing="loading">
-      <q-spinner-dots color="primary" size="40px" />
-    </q-inner-loading>
+    <q-card v-else>
+      <q-card-section>
+        <div class="detail-layout">
+          <q-responsive :ratio="2 / 3">
+            <q-skeleton class="fit" square />
+          </q-responsive>
+          <div class="detail-skeletons">
+            <q-skeleton />
+            <q-skeleton width="50%" />
+            <q-skeleton />
+            <q-skeleton />
+            <q-skeleton />
+            <q-skeleton height="150px" />
+            <div class="row skeleton-actions">
+              <q-skeleton type="QBtn" />
+              <q-skeleton type="QBtn" />
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
@@ -100,6 +118,8 @@ import { parseTime } from 'src/utils/time'
 
 import { Comment } from 'components'
 
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useToNowRef } from 'src/composition/useToNowRef'
 
 import { CommentType } from 'src/services/comment/types'
@@ -115,7 +135,6 @@ const props = defineProps<{ mangaId: string }>()
 const ascending = ref(true)
 const { progress, saveProgress } = useMangaLibrary()
 const manga = ref<Manga>()
-const loading = ref(false)
 const loadError = ref('')
 
 const savedChapter = computed(() =>
@@ -143,27 +162,27 @@ const readerRoute = computed(() => {
   }
 })
 
+const request = useTimeoutFn(async (mangaId = props.mangaId) => {
+  loadError.value = ''
+  if (manga.value?.id !== mangaId) manga.value = undefined
+  try {
+    const id = Number(mangaId)
+    if (!Number.isInteger(id)) throw new Error('无效的漫画 ID')
+    const response = await getComicInfo(id)
+    manga.value = toManga(response)
+    const position = response.ReadPosition
+    if (position) saveProgress(mangaId, String(position.ChapterId), Number(position.Position) || 1)
+  } catch (error) {
+    loadError.value = getErrMsg(error)
+  }
+})
+const isActive = computed(() => manga.value?.id === props.mangaId)
+
 watch(
   () => props.mangaId,
-  async (mangaId) => {
-    loading.value = true
-    loadError.value = ''
-    manga.value = undefined
-    try {
-      const id = Number(mangaId)
-      if (!Number.isInteger(id)) throw new Error('无效的漫画 ID')
-      const response = await getComicInfo(id)
-      manga.value = toManga(response)
-      const position = response.ReadPosition
-      if (position) saveProgress(mangaId, String(position.ChapterId), Number(position.Position) || 1)
-    } catch (error) {
-      loadError.value = getErrMsg(error)
-    } finally {
-      loading.value = false
-    }
-  },
-  { immediate: true },
+  (mangaId) => void request(mangaId),
 )
+useInitRequest(request, { isActive })
 
 function dateFormat(time: string) {
   return parseTime(time).format('YYYY-MM-DD HH:mm')
@@ -185,6 +204,15 @@ function chapterDateFormat(time: string) {
   display: grid;
   min-height: 280px;
   place-items: center;
+}
+.detail-skeletons {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+.skeleton-actions {
+  gap: 16px;
+  margin-top: 12px;
 }
 .detail-layout {
   display: grid;

@@ -3,6 +3,7 @@
     <div class="top-bar">
       <q-select
         v-model="order"
+        :disable="loading"
         emit-value
         map-options
         filled
@@ -38,16 +39,17 @@
     <div v-else-if="!loading" class="empty-state text-grey-7">
       {{ loadError || '暂无漫画' }}
     </div>
-    <q-inner-loading :showing="loading">
-      <q-spinner-dots color="primary" size="40px" />
-    </q-inner-loading>
   </q-page>
 </template>
 
 <script lang="ts" setup>
+import { useQuasar } from 'quasar'
 import { ref, watch } from 'vue'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
+
+import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { getComicList } from 'src/services/manga'
 
@@ -64,28 +66,29 @@ const orderOptions: Array<{ label: string; value: ComicOrder }> = [
   { label: '总点击量', value: 'view' },
 ]
 
+const $q = useQuasar()
 const order = ref<ComicOrder>('latest')
 const mangas = ref<MangaListItem[]>([])
-const loading = ref(false)
 const loadError = ref('')
 
-watch(
-  order,
-  async () => {
-    loading.value = true
-    loadError.value = ''
-    try {
-      const response = await getComicList({ Page: 1, Size: 24, Order: order.value })
-      mangas.value = response.Data.map(toMangaListItem)
-    } catch (error) {
-      mangas.value = []
-      loadError.value = getErrMsg(error)
-    } finally {
-      loading.value = false
-    }
-  },
-  { immediate: true },
-)
+const request = useTimeoutFn(async () => {
+  loadError.value = ''
+  try {
+    const response = await getComicList({ Page: 1, Size: 24, Order: order.value })
+    mangas.value = response.Data.map(toMangaListItem)
+  } catch (error) {
+    mangas.value = []
+    loadError.value = getErrMsg(error)
+  }
+})
+const loading = request.loading
+
+watch(loading, (nextLoading) => {
+  $q.loadingBar.stop()
+  if (nextLoading) $q.loadingBar.start()
+})
+watch(order, () => void request())
+useInitRequest(request)
 </script>
 
 <style lang="scss" scoped>
