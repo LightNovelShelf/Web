@@ -22,7 +22,8 @@
       >
         <div class="cover-wrap">
           <manga-cover :manga="manga" compact />
-          <span class="chapter-count">{{ manga.chapterCount }} 卷</span>
+          <span class="status-tag" :style="{ backgroundColor: manga.status.color }">{{ manga.status.name }}</span>
+          <span class="chapter-count">{{ manga.chapterCount }}话</span>
         </div>
         <div class="series-meta">
           <div class="series-title">
@@ -136,6 +137,15 @@ watch(
   color: #fff;
   background: #1976d2;
   border-radius: 1em 0 0 1em;
+  font-size: 12px;
+}
+.status-tag {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  padding: 1px 9px 1px 7px;
+  color: #fff;
+  border-radius: 0 1em 1em 0;
   font-size: 12px;
 }
 .series-meta {

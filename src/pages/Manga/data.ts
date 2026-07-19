@@ -3,7 +3,6 @@ import { getPlaceholder } from 'src/utils/url'
 import type { Manga, MangaImageAsset, MangaListItem } from './types'
 import type { ComicInfoResponse, ComicListItem } from 'src/services/manga/types'
 
-
 const mangaTheme = {
   primary: '#137fc4',
   secondary: '#ec5a8e',
@@ -28,6 +27,11 @@ export function toMangaListItem(item: ComicListItem): MangaListItem {
     createdAt: item.CreatedAt,
     updatedAt: item.LastUpdatedAt,
     chapterCount: item.ChapterCount,
+    status: {
+      name: item.Category.Name,
+      shortName: item.Category.ShortName,
+      color: item.Category.Color,
+    },
     cover: toMangaImage(item.Cover),
   }
 }

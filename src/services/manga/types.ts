@@ -16,6 +16,11 @@ export interface ComicListItem {
   CreatedAt: string
   LastUpdatedAt: string
   ChapterCount: number
+  Category: {
+    Name: string
+    ShortName: string
+    Color: string
+  }
 }
 
 export interface ComicListResponse extends ListResult<ComicListItem> {}

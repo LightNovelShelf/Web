@@ -50,5 +50,10 @@ export interface MangaListItem {
   createdAt: string
   updatedAt: string
   chapterCount: number
+  status: {
+    name: string
+    shortName: string
+    color: string
+  }
   cover: MangaImageAsset
 }
