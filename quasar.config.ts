@@ -7,6 +7,11 @@ import AutoImport from 'unplugin-auto-import/vite'
 let sha = process.env.CF_PAGES_COMMIT_SHA || process.env.GITHUB_SHA || 'dev'
 if (sha.length > 7) sha = sha.substring(0, 7)
 
+const autoImportPlugin = AutoImport({
+  imports: ['vue', 'vue-router', 'pinia'],
+})
+const vitePlugins = Array.isArray(autoImportPlugin) ? autoImportPlugin : [autoImportPlugin]
+
 export default defineConfig((ctx) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -88,11 +93,7 @@ export default defineConfig((ctx) => {
       },
       // viteVuePluginOptions: {},
 
-      vitePlugins: [
-        AutoImport({
-          imports: ['vue', 'vue-router', 'pinia'],
-        }),
-      ],
+      vitePlugins,
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer

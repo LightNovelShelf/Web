@@ -100,7 +100,7 @@
                 v-for="(item, index) in chapter['Chapters']"
                 :key="index"
                 replace
-                :to="{ name: 'Read', params: { bid, sortNum: index + 1 } }"
+                :to="{ name: 'Read', params: { bid, sortNum: Number(index) + 1 } }"
               >
                 <q-item-section>{{ item }}</q-item-section>
               </q-item>

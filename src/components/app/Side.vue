@@ -94,16 +94,12 @@ const menuOptions: Array<Record<string, any>> = [
     route: 'BookList',
     params: { order: 'latest', page: '1' },
   },
-  ...(process.env.DEV
-    ? [
-        {
-          label: '全部漫画',
-          key: 'MangaDiscover',
-          icon: 'mdiImage',
-          route: 'MangaDiscover',
-        },
-      ]
-    : []),
+  {
+    label: '全部漫画',
+    key: 'MangaDiscover',
+    icon: 'mdiImage',
+    route: 'MangaDiscover',
+  },
   {
     label: '近期排行',
     key: 'BookRank',

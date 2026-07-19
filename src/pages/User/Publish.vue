@@ -1,19 +1,19 @@
 <template>
   <q-page padding style="max-width: 1920px" class="q-mx-auto">
-    <div class="q-gutter-y-md">
+    <div class="publish-content">
       <q-tabs dense v-model="tab" class="text-teal">
         <template v-for="option in tabOptions" :key="option.key">
-          <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
+          <q-tab :name="option.name" :icon="option.icon" :label="option.label" />
         </template>
       </q-tabs>
       <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="Book">
+        <q-tab-panel v-for="option in tabOptions" :key="option.key" :name="option.name">
           <div class="flex justify-between items-center gap-8">
             <q-input
               dense
               outlined
               v-model="searchKeyword"
-              placeholder="搜索书籍"
+              :placeholder="`搜索${option.label}`"
               @keyup.enter="searchBook"
               style="width: 250px"
             >
@@ -21,7 +21,7 @@
                 <q-icon name="mdiMagnify" class="cursor-pointer" @click="searchBook" />
               </template>
             </q-input>
-            <div class="q-gutter-x-sm">
+            <div v-if="tab === GetMyBooks.BookType.Novel" class="publish-actions">
               <q-btn color="primary" @click="uploadBookShow = true"> 上传书籍 </q-btn>
               <q-btn color="primary" @click="createBookShow = true"> 发布新书 </q-btn>
             </div>
@@ -29,10 +29,10 @@
 
           <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
             <q-grid-item v-for="(book, index) in bookData" :key="book['Id']">
-              <div class="q-gutter-sm">
+              <div class="publish-card">
                 <book-card :book="book"></book-card>
                 <div>
-                  <div class="flex q-gutter-sm">
+                  <div class="card-actions">
                     <q-btn dense color="negative" class="col" @click="delBook(book['Id'], index)">删除</q-btn>
                     <q-btn
                       dense
@@ -75,7 +75,7 @@
 
         <q-form @submit="createBook">
           <q-card-section style="padding-top: 0">
-            <div class="q-gutter-sm">
+            <div class="create-book-fields">
               <image-input
                 label="封面链接"
                 :rules="[(val) => val.startsWith('https://') || '必须是一个https链接']"
@@ -137,6 +137,7 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { deleteBook } from 'src/services/book'
 import { PATH } from 'src/services/path'
 import { getMyBooks, quickCreateNovel } from 'src/services/user'
+import { GetMyBooks } from 'src/services/user/type'
 import { getSessionToken } from 'src/services/utils'
 
 import type { QUploaderFactoryFn } from 'quasar'
@@ -145,17 +146,22 @@ import type { QuickCreateNovel } from 'src/services/user/type'
 
 defineComponent({ QGrid, QGridItem })
 
-const tabOptions: Array<Record<string, any>> = [
+const tabOptions: Array<{ name: GetMyBooks.BookType; key: string; label: string; icon: string }> = [
   {
-    name: 'Book',
-    key: 'Book',
-    label: '书籍',
+    name: GetMyBooks.BookType.Novel,
+    key: 'Novel',
+    label: '小说',
     icon: 'mdiBook',
-    disable: false,
+  },
+  {
+    name: GetMyBooks.BookType.Comic,
+    key: 'Comic',
+    label: '漫画',
+    icon: 'mdiImage',
   },
 ]
 
-const tab = ref('Book')
+const tab = ref(GetMyBooks.BookType.Novel)
 const router = useRouter()
 const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
@@ -212,21 +218,23 @@ const currentPage = computed({
     return _page.value
   },
   set(val) {
-    request(val)
+    request(val, tab.value)
   },
 })
 
-const request = useTimeoutFn(function (page = currentPage.value) {
-  return getMyBooks({ Page: page, Size: 24, KeyWords: searchKeyword.value }).then((serverData) => {
-    bookData.value = serverData.Data
-    pageData.value.totalPage = serverData.TotalPages
-    _page.value = serverData.Page
+const request = useTimeoutFn(function (page = currentPage.value, type = tab.value) {
+  return getMyBooks({ Page: page, Size: 24, Type: type, KeyWords: searchKeyword.value }).then((serverData) => {
+    if (type === tab.value) {
+      bookData.value = serverData.Data
+      pageData.value.totalPage = serverData.TotalPages
+      _page.value = serverData.Page
+    }
   })
 })
 
 function searchBook() {
   _page.value = 1
-  request(1)
+  request(1, tab.value)
 }
 
 function delBook(bid: number, index: number) {
@@ -290,6 +298,11 @@ const factoryFn: QUploaderFactoryFn = (files) => {
 }
 
 const loading = request.loading
+watch(tab, (type) => {
+  _page.value = 1
+  bookData.value = []
+  request(1, type)
+})
 watch(request.loading, (nextLoading) => {
   $q.loadingBar.stop()
   if (nextLoading) {
@@ -301,6 +314,26 @@ useInitRequest(request)
 </script>
 
 <style lang="scss" scoped>
+.publish-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.publish-actions,
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+.publish-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.create-book-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .pagination {
   :deep(.q-btn) {
     min-width: 34px !important;

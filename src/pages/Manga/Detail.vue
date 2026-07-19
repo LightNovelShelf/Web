@@ -1,6 +1,7 @@
 <template>
   <q-page padding class="manga-detail q-mx-auto">
-    <q-card flat bordered>
+    <template v-if="manga">
+      <q-card flat bordered>
       <q-card-section>
         <div class="detail-layout">
           <div>
@@ -41,7 +42,7 @@
             </div>
 
             <div class="text-subtitle2 q-mt-lg q-mb-xs">简介</div>
-            <p class="description text-caption text-grey-7">{{ manga.description }}</p>
+            <p class="description">{{ manga.description }}</p>
 
             <div class="row items-center action-list q-mt-lg">
               <q-btn color="primary" :label="progress[manga.id] ? '继续阅读' : '开始阅读'" :to="readerRoute" />
@@ -50,13 +51,13 @@
           </div>
         </div>
       </q-card-section>
-    </q-card>
+      </q-card>
 
-    <q-card flat bordered class="q-mt-md">
+      <q-card flat bordered class="q-mt-md">
       <q-card-section class="row items-center">
         <div>
-          <div class="text-h6">章节列表</div>
-          <div class="text-caption text-grey-7">共 {{ manga.chapters.length }} 话</div>
+          <div class="text-h6">分卷列表</div>
+          <div class="text-caption text-grey-7">共 {{ manga.chapters.length }} 卷</div>
         </div>
         <q-space />
         <q-btn flat dense no-caps :label="ascending ? '正序' : '倒序'" @click="ascending = !ascending" />
@@ -80,20 +81,26 @@
             </q-item-section>
             <q-item-section>
               <q-item-label lines="1">{{ chapter.title }}</q-item-label>
-              <q-item-label caption>{{ chapter.publishedAt }} · {{ chapter.pages }}P</q-item-label>
+              <q-item-label caption>{{ chapterDateFormat(chapter.publishedAt) }} · {{ chapter.pages }}P</q-item-label>
             </q-item-section>
           </q-item>
         </div>
       </q-card-section>
-    </q-card>
+      </q-card>
 
-    <comment class="q-mt-md" :type="CommentType.Book" :id="4140" />
+      <comment class="q-mt-md" :type="CommentType.Book" :id="Number(manga.id)" />
+    </template>
+    <div v-else-if="loadError" class="detail-state text-negative">{{ loadError }}</div>
+    <q-inner-loading :showing="loading">
+      <q-spinner-dots color="primary" size="40px" />
+    </q-inner-loading>
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
+import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
 
 import { Comment } from 'components'
@@ -101,42 +108,88 @@ import { Comment } from 'components'
 import { useToNowRef } from 'src/composition/useToNowRef'
 
 import { CommentType } from 'src/services/comment/types'
+import { getComicInfo } from 'src/services/manga'
+
+import type { Manga } from './types'
 
 import MangaCover from './components/MangaCover.vue'
-import { getManga } from './mock'
+import { toManga } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
 
 const props = defineProps<{ mangaId: string }>()
 const ascending = ref(true)
-const { progress } = useMangaLibrary()
+const { progress, saveProgress } = useMangaLibrary()
+const manga = ref<Manga>()
+const loading = ref(false)
+const loadError = ref('')
 
-const manga = computed(() => getManga(props.mangaId))
 const savedChapter = computed(() =>
-  manga.value.chapters.find((chapter) => chapter.id === progress.value[manga.value.id]?.chapterId),
+  manga.value?.chapters.find((chapter) => chapter.id === progress.value[manga.value!.id]?.chapterId),
 )
 const lastReadText = computed(() => {
+  if (!manga.value) return '暂无'
   const page = progress.value[manga.value.id]?.page
   return savedChapter.value && page != null ? `${savedChapter.value.title} · 第 ${page} 页` : '暂无'
 })
-const updatedAtDesc = useToNowRef(() => manga.value.updatedAt)
-const sortedChapters = computed(() => (ascending.value ? manga.value.chapters : [...manga.value.chapters].reverse()))
-const readerRoute = computed(() => ({
-  name: 'MangaReader',
-  params: {
-    mangaId: manga.value.id,
-    chapterId: savedChapter.value?.id ?? manga.value.chapters[0].id,
+const updatedAtDesc = useToNowRef(() => manga.value?.updatedAt)
+const sortedChapters = computed(() => {
+  const chapters = manga.value?.chapters ?? []
+  return ascending.value ? chapters : [...chapters].reverse()
+})
+const readerRoute = computed(() => {
+  const firstChapter = manga.value?.chapters[0]
+  if (!manga.value || !firstChapter) return undefined
+  return {
+    name: 'MangaReader',
+    params: {
+      mangaId: manga.value.id,
+      chapterId: savedChapter.value?.id ?? firstChapter.id,
+    },
+  }
+})
+
+watch(
+  () => props.mangaId,
+  async (mangaId) => {
+    loading.value = true
+    loadError.value = ''
+    manga.value = undefined
+    try {
+      const id = Number(mangaId)
+      if (!Number.isInteger(id)) throw new Error('无效的漫画 ID')
+      const response = await getComicInfo(id)
+      manga.value = toManga(response)
+      const position = response.ReadPosition
+      if (position) saveProgress(mangaId, String(position.ChapterId), Number(position.Position) || 1)
+    } catch (error) {
+      loadError.value = getErrMsg(error)
+    } finally {
+      loading.value = false
+    }
   },
-}))
+  { immediate: true },
+)
 
 function dateFormat(time: string) {
   return parseTime(time).format('YYYY-MM-DD HH:mm')
+}
+
+function chapterDateFormat(time: string) {
+  return parseTime(time).format('YYYY-MM-DD')
 }
 </script>
 
 <style lang="scss" scoped>
 .manga-detail {
+  position: relative;
   width: 100%;
   max-width: 1440px;
+  min-height: 320px;
+}
+.detail-state {
+  display: grid;
+  min-height: 280px;
+  place-items: center;
 }
 .detail-layout {
   display: grid;
@@ -165,7 +218,9 @@ function dateFormat(time: string) {
 .description {
   max-width: 820px;
   margin: 0;
-  line-height: 1.6;
+  padding-top: 6px;
+  line-height: 1;
+  opacity: 0.6;
 }
 .info-lines {
   line-height: 1.65;

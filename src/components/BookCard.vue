@@ -1,6 +1,6 @@
 <template>
   <div>
-    <router-link :to="{ name: 'BookInfo', params: { bid: props.book.Id } }">
+    <router-link :to="detailRoute">
       <div class="book-cover">
         <q-card v-intersection.once="onIntersection">
           <div v-if="visible">
@@ -62,6 +62,11 @@ const settingStore = useSettingStore()
 const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
+const detailRoute = computed(() =>
+  props.book.Type === 'Comic'
+    ? { name: 'MangaDetail', params: { mangaId: props.book.Id } }
+    : { name: 'BookInfo', params: { bid: props.book.Id } },
+)
 const cover = computed(() => props.book.Cover)
 const updateTime = useToNowRef(() => props.book.LastUpdatedAt)
 const placeholder = computed(() => getPlaceholder(props.book.Cover))

@@ -36,7 +36,14 @@ export namespace RefreshToken {
 }
 
 export namespace GetMyBooks {
-  export type Request = GetBookListRequest
+  export enum BookType {
+    Novel = 'Novel',
+    Comic = 'Comic',
+  }
+
+  export interface Request extends GetBookListRequest {
+    Type: BookType
+  }
   export type Response = GetBookListRes
 }
 

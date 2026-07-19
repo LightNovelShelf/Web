@@ -13,66 +13,88 @@
       />
     </div>
 
-    <div class="series-grid">
+    <div v-if="mangas.length" class="series-grid">
       <router-link
-        v-for="manga in sortedMangas"
+        v-for="manga in mangas"
         :key="manga.id"
         class="series-card"
         :to="{ name: 'MangaDetail', params: { mangaId: manga.id } }"
       >
         <div class="cover-wrap">
           <manga-cover :manga="manga" compact />
-          <span class="chapter-count">{{ manga.chapters.length }} 话</span>
+          <span class="chapter-count">{{ manga.chapterCount }} 卷</span>
         </div>
-        <div class="series-title" :title="manga.title">{{ manga.title }}</div>
-        <div class="series-update-time">
-          <manga-update-time :updated-at="manga.updatedAt" />
+        <div class="series-meta">
+          <div class="series-title">
+            <div class="series-title-text" :title="manga.title">{{ manga.title }}</div>
+          </div>
+          <div class="series-update-time">
+            <manga-update-time :updated-at="manga.updatedAt" />
+          </div>
         </div>
       </router-link>
     </div>
+    <div v-else-if="!loading" class="empty-state text-grey-7">
+      {{ loadError || '暂无漫画' }}
+    </div>
+    <q-inner-loading :showing="loading">
+      <q-spinner-dots color="primary" size="40px" />
+    </q-inner-loading>
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { ref, watch } from 'vue'
+
+import { getErrMsg } from 'src/utils/getErrMsg'
+
+import { getComicList } from 'src/services/manga'
+
+import type { MangaListItem } from './types'
+import type { ComicOrder } from 'src/services/manga'
 
 import MangaCover from './components/MangaCover.vue'
 import MangaUpdateTime from './components/MangaUpdateTime.vue'
-import { mangas } from './mock'
+import { toMangaListItem } from './data'
 
-type MangaOrder = 'latest' | 'new' | 'view'
-
-const orderOptions: Array<{ label: string; value: MangaOrder }> = [
+const orderOptions: Array<{ label: string; value: ComicOrder }> = [
   { label: '最近更新', value: 'latest' },
   { label: '上架时间', value: 'new' },
   { label: '总点击量', value: 'view' },
 ]
 
-const seriesStats: Record<string, { createdAt: string; updatedAt: string; views: number }> = {
-  'night-train': { createdAt: '2026-01-10', updatedAt: '2026-07-18', views: 1280000 },
-  'summer-echo': { createdAt: '2025-05-16', updatedAt: '2026-06-20', views: 860000 },
-  'blade-bloom': { createdAt: '2025-11-08', updatedAt: '2026-07-19', views: 1020000 },
-  'cloud-cafe': { createdAt: '2026-03-22', updatedAt: '2026-07-14', views: 640000 },
-  'zero-city': { createdAt: '2026-02-02', updatedAt: '2026-07-17', views: 1110000 },
-  'fox-letter': { createdAt: '2025-08-12', updatedAt: '2026-05-30', views: 1530000 },
-}
+const order = ref<ComicOrder>('latest')
+const mangas = ref<MangaListItem[]>([])
+const loading = ref(false)
+const loadError = ref('')
 
-const order = ref<MangaOrder>('latest')
-const sortedMangas = computed(() =>
-  [...mangas].sort((left, right) => {
-    const leftStats = seriesStats[left.id]
-    const rightStats = seriesStats[right.id]
-    if (order.value === 'view') return rightStats.views - leftStats.views
-    if (order.value === 'new') return rightStats.createdAt.localeCompare(leftStats.createdAt)
-    return rightStats.updatedAt.localeCompare(leftStats.updatedAt)
-  }),
+watch(
+  order,
+  async () => {
+    loading.value = true
+    loadError.value = ''
+    try {
+      const response = await getComicList({ Page: 1, Size: 24, Order: order.value })
+      mangas.value = response.Data.map(toMangaListItem)
+    } catch (error) {
+      mangas.value = []
+      loadError.value = getErrMsg(error)
+    } finally {
+      loading.value = false
+    }
+  },
+  { immediate: true },
 )
 </script>
 
 <style lang="scss" scoped>
+@import 'src/css/mixin';
+
 .manga-series-page {
+  position: relative;
   width: 100%;
   max-width: 1920px;
+  min-height: 320px;
 }
 .top-bar {
   display: flex;
@@ -116,23 +138,32 @@ const sortedMangas = computed(() =>
   border-radius: 1em 0 0 1em;
   font-size: 12px;
 }
+.series-meta {
+  padding: 4px;
+}
 .series-title {
-  display: -webkit-box;
-  height: 38px;
-  margin: 6px 4px 0;
-  overflow: hidden;
-  font-size: 12px;
-  line-height: 19px;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  display: flex;
+  align-items: flex-start;
+  height: calc(var(--font-size) * var(--line-height) * 2);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  --font-size: 12px;
+  --line-height: 1.6;
+}
+.series-title-text {
+  @include ellipsis(2);
 }
 .series-update-time {
   height: 18px;
-  margin: 2px 4px 0;
   font-size: 12px;
   line-height: 18px;
   text-align: right;
   opacity: 0.6;
+}
+.empty-state {
+  display: grid;
+  min-height: 240px;
+  place-items: center;
 }
 @media (max-width: 1439px) {
   .series-grid {

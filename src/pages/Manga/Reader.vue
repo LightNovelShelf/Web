@@ -4,6 +4,7 @@
     :class="[`mode-${settings.mode}`, { 'toolbar-hidden': !toolbarVisible }]"
     :style="themeStyle"
   >
+    <template v-if="manga && currentChapter">
     <header class="reader-topbar" @click.stop>
       <div class="topbar-leading">
         <q-btn
@@ -15,16 +16,16 @@
         />
         <div class="work-info">
           <strong>{{ manga.title }}</strong>
-          <span>第 {{ currentChapter.number }} 话 · {{ currentChapter.title }}</span>
+          <span>{{ currentChapter.title }}</span>
         </div>
       </div>
       <div class="topbar-actions">
         <q-btn
           flat
           round
-          :icon="followed ? 'mdiHeart' : 'mdiHeartOutline'"
-          :aria-label="followed ? '取消追漫' : '追漫'"
-          @click="toggleFollow(manga.id)"
+          disable
+          icon="mdiHeartOutline"
+          aria-label="追漫功能暂不可用"
         />
       </div>
     </header>
@@ -42,37 +43,36 @@
         <div class="page-spread" :class="{ double: effectivePageMode === 'double', rtl: settings.direction === 'rtl' }">
           <manga-page
             v-for="page in visiblePages"
-            :key="page"
-            :page-number="page"
-            :chapter-number="currentChapter.number"
-            :theme="manga.theme"
+            :key="`${currentChapter.id}-${page.number}`"
+            :page-number="page.number"
+            :image="page.image"
+            loading="eager"
           />
         </div>
       </div>
 
       <div v-else class="vertical-stage">
         <div class="chapter-opening">
-          <span>CHAPTER {{ String(currentChapter.number).padStart(2, '0') }}</span>
+          <span>VOLUME {{ String(currentChapter.number).padStart(2, '0') }}</span>
           <h1>{{ currentChapter.title }}</h1>
           <p>{{ manga.title }}</p>
         </div>
         <manga-page
           v-for="page in pages"
-          :key="page"
-          :data-page="page"
-          :page-number="page"
-          :chapter-number="currentChapter.number"
-          :theme="manga.theme"
+          :key="`${currentChapter.id}-${page.number}`"
+          :data-page="page.number"
+          :page-number="page.number"
+          :image="page.image"
         />
         <div class="chapter-ending">
-          <div>本话完</div>
-          <strong>下一话 · {{ nextChapter?.title ?? '敬请期待' }}</strong>
+          <div>本卷完</div>
+          <strong>下一卷 · {{ nextChapter?.title ?? '敬请期待' }}</strong>
           <q-btn
             v-if="nextChapter"
             unelevated
             color="amber-7"
             text-color="grey-10"
-            label="阅读下一话"
+            label="阅读下一卷"
             icon-right="mdiArrowRight"
             @click="goToChapter(nextChapter.id)"
           />
@@ -111,11 +111,11 @@
         flat
         round
         icon="mdiFormatListBulleted"
-        aria-label="章节目录"
+        aria-label="分卷目录"
         :class="{ active: panel === 'catalog' }"
         @click="togglePanel('catalog')"
       >
-        <q-tooltip anchor="center left" self="center right">章节目录</q-tooltip>
+        <q-tooltip anchor="center left" self="center right">分卷目录</q-tooltip>
       </q-btn>
       <q-btn
         flat
@@ -141,7 +141,7 @@
       <div class="panel-header">
         <div>
           <span>{{ panel === 'settings' ? 'READING PREFERENCES' : 'EPISODE GUIDE' }}</span>
-          <strong>{{ panel === 'settings' ? '阅读设置' : '章节目录' }}</strong>
+          <strong>{{ panel === 'settings' ? '阅读设置' : '分卷目录' }}</strong>
         </div>
         <q-btn flat round dense icon="mdiClose" aria-label="关闭面板" @click="panel = null" />
       </div>
@@ -220,22 +220,22 @@
         round
         icon="mdiSkipPrevious"
         :disable="!previousChapter"
-        aria-label="上一话"
+        aria-label="上一卷"
         @click="previousChapter && goToChapter(previousChapter.id)"
       />
       <div class="progress-control">
         <div class="page-count">
-          {{ currentPage }} <span>/ {{ currentChapter.pages }}</span>
+          {{ sliderPage }} <span>/ {{ currentChapter.pages }}</span>
         </div>
         <div class="slider-wrap">
           <q-slider
-            v-model="currentPage"
+            v-model="sliderPage"
             :min="1"
             :max="currentChapter.pages"
             :step="effectivePageMode === 'double' && settings.mode === 'horizontal' ? 2 : 1"
             color="amber-7"
             track-color="grey-7"
-            @change="saveCurrentProgress"
+            @change="commitSliderPage"
           />
         </div>
       </div>
@@ -245,10 +245,15 @@
         round
         icon="mdiSkipNext"
         :disable="!nextChapter"
-        aria-label="下一话"
+        aria-label="下一卷"
         @click="nextChapter && goToChapter(nextChapter.id)"
       />
     </footer>
+    </template>
+    <div v-else class="reader-loading">
+      <q-spinner-dots v-if="loading" color="amber-7" size="48px" />
+      <span v-else>{{ loadError || '漫画分卷不存在' }}</span>
+    </div>
   </q-page>
 </template>
 
@@ -257,17 +262,30 @@ import { useQuasar } from 'quasar'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { getErrMsg } from 'src/utils/getErrMsg'
+
+import { saveReadPosition } from 'src/services/book'
+import { getComicContent, getComicInfo } from 'src/services/manga'
+
+import type { Manga } from './types'
+
 import MangaPage from './components/MangaPage.vue'
-import { getChapter, getManga } from './mock'
+import { toManga, toMangaImage } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
 
 const props = defineProps<{ mangaId: string; chapterId: string }>()
 const $q = useQuasar()
 const router = useRouter()
-const { progress, isFollowing, toggleFollow, saveProgress } = useMangaLibrary()
+const { progress, saveProgress } = useMangaLibrary()
 const readerCanvas = ref<HTMLElement>()
 const toolbarVisible = ref(true)
 const panel = ref<'settings' | 'catalog' | null>(null)
+const manga = ref<Manga>()
+const loading = ref(false)
+const loadError = ref('')
+const activeChapterId = ref('')
+let requestVersion = 0
+let saveTimer: ReturnType<typeof setTimeout> | undefined
 const savedSettings = (() => {
   try {
     return JSON.parse(window.localStorage.getItem('light-novel-shelf:manga-reader-settings') ?? '')
@@ -281,25 +299,36 @@ const settings = reactive({
   direction: savedSettings.direction === 'rtl' ? 'rtl' : 'ltr',
 } as { mode: 'horizontal' | 'vertical'; pageMode: 'single' | 'double'; direction: 'ltr' | 'rtl' })
 
-const manga = computed(() => getManga(props.mangaId))
-const currentChapter = computed(() => getChapter(manga.value, props.chapterId))
-const savedPage =
-  progress.value[manga.value.id]?.chapterId === currentChapter.value.id ? progress.value[manga.value.id]?.page : 1
-const currentPage = ref(savedPage ?? 1)
-const chapterIndex = computed(() => manga.value.chapters.findIndex((chapter) => chapter.id === currentChapter.value.id))
-const previousChapter = computed(() => manga.value.chapters[chapterIndex.value - 1])
-const nextChapter = computed(() => manga.value.chapters[chapterIndex.value + 1])
-const followed = computed(() => isFollowing(manga.value.id).value)
+const currentChapter = computed(() =>
+  manga.value?.chapters.find((chapter) => chapter.id === activeChapterId.value),
+)
+const currentPage = ref(1)
+const sliderPage = ref(1)
+const preloadedImageUrls = new Set<string>()
+const chapterIndex = computed(() =>
+  manga.value && currentChapter.value
+    ? manga.value.chapters.findIndex((chapter) => chapter.id === currentChapter.value!.id)
+    : -1,
+)
+const previousChapter = computed(() => manga.value?.chapters[chapterIndex.value - 1])
+const nextChapter = computed(() => manga.value?.chapters[chapterIndex.value + 1])
 const effectivePageMode = computed(() => ($q.screen.lt.sm ? 'single' : settings.pageMode))
-const pages = computed(() => Array.from({ length: currentChapter.value.pages }, (_, index) => index + 1))
+const pages = computed(() =>
+  (currentChapter.value?.images ?? []).map((image, index) => ({ number: index + 1, image })),
+)
 const visiblePages = computed(() => {
-  if (effectivePageMode.value === 'single') return [currentPage.value]
-  return [currentPage.value, currentPage.value + 1].filter((page) => page <= currentChapter.value.pages)
+  const chapter = currentChapter.value
+  if (!chapter) return []
+  const pageNumbers =
+    effectivePageMode.value === 'single' ? [currentPage.value] : [currentPage.value, currentPage.value + 1]
+  return pageNumbers
+    .filter((page) => page <= chapter.pages)
+    .map((page) => ({ number: page, image: chapter.images[page - 1] }))
 })
 const themeStyle = computed(() => ({
-  '--reader-primary': manga.value.theme.primary,
-  '--reader-secondary': manga.value.theme.secondary,
-  '--reader-accent': manga.value.theme.accent,
+  '--reader-primary': manga.value?.theme.primary,
+  '--reader-secondary': manga.value?.theme.secondary,
+  '--reader-accent': manga.value?.theme.accent,
 }))
 
 watch(
@@ -313,18 +342,82 @@ watch(
 )
 
 watch(
-  () => props.chapterId,
-  () => {
-    currentPage.value =
-      progress.value[manga.value.id]?.chapterId === currentChapter.value.id
-        ? (progress.value[manga.value.id]?.page ?? 1)
-        : 1
-    panel.value = null
-    window.scrollTo({ top: 0 })
+  [() => props.mangaId, () => props.chapterId],
+  async ([mangaId, chapterId]) => {
+    const version = ++requestVersion
+    loading.value = true
+    loadError.value = ''
+    if (manga.value && manga.value.id !== mangaId) {
+      manga.value = undefined
+      activeChapterId.value = ''
+    }
+    try {
+      const bookId = Number(mangaId)
+      const cid = Number(chapterId)
+      if (!Number.isInteger(bookId) || !Number.isInteger(cid)) throw new Error('无效的漫画或分卷 ID')
+      const [info, content] = await Promise.all([getComicInfo(bookId), getComicContent(cid)])
+      if (version !== requestVersion) return
+      if (content.Chapter.BookId !== bookId) throw new Error('漫画与分卷不匹配')
+
+      const loadedManga = toManga(info)
+      const loadedChapter = loadedManga.chapters.find((chapter) => chapter.id === chapterId)
+      if (!loadedChapter) throw new Error('分卷不存在')
+      loadedChapter.images = content.Chapter.Images.map((image) =>
+        toMangaImage(image.Url, image.Width, image.Height, image.Placeholder),
+      )
+      loadedChapter.pages = loadedChapter.images.length
+      manga.value = loadedManga
+      activeChapterId.value = chapterId
+
+      const serverPosition = content.ReadPosition
+      if (serverPosition)
+        saveProgress(mangaId, String(serverPosition.ChapterId), Number(serverPosition.Position) || 1)
+      const saved = progress.value[mangaId]
+      currentPage.value = saved?.chapterId === chapterId ? Math.min(saved.page, loadedChapter.pages) : 1
+      panel.value = null
+      window.scrollTo({ top: 0 })
+    } catch (error) {
+      if (version !== requestVersion) return
+      if (!manga.value || manga.value.id !== mangaId) {
+        manga.value = undefined
+        activeChapterId.value = ''
+      }
+      loadError.value = getErrMsg(error)
+    } finally {
+      if (version === requestVersion) loading.value = false
+    }
   },
+  { immediate: true },
 )
 
-watch(currentPage, saveCurrentProgress)
+watch(currentPage, (page) => {
+  sliderPage.value = page
+  saveCurrentProgress()
+})
+
+watch([currentPage, () => currentChapter.value?.id, effectivePageMode, () => settings.mode], preloadNearbyPages, {
+  immediate: true,
+})
+
+function preloadNearbyPages() {
+  const chapter = currentChapter.value
+  if (!chapter) return
+  const visiblePageCount = settings.mode === 'horizontal' && effectivePageMode.value === 'double' ? 2 : 1
+  const firstVisiblePage = currentPage.value
+  const lastVisiblePage = Math.min(chapter.pages, currentPage.value + visiblePageCount - 1)
+  const pageNumbers = [firstVisiblePage - 2, firstVisiblePage - 1, lastVisiblePage + 1, lastVisiblePage + 2]
+
+  pageNumbers.forEach((pageNumber) => {
+    const image = chapter.images[pageNumber - 1]
+    if (!image || preloadedImageUrls.has(image.url)) return
+
+    preloadedImageUrls.add(image.url)
+    const preloader = new Image()
+    preloader.decoding = 'async'
+    preloader.onerror = () => preloadedImageUrls.delete(image.url)
+    preloader.src = image.url
+  })
+}
 
 async function scrollToCurrentPage() {
   await nextTick()
@@ -333,7 +426,22 @@ async function scrollToCurrentPage() {
 }
 
 function saveCurrentProgress() {
+  if (!manga.value || !currentChapter.value) return
   saveProgress(manga.value.id, currentChapter.value.id, currentPage.value)
+  clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => {
+    if (!manga.value || !currentChapter.value) return
+    void saveReadPosition({
+      Bid: Number(manga.value.id),
+      Cid: Number(currentChapter.value.id),
+      XPath: String(currentPage.value),
+    }).catch(() => undefined)
+  }, 400)
+}
+
+function commitSliderPage(page: number | null) {
+  if (page === null || page === currentPage.value) return
+  currentPage.value = page
 }
 
 function previousPage() {
@@ -343,14 +451,17 @@ function previousPage() {
 }
 
 function nextPage() {
+  if (!currentChapter.value) return
   const step = effectivePageMode.value === 'double' ? 2 : 1
   if (currentPage.value + step <= currentChapter.value.pages) currentPage.value += step
   else if (nextChapter.value) goToChapter(nextChapter.value.id)
-  else showMockNotice('已经是最后一话了')
+  else showNotice('已经是最后一卷了')
 }
 
 function goToChapter(chapterId: string, page: 'first' | 'last' = 'first') {
-  const chapter = getChapter(manga.value, chapterId)
+  if (!manga.value) return
+  const chapter = manga.value.chapters.find((item) => item.id === chapterId)
+  if (!chapter) return
   const targetPage = page === 'last' ? chapter.pages : 1
   saveProgress(manga.value.id, chapterId, targetPage)
   void router.push({ name: 'MangaReader', params: { mangaId: manga.value.id, chapterId } })
@@ -366,7 +477,7 @@ function toggleToolbar() {
   if (!toolbarVisible.value) panel.value = null
 }
 
-function showMockNotice(message: string) {
+function showNotice(message: string) {
   $q.notify({ position: 'top', timeout: 1200, message })
 }
 
@@ -404,6 +515,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(saveTimer)
   window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('scroll', handleVerticalScroll)
 })
@@ -417,6 +529,11 @@ onBeforeUnmount(() => {
   min-height: 100vh !important;
   color: #eee;
   background: #17181b;
+}
+.reader-loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
 }
 .reader-topbar,
 .reader-bottombar,
@@ -510,7 +627,6 @@ onBeforeUnmount(() => {
 .page-spread.double :deep(.comic-page) {
   max-width: none;
   height: min(var(--reader-page-height), 69.444vw);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
 }
 .page-zone {
   position: fixed;

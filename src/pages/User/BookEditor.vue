@@ -22,7 +22,7 @@
             <q-grid-item span="2" xs="1" sm="1" md="1">
               <div class="q-gutter-sm">
                 <image-input v-model="book['Cover']" />
-                <q-input label="书名" v-model="book['Title']" />
+                <q-input :label="isComic ? '漫画名' : '书名'" v-model="book['Title']" />
                 <q-input label="作者" v-model="book['Author']" />
                 <div class="text-opacity">简介</div>
                 <html-editor v-model:html="book['Introduction']" mode="simple" />
@@ -63,14 +63,14 @@
             </div>
           </div>
         </q-tab-panel>
-        <q-tab-panel name="chapter">
+        <q-tab-panel v-if="!isComic" name="chapter">
           <div class="q-gutter-sm">
             <q-input label="标题" v-model="chapter['Title']" />
             <div class="text-opacity">内容</div>
             <html-editor v-model:html="chapter['Content']" mode="common" />
           </div>
         </q-tab-panel>
-        <q-tab-panel name="new">
+        <q-tab-panel v-if="!isComic" name="new">
           <div class="q-gutter-sm">
             <q-input label="标题" v-model="creatingChapterContent.title" />
             <div class="text-opacity">内容</div>
@@ -110,41 +110,43 @@
       <q-item clickable v-ripple :active="tab === 'setting'" @click="tab = 'setting'">
         <q-item-section> 设置 </q-item-section>
       </q-item>
-      <q-separator class="q-my-sm" />
-      <Draggable
-        v-model="chapters"
-        :animation="100"
-        item-key="Id"
-        class="list-group"
-        ghost-class="ghost"
-        @change="handleChange"
-      >
-        <template #item="{ element, index }">
-          <q-item
-            clickable
-            v-ripple
-            @click="
-              () => {
-                _cid = element.Id
-                tab = 'chapter'
-              }
-            "
-            :active="tab === 'chapter' && _cid === element.Id"
-            :disable="disableDrawer"
-          >
-            <q-item-section>{{ element.Title }}</q-item-section>
-            <q-item-section side>
-              <q-btn flat round @click.stop="delChapter(index + 1)" icon="mdiDelete"></q-btn>
-            </q-item-section>
-          </q-item>
-        </template>
-      </Draggable>
-      <q-separator class="q-my-sm" />
-      <q-item>
-        <q-item-section>
-          <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()"> 新增 </q-btn>
-        </q-item-section>
-      </q-item>
+      <template v-if="!isComic">
+        <q-separator class="q-my-sm" />
+        <Draggable
+          v-model="chapters"
+          :animation="100"
+          item-key="Id"
+          class="list-group"
+          ghost-class="ghost"
+          @change="handleChange"
+        >
+          <template #item="{ element, index }">
+            <q-item
+              clickable
+              v-ripple
+              @click="
+                () => {
+                  _cid = element.Id
+                  tab = 'chapter'
+                }
+              "
+              :active="tab === 'chapter' && _cid === element.Id"
+              :disable="disableDrawer"
+            >
+              <q-item-section>{{ element.Title }}</q-item-section>
+              <q-item-section side>
+                <q-btn flat round @click.stop="delChapter(index + 1)" icon="mdiDelete"></q-btn>
+              </q-item-section>
+            </q-item>
+          </template>
+        </Draggable>
+        <q-separator class="q-my-sm" />
+        <q-item>
+          <q-item-section>
+            <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()"> 新增 </q-btn>
+          </q-item-section>
+        </q-item>
+      </template>
     </q-scroll-area>
   </q-drawer>
 </template>
@@ -196,6 +198,7 @@ const options = ref([])
 const isActive = computed(() => book.value?.Id === _bid.value)
 const disableDrawer = ref(false)
 const book = ref<any>()
+const isComic = computed(() => book.value?.Type === 'Comic')
 const bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 const chapters = ref([] as ChapterInfo[])
 const _bid = computed(() => ~~(props.bookId || '1'))
@@ -430,7 +433,11 @@ async function handleChange(evt) {
   const newSort = newIndex + 1
 
   try {
-    const changedList = await reorderChapter({ BookId: _bid.value, OldSortNum: oldSort, NewSortNum: newSort })
+    const changedList = await reorderChapter({
+      BookId: _bid.value,
+      OldSortNum: oldSort,
+      NewSortNum: newSort,
+    })
     chapters.value = <ChapterInfo[]>changedList
   } catch (e) {
     $q.notify({
