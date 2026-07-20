@@ -258,6 +258,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useSwipe } from '@vueuse/core'
 import { useQuasar } from 'quasar'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -299,6 +300,21 @@ const settings = reactive({
   pageMode: savedSettings.pageMode === 'double' ? 'double' : 'single',
   direction: savedSettings.direction === 'rtl' ? 'rtl' : 'ltr',
 } as { mode: 'horizontal' | 'vertical'; pageMode: 'single' | 'double'; direction: 'ltr' | 'rtl' })
+
+const swipeTarget = computed(() => (settings.mode === 'horizontal' ? readerCanvas.value : undefined))
+useSwipe(swipeTarget, {
+  passive: false,
+  threshold: 50,
+  onSwipeEnd: (_event, direction) => {
+    if (direction === 'left') {
+      if (settings.direction === 'rtl') previousPage()
+      else nextPage()
+    } else if (direction === 'right') {
+      if (settings.direction === 'rtl') nextPage()
+      else previousPage()
+    }
+  },
+})
 
 const currentChapter = computed(() =>
   manga.value?.chapters.find((chapter) => chapter.id === activeChapterId.value),
