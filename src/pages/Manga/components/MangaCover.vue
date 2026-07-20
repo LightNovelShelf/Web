@@ -1,12 +1,5 @@
 <template>
-  <q-img
-    class="manga-cover"
-    :src="manga.cover.url"
-    :ratio="manga.cover.width / manga.cover.height"
-    fit="cover"
-    no-spinner
-    :alt="`${manga.title}封面`"
-  >
+  <q-img class="manga-cover" :src="manga.cover.url" :ratio="2 / 3" fit="cover" no-spinner :alt="`${manga.title}封面`">
     <template v-if="manga.cover.placeholder && generalSetting.enableBlurHash" #loading>
       <blur-hash :blurhash="manga.cover.placeholder" />
     </template>
@@ -20,7 +13,7 @@ import { BlurHash } from 'components'
 
 import type { Manga, MangaListItem } from '../types'
 
-withDefaults(defineProps<{ manga: Manga | MangaListItem; compact?: boolean }>(), { compact: false })
+defineProps<{ manga: Manga | MangaListItem }>()
 
 const { generalSetting } = useSettingStore()
 </script>

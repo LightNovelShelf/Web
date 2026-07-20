@@ -1,6 +1,6 @@
 <template>
-  <q-page padding class="manga-series-page q-mx-auto">
-    <div class="top-bar">
+  <q-page padding style="max-width: 1920px" class="q-mx-auto">
+    <div class="row justify-end">
       <q-select
         v-model="order"
         :disable="loading"
@@ -10,33 +10,43 @@
         dense
         :options="orderOptions"
         label="排序"
-        class="order-select"
+        style="width: 160px"
       />
     </div>
 
-    <div v-if="mangas.length" class="series-grid">
-      <router-link
-        v-for="manga in mangas"
-        :key="manga.id"
-        class="series-card"
-        :to="{ name: 'MangaDetail', params: { mangaId: manga.id } }"
-      >
-        <div class="cover-wrap">
-          <manga-cover :manga="manga" compact />
-          <span class="status-tag" :style="{ backgroundColor: manga.status.color }">{{ manga.status.name }}</span>
-          <span class="chapter-count">{{ manga.chapterCount }}话</span>
-        </div>
-        <div class="series-meta">
-          <div class="series-title">
-            <div class="series-title-text" :title="manga.title">{{ manga.title }}</div>
+    <q-grid
+      v-if="mangas.length"
+      :x-gap="12"
+      :y-gap="20"
+      cols="6"
+      xs="3"
+      sm="4"
+      md="5"
+      lg="6"
+      xl="6"
+      style="margin-top: 12px"
+    >
+      <q-grid-item v-for="manga in mangas" :key="manga.id">
+        <router-link class="series-card" :to="{ name: 'MangaDetail', params: { mangaId: manga.id } }">
+          <div class="cover-wrap">
+            <q-card class="overflow-hidden">
+              <manga-cover :manga="manga" />
+            </q-card>
+            <span class="status-tag" :style="{ backgroundColor: manga.status.color }">{{ manga.status.name }}</span>
+            <span class="chapter-count">{{ manga.chapterCount }}话</span>
           </div>
-          <div class="series-update-time">
-            <manga-update-time :updated-at="manga.updatedAt" />
+          <div class="q-pa-xs">
+            <div class="series-title">
+              <div class="series-title-text" :title="manga.title">{{ manga.title }}</div>
+            </div>
+            <div class="series-update-time">
+              <manga-update-time :updated-at="manga.updatedAt" />
+            </div>
           </div>
-        </div>
-      </router-link>
-    </div>
-    <div v-else-if="!loading" class="empty-state text-grey-7">
+        </router-link>
+      </q-grid-item>
+    </q-grid>
+    <div v-else-if="!loading" class="row items-center justify-center text-grey-7" style="min-height: 240px">
       {{ loadError || '暂无漫画' }}
     </div>
   </q-page>
@@ -47,6 +57,8 @@ import { useQuasar } from 'quasar'
 import { ref, watch } from 'vue'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
+
+import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
@@ -94,39 +106,13 @@ useInitRequest(request)
 <style lang="scss" scoped>
 @import 'src/css/mixin';
 
-.manga-series-page {
-  position: relative;
-  width: 100%;
-  max-width: 1920px;
-  min-height: 320px;
-}
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-}
-.order-select {
-  width: 160px;
-}
-.series-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 20px 12px;
-  margin-top: 12px;
-}
 .series-card {
-  min-width: 0;
   color: inherit;
 }
 .cover-wrap {
   position: relative;
-  overflow: hidden;
-  background: #ddd;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 .cover-wrap :deep(.manga-cover) {
-  aspect-ratio: 2 / 3;
   transition: transform 0.25s ease;
 }
 .series-card:hover :deep(.manga-cover) {
@@ -151,9 +137,6 @@ useInitRequest(request)
   border-radius: 0 1em 1em 0;
   font-size: 12px;
 }
-.series-meta {
-  padding: 4px;
-}
 .series-title {
   display: flex;
   align-items: flex-start;
@@ -172,29 +155,5 @@ useInitRequest(request)
   line-height: 18px;
   text-align: right;
   opacity: 0.6;
-}
-.empty-state {
-  display: grid;
-  min-height: 240px;
-  place-items: center;
-}
-@media (max-width: 1439px) {
-  .series-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-@media (max-width: 1023px) {
-  .series-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-@media (max-width: 599px) {
-  .order-select {
-    width: 140px;
-  }
-  .series-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px 8px;
-  }
 }
 </style>
