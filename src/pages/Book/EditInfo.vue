@@ -65,13 +65,19 @@ const bid = computed(() => ~~props.bid)
 const book = ref<any>()
 const options = ref([])
 const isActive = computed(() => book.value?.Id === bid.value)
+const comicCategoryNames = new Set(['原创', '连载', '完结'])
+const comicOnlyCategoryNames = new Set(['连载', '完结'])
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
 
 const request = useTimeoutFn(async () => {
   const data = (await getBookEditInfo(bid.value)) as any
-  options.value = data.Categories.map((item) => {
+  const categories =
+    data.Book.Type === 'Comic'
+      ? data.Categories.filter((item) => comicCategoryNames.has(item.Name))
+      : data.Categories.filter((item) => !comicOnlyCategoryNames.has(item.Name))
+  options.value = categories.map((item) => {
     return {
       label: item.Name,
       value: item.Id,

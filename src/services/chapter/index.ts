@@ -19,6 +19,18 @@ export function createNewNovelChapter(request: Types.UpdateNovelChapterRequest) 
   return requestWithSignalr('CreateNewNovelChapter', request)
 }
 
+export function getComicEditInfo(request: Types.GetComicEditInfo) {
+  return requestWithSignalr('GetComicEditInfo', request)
+}
+
+export function updateComicChapter(request: Types.UpdateComicChapterRequest) {
+  return requestWithSignalr('UpdateComicChapter', request)
+}
+
+export function createNewComicChapter(request: Types.CreateNewComicChapterRequest) {
+  return requestWithSignalr('CreateNewComicChapter', request)
+}
+
 export function deleteChapter(request: Types.UpdateNovelChapterRequest) {
   return requestWithSignalr('DeleteChapter', request)
 }

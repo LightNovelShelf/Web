@@ -68,7 +68,7 @@
                   clickable
                   v-ripple
                   class="chapter-item rounded-borders"
-                  :active="bookProgress(book)?.chapterId === chapter.id"
+                  :active="lastProgress?.book.id === book.id && lastProgress?.chapter.id === chapter.id"
                   active-class="bg-primary text-white"
                   :to="{ name: 'MangaReader', params: { mangaId: book.id, chapterId: chapter.id } }"
                 >

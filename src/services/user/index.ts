@@ -139,7 +139,12 @@ export async function quickCreateNovel(req: Types.QuickCreateNovel.Request) {
   return requestWithSignalr<Types.QuickCreateNovel.Response>('QuickCreateNovel', req)
 }
 
-/** 上传图片，返回图片链接 */
+/** 新建漫画，不创建占位章节 */
+export async function quickCreateComic(req: Types.QuickCreateComic.Request) {
+  return requestWithSignalr<Types.QuickCreateComic.Response>('QuickCreateComic', req)
+}
+
+/** 上传图片，返回原图与 MD 图链接 */
 export async function uploadImage(req: Types.UploadImage.Request) {
   return requestWithSignalr<Types.UploadImage.Response>('UploadImage', req)
 }

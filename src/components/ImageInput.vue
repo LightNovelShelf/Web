@@ -49,8 +49,11 @@ const handleUpload = async (file: File) => {
   })
 
   try {
-    const url = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
-    emit('update:modelValue', url)
+    const { Url } = await uploadImage({
+      FileName: file.name,
+      ImageData: new Uint8Array(await file.arrayBuffer()),
+    })
+    emit('update:modelValue', Url)
     notif({
       icon: 'mdiCheck',
       spinner: false,

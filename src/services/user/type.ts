@@ -60,12 +60,26 @@ export namespace QuickCreateNovel {
   export type Response = number
 }
 
+export namespace QuickCreateComic {
+  export interface Request {
+    Cover: string
+    Title: string
+    Author: string
+    Introduction: string
+    CategoryName: '原创' | '连载' | '完结'
+  }
+  export type Response = number
+}
+
 export namespace UploadImage {
   export interface Request {
     FileName: string
     ImageData: Uint8Array
   }
-  export type Response = string
+  export interface Response {
+    Url: string
+    MediumUrl: string
+  }
 }
 
 export namespace GetNotifications {

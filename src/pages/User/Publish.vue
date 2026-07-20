@@ -21,9 +21,13 @@
                 <q-icon name="mdiMagnify" class="cursor-pointer" @click="searchBook" />
               </template>
             </q-input>
-            <div v-if="tab === GetMyBooks.BookType.Novel" class="publish-actions">
-              <q-btn color="primary" @click="uploadBookShow = true"> 上传书籍 </q-btn>
-              <q-btn color="primary" @click="createBookShow = true"> 发布新书 </q-btn>
+            <div class="publish-actions">
+              <q-btn v-if="tab === GetMyBooks.BookType.Novel" color="primary" @click="uploadBookShow = true">
+                上传书籍
+              </q-btn>
+              <q-btn color="primary" @click="createBookShow = true">
+                {{ tab === GetMyBooks.BookType.Comic ? '发布漫画' : '发布新书' }}
+              </q-btn>
             </div>
           </div>
 
@@ -70,7 +74,7 @@
     <q-dialog v-model="createBookShow">
       <q-card class="create-book-dialog">
         <q-card-section>
-          <div class="text-h6">创建书籍</div>
+          <div class="text-h6">{{ tab === GetMyBooks.BookType.Comic ? '创建漫画' : '创建书籍' }}</div>
         </q-card-section>
 
         <q-form @submit="createBook">
@@ -89,12 +93,26 @@
                 type="textarea"
                 v-model="createBookData.Introduction"
               />
-              <q-input label="章节数量(请预估所需要的章节数量)" type="number" v-model="createBookData.Count" />
+              <q-input
+                v-if="tab === GetMyBooks.BookType.Novel"
+                label="章节数量(请预估所需要的章节数量)"
+                type="number"
+                v-model="createBookData.Count"
+              />
               <q-select
+                v-if="tab === GetMyBooks.BookType.Novel"
                 map-options
                 emit-value
                 v-model="createBookData.CategoryId"
                 :options="categoryOptions"
+                label="分类"
+              />
+              <q-select
+                v-else
+                map-options
+                emit-value
+                v-model="comicCategoryName"
+                :options="comicCategoryOptions"
                 label="分类"
               />
             </div>
@@ -136,13 +154,13 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
 import { deleteBook } from 'src/services/book'
 import { PATH } from 'src/services/path'
-import { getMyBooks, quickCreateNovel } from 'src/services/user'
+import { getMyBooks, quickCreateComic, quickCreateNovel } from 'src/services/user'
 import { GetMyBooks } from 'src/services/user/type'
 import { getSessionToken } from 'src/services/utils'
 
 import type { QUploaderFactoryFn } from 'quasar'
 import type { BookInList } from 'src/services/book/types'
-import type { QuickCreateNovel } from 'src/services/user/type'
+import type { QuickCreateComic, QuickCreateNovel } from 'src/services/user/type'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -204,6 +222,12 @@ const categoryOptions = ref([
     value: 8,
   },
 ])
+const comicCategoryOptions: Array<{ label: string; value: QuickCreateComic.Request['CategoryName'] }> = [
+  { label: '原创', value: '原创' },
+  { label: '连载', value: '连载' },
+  { label: '完结', value: '完结' },
+]
+const comicCategoryName = ref<QuickCreateComic.Request['CategoryName']>('连载')
 const createBookData = reactive<QuickCreateNovel.Request>({
   Cover: '',
   Title: '',
@@ -261,6 +285,20 @@ function delBook(bid: number, index: number) {
 }
 async function createBook() {
   try {
+    if (tab.value === GetMyBooks.BookType.Comic) {
+      const bid = await quickCreateComic({
+        Cover: createBookData.Cover,
+        Title: createBookData.Title,
+        Author: createBookData.Author,
+        Introduction: createBookData.Introduction,
+        CategoryName: comicCategoryName.value,
+      })
+      $q.notify({ type: 'positive', message: '创建成功' })
+      createBookShow.value = false
+      await router.push({ name: 'UserBookEditor', params: { bookId: bid } })
+      return
+    }
+
     const request = {
       ...createBookData,
       Count: ~~createBookData.Count,

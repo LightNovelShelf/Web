@@ -15,6 +15,8 @@ interface GetNovelEditInfoByCid {
 
 export type GetNovelEditInfo = GetNovelEditInfoBySortNum | GetNovelEditInfoByCid
 
+export type GetComicEditInfo = GetNovelEditInfo
+
 interface UpdateNovelChapterRequestBySortNum extends GetNovelEditInfoBySortNum {
   Map?: {
     Content?: string
@@ -30,6 +32,27 @@ interface UpdateNovelChapterRequestByCid extends GetNovelEditInfoByCid {
 }
 
 export type UpdateNovelChapterRequest = UpdateNovelChapterRequestBySortNum | UpdateNovelChapterRequestByCid
+
+export type ComicChapterMap = {
+  Title: string
+  Images: string[]
+}
+
+interface UpdateComicChapterRequestBySortNum extends GetNovelEditInfoBySortNum {
+  Map: ComicChapterMap
+}
+
+interface UpdateComicChapterRequestByCid extends GetNovelEditInfoByCid {
+  Map: ComicChapterMap
+}
+
+export type UpdateComicChapterRequest = UpdateComicChapterRequestBySortNum | UpdateComicChapterRequestByCid
+
+export interface CreateNewComicChapterRequest {
+  Bid: number
+  SortNum: number
+  Map: ComicChapterMap
+}
 
 export interface ReorderChapterRequest {
   BookId: number

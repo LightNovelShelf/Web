@@ -315,9 +315,12 @@ const handleUpload = async (files: FileList | File[]) => {
   try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      const url = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
+      const { Url } = await uploadImage({
+        FileName: file.name,
+        ImageData: new Uint8Array(await file.arrayBuffer()),
+      })
 
-      editorRef.value?.runCmd('insertImage', url)
+      editorRef.value?.runCmd('insertImage', Url)
 
       notif({
         caption: `${i + 1}/${files.length}`,

@@ -63,18 +63,34 @@
             </div>
           </div>
         </q-tab-panel>
-        <q-tab-panel v-if="!isComic" name="chapter">
-          <div class="q-gutter-sm">
+        <q-tab-panel name="chapter">
+          <div class="chapter-editor">
             <q-input label="标题" v-model="chapter['Title']" />
-            <div class="text-opacity">内容</div>
-            <html-editor v-model:html="chapter['Content']" mode="common" />
+            <comic-chapter-images
+              v-if="isComic"
+              v-model="chapter.Images"
+              v-model:previews="chapter.Previews"
+              v-model:uploading="comicUploading"
+            />
+            <template v-else>
+              <div class="text-opacity">内容</div>
+              <html-editor v-model:html="chapter['Content']" mode="common" />
+            </template>
           </div>
         </q-tab-panel>
-        <q-tab-panel v-if="!isComic" name="new">
-          <div class="q-gutter-sm">
+        <q-tab-panel name="new">
+          <div class="chapter-editor">
             <q-input label="标题" v-model="creatingChapterContent.title" />
-            <div class="text-opacity">内容</div>
-            <html-editor v-model:html="creatingChapterContent.html" mode="common" />
+            <comic-chapter-images
+              v-if="isComic"
+              v-model="creatingChapterContent.images"
+              v-model:previews="creatingChapterContent.previews"
+              v-model:uploading="comicUploading"
+            />
+            <template v-else>
+              <div class="text-opacity">内容</div>
+              <html-editor v-model:html="creatingChapterContent.html" mode="common" />
+            </template>
           </div>
         </q-tab-panel>
       </q-tab-panels>
@@ -110,43 +126,41 @@
       <q-item clickable v-ripple :active="tab === 'setting'" @click="tab = 'setting'">
         <q-item-section> 设置 </q-item-section>
       </q-item>
-      <template v-if="!isComic">
-        <q-separator class="q-my-sm" />
-        <Draggable
-          v-model="chapters"
-          :animation="100"
-          item-key="Id"
-          class="list-group"
-          ghost-class="ghost"
-          @change="handleChange"
-        >
-          <template #item="{ element, index }">
-            <q-item
-              clickable
-              v-ripple
-              @click="
-                () => {
-                  _cid = element.Id
-                  tab = 'chapter'
-                }
-              "
-              :active="tab === 'chapter' && _cid === element.Id"
-              :disable="disableDrawer"
-            >
-              <q-item-section>{{ element.Title }}</q-item-section>
-              <q-item-section side>
-                <q-btn flat round @click.stop="delChapter(index + 1)" icon="mdiDelete"></q-btn>
-              </q-item-section>
-            </q-item>
-          </template>
-        </Draggable>
-        <q-separator class="q-my-sm" />
-        <q-item>
-          <q-item-section>
-            <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()"> 新增 </q-btn>
-          </q-item-section>
-        </q-item>
-      </template>
+      <q-separator class="q-my-sm" />
+      <Draggable
+        v-model="chapters"
+        :animation="100"
+        item-key="Id"
+        class="list-group"
+        ghost-class="ghost"
+        @change="handleChange"
+      >
+        <template #item="{ element, index }">
+          <q-item
+            clickable
+            v-ripple
+            @click="
+              () => {
+                _cid = element.Id
+                tab = 'chapter'
+              }
+            "
+            :active="tab === 'chapter' && _cid === element.Id"
+            :disable="disableDrawer"
+          >
+            <q-item-section>{{ element.Title }}</q-item-section>
+            <q-item-section side>
+              <q-btn flat round @click.stop="delChapter(index + 1)" icon="mdiDelete"></q-btn>
+            </q-item-section>
+          </q-item>
+        </template>
+      </Draggable>
+      <q-separator class="q-my-sm" />
+      <q-item>
+        <q-item-section>
+          <q-btn color="secondary" @click.prevent="addChapter()" :disable="getSaveState()"> 新增 </q-btn>
+        </q-item-section>
+      </q-item>
     </q-scroll-area>
   </q-drawer>
 </template>
@@ -160,7 +174,7 @@ import { getErrMsg } from 'src/utils/getErrMsg'
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
 
-import { BlurHash, HtmlEditor, DragPageSticky, ImageInput } from 'components'
+import { BlurHash, HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from 'components'
 import { useLayout } from 'components/app/useLayout'
 import { QGrid, QGridItem } from 'components/grid'
 
@@ -174,6 +188,9 @@ import {
   deleteChapter,
   updateNovelChapter,
   getNovelEditInfo,
+  createNewComicChapter,
+  updateComicChapter,
+  getComicEditInfo,
 } from 'src/services/chapter'
 
 import type { BookServicesTypes } from 'src/services/book'
@@ -203,20 +220,40 @@ const bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 const chapters = ref([] as ChapterInfo[])
 const _bid = computed(() => ~~(props.bookId || '1'))
 const _cid = ref(-1)
-const chapter = ref<any>({ Title: '加载中...', Content: '加载中...' })
+const chapter = ref<ChapterEditState>({ Title: '加载中...', Content: '加载中...', Images: [], Previews: [] })
 const chapterLoaded = ref(true)
-const creatingChapterContent = reactive({
+const comicUploading = ref(false)
+const comicCategoryNames = new Set(['原创', '连载', '完结'])
+const comicOnlyCategoryNames = new Set(['连载', '完结'])
+const creatingChapterContent = reactive<CreatingChapterState>({
   sortNum: '',
   title: '',
   html: '',
+  images: [],
+  previews: [],
 })
 const tab = ref('information')
 const bookSetting = reactive({} as BookSetting)
 //#endregion
 
 interface ChapterInfo {
-  Id?: number
-  Title?: string
+  Id: number
+  Title: string
+}
+
+interface ChapterEditState {
+  Title: string
+  Content?: string
+  Images: string[]
+  Previews: string[]
+}
+
+interface CreatingChapterState {
+  sortNum: string
+  title: string
+  html: string
+  images: string[]
+  previews: string[]
 }
 
 interface BookSetting {
@@ -227,22 +264,33 @@ interface BookSetting {
 watch(
   () => _cid.value,
   async () => {
+    const cid = _cid.value
     chapterLoaded.value = false
-    if (_cid.value <= 0) {
+    if (cid <= 0) {
       chapterLoaded.value = true
       return
     }
-    chapter.value = { Title: '加载中...', Content: '加载中...' }
-    chapter.value = await getNovelEditInfo({ Bid: _bid.value, Cid: _cid.value })
-    chapterLoaded.value = true
+    chapter.value = { Title: '加载中...', Content: '加载中...', Images: [], Previews: [] }
+    try {
+      const result = isComic.value
+        ? await getComicEditInfo({ Bid: _bid.value, Cid: cid })
+        : await getNovelEditInfo({ Bid: _bid.value, Cid: cid })
+      if (_cid.value === cid) {
+        chapter.value = result as ChapterEditState
+        chapter.value.Images ??= []
+        chapter.value.Previews ??= [...chapter.value.Images]
+      }
+    } catch (error) {
+      $q.notify({ type: 'negative', message: getErrMsg(error) })
+    } finally {
+      if (_cid.value === cid) chapterLoaded.value = true
+    }
   },
 )
 
 function getSaveState(): boolean {
-  if (isActive.value) {
-    return !(tab.value !== 'chapter' || chapterLoaded.value)
-  }
-  return true
+  if (!isActive.value || comicUploading.value) return true
+  return tab.value === 'chapter' && !chapterLoaded.value
 }
 
 //#region book
@@ -308,7 +356,14 @@ async function saveChapter() {
     cancel: true,
   }).onOk(async () => {
     try {
-      await updateNovelChapter({ Cid: _cid.value, Map: toRaw(chapter.value) })
+      if (isComic.value) {
+        await updateComicChapter({
+          Cid: _cid.value,
+          Map: { Title: chapter.value.Title, Images: toRaw(chapter.value.Images) },
+        })
+      } else {
+        await updateNovelChapter({ Cid: _cid.value, Map: toRaw(chapter.value) })
+      }
 
       $q.notify({
         type: 'positive',
@@ -374,8 +429,30 @@ async function delChapter(sortNum: number) {
 async function createChapter() {
   try {
     const sort = ~~creatingChapterContent.sortNum
-    const emptyHtml = !creatingChapterContent.html
     const emptyTitle = !creatingChapterContent.title
+
+    if (isComic.value) {
+      if (creatingChapterContent.images.length === 0) {
+        $q.notify({ type: 'warning', message: '请至少添加一张漫画图片' })
+        return
+      }
+
+      if (emptyTitle) {
+        $q.dialog({
+          title: '警告',
+          message: '章节标题为空，将使用“新章节”初始化。',
+          cancel: true,
+        }).onOk(async () => {
+          creatingChapterContent.title = '新章节'
+          await createComicChapterInner(sort)
+        })
+      } else {
+        await createComicChapterInner(sort)
+      }
+      return
+    }
+
+    const emptyHtml = !creatingChapterContent.html
 
     if (emptyHtml || emptyTitle) {
       $q.dialog({
@@ -423,6 +500,25 @@ async function createChapter() {
   }
 }
 
+async function createComicChapterInner(sortNum: number) {
+  const { Chapters: response, NewCid: cid } = <any>await createNewComicChapter({
+    Bid: _bid.value,
+    SortNum: sortNum,
+    Map: {
+      Title: creatingChapterContent.title,
+      Images: toRaw(creatingChapterContent.images),
+    },
+  })
+  $q.notify({ type: 'positive', message: '新增成功' })
+  chapters.value = response
+  creatingChapterContent.title = ''
+  creatingChapterContent.images = []
+  creatingChapterContent.previews = []
+  creatingChapterContent.sortNum = ''
+  tab.value = 'chapter'
+  _cid.value = cid
+}
+
 //#endregion
 
 async function handleChange(evt) {
@@ -455,7 +551,11 @@ async function handleChange(evt) {
 const request = useTimeoutFn(async () => {
   const p1 = getBookEditInfo(_bid.value).then((data: any) => {
     bookInfo.value = data
-    options.value = data.Categories.map((item) => {
+    const categories =
+      data.Book.Type === 'Comic'
+        ? data.Categories.filter((item) => comicCategoryNames.has(item.Name))
+        : data.Categories.filter((item) => !comicOnlyCategoryNames.has(item.Name))
+    options.value = categories.map((item) => {
       return {
         label: item.Name,
         value: item.Id,
@@ -473,13 +573,22 @@ const request = useTimeoutFn(async () => {
 
 const refresh = () => {
   // refresh page data when back to another book.
-  chapter.value = { Title: '加载中...', Content: '加载中...' }
+  chapter.value = { Title: '加载中...', Content: '加载中...', Images: [], Previews: [] }
+  _cid.value = -1
   tab.value = 'information'
   creatingChapterContent.title = ''
   creatingChapterContent.html = ''
+  creatingChapterContent.images = []
+  creatingChapterContent.previews = []
   creatingChapterContent.sortNum = ''
 }
 useInitRequest(request, { before: refresh, isActive })
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.chapter-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>

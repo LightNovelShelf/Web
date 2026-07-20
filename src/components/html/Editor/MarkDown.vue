@@ -132,8 +132,8 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
 
   const urls: string[] = []
   for (const file of files) {
-    const res = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
-    urls.push(res)
+    const { Url } = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
+    urls.push(Url)
     notif({
       caption: `${urls.length}/${files.length}`,
     })
