@@ -41,7 +41,7 @@
 
               <div class="q-mt-lg">
                 <div>简介</div>
-                <p class="introduction">{{ manga.description }}</p>
+                <div class="introduction" v-html="sanitizerHtml(manga.description)"></div>
               </div>
 
               <div class="row items-center gap-16 q-mt-lg">
@@ -126,6 +126,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
+import sanitizerHtml from 'src/utils/sanitizeHtml'
 import { parseTime } from 'src/utils/time'
 
 import { BookUserAvatar, Comment } from 'components'
@@ -227,10 +228,15 @@ function chapterDateFormat(time: string) {
   background-image: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
 }
 .introduction {
-  margin: 0;
-  padding-top: 6px;
-  line-height: 1;
   opacity: 0.6;
+  line-height: 1;
+  padding-top: 6px;
+  :deep(p) {
+    margin: 0;
+  }
+  :deep(img) {
+    max-width: 100%;
+  }
 }
 .chapter-header {
   padding: 16px 0;

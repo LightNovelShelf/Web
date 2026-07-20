@@ -30,7 +30,7 @@
       </div>
     </header>
 
-    <main ref="readerCanvas" class="reader-canvas" @click.self="toggleToolbar">
+    <main ref="readerCanvas" class="reader-canvas" @click.self="toggleToolbar" @wheel="handleWheel">
       <button
         v-if="settings.mode === 'horizontal'"
         class="page-zone page-zone-left"
@@ -494,6 +494,13 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key.toLowerCase() === 'c') togglePanel('catalog')
   if (event.key.toLowerCase() === 's') togglePanel('settings')
   if (event.key === 'Escape') panel.value = null
+}
+
+function handleWheel(event: WheelEvent) {
+  if (settings.mode !== 'horizontal' || event.ctrlKey) return
+  event.preventDefault()
+  if (event.deltaY > 0) nextPage()
+  else if (event.deltaY < 0) previousPage()
 }
 
 function handleVerticalScroll() {
