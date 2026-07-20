@@ -1,7 +1,12 @@
 import { getPlaceholder } from 'src/utils/url'
 
-import type { Manga, MangaImageAsset, MangaListItem } from './types'
-import type { ComicInfoResponse, ComicListItem } from 'src/services/manga/types'
+import type { Manga, MangaChapter, MangaImageAsset, MangaListItem, MangaSeries } from './types'
+import type {
+  ComicChapterSummary,
+  ComicInfoResponse,
+  ComicListItem,
+  ComicSeriesInfoResponse,
+} from 'src/services/manga/types'
 
 const mangaTheme = {
   primary: '#137fc4',
@@ -21,18 +26,59 @@ export function toMangaImage(url: string, width = 2, height = 3, placeholder?: s
 
 export function toMangaListItem(item: ComicListItem): MangaListItem {
   return {
-    id: String(item.Id),
+    id: item.Title,
     title: item.Title,
-    views: item.Views,
-    createdAt: item.CreatedAt,
+    subtitle: item.OriginalTitle ?? '',
     updatedAt: item.LastUpdatedAt,
-    chapterCount: item.ChapterCount,
-    status: {
-      name: item.Category.Name,
-      shortName: item.Category.ShortName,
-      color: item.Category.Color,
-    },
+    chapterCount: item.Count,
     cover: toMangaImage(item.Cover),
+  }
+}
+
+function toMangaChapter(chapter: ComicChapterSummary): MangaChapter {
+  return {
+    id: String(chapter.Id),
+    number: chapter.SortNum,
+    title: chapter.Title,
+    publishedAt: chapter.UpdatedAt ?? chapter.CreatedAt,
+    pages: chapter.PageCount,
+    images: [],
+  }
+}
+
+export function toMangaSeries(info: ComicSeriesInfoResponse): MangaSeries {
+  const { Series: series } = info
+  const classification = series.Extra?.classification
+  return {
+    id: String(series.Id),
+    title: series.Title,
+    subtitle: series.OriginalTitle ?? classification?.series_name ?? '',
+    author: series.Author || classification?.author || '暂无',
+    tags: classification?.tags ?? [],
+    description: series.Introduction,
+    followers: String(series.Favorite),
+    views: String(series.Views),
+    latestUpdate: series.LastUpdatedChapter,
+    createdAt: series.CreatedAt,
+    updatedAt: series.LastUpdatedAt,
+    cover: toMangaImage(series.Cover),
+    books: info.Books.map((book) => ({
+      id: String(book.Id),
+      title: book.Title,
+      uploader: book.Uploader,
+      cover: toMangaImage(book.Cover),
+      createdAt: book.CreatedAt,
+      updatedAt: book.LastUpdatedAt,
+      latestUpdate: book.LastUpdatedChapter,
+      readPosition: book.ReadPosition
+        ? {
+            chapterId: String(book.ReadPosition.ChapterId),
+            page: Number(book.ReadPosition.Position) || 1,
+            readAt: book.ReadPosition.ReadAt,
+          }
+        : undefined,
+      chapters: book.Chapters.map(toMangaChapter),
+    })),
   }
 }
 
@@ -41,6 +87,7 @@ export function toManga(info: ComicInfoResponse): Manga {
   const classification = book.Extra?.classification
   return {
     id: String(book.Id),
+    seriesTitle: classification?.series_name_cn || classification?.series_name || book.Title,
     title: book.Title,
     subtitle: classification?.series_name ?? '',
     author: book.Author || classification?.author || '暂无',
@@ -58,13 +105,6 @@ export function toManga(info: ComicInfoResponse): Manga {
       avatar: book.User.Avatar,
       name: book.User.UserName,
     },
-    chapters: book.Chapters.map((chapter) => ({
-      id: String(chapter.Id),
-      number: chapter.SortNum,
-      title: chapter.Title,
-      publishedAt: chapter.UpdatedAt ?? chapter.CreatedAt,
-      pages: chapter.PageCount,
-      images: [],
-    })),
+    chapters: book.Chapters.map(toMangaChapter),
   }
 }

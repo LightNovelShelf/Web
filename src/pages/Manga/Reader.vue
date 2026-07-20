@@ -12,7 +12,7 @@
           round
           icon="mdiArrowLeft"
           aria-label="返回作品详情"
-          :to="{ name: 'MangaDetail', params: { mangaId: manga.id } }"
+          :to="{ name: 'MangaDetail', params: { seriesTitle: manga.seriesTitle } }"
         />
         <div class="work-info">
           <strong>{{ manga.title }}</strong>
@@ -206,7 +206,7 @@
           <span>{{ String(chapter.number).padStart(2, '0') }}</span>
           <div>
             <strong>{{ chapter.title }}</strong
-            ><small>{{ chapter.pages }}P · {{ chapter.publishedAt }}</small>
+            ><small>{{ chapter.pages }}P · {{ toNow(parseTime(chapter.publishedAt)) }}</small>
           </div>
           <q-icon v-if="chapter.id === currentChapter.id" name="mdiBookmark" />
         </button>
@@ -263,6 +263,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRouter } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
+import { parseTime, toNow } from 'src/utils/time'
 
 import { saveReadPosition } from 'src/services/book'
 import { getComicContent, getComicInfo } from 'src/services/manga'

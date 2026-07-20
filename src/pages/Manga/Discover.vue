@@ -27,13 +27,15 @@
       style="margin-top: 12px"
     >
       <q-grid-item v-for="manga in mangas" :key="manga.id">
-        <router-link class="series-card" :to="{ name: 'MangaDetail', params: { mangaId: manga.id } }">
+        <router-link
+          class="series-card"
+          :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id }, query: { order } }"
+        >
           <div class="cover-wrap">
             <q-card class="overflow-hidden">
               <manga-cover :manga="manga" />
             </q-card>
-            <span class="status-tag" :style="{ backgroundColor: manga.status.color }">{{ manga.status.name }}</span>
-            <span class="chapter-count">{{ manga.chapterCount }}话</span>
+            <span class="chapter-count">{{ manga.chapterCount }} 话</span>
           </div>
           <div class="q-pa-xs">
             <div class="series-title">
@@ -126,15 +128,6 @@ useInitRequest(request)
   color: #fff;
   background: #1976d2;
   border-radius: 1em 0 0 1em;
-  font-size: 12px;
-}
-.status-tag {
-  position: absolute;
-  top: 8px;
-  left: 0;
-  padding: 1px 9px 1px 7px;
-  color: #fff;
-  border-radius: 0 1em 1em 0;
   font-size: 12px;
 }
 .series-title {

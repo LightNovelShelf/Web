@@ -11,16 +11,10 @@ export interface ComicListRequest {
 export interface ComicListItem {
   Id: number
   Title: string
+  OriginalTitle?: string | null
   Cover: string
-  Views: number
-  CreatedAt: string
+  Count: number
   LastUpdatedAt: string
-  ChapterCount: number
-  Category: {
-    Name: string
-    ShortName: string
-    Color: string
-  }
 }
 
 export interface ComicListResponse extends ListResult<ComicListItem> {}
@@ -40,6 +34,43 @@ export interface ComicChapterSummary {
   CreatedAt: string
   UpdatedAt?: string | null
   PageCount: number
+}
+
+export interface ComicReadPosition {
+  ChapterId: number
+  Position: string
+  ReadAt?: string
+}
+
+export interface ComicSeriesInfoResponse {
+  Series: {
+    Id: string
+    Title: string
+    OriginalTitle?: string | null
+    Cover: string
+    Author?: string | null
+    Views: number
+    Favorite: number
+    Introduction: string
+    CreatedAt: string
+    LastUpdatedChapter: string
+    LastUpdatedAt: string
+    Extra?: {
+      classification?: ComicClassification
+      [key: string]: unknown
+    }
+  }
+  Books: Array<{
+    Id: number
+    Title: string
+    Uploader: string
+    Cover: string
+    CreatedAt: string
+    LastUpdatedChapter: string
+    LastUpdatedAt: string
+    ReadPosition?: ComicReadPosition | null
+    Chapters: ComicChapterSummary[]
+  }>
 }
 
 export interface ComicInfoResponse {

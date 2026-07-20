@@ -64,7 +64,7 @@ const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const detailRoute = computed(() =>
   props.book.Type === 'Comic'
-    ? { name: 'MangaDetail', params: { mangaId: props.book.Id } }
+    ? { name: 'MangaDetail', params: { seriesTitle: props.book.SeriesTitle || props.book.Title } }
     : { name: 'BookInfo', params: { bid: props.book.Id } },
 )
 const cover = computed(() => props.book.Cover)

@@ -11,9 +11,9 @@ import { useSettingStore } from 'stores/setting'
 
 import { BlurHash } from 'components'
 
-import type { Manga, MangaListItem } from '../types'
+import type { MangaImageAsset } from '../types'
 
-defineProps<{ manga: Manga | MangaListItem }>()
+defineProps<{ manga: { title: string; cover: MangaImageAsset } }>()
 
 const { generalSetting } = useSettingStore()
 </script>

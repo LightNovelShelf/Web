@@ -45,46 +45,49 @@
               </div>
 
               <div class="row items-center gap-16 q-mt-lg">
-                <q-btn color="primary" :label="progress[manga.id] ? '继续阅读' : '开始阅读'" :to="readerRoute" />
+                <q-btn color="primary" :label="lastProgress ? '继续阅读' : '开始阅读'" :to="readerRoute" />
                 <q-btn outline color="primary" label="追漫" disable />
               </div>
             </q-grid-item>
           </q-grid>
-          <div class="row items-center chapter-header">
-            <div>
-              <div class="text-h6">章节列表</div>
-              <div class="text-caption text-grey-7">共 {{ manga.chapters.length }} 话</div>
+
+          <section v-for="book in manga.books" :key="book.id" class="chapter-group">
+            <div class="row items-center chapter-header">
+              <div>
+                <div class="text-h6">{{ book.title }} - 上传：{{ book.uploader }}</div>
+                <div class="text-caption text-grey-7">共 {{ book.chapters.length }} 话</div>
+              </div>
+              <q-space />
+              <q-btn flat dense no-caps :label="isAscending(book.id) ? '正序' : '倒序'" @click="toggleSort(book.id)" />
             </div>
-            <q-space />
-            <q-btn flat dense no-caps :label="ascending ? '正序' : '倒序'" @click="ascending = !ascending" />
-          </div>
-          <q-separator />
-          <q-grid :x-gap="8" :y-gap="8" cols="3" xs="1" sm="2" md="3" style="padding-top: 16px">
-            <q-grid-item v-for="chapter in sortedChapters" :key="chapter.id">
-              <q-item
-                clickable
-                v-ripple
-                class="chapter-item rounded-borders"
-                :active="progress[manga.id]?.chapterId === chapter.id"
-                active-class="bg-primary text-white"
-                :to="{ name: 'MangaReader', params: { mangaId: manga.id, chapterId: chapter.id } }"
-              >
-                <q-item-section avatar>
-                  <q-avatar color="grey-3" text-color="grey-8" size="36px">{{ chapter.number }}</q-avatar>
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label lines="1">{{ chapter.title }}</q-item-label>
-                  <q-item-label caption>
-                    {{ chapterDateFormat(chapter.publishedAt) }} · {{ chapter.pages }}P
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-grid-item>
-          </q-grid>
+            <q-separator />
+            <q-grid :x-gap="8" :y-gap="8" cols="3" xs="1" sm="2" md="3" style="padding-top: 16px">
+              <q-grid-item v-for="chapter in sortedChapters(book)" :key="chapter.id">
+                <q-item
+                  clickable
+                  v-ripple
+                  class="chapter-item rounded-borders"
+                  :active="bookProgress(book)?.chapterId === chapter.id"
+                  active-class="bg-primary text-white"
+                  :to="{ name: 'MangaReader', params: { mangaId: book.id, chapterId: chapter.id } }"
+                >
+                  <q-item-section avatar>
+                    <q-avatar color="grey-3" text-color="grey-8" size="36px">{{ chapter.number }}</q-avatar>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label lines="1">{{ chapter.title }}</q-item-label>
+                    <q-item-label caption>
+                      {{ chapterDateFormat(chapter.publishedAt) }} · {{ chapter.pages }}P
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-grid-item>
+            </q-grid>
+          </section>
         </q-card-section>
       </q-card>
 
-      <comment class="q-mt-md" :type="CommentType.Book" :id="Number(manga.id)" />
+      <comment :key="manga.title" class="q-mt-md" :type="CommentType.Series" :series-title="manga.title" />
     </template>
     <div v-else-if="loadError" class="row items-center justify-center text-negative" style="min-height: 280px">
       {{ loadError }}
@@ -119,6 +122,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
@@ -131,65 +135,80 @@ import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useToNowRef } from 'src/composition/useToNowRef'
 
 import { CommentType } from 'src/services/comment/types'
-import { getComicInfo } from 'src/services/manga'
+import { getComicSeriesInfo } from 'src/services/manga'
 
-import type { Manga } from './types'
+import type { MangaBook, MangaSeries } from './types'
+import type { ComicOrder } from 'src/services/manga'
 
 import MangaCover from './components/MangaCover.vue'
-import { toManga } from './data'
+import { toMangaSeries } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
 
-const props = defineProps<{ mangaId: string }>()
-const ascending = ref(true)
-const { progress, saveProgress } = useMangaLibrary()
-const manga = ref<Manga>()
+const props = defineProps<{ seriesTitle: string }>()
+const route = useRoute()
+const order = computed<ComicOrder>(() => {
+  const value = route.query.order
+  return value === 'new' || value === 'view' ? value : 'latest'
+})
+const ascending = ref<Record<string, boolean>>({})
+const { progress } = useMangaLibrary()
+const manga = ref<MangaSeries>()
 const loadError = ref('')
 
-const savedChapter = computed(() =>
-  manga.value?.chapters.find((chapter) => chapter.id === progress.value[manga.value!.id]?.chapterId),
-)
+const bookProgress = (book: MangaBook) => {
+  const local = progress.value[book.id]
+  const remote = book.readPosition
+  if (!remote) return local
+  const remoteUpdatedAt = remote.readAt ? new Date(remote.readAt).getTime() : 0
+  if (local && local.updatedAt >= remoteUpdatedAt) return local
+  return { chapterId: remote.chapterId, page: remote.page, updatedAt: remoteUpdatedAt }
+}
+const lastProgress = computed(() => {
+  const candidates =
+    manga.value?.books.flatMap((book) => {
+      const saved = bookProgress(book)
+      const chapter = saved && book.chapters.find((item) => item.id === saved.chapterId)
+      return saved && chapter ? [{ book, chapter, progress: saved }] : []
+    }) ?? []
+  return candidates.sort((a, b) => b.progress.updatedAt - a.progress.updatedAt)[0]
+})
 const lastReadText = computed(() => {
-  if (!manga.value) return '暂无'
-  const page = progress.value[manga.value.id]?.page
-  return savedChapter.value && page != null ? `${savedChapter.value.title} · 第 ${page} 页` : '暂无'
+  const saved = lastProgress.value
+  return saved ? `${saved.book.title} / ${saved.chapter.title} · 第 ${saved.progress.page} 页` : '暂无'
 })
 const updatedAtDesc = useToNowRef(() => manga.value?.updatedAt)
-const sortedChapters = computed(() => {
-  const chapters = manga.value?.chapters ?? []
-  return ascending.value ? chapters : [...chapters].reverse()
-})
+const isAscending = (bookId: string) => ascending.value[bookId] ?? true
+const toggleSort = (bookId: string) => {
+  ascending.value = { ...ascending.value, [bookId]: !isAscending(bookId) }
+}
+const sortedChapters = (book: MangaBook) => (isAscending(book.id) ? book.chapters : [...book.chapters].reverse())
 const readerRoute = computed(() => {
-  const firstChapter = manga.value?.chapters[0]
-  if (!manga.value || !firstChapter) return undefined
+  const saved = lastProgress.value
+  const firstBook = manga.value?.books[0]
+  const firstChapter = firstBook?.chapters[0]
+  if (!saved && (!firstBook || !firstChapter)) return undefined
   return {
     name: 'MangaReader',
     params: {
-      mangaId: manga.value.id,
-      chapterId: savedChapter.value?.id ?? firstChapter.id,
+      mangaId: saved?.book.id ?? firstBook!.id,
+      chapterId: saved?.chapter.id ?? firstChapter!.id,
     },
   }
 })
 
-const request = useTimeoutFn(async (mangaId = props.mangaId) => {
+const request = useTimeoutFn(async (seriesTitle = props.seriesTitle) => {
   loadError.value = ''
-  if (manga.value?.id !== mangaId) manga.value = undefined
+  if (manga.value?.id !== seriesTitle) manga.value = undefined
   try {
-    const id = Number(mangaId)
-    if (!Number.isInteger(id)) throw new Error('无效的漫画 ID')
-    const response = await getComicInfo(id)
-    manga.value = toManga(response)
-    const position = response.ReadPosition
-    if (position) saveProgress(mangaId, String(position.ChapterId), Number(position.Position) || 1)
+    manga.value = toMangaSeries(await getComicSeriesInfo(seriesTitle, order.value))
+    ascending.value = {}
   } catch (error) {
     loadError.value = getErrMsg(error)
   }
 })
-const isActive = computed(() => manga.value?.id === props.mangaId)
+const isActive = computed(() => manga.value?.id === props.seriesTitle)
 
-watch(
-  () => props.mangaId,
-  (mangaId) => void request(mangaId),
-)
+watch([() => props.seriesTitle, order], ([seriesTitle]) => void request(seriesTitle))
 useInitRequest(request, { isActive })
 
 function dateFormat(time: string) {
@@ -213,8 +232,10 @@ function chapterDateFormat(time: string) {
   opacity: 0.6;
 }
 .chapter-header {
-  margin-top: 12px;
   padding: 16px 0;
+}
+.chapter-group {
+  margin-top: 12px;
 }
 .chapter-item {
   min-width: 0;

@@ -3,6 +3,7 @@ import type { ListResult } from '../types'
 export interface BookInList {
   Id: number
   Type?: 'Novel' | 'Comic'
+  SeriesTitle?: string | null
   Cover: string
   // TODO: 走了二进制解码后自动转Date对象的特性丢失了，就是一个ISO 8601的日期
   LastUpdatedAt: Date

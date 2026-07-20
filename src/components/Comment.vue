@@ -204,7 +204,10 @@ import { postComment, replyComment, getComments, deleteComment } from 'src/servi
 
 import type { CommentType, GetComments } from 'src/services/comment/types'
 
-const props = defineProps<{ type: CommentType; id: number }>()
+const props = withDefaults(defineProps<{ type: CommentType; id?: number; seriesTitle?: string }>(), {
+  id: 0,
+  seriesTitle: '',
+})
 const $q = useQuasar()
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
@@ -212,7 +215,10 @@ const comment = ref<GetComments.Response>()
 
 const isActive = computed(
   () =>
-    comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page,
+    comment.value?.Type === props.type &&
+    comment.value?.Id === props.id &&
+    (comment.value?.SeriesTitle ?? '') === props.seriesTitle &&
+    currentPage.value === comment.value.Page,
 )
 
 const currentPage = ref(1)
@@ -225,7 +231,12 @@ const parentId = ref<number>()
 const replyId = ref<number>()
 
 const request = async () => {
-  comment.value = await getComments({ Type: props.type, Id: props.id, Page: currentPage.value })
+  comment.value = await getComments({
+    Type: props.type,
+    Id: props.id,
+    Page: currentPage.value,
+    SeriesTitle: props.seriesTitle || undefined,
+  })
   posting.value = false
 }
 
@@ -245,7 +256,12 @@ const post = async () => {
   if (inputComment.value) {
     posting.value = true
     try {
-      await postComment({ Type: props.type, Id: props.id, Content: inputComment.value })
+      await postComment({
+        Type: props.type,
+        Id: props.id,
+        Content: inputComment.value,
+        SeriesTitle: props.seriesTitle || undefined,
+      })
       $q.notify({
         message: '评论成功',
         timeout: 2000,
@@ -279,6 +295,7 @@ const reply = async () => {
         Content: inputReplyComment.value,
         ReplyId: replyId.value,
         ParentId: parentId.value!,
+        SeriesTitle: props.seriesTitle || undefined,
       })
       $q.notify({
         message: '评论成功',
