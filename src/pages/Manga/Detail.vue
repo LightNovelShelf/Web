@@ -53,8 +53,9 @@
 
           <section v-for="book in manga.books" :key="book.id" class="chapter-group">
             <div class="row items-center chapter-header">
+              <book-user-avatar :user="book.uploader" />
               <div>
-                <div class="text-h6">{{ book.title }} - 上传：{{ book.uploader }}</div>
+                <div class="text-h6">{{ book.title }}</div>
                 <div class="text-caption text-grey-7">共 {{ book.chapters.length }} 话</div>
               </div>
               <q-space />
@@ -127,7 +128,7 @@ import { useRoute } from 'vue-router'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
 
-import { Comment } from 'components'
+import { BookUserAvatar, Comment } from 'components'
 import { QGrid, QGridItem } from 'components/grid'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
@@ -233,6 +234,7 @@ function chapterDateFormat(time: string) {
 }
 .chapter-header {
   padding: 16px 0;
+  gap: 12px;
 }
 .chapter-group {
   margin-top: 12px;

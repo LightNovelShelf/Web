@@ -31,15 +31,7 @@
           <q-grid-item span="2" xs="1" sm="1" md="1">
             <div v-if="isActive" class="book-info-content">
               <div class="book-author-avatar">
-                <q-avatar>
-                  <img :src="book.User.Avatar" alt="book_user" />
-                </q-avatar>
-
-                <q-menu :offset="[-30, 5]" anchor="bottom left" self="top right">
-                  <q-card>
-                    <q-card-section>{{ book.User.UserName }}</q-card-section>
-                  </q-card>
-                </q-menu>
+                <book-user-avatar :user="book.User" />
               </div>
 
               <div class="text-subtitle1 text-weight-bold">《{{ book['Title'] }}》</div>
@@ -158,7 +150,7 @@ import { getPlaceholder } from 'src/utils/url'
 import { useAppStore } from 'stores/app'
 import { useSettingStore } from 'stores/setting'
 
-import { Comment, BlurHash } from 'components'
+import { BookUserAvatar, Comment, BlurHash } from 'components'
 import AddToShelf from 'components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from 'components/grid'
 

@@ -63,7 +63,10 @@ export interface ComicSeriesInfoResponse {
   Books: Array<{
     Id: number
     Title: string
-    Uploader: string
+    Uploader: {
+      UserName: string
+      Avatar: string
+    }
     Cover: string
     CreatedAt: string
     LastUpdatedChapter: string

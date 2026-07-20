@@ -47,7 +47,10 @@ export interface Manga {
 export interface MangaBook {
   id: string
   title: string
-  uploader: string
+  uploader: {
+    UserName: string
+    Avatar: string
+  }
   cover: MangaImageAsset
   createdAt: string
   updatedAt: string
