@@ -329,7 +329,21 @@ const chapterIndex = computed(() =>
 )
 const previousChapter = computed(() => manga.value?.chapters[chapterIndex.value - 1])
 const nextChapter = computed(() => manga.value?.chapters[chapterIndex.value + 1])
-const effectivePageMode = computed(() => ($q.screen.lt.sm ? 'single' : settings.pageMode))
+
+// 跨页宽图(宽>=高)或超长条图(高>=宽*3)在双页并排时会撑破屏幕，强制单页
+function isOversizedImage(image?: { width: number; height: number }) {
+  if (!image?.width || !image?.height) return false
+  return image.width / image.height >= 1 || image.height / image.width >= 3
+}
+const forceSinglePage = computed(() => {
+  const images = currentChapter.value?.images
+  if (!images) return false
+  // 当前页或其配对的下一页任一为异常比例，都退回单页
+  return isOversizedImage(images[currentPage.value - 1]) || isOversizedImage(images[currentPage.value])
+})
+const effectivePageMode = computed(() =>
+  $q.screen.lt.sm || forceSinglePage.value ? 'single' : settings.pageMode,
+)
 const pages = computed(() =>
   (currentChapter.value?.images ?? []).map((image, index) => ({ number: index + 1, image })),
 )
@@ -643,13 +657,13 @@ onBeforeUnmount(() => {
 }
 .page-spread :deep(.comic-page) {
   width: auto;
-  max-width: none;
+  max-width: 100%;
   height: min(var(--reader-page-height), 138.889vw);
   max-height: none;
   flex: none;
 }
 .page-spread.double :deep(.comic-page) {
-  max-width: none;
+  max-width: 50%;
   height: min(var(--reader-page-height), 69.444vw);
 }
 .page-zone {
@@ -984,7 +998,7 @@ onBeforeUnmount(() => {
   .page-spread :deep(.comic-page),
   .page-spread.double :deep(.comic-page) {
     width: auto;
-    max-width: none;
+    max-width: 100%;
     height: min(var(--reader-page-height), 138.889vw);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.26);
   }
