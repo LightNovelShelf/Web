@@ -8,6 +8,17 @@ export interface ComicListRequest {
   Order?: ComicOrder
 }
 
+/** 漫画系列搜索：沿用 book 搜索维度，结果按系列聚合 */
+export interface SearchComicSeriesRequest {
+  KeyWords: string
+  /** 搜索维度，对齐 book 搜索：fuzzy | exact | title | author | name | tags */
+  Mode?: string
+  Page?: number
+  Size?: number
+  IgnoreJapanese?: boolean
+  IgnoreAI?: boolean
+}
+
 export interface ComicListItem {
   Id: number
   Title: string

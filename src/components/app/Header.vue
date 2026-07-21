@@ -24,8 +24,7 @@
       <!-- form 是为了规避 focus-index 跳到意外的地方的问题 -->
       <form @submit.prevent>
         <search-input
-          v-show="!hideSearchBar"
-          placeholder="搜索"
+          :placeholder="searchPlaceholder"
           dark
           dense
           standout
@@ -192,7 +191,8 @@ import SearchInput from '../SearchInput.vue'
 
 const route = useRoute()
 
-const hideSearchBar = computed(() => route.meta.hideSearchBar)
+// placeholder 跟随当前页面：漫画相关页搜漫画，其他页搜小说
+const searchPlaceholder = computed(() => (route.meta.searchTab === 'Comic' ? '搜索漫画' : '搜索小说'))
 
 const $q = useQuasar()
 const appStore = useAppStore()
@@ -249,7 +249,9 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
 ]
 
 function onSearch(keywords: string, mode: SearchMode) {
-  router.push({ name: 'Search', query: { keywords, mode } })
+  // 漫画相关页面（meta.searchTab='Comic'）搜索直达漫画 tab，其他页面默认小说
+  const tab = route.meta.searchTab as string | undefined
+  router.push({ name: 'Search', query: { keywords, mode, ...(tab ? { tab } : {}) } })
   searchKey.value = ''
 }
 function changAppName() {

@@ -7,6 +7,7 @@ export {
   mdiInformation,
   mdiBullhorn,
   mdiBook,
+  mdiBookMultiple,
   mdiForum,
   mdiForumOutline,
   mdiBroadcast,
