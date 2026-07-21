@@ -99,6 +99,7 @@ const menuOptions: Array<Record<string, any>> = [
     key: 'MangaDiscover',
     icon: 'mdiImage',
     route: 'MangaDiscover',
+    params: { order: 'latest', page: '1' },
   },
   {
     label: '近期排行',

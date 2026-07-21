@@ -69,8 +69,9 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Book/BookRank.vue'),
   },
   {
-    path: '/manga',
+    path: '/manga/list/:order/:page?',
     name: 'MangaDiscover',
+    props: true,
     meta: { requiresAuth: false, hideSearchBar: true },
     component: () => import('../pages/Manga/Discover.vue'),
   },

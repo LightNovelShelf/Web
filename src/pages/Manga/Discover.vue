@@ -51,12 +51,33 @@
     <div v-else-if="!loading" class="row items-center justify-center text-grey-7" style="min-height: 240px">
       {{ loadError || '暂无漫画' }}
     </div>
+
+    <div
+      v-if="mangas.length"
+      class="pagination"
+      style="display: flex; justify-content: center; padding-top: 24px"
+    >
+      <q-pagination
+        padding="4px"
+        :disable="loading"
+        v-model="currentPage"
+        :max="totalPage"
+        direction-links
+        icon-first="mdiSkipPrevious"
+        icon-last="mdiSkipNext"
+        icon-prev="mdiChevronLeft"
+        icon-next="mdiChevronRight"
+        :max-pages="8"
+        :input="!$q.screen.gt.sm"
+      />
+    </div>
   </q-page>
 </template>
 
 <script lang="ts" setup>
 import { useQuasar } from 'quasar'
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 
@@ -65,6 +86,7 @@ import { QGrid, QGridItem } from 'components/grid'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 
+import { NOOP } from 'src/const/empty'
 import { getComicList } from 'src/services/manga'
 
 import type { MangaListItem } from './types'
@@ -74,6 +96,8 @@ import MangaCover from './components/MangaCover.vue'
 import MangaUpdateTime from './components/MangaUpdateTime.vue'
 import { toMangaListItem } from './data'
 
+const props = defineProps<{ order: ComicOrder; page?: string }>()
+
 const orderOptions: Array<{ label: string; value: ComicOrder }> = [
   { label: '最近更新', value: 'latest' },
   { label: '上架时间', value: 'new' },
@@ -81,15 +105,26 @@ const orderOptions: Array<{ label: string; value: ComicOrder }> = [
 ]
 
 const $q = useQuasar()
-const order = ref<ComicOrder>('latest')
+const router = useRouter()
+const totalPage = ref(1)
 const mangas = ref<MangaListItem[]>([])
 const loadError = ref('')
 
-const request = useTimeoutFn(async () => {
+const currentPage = computed({
+  get: () => ~~(props.page ?? '') || 1,
+  set: (val: number) => void router.push({ name: 'MangaDiscover', params: { order: props.order, page: val } }),
+})
+const order = computed({
+  get: () => props.order,
+  set: (val: ComicOrder) => void router.push({ name: 'MangaDiscover', params: { order: val, page: 1 } }),
+})
+
+const request = useTimeoutFn(async (page = currentPage.value, ord = props.order) => {
   loadError.value = ''
   try {
-    const response = await getComicList({ Page: 1, Size: 24, Order: order.value })
+    const response = await getComicList({ Page: page, Size: 24, Order: ord })
     mangas.value = response.Data.map(toMangaListItem)
+    totalPage.value = response.TotalPages || 1
   } catch (error) {
     mangas.value = []
     loadError.value = getErrMsg(error)
@@ -101,7 +136,14 @@ watch(loading, (nextLoading) => {
   $q.loadingBar.stop()
   if (nextLoading) $q.loadingBar.start()
 })
-watch(order, () => void request())
+
+onBeforeRouteUpdate((to, from, next) => {
+  request(~~`${to.params.page}` || 1, `${to.params.order}` as ComicOrder).then(() => {
+    window.scrollTo({ top: 0 })
+    next()
+  }, NOOP)
+})
+
 useInitRequest(request)
 </script>
 
