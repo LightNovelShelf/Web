@@ -6,6 +6,7 @@
     :style="pageStyle"
     fit="contain"
     no-spinner
+    no-transition
     :loading="loading"
     :alt="`漫画第 ${pageNumber} 页`"
   >
