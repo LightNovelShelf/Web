@@ -42,8 +42,9 @@
       <div v-if="settings.mode === 'horizontal'" class="horizontal-stage" @click.self="toggleToolbar">
         <div class="page-spread" :class="{ double: effectivePageMode === 'double', rtl: settings.direction === 'rtl' }">
           <manga-page
-            v-for="page in visiblePages"
+            v-for="page in windowPages"
             :key="`${currentChapter.id}-${page.number}`"
+            :class="isActivePage(page.number) ? 'page-live' : 'page-standby'"
             :page-number="page.number"
             :image="page.image"
             loading="eager"
@@ -348,14 +349,25 @@ const effectivePageMode = computed(() =>
 const pages = computed(() =>
   (currentChapter.value?.images ?? []).map((image, index) => ({ number: index + 1, image })),
 )
-const visiblePages = computed(() => {
+// 当前正在显示的页码（单页 1 个，双页 2 个）
+const activePageNumbers = computed(() =>
+  effectivePageMode.value === 'single' ? [currentPage.value] : [currentPage.value, currentPage.value + 1],
+)
+function isActivePage(pageNumber: number) {
+  return activePageNumbers.value.includes(pageNumber)
+}
+// 渲染窗口：以当前页为中心前后各 RENDER_RADIUS 页常驻挂载（含 active），
+// 非 active 页移出窗口但保持已解码，翻页只切 active，不卸载/不重挂 → 无加载闪烁
+const RENDER_RADIUS = 2
+const windowPages = computed(() => {
   const chapter = currentChapter.value
   if (!chapter) return []
-  const pageNumbers =
-    effectivePageMode.value === 'single' ? [currentPage.value] : [currentPage.value, currentPage.value + 1]
-  return pageNumbers
-    .filter((page) => page <= chapter.pages)
-    .map((page) => ({ number: page, image: chapter.images[page - 1] }))
+  const span = effectivePageMode.value === 'double' ? 1 : 0
+  const start = Math.max(1, currentPage.value - RENDER_RADIUS)
+  const end = Math.min(chapter.pages, currentPage.value + span + RENDER_RADIUS)
+  const list: Array<{ number: number; image: (typeof chapter.images)[number] }> = []
+  for (let n = start; n <= end; n++) list.push({ number: n, image: chapter.images[n - 1] })
+  return list
 })
 const themeStyle = computed(() => ({
   '--reader-primary': manga.value?.theme.primary,
@@ -439,21 +451,23 @@ watch([currentPage, () => currentChapter.value?.id, effectivePageMode, () => set
 function preloadNearbyPages() {
   const chapter = currentChapter.value
   if (!chapter) return
-  const visiblePageCount = settings.mode === 'horizontal' && effectivePageMode.value === 'double' ? 2 : 1
-  const firstVisiblePage = currentPage.value
-  const lastVisiblePage = Math.min(chapter.pages, currentPage.value + visiblePageCount - 1)
-  const pageNumbers = [firstVisiblePage - 2, firstVisiblePage - 1, lastVisiblePage + 1, lastVisiblePage + 2]
+  // 渲染窗口(±RENDER_RADIUS)内的页已由 DOM 常驻加载；这里额外预热窗口外沿再往前 2 页，
+  // 保证连续翻页时下一批将要挂载的边缘页 URL 已在缓存
+  const span = settings.mode === 'horizontal' && effectivePageMode.value === 'double' ? 1 : 0
+  const margin = 2
+  const start = Math.max(1, currentPage.value - RENDER_RADIUS - margin)
+  const end = Math.min(chapter.pages, currentPage.value + span + RENDER_RADIUS + margin)
 
-  pageNumbers.forEach((pageNumber) => {
+  for (let pageNumber = start; pageNumber <= end; pageNumber++) {
     const image = chapter.images[pageNumber - 1]
-    if (!image || preloadedImageUrls.has(image.url)) return
+    if (!image || preloadedImageUrls.has(image.url)) continue
 
     preloadedImageUrls.add(image.url)
     const preloader = new Image()
     preloader.decoding = 'async'
     preloader.onerror = () => preloadedImageUrls.delete(image.url)
     preloader.src = image.url
-  })
+  }
 }
 
 async function scrollToCurrentPage() {
@@ -648,6 +662,7 @@ onBeforeUnmount(() => {
   padding: 58px 0 52px;
 }
 .page-spread {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -664,13 +679,22 @@ onBeforeUnmount(() => {
 .page-spread :deep(.comic-page) {
   width: auto;
   max-width: 100%;
-  height: min(var(--reader-page-height), 138.889vw);
-  max-height: none;
+  // 撑满高或宽（取先到者）：宽度触顶(100vw)对应的高度 = 100vw × 高宽比
+  height: min(var(--reader-page-height), calc(100vw * var(--page-hw)));
   flex: none;
 }
 .page-spread.double :deep(.comic-page) {
   max-width: 50%;
-  height: min(var(--reader-page-height), 69.444vw);
+  height: min(var(--reader-page-height), calc(50vw * var(--page-hw)));
+}
+// 窗口内非当前页：移出可见布局但保留尺寸以维持已解码状态，翻页切到它时零加载
+.page-spread :deep(.comic-page.page-standby) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
 }
 .page-zone {
   position: fixed;
@@ -1005,7 +1029,7 @@ onBeforeUnmount(() => {
   .page-spread.double :deep(.comic-page) {
     width: auto;
     max-width: 100%;
-    height: min(var(--reader-page-height), 138.889vw);
+    height: min(var(--reader-page-height), calc(100vw * var(--page-hw)));
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.26);
   }
   .page-zone {

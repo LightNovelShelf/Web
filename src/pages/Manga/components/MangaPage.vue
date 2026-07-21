@@ -35,7 +35,11 @@ const props = withDefaults(
 )
 
 const { generalSetting } = useSettingStore()
-const pageStyle = computed(() => ({ aspectRatio: `${props.image.width} / ${props.image.height}` }))
+// --page-hw = 高/宽，供阅读器按真实宽高比计算「宽度撑满时的高度上限」
+const pageStyle = computed(() => ({
+  aspectRatio: `${props.image.width} / ${props.image.height}`,
+  '--page-hw': props.image.width && props.image.height ? String(props.image.height / props.image.width) : undefined,
+}))
 </script>
 
 <style lang="scss" scoped>
