@@ -265,6 +265,7 @@ import { useRouter } from 'vue-router'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime, toNow } from 'src/utils/time'
+import { withReaderHeight } from 'src/utils/url'
 
 import { saveReadPosition } from 'src/services/book'
 import { getComicContent, getComicInfo } from 'src/services/manga'
@@ -394,7 +395,12 @@ watch(
       const loadedChapter = loadedManga.chapters.find((chapter) => chapter.id === chapterId)
       if (!loadedChapter) throw new Error('分卷不存在')
       loadedChapter.images = content.Chapter.Images.map((image) =>
-        toMangaImage(image.Url, image.Width, image.Height, image.Placeholder),
+        toMangaImage(
+          withReaderHeight(image.Url, image.Width, image.Height),
+          image.Width,
+          image.Height,
+          image.Placeholder,
+        ),
       )
       loadedChapter.pages = loadedChapter.images.length
       manga.value = loadedManga
