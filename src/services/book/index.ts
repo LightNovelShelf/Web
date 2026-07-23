@@ -1,4 +1,5 @@
 import type { SaveReadPositionRequest } from './types'
+import type { ComicListResponse } from 'src/services/manga/types'
 
 import * as Types from './types'
 import { requestWithSignalr } from '../internal/request'
@@ -67,6 +68,15 @@ export function getBookListByIds(ids: number[]) {
 
 /** 最大并行数量 */
 getBookListByIds.MAX_CONCURRENT = 24
+
+/** 从一批分卷 id 获取漫画，后端按系列聚合返回系列列表 */
+export function getComicSeriesByIds(ids: number[]) {
+  if (ids.length > 24) {
+    throw new Error('单次批量操作最多 24 本')
+  }
+
+  return requestWithSignalr<ComicListResponse>('GetBookListByIds', { Ids: ids, Type: 'Comic' })
+}
 
 /** 取最新的 6 本书，无需登录 */
 export function getLatestBookList(param: Types.GetBookListRequest) {
