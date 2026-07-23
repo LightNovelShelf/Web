@@ -36,7 +36,14 @@
               </div>
 
               <div class="row gap-4 q-mt-md">
-                <q-chip v-for="tag in manga.tags" :key="tag" dense outline color="primary">{{ tag }}</q-chip>
+                <router-link
+                  v-for="tag in manga.tags"
+                  :key="tag"
+                  class="tag-link"
+                  :to="{ name: 'Search', query: { keywords: tag, mode: 'tags', tab: 'Comic' } }"
+                >
+                  <q-chip clickable dense outline color="primary">{{ tag }}</q-chip>
+                </router-link>
               </div>
 
               <div class="q-mt-lg">
@@ -226,6 +233,9 @@ function chapterDateFormat(time: string) {
 .bottom-shadow {
   background-color: unset;
   background-image: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+}
+.tag-link {
+  text-decoration: none;
 }
 .introduction {
   opacity: 0.6;
