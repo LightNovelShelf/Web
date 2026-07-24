@@ -8,24 +8,33 @@
     @click="onClick"
   >
     <div class="folder-cover">
-      <q-card>
+      <q-card v-intersection.once="onIntersection">
         <q-responsive :ratio="2 / 3">
           <!-- q-responsive 只接受单一子元素，故所有内容包在一个定位容器里 -->
           <div class="cover-wrap">
-            <!-- 单封面：铺满整卡 -->
-            <q-img v-if="limitedCovers.length <= 1" class="single-cover" :src="limitedCovers[0]" :ratio="2 / 3">
-              <template v-if="firstPlaceholder && generalSetting.enableBlurHash" v-slot:loading>
-                <blur-hash :blurhash="firstPlaceholder" />
-              </template>
-            </q-img>
-            <!-- 多封面：2×2 网格 -->
-            <div v-else class="books-group">
-              <q-img v-for="(cover, i) in limitedCovers" :key="i" class="books-group-cover" :src="cover" :ratio="2 / 3">
-                <template v-if="getPlaceholder(cover) && generalSetting.enableBlurHash" v-slot:loading>
-                  <blur-hash :blurhash="getPlaceholder(cover)" />
+            <!-- 未进入视口前不渲染封面，按需加载（与 BookCard 一致） -->
+            <template v-if="visible">
+              <!-- 单封面：铺满整卡 -->
+              <q-img v-if="limitedCovers.length <= 1" class="single-cover" :src="limitedCovers[0]" :ratio="2 / 3">
+                <template v-if="firstPlaceholder && generalSetting.enableBlurHash" v-slot:loading>
+                  <blur-hash :blurhash="firstPlaceholder" />
                 </template>
               </q-img>
-            </div>
+              <!-- 多封面：2×2 网格 -->
+              <div v-else class="books-group">
+                <q-img
+                  v-for="(cover, i) in limitedCovers"
+                  :key="i"
+                  class="books-group-cover"
+                  :src="cover"
+                  :ratio="2 / 3"
+                >
+                  <template v-if="getPlaceholder(cover) && generalSetting.enableBlurHash" v-slot:loading>
+                    <blur-hash :blurhash="getPlaceholder(cover)" />
+                  </template>
+                </q-img>
+              </div>
+            </template>
 
             <!-- 数量徽标：显示系列内书籍数量 -->
             <div v-if="count != null" class="folder-count">{{ count }} 本</div>
@@ -46,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { getPlaceholder } from 'src/utils/url'
 
@@ -77,6 +86,12 @@ const { generalSetting } = useSettingStore()
 const limitedCovers = computed(() => (props.covers ?? []).filter(Boolean).slice(0, 4))
 const firstPlaceholder = computed(() => getPlaceholder(limitedCovers.value[0] ?? ''))
 const updateTime = useToNowRef(() => props.updatedAt)
+
+const visible = ref(false)
+function onIntersection(entry: IntersectionObserverEntry) {
+  visible.value = entry.isIntersecting
+  return true
+}
 
 function onClick(evt: MouseEvent) {
   if (!props.to) {
