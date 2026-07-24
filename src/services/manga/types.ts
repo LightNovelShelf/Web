@@ -130,6 +130,10 @@ export interface ComicContentResponse {
     BookName: string
     Title: string
     SortNum: number
+    /** 本章总页数（与 Skip/Take 无关，用于前端预分配占位与进度条） */
+    Total: number
+    /** 本批图片在整章中的起始下标 */
+    Skip: number
     Images: ComicImage[]
   }
   ReadPosition?: {
