@@ -71,7 +71,7 @@
               </div>
 
               <div class="level-item">
-                <template v-if="user.Level === 6">
+                <template v-if="levelValue >= 6">
                   <div class="row q-col-gutter-sm items-center">
                     <div class="col level-item__bar--tag level-item__bar--now">lv6</div>
                     <div class="col">
@@ -84,16 +84,14 @@
                 </template>
                 <template v-else>
                   <div class="row q-col-gutter-sm items-center">
-                    <div class="col level-item__bar--tag level-item__bar--now">lv{{ user.Level }}</div>
+                    <div class="col level-item__bar--tag level-item__bar--now">lv{{ levelValue }}</div>
                     <div class="col">
-                      <q-linear-progress size="xs" :value="0.3" />
+                      <q-linear-progress size="xs" :value="expProgress" />
                     </div>
-                    <div class="col level-item__bar--tag level-item__bar--next">lv{{ user.Level + 1 }}</div>
+                    <div class="col level-item__bar--tag level-item__bar--next">lv{{ levelValue + 1 }}</div>
                   </div>
 
-                  <div class="text-caption text-opacity level-item__text">
-                    当前经验0, 还需要114514经验升级到lv{{ user.Level + 1 }}
-                  </div>
+                  <div class="text-caption text-opacity level-item__text">{{ expText }}</div>
                 </template>
               </div>
 
@@ -199,6 +197,23 @@ const appStore = useAppStore()
 const layout = useLayout()
 const { appName, user } = storeToRefs(appStore)
 const { siderShow, headerHeight, siderBreakpoint } = layout
+
+// 等级/经验进度：数据来自 user.Growth（随 GetMyInfo 返回）
+const growth = computed(() => user.value?.Growth)
+const levelValue = computed<number>(() => growth.value?.Level ?? user.value?.Level ?? 0)
+const expProgress = computed<number>(() => {
+  const g = growth.value
+  if (!g || g.NextLevelExp == null) return 0
+  const span = g.NextLevelExp - g.CurrentLevelExp
+  if (span <= 0) return 0
+  return Math.min(1, Math.max(0, (g.Exp - g.CurrentLevelExp) / span))
+})
+const expText = computed<string>(() => {
+  const g = growth.value
+  if (!g) return ''
+  if (g.NextLevelExp == null) return '恭喜你已经是满级了'
+  return `当前经验 ${g.Exp}，还需 ${g.NextLevelExp - g.Exp} 经验升级到 lv${g.Level + 1}`
+})
 const searchKey = ref('')
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),

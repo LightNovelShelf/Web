@@ -23,6 +23,7 @@ import { getMyInfo } from 'src/services/user'
 import { useServerNotify } from 'src/services/utils/useServerNotify'
 
 import type { UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
+import type { Growth } from 'src/services/points'
 
 import 'overlayscrollbars/overlayscrollbars.css'
 
@@ -102,6 +103,22 @@ const refreshMyInfo = async () => {
 
 useServerNotify('OnNotificationRefresh', () => {
   void refreshMyInfo()
+})
+
+// 经验/等级变动时后端主动推送最新成长摘要，直接更新本地 user，无需重新拉 info
+useServerNotify<Growth>('OnGrowthUpdate', (growth) => {
+  if (!appStore.user || !growth) return
+  const delta = growth.Exp - (appStore.user.Growth?.Exp ?? growth.Exp)
+  appStore.user.Growth = growth
+  appStore.user.Level = growth.Level
+  if (delta !== 0) {
+    $q.notify({
+      position: 'top',
+      type: delta > 0 ? 'positive' : 'warning',
+      message: `经验 ${delta > 0 ? '+' : ''}${delta}`,
+      timeout: 2000,
+    })
+  }
 })
 
 const getUser = async () => {

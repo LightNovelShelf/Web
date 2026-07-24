@@ -28,8 +28,55 @@
             </q-item>
           </template>
         </q-list>
+
+        <div class="h2 title">我的成长</div>
+
+        <q-list class="card" bordered separator>
+          <q-item>
+            <q-item-section class="avatar-item" avatar>
+              <q-avatar><q-icon name="mdiTrophyVariantOutline" /></q-avatar>
+            </q-item-section>
+            <q-item-section class="label-item">等级</q-item-section>
+            <q-item-section side>Lv{{ growth?.Level ?? 0 }}</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="pointLogVisible = true">
+            <q-item-section class="avatar-item" avatar>
+              <q-avatar><q-icon name="mdiStarFourPointsOutline" /></q-avatar>
+            </q-item-section>
+            <q-item-section class="label-item">经验值</q-item-section>
+            <q-item-section side>
+              <div class="row items-center no-wrap">
+                <span>{{ growth?.Exp ?? 0 }}</span>
+                <q-icon size="18px" name="mdiChevronRight" />
+              </div>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="signInVisible = true">
+            <q-item-section class="avatar-item" avatar>
+              <q-avatar><q-icon name="mdiCalendarCheckOutline" /></q-avatar>
+            </q-item-section>
+            <q-item-section class="label-item">连续签到</q-item-section>
+            <q-item-section side>
+              <div class="row items-center no-wrap">
+                <span>{{ growth?.SignStreak ?? 0 }} 天</span>
+                <q-badge v-if="growth?.TodaySigned" color="positive" class="q-mx-sm">已签到</q-badge>
+                <q-icon size="18px" name="mdiChevronRight" />
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </div>
     </div>
+
+    <point-log-dialog v-model="pointLogVisible" />
+    <sign-in-dialog
+      v-model="signInVisible"
+      :streak="growth?.SignStreak ?? 0"
+      :today-signed="growth?.TodaySigned ?? false"
+      @signed="refreshUser"
+    />
 
     <q-dialog ref="dialog" v-model="visible">
       <q-card style="min-width: 350px">
@@ -84,14 +131,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { computed, defineComponent, ref, watch, reactive } from 'vue'
+import { computed, defineComponent, onMounted, ref, watch, reactive } from 'vue'
+
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime } from 'src/utils/time'
 
 import { useAppStore } from 'stores/app'
 
+import PointLogDialog from 'src/components/points/PointLogDialog.vue'
+import SignInDialog from 'src/components/points/SignInDialog.vue'
+
 import { setAvatar, getMyInfo } from 'src/services/user'
+
+import type { Growth } from 'src/services/points'
 
 const avatar = computed(() => appStore.avatar)
 
@@ -100,6 +153,23 @@ defineComponent({ name: 'Profile' })
 const $q = useQuasar()
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
+
+const growth = computed<Growth | undefined>(() => user.value?.Growth)
+const pointLogVisible = ref(false)
+const signInVisible = ref(false)
+
+async function refreshUser() {
+  try {
+    appStore.user = await getMyInfo()
+  } catch (err) {
+    $q.notify({ type: 'negative', message: getErrMsg(err) })
+  }
+}
+
+// 确保进入个人资料时拿到最新成长数据（旧会话的 user 可能尚无 Growth）
+onMounted(() => {
+  if (!user.value?.Growth) void refreshUser()
+})
 
 /** 是否展示对话框 */
 const visible = ref(false)
@@ -151,12 +221,6 @@ const profileListOptions: Array<Record<string, any>> = reactive([
     key: 'UserGroup',
     value: (u) => u?.Role.Name,
     icon: 'mdiAccountSupervisor',
-  },
-  {
-    label: '积分',
-    key: 'Point',
-    value: (u) => 0,
-    icon: 'mdiTicketConfirmation',
   },
   {
     label: '注册时间',

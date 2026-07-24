@@ -138,4 +138,7 @@ export {
   mdiCircleDouble,
   mdiLockPlus,
   mdiReplay,
+  mdiTrophyVariantOutline,
+  mdiStarFourPointsOutline,
+  mdiCalendarCheckOutline,
 } from '@quasar/extras/mdi-v7'
