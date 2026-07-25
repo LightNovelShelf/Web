@@ -85,11 +85,12 @@ export namespace UploadImage {
 export namespace GetNotifications {
   export type NotificationType = 'Comment' | 'CommentReply' | 'CommunityThreadReply' | 'CommunityThreadChildReply'
 
-  export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread'
+  export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread' | 'Series'
 
   export interface NotificationExtra {
     object_id: number
     object_title: string
+    series_title?: string | null
     preview: string
     reply_id?: number | null
     parent_reply_id?: number | null

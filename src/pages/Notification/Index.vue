@@ -197,6 +197,14 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     return
   }
 
+  if (notification.ObjectType === 'Series' && notification.Extra?.series_title) {
+    router.push({
+      name: 'MangaDetail',
+      params: { seriesTitle: notification.Extra.series_title },
+    })
+    return
+  }
+
   if (notification.ObjectType === 'Announcement' && notification.Extra?.object_id) {
     router.push({
       name: 'AnnouncementDetail',
@@ -219,11 +227,15 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
 
 const getNotificationLabel = (notification: GetNotifications.Notification) => {
   if (notification.Type === 'Comment') {
-    return notification.ObjectType === 'Announcement' ? '评论了你的公告' : '评论了你的书籍'
+    if (notification.ObjectType === 'Announcement') return '评论了你的公告'
+    if (notification.ObjectType === 'Series') return '评论了你上传的系列'
+    return '评论了你的书籍'
   }
 
   if (notification.Type === 'CommentReply') {
-    return notification.ObjectType === 'Announcement' ? '回复了你的公告评论' : '回复了你的书籍评论'
+    if (notification.ObjectType === 'Announcement') return '回复了你的公告评论'
+    if (notification.ObjectType === 'Series') return '回复了你的系列评论'
+    return '回复了你的书籍评论'
   }
 
   if (notification.Type === 'CommunityThreadReply') {
