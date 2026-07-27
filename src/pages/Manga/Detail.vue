@@ -53,7 +53,6 @@
 
               <div class="row items-center gap-16 q-mt-lg">
                 <q-btn color="primary" :label="lastProgress ? '继续阅读' : '开始阅读'" :to="readerRoute" />
-                <q-btn outline color="primary" label="追漫" disable />
               </div>
             </q-grid-item>
           </q-grid>

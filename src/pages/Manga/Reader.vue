@@ -19,15 +19,6 @@
           <span>{{ currentChapter.title }}</span>
         </div>
       </div>
-      <div class="topbar-actions">
-        <q-btn
-          flat
-          round
-          disable
-          icon="mdiHeartOutline"
-          aria-label="追漫功能暂不可用"
-        />
-      </div>
     </header>
 
     <main ref="readerCanvas" class="reader-canvas" @click.self="toggleToolbar" @wheel="handleWheel">
@@ -673,8 +664,7 @@ onBeforeUnmount(() => {
   padding: 6px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.topbar-leading,
-.topbar-actions {
+.topbar-leading {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1062,9 +1052,6 @@ onBeforeUnmount(() => {
   .reader-topbar {
     min-height: 52px;
     padding: 4px 6px;
-  }
-  .topbar-actions {
-    gap: 0;
   }
   .work-info strong {
     max-width: 190px;
