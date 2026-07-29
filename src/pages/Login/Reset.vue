@@ -53,7 +53,6 @@
               <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
             </template>
           </q-input>
-          <vue-turnstile ref="turnstile" v-model="token" />
           <div class="row">
             <q-btn rounded flat :to="{ name: 'Register' }">注册</q-btn>
             <q-space />
@@ -79,7 +78,6 @@ import { sha256 } from 'src/utils/hash'
 
 import { useAppStore } from 'stores/app'
 
-import VueTurnstile from 'src/pages/Login/VueTurnstile.vue'
 import { resetPassword, sendResetEmail } from 'src/services/user'
 
 const $q = useQuasar()
@@ -93,41 +91,21 @@ const isPwd = ref(true)
 const loading = ref(false)
 const sending = ref(false)
 const router = useRouter()
-const token = ref()
-const turnstile = ref()
 
 const sendEmail = async () => {
-  if (!turnstile.value?.loaded || !token.value) {
-    $q.notify({
-      type: 'negative',
-      message: '请等待Turnstile服务加载和通过验证',
-    })
-    return
-  }
-
   sending.value = true
   try {
-    await sendResetEmail(email.value, token.value)
+    await sendResetEmail(email.value)
 
     $q.notify({
       message: '发送成功',
       timeout: 3000,
     })
   } catch (e) {
-    token.value = null
-    turnstile.value?.reset()
-
-    if (e?.target?.localName === 'script') {
-      $q.notify({
-        type: 'negative',
-        message: '加载reCAPTCHA服务失败，请检查网络并刷新网页重试',
-      })
-    } else {
-      $q.notify({
-        type: 'negative',
-        message: getErrMsg(e),
-      })
-    }
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e),
+    })
   }
   sending.value = false
 }

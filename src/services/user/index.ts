@@ -9,9 +9,9 @@ import type * as Types from './type'
 import type { ShelfItem, SHELF_STRUCT_VER } from 'src/types/shelf'
 
 /** 登录 */
-export async function login(email: string, password: string, token: string) {
+export async function login(email: string, password: string) {
   const res = await requestWithFetch<Types.Login.Res, Types.Login.Param>(PATH.USER_LOGIN, {
-    payload: { email, password, token },
+    payload: { email, password },
   })
 
   // 记录到全局变量中, 方便其它业务取值
@@ -55,16 +55,16 @@ export async function getReadHistory() {
   return requestWithSignalr<{ Novel: number[]; Comic: number[] }>('GetReadHistory')
 }
 
-export async function sendResetEmail(email: string, token: string) {
-  await requestWithFetch<void, { email: string; token: string }>(PATH.USER_SEND_RESET_EMAIL, {
-    payload: { email, token },
+export async function sendResetEmail(email: string) {
+  await requestWithFetch<void, { email: string }>(PATH.USER_SEND_RESET_EMAIL, {
+    payload: { email },
     method: RequestMethod.GET,
   })
 }
 
-export async function sendRegisterEmail(email: string, token: string) {
-  await requestWithFetch<void, { email: string; token: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
-    payload: { email, token },
+export async function sendRegisterEmail(email: string) {
+  await requestWithFetch<void, { email: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
+    payload: { email },
     method: RequestMethod.GET,
   })
 }

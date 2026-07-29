@@ -4,7 +4,6 @@ export namespace Login {
   export interface Param {
     email: string
     password: string
-    token: string
   }
 
   export interface Res {
