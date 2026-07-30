@@ -17,7 +17,7 @@
         <q-list separator>
           <q-item v-for="(item, i) in list" :key="i">
             <q-item-section>
-              <q-item-label>{{ sourceLabel(item.Source) }}</q-item-label>
+              <q-item-label>{{ sourceLabel(item.Source, item.Amount) }}</q-item-label>
               <q-item-label caption>{{ toNow(parseTime(item.OccurredAt)) }}</q-item-label>
             </q-item-section>
             <q-item-section side class="items-end">
@@ -75,15 +75,16 @@ const scrollbarOptions = computed(() => ({
 const SOURCE_LABEL: Record<string, string> = {
   SignIn: '签到',
   Read: '阅读',
-  Publish: '发布',
+  PublishNovel: '发布小说',
+  PublishComic: '发布漫画',
   Thread: '发帖',
   Reply: '回复',
   BookComment: '评论',
   Admin: '系统',
-  Clawback: '回收',
 }
-function sourceLabel(source: string) {
-  return SOURCE_LABEL[source] ?? source
+function sourceLabel(source: string, amount: number) {
+  const label = SOURCE_LABEL[source] ?? source
+  return amount < 0 ? `${label}回收` : label
 }
 
  
