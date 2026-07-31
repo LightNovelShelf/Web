@@ -16,7 +16,7 @@ export async function getCommunityHome(query: CommunityListQuery = {}): Promise<
   return requestWithSignalr<CommunityHomePayload>('GetCommunityHome', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
-    Order: query.order ?? 'latest',
+    Order: query.order ?? 'reply',
     Scope: query.scope ?? 'all',
     Page: Math.max(1, query.page ?? 1),
     Size: Math.max(1, query.size ?? 6),
@@ -27,7 +27,7 @@ export async function getCommunityFeed(query: CommunityListQuery = {}): Promise<
   return requestWithSignalr<CommunityFeedPayload>('GetCommunityFeed', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
-    Order: query.order ?? 'latest',
+    Order: query.order ?? 'reply',
     Scope: query.scope ?? 'all',
     Page: Math.max(1, query.page ?? 1),
     Size: Math.max(1, query.size ?? 6),

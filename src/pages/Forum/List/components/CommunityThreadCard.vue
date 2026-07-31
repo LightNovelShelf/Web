@@ -227,10 +227,46 @@ function formatPublishedAt(value: string) {
   background: var(--community-chip-bg);
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 599px) {
+  .feed-item-link,
+  .feed-item {
+    border-radius: 20px;
+  }
+
+  .feed-item {
+    padding: 16px;
+  }
+
+  .feed-item__topline {
+    gap: 7px;
+  }
+
+  .feed-item__board,
+  .feed-item__sub-category {
+    padding: 5px 9px;
+  }
+
+  .feed-item__title {
+    margin-top: 12px;
+    font-size: 20px;
+    line-height: 1.35;
+  }
+
+  .feed-item__excerpt {
+    margin-top: 9px;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
   .feed-item__footer {
     align-items: flex-start;
     flex-direction: column;
+    margin-top: 14px;
+  }
+
+  .feed-item__stats {
+    gap: 8px 12px;
+    font-size: 12px;
   }
 }
 </style>

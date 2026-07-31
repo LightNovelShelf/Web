@@ -1,7 +1,7 @@
 export type { CommunityBoardKey, CommunityCatalogBoard, CommunityCatalogSubCategory } from './catalog'
 import type { CommunityBoardKey, CommunityCatalogBoard } from './catalog'
 
-export type CommunityFeedOrder = 'latest' | 'hot' | 'featured'
+export type CommunityFeedOrder = 'reply' | 'latest' | 'hot' | 'featured'
 
 export type CommunityFeedScope = 'all' | 'today' | 'week'
 

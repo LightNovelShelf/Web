@@ -3,41 +3,46 @@
     <div class="community-home__shell">
       <div class="community-home__grid">
         <div class="community-home__left">
-          <community-board-rail :boards="boards" :selected-board-key="boardKey" @select="handleBoardSelect" />
+          <community-board-rail
+            :boards="boards"
+            :selected-board-key="boardKey"
+            :compact="$q.screen.width < 1440"
+            @select="handleBoardSelect"
+          />
         </div>
 
-        <main class="community-home__center">
-          <section class="community-hero">
-            <community-blueprint-canvas />
+        <section class="community-hero">
+          <community-blueprint-canvas />
 
-            <div class="community-hero__content">
-              <div class="community-hero__copy">
-                <h1 class="community-hero__title">{{ payload?.Title ?? '社区讨论中心' }}</h1>
-                <p class="community-hero__subtitle">{{ payload?.Subtitle }}</p>
+          <div class="community-hero__content">
+            <div class="community-hero__copy">
+              <h1 class="community-hero__title">{{ payload?.Title ?? '社区讨论中心' }}</h1>
+              <p class="community-hero__subtitle">{{ payload?.Subtitle }}</p>
+            </div>
+
+            <div class="community-hero__stats">
+              <div class="community-hero__stat">
+                <span class="community-hero__stat-label">今日新增</span>
+                <strong>{{ payload?.TodayThreads ?? 0 }}</strong>
               </div>
-
-              <div class="community-hero__stats">
-                <div class="community-hero__stat">
-                  <span class="community-hero__stat-label">今日新增</span>
-                  <strong>{{ payload?.TodayThreads ?? 0 }}</strong>
-                </div>
-                <div class="community-hero__stat">
-                  <span class="community-hero__stat-label">在线用户</span>
-                  <strong>{{ payload?.OnlineUserCount ?? 0 }}</strong>
-                </div>
+              <div class="community-hero__stat">
+                <span class="community-hero__stat-label">在线用户</span>
+                <strong>{{ payload?.OnlineUserCount ?? 0 }}</strong>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section class="community-notice">
-            <div class="community-notice__label">
-              <q-icon name="mdiBullhorn" size="18px" />
-              公告
-            </div>
-            <div class="community-notice__text">{{ payload?.Announcement }}</div>
-            <q-btn flat no-caps color="primary" label="查看板块" :to="payload?.AnnouncementLink" />
-          </section>
+        <section class="community-notice">
+          <div class="community-notice__label">
+            <q-icon name="mdiBullhorn" size="18px" />
+            公告
+          </div>
+          <div class="community-notice__text">{{ payload?.Announcement }}</div>
+          <q-btn flat no-caps color="primary" label="查看板块" :to="payload?.AnnouncementLink" />
+        </section>
 
+        <div class="community-home__composer">
           <community-composer
             :user="user"
             :ready="initialRequestCompleted"
@@ -47,7 +52,9 @@
             :submitting="creatingThread"
             @create="handleThreadCreate"
           />
+        </div>
 
+        <main class="community-home__feed">
           <community-feed-list
             :items="feedItems"
             :loading="loading"
@@ -67,7 +74,11 @@
         </main>
 
         <div class="community-home__right">
-          <community-right-rail :hot-threads="payload?.HotThreads ?? []" :active-users="payload?.ActiveUsers ?? []" />
+          <community-right-rail
+            :hot-threads="payload?.HotThreads ?? []"
+            :active-users="payload?.ActiveUsers ?? []"
+            :compact="$q.screen.width < 1200"
+          />
         </div>
       </div>
     </div>
@@ -140,8 +151,8 @@ const subCategoryKey = computed(() => {
 
 const order = computed<CommunityFeedOrder>(() => {
   const value = route.query.order
-  if (typeof value !== 'string') return 'latest'
-  return ['latest', 'hot', 'featured'].includes(value) ? (value as CommunityFeedOrder) : 'latest'
+  if (typeof value !== 'string') return 'reply'
+  return ['reply', 'latest', 'hot', 'featured'].includes(value) ? (value as CommunityFeedOrder) : 'reply'
 })
 
 const scope = computed<CommunityFeedScope>(() => {
@@ -297,7 +308,7 @@ function updateQuery(next: Partial<Record<'board' | 'order' | 'scope' | 'categor
     if (
       !value ||
       (key === 'board' && value === 'all') ||
-      (key === 'order' && value === 'latest') ||
+      (key === 'order' && value === 'reply') ||
       (key === 'scope' && value === 'all')
     ) {
       delete query[key]
@@ -442,9 +453,22 @@ watch(routeQueryKey, () => {
 
 .community-home__grid {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 320px;
-  gap: 22px;
+  grid-template-areas:
+    'left hero right'
+    'left notice right'
+    'left composer right'
+    'left feed right';
+  grid-template-columns: minmax(210px, 230px) minmax(0, 1fr) minmax(260px, 280px);
+  gap: 18px 20px;
   align-items: start;
+}
+
+.community-home__left {
+  grid-area: left;
+}
+
+.community-home__right {
+  grid-area: right;
 }
 
 .community-home__left,
@@ -454,14 +478,18 @@ watch(routeQueryKey, () => {
   align-self: start;
 }
 
-.community-home__center {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.community-home__composer {
+  grid-area: composer;
+}
+
+.community-home__feed {
+  grid-area: feed;
+  min-width: 0;
   padding-bottom: 40px;
 }
 
 .community-hero {
+  grid-area: hero;
   position: relative;
   overflow: hidden;
   padding: 24px 28px 18px;
@@ -533,6 +561,10 @@ watch(routeQueryKey, () => {
   background: var(--community-card-bg-soft);
 }
 
+.community-notice {
+  grid-area: notice;
+}
+
 .community-notice__label {
   display: inline-flex;
   align-items: center;
@@ -548,20 +580,54 @@ watch(routeQueryKey, () => {
   line-height: 1.6;
 }
 
-@media (max-width: 1320px) {
+@media (min-width: 1920px) {
   .community-home__grid {
-    grid-template-columns: 240px minmax(0, 1fr) 292px;
+    grid-template-columns: 260px minmax(0, 1fr) 320px;
+    gap: 18px 22px;
   }
 }
 
-@media (max-width: 1180px) {
+@media (min-width: 1200px) and (max-width: 1439px) {
   .community-home__grid {
-    grid-template-columns: 1fr;
+    grid-template-areas:
+      'hero hero'
+      'left left'
+      'notice notice'
+      'composer right'
+      'feed right';
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .community-home__left {
+    position: static;
+  }
+
+  .community-hero__content {
+    align-items: center;
+  }
+}
+
+@media (max-width: 1199px) {
+  .community-home__grid {
+    grid-template-areas:
+      'hero'
+      'left'
+      'notice'
+      'composer'
+      'right'
+      'feed';
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .community-home__left,
   .community-home__right {
     position: static;
+  }
+}
+
+@media (max-width: 1023px) {
+  .community-home {
+    padding: 20px 18px 0;
   }
 
   .community-hero__content {
@@ -570,7 +636,73 @@ watch(routeQueryKey, () => {
   }
 
   .community-notice {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .community-notice .q-btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 599px) {
+  .community-home {
+    padding: 14px 12px 0;
+  }
+
+  .community-home__grid {
+    gap: 12px;
+  }
+
+  .community-hero {
+    padding: 20px 18px 18px;
+    border-radius: 22px;
+  }
+
+  .community-hero__content {
+    gap: 18px;
+  }
+
+  .community-hero__title {
+    font-size: 29px;
+    line-height: 1.12;
+  }
+
+  .community-hero__subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  .community-hero__stats {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .community-hero__stat {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px;
+    border-radius: 15px;
+  }
+
+  .community-hero__stat strong {
+    font-size: 22px;
+  }
+
+  .community-notice {
     grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 13px 14px;
+  }
+
+  .community-notice .q-btn {
+    grid-column: auto;
+    justify-self: start;
+    margin-left: -12px;
+  }
+
+  .community-home__feed {
+    padding-bottom: 24px;
   }
 }
 </style>

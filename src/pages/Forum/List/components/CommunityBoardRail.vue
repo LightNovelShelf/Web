@@ -1,32 +1,36 @@
 <template>
-  <aside class="board-rail">
+  <aside class="board-rail" :class="{ 'board-rail--compact': compact }">
     <overlay-scrollbars-component class="board-rail__scroll" :options="scrollbarOptions" defer>
       <div class="board-rail__content-wrap">
         <div class="board-rail__header">
           <h2 class="board-rail__title">社区</h2>
-          <p class="board-rail__summary">按板块快速切换讨论主题，先看内容，再决定要不要参与。</p>
         </div>
 
-        <button
-          v-for="board in boards"
-          :key="board.Key"
-          class="board-rail__item"
-          :class="{ 'board-rail__item--active': board.Key === selectedBoardKey }"
-          type="button"
-          @click="$emit('select', board.Key)"
-        >
-          <span class="board-rail__icon">
-            <q-icon :name="board.Icon" size="19px" />
-          </span>
-          <span class="board-rail__content">
-            <span class="board-rail__name">{{ board.Title }}</span>
-            <span class="board-rail__description">{{ board.Description }}</span>
-          </span>
-          <span class="board-rail__meta">
-            <span class="board-rail__count">{{ board.TodayPosts }}</span>
-            <span class="board-rail__heat">{{ board.HeatLabel }}</span>
-          </span>
-        </button>
+        <overlay-scrollbars-component class="board-rail__items-scroll" :options="horizontalScrollbarOptions" defer>
+          <div class="board-rail__items">
+            <button
+              v-for="board in boards"
+              :key="board.Key"
+              class="board-rail__item"
+              :class="{ 'board-rail__item--active': board.Key === selectedBoardKey }"
+              type="button"
+              :aria-pressed="board.Key === selectedBoardKey"
+              @click="$emit('select', board.Key)"
+            >
+              <span class="board-rail__icon">
+                <q-icon :name="board.Icon" size="19px" />
+              </span>
+              <span class="board-rail__content">
+                <span class="board-rail__name">{{ board.Title }}</span>
+                <span class="board-rail__description">{{ board.Description }}</span>
+              </span>
+              <span class="board-rail__meta">
+                <span class="board-rail__count">{{ board.TodayPosts }}</span>
+                <span class="board-rail__heat">{{ board.HeatLabel }}</span>
+              </span>
+            </button>
+          </div>
+        </overlay-scrollbars-component>
       </div>
     </overlay-scrollbars-component>
   </aside>
@@ -41,6 +45,7 @@ import type { CommunityBoardKey, CommunityBoardSummary } from 'src/services/foru
 const props = defineProps<{
   boards: CommunityBoardSummary[]
   selectedBoardKey: CommunityBoardKey
+  compact?: boolean
 }>()
 
 defineEmits<{
@@ -50,6 +55,19 @@ defineEmits<{
 const $q = useQuasar()
 
 const scrollbarOptions = computed(() => ({
+  scrollbars: {
+    theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+    autoHide: 'move' as const,
+    autoHideDelay: 300,
+    autoHideSuspend: false,
+  },
+}))
+
+const horizontalScrollbarOptions = computed(() => ({
+  overflow: {
+    x: 'scroll' as const,
+    y: 'hidden' as const,
+  },
   scrollbars: {
     theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
     autoHide: 'move' as const,
@@ -72,6 +90,11 @@ const scrollbarOptions = computed(() => ({
   box-sizing: border-box;
 }
 
+.board-rail__items-scroll {
+  min-width: 0;
+  width: 100%;
+}
+
 .board-rail__content-wrap {
   display: flex;
   flex-direction: column;
@@ -79,29 +102,29 @@ const scrollbarOptions = computed(() => ({
   box-sizing: border-box;
 }
 
+.board-rail__items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .board-rail__header {
   padding: 4px 2px 10px;
 }
 
 .board-rail__title {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 28px;
   line-height: 1.1;
 }
 
-.board-rail__summary {
-  margin: 0;
-  color: var(--community-text-soft);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
 .board-rail__item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  gap: 8px 10px;
   width: 100%;
-  padding: 16px 16px 15px;
+  padding: 14px;
   border: 1px solid var(--community-border);
   border-radius: 20px;
   background: var(--community-card-bg-soft);
@@ -135,33 +158,42 @@ const scrollbarOptions = computed(() => ({
   background: var(--community-chip-bg);
   color: var(--community-accent);
 }
-
+.board-rail__icon {
+  grid-column: 1;
+  grid-row: 1;
+}
 .board-rail__content,
 .board-rail__meta {
-  display: flex;
-  flex-direction: column;
+  display: contents;
 }
 
 .board-rail__name {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  min-width: 0;
+  color: var(--community-text);
   font-size: 15px;
   font-weight: 700;
-  color: var(--community-text);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .board-rail__description {
-  margin-top: 4px;
+  grid-column: 1 / 3;
+  grid-row: 2;
+  min-width: 0;
   color: var(--community-text-soft);
   font-size: 12px;
-  line-height: 1.5;
-}
-
-.board-rail__meta {
-  align-items: flex-end;
-  justify-content: space-between;
-  min-width: 64px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .board-rail__count {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+  justify-self: end;
   color: var(--community-accent);
   font-size: 20px;
   font-weight: 700;
@@ -169,8 +201,84 @@ const scrollbarOptions = computed(() => ({
 }
 
 .board-rail__heat {
+  grid-column: 3;
+  grid-row: 2;
+  align-self: center;
+  justify-self: end;
   color: var(--community-text-muted);
   font-size: 11px;
   white-space: nowrap;
+}
+
+.board-rail--compact .board-rail__scroll {
+  max-height: none;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
+.board-rail--compact .board-rail__content-wrap {
+  gap: 10px;
+}
+
+.board-rail--compact .board-rail__header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 0 2px;
+}
+
+.board-rail--compact .board-rail__title {
+  flex: 0 0 auto;
+  font-size: 22px;
+}
+
+.board-rail--compact .board-rail__items {
+  flex-direction: row;
+  gap: 10px;
+  width: max-content;
+  min-width: 100%;
+  padding: 2px 2px 10px;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+
+.board-rail--compact .board-rail__item {
+  flex: 0 0 220px;
+  min-height: 88px;
+  padding: 12px;
+  scroll-snap-align: start;
+}
+
+.board-rail--compact .board-rail__description {
+  display: block;
+}
+
+@media (max-width: 599px) {
+  .board-rail--compact .board-rail__header {
+    display: block;
+  }
+
+  .board-rail--compact .board-rail__item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    flex-basis: 178px;
+    min-height: 70px;
+    padding: 10px;
+    border-radius: 17px;
+  }
+
+  .board-rail--compact .board-rail__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+
+  .board-rail--compact .board-rail__description,
+  .board-rail--compact .board-rail__heat {
+    display: none;
+  }
+
+  .board-rail--compact .board-rail__count {
+    font-size: 17px;
+  }
 }
 </style>

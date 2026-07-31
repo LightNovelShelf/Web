@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page class="community-mine-page">
     <section :class="['community-panel', { 'community-panel--dark': $q.dark.isActive }]">
       <div class="community-panel__header">
         <div>
@@ -14,7 +14,16 @@
       </div>
 
       <template v-else>
-        <q-tabs v-model="tab" no-caps indicator-color="primary" active-color="primary" class="community-panel__tabs">
+        <q-tabs
+          v-model="tab"
+          no-caps
+          outside-arrows
+          mobile-arrows
+          :dense="$q.screen.lt.sm"
+          indicator-color="primary"
+          active-color="primary"
+          class="community-panel__tabs"
+        >
           <q-tab name="threads" label="我发布的帖子" />
           <q-tab name="replies" label="我参与的回复" />
           <q-tab name="favorites" label="我的收藏" />
@@ -128,6 +137,11 @@ useInitRequest(loadOverview)
 </script>
 
 <style scoped lang="scss">
+.community-mine-page {
+  min-height: 100%;
+  padding: 24px 20px 40px;
+}
+
 .community-panel {
   --community-accent: #2563eb;
   --community-text: #0f172a;
@@ -243,14 +257,40 @@ useInitRequest(loadOverview)
   color: #2563eb;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 599px) {
+  .community-mine-page {
+    padding: 12px 10px 24px;
+  }
+
   .community-panel {
-    margin: 12px;
+    padding: 16px 12px;
+    border-radius: 18px;
   }
 
   .community-panel__header {
-    flex-direction: column;
     align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .community-panel__title {
+    font-size: 24px;
+  }
+
+  .community-panel__tabs {
+    margin-inline: -12px;
+  }
+
+  .community-panel__panel {
+    padding-top: 14px;
+  }
+
+  .community-replies__item {
+    padding: 14px;
+  }
+
+  .community-panel__state {
+    padding: 30px 14px;
   }
 }
 </style>

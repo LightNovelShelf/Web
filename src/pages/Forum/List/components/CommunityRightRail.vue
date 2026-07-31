@@ -1,5 +1,5 @@
 <template>
-  <aside class="right-rail">
+  <aside class="right-rail" :class="{ 'right-rail--compact': compact }">
     <overlay-scrollbars-component class="right-rail__scroll" :options="scrollbarOptions" defer>
       <div class="right-rail__content-wrap">
         <section class="rail-panel">
@@ -73,11 +73,16 @@ import type { CommunityActiveUserItem, CommunityHotRankItem } from 'src/services
 const props = defineProps<{
   hotThreads: CommunityHotRankItem[]
   activeUsers: CommunityActiveUserItem[]
+  compact?: boolean
 }>()
 
 const $q = useQuasar()
 
 const scrollbarOptions = computed(() => ({
+  overflow: {
+    x: props.compact ? ('scroll' as const) : ('hidden' as const),
+    y: props.compact ? ('hidden' as const) : ('scroll' as const),
+  },
   scrollbars: {
     theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
     autoHide: 'move' as const,
@@ -275,5 +280,47 @@ function formatPublishedAt(value: string) {
   color: var(--community-accent);
   font-size: 14px;
   font-weight: 700;
+}
+
+.right-rail--compact .right-rail__scroll {
+  max-height: none;
+  padding-right: 0;
+}
+
+.right-rail--compact .right-rail__content-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.right-rail--compact .rail-panel {
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.right-rail--compact .rail-panel__title {
+  font-size: 19px;
+}
+
+@media (max-width: 599px) {
+  .right-rail--compact .right-rail__content-wrap {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: max-content;
+    min-width: 100%;
+    padding: 2px 2px 10px;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+  }
+
+  .right-rail--compact .rail-panel {
+    flex: 0 0 min(300px, calc(100vw - 48px));
+    scroll-snap-align: start;
+  }
+
+  .right-rail--compact .rank-item {
+    padding-inline: 6px;
+  }
 }
 </style>

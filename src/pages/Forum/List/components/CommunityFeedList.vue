@@ -3,7 +3,6 @@
     <div class="feed__toolbar">
       <div class="feed__toolbar-copy">
         <h3 class="feed__title">帖子流</h3>
-        <p class="feed__subtitle">按你关心的板块和排序快速浏览当前社区讨论。</p>
       </div>
 
       <div class="feed__filters">
@@ -35,29 +34,33 @@
 
     <div v-if="subCategories.length" class="feed__subcategories">
       <div class="feed__subcategories-label">子分类</div>
-      <div class="feed__subcategories-list">
-        <button
-          type="button"
-          class="feed__subcategories-item"
-          :class="{ 'feed__subcategories-item--active': !selectedSubCategoryKey }"
-          @click="$emit('update:sub-category', '')"
-        >
-          <span class="feed__subcategories-name">全部</span>
-          <span class="feed__subcategories-count">{{ subCategories.reduce((sum, item) => sum + item.Count, 0) }}</span>
-        </button>
+      <overlay-scrollbars-component class="feed__subcategories-scroll" :options="horizontalScrollbarOptions" defer>
+        <div class="feed__subcategories-list">
+          <button
+            type="button"
+            class="feed__subcategories-item"
+            :class="{ 'feed__subcategories-item--active': !selectedSubCategoryKey }"
+            @click="$emit('update:sub-category', '')"
+          >
+            <span class="feed__subcategories-name">全部</span>
+            <span class="feed__subcategories-count">{{
+              subCategories.reduce((sum, item) => sum + item.Count, 0)
+            }}</span>
+          </button>
 
-        <button
-          v-for="subCategory in subCategories"
-          :key="subCategory.Key"
-          type="button"
-          class="feed__subcategories-item"
-          :class="{ 'feed__subcategories-item--active': selectedSubCategoryKey === subCategory.Key }"
-          @click="$emit('update:sub-category', subCategory.Key)"
-        >
-          <span class="feed__subcategories-name">{{ subCategory.Label }}</span>
-          <span class="feed__subcategories-count">{{ subCategory.Count }}</span>
-        </button>
-      </div>
+          <button
+            v-for="subCategory in subCategories"
+            :key="subCategory.Key"
+            type="button"
+            class="feed__subcategories-item"
+            :class="{ 'feed__subcategories-item--active': selectedSubCategoryKey === subCategory.Key }"
+            @click="$emit('update:sub-category', subCategory.Key)"
+          >
+            <span class="feed__subcategories-name">{{ subCategory.Label }}</span>
+            <span class="feed__subcategories-count">{{ subCategory.Count }}</span>
+          </button>
+        </div>
+      </overlay-scrollbars-component>
     </div>
 
     <div v-if="loading" class="feed__list">
@@ -114,6 +117,7 @@
 </template>
 
 <script setup lang="ts">
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
 import type {
@@ -127,6 +131,19 @@ import type {
 import CommunityThreadCard from './CommunityThreadCard.vue'
 
 const $q = useQuasar()
+
+const horizontalScrollbarOptions = computed(() => ({
+  overflow: {
+    x: 'scroll' as const,
+    y: 'hidden' as const,
+  },
+  scrollbars: {
+    theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+    autoHide: 'move' as const,
+    autoHideDelay: 300,
+    autoHideSuspend: false,
+  },
+}))
 
 defineProps<{
   items: CommunityFeedItem[]
@@ -149,6 +166,7 @@ defineEmits<{
 }>()
 
 const orderOptions = [
+  { label: '回复', value: 'reply' },
   { label: '最新', value: 'latest' },
   { label: '热门', value: 'hot' },
   { label: '精华', value: 'featured' },
@@ -181,12 +199,6 @@ const scopeOptions = [
   line-height: 1.1;
 }
 
-.feed__subtitle {
-  margin: 8px 0 0;
-  color: var(--community-text-soft);
-  font-size: 13px;
-}
-
 .feed__filters {
   display: flex;
   gap: 10px;
@@ -207,6 +219,11 @@ const scopeOptions = [
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.feed__subcategories-scroll {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .feed__subcategories-list {
@@ -325,10 +342,77 @@ const scopeOptions = [
   flex-wrap: wrap;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1439px) {
   .feed__toolbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 599px) {
+  .feed {
+    gap: 12px;
+  }
+
+  .feed__title {
+    font-size: 22px;
+  }
+
+  .feed__filters {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .feed__toggle {
+    display: flex;
+    width: 100%;
+  }
+
+  .feed__toggle :deep(.q-btn) {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .feed__subcategories {
+    display: block;
+    min-width: 0;
+    padding-top: 2px;
+  }
+
+  .feed__subcategories-label {
+    margin-bottom: 8px;
+  }
+
+  .feed__subcategories-scroll {
+    width: 100%;
+  }
+
+  .feed__subcategories-list {
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: max-content;
+    min-width: 100%;
+    padding-bottom: 6px;
+    overscroll-behavior-x: contain;
+  }
+
+  .feed__subcategories-item {
+    flex: 0 0 auto;
+  }
+
+  .feed__state {
+    padding: 40px 18px;
+    border-radius: 20px;
+  }
+
+  .feed__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .feed__footer .q-btn {
+    width: 100%;
   }
 }
 </style>

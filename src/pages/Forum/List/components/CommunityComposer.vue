@@ -18,7 +18,13 @@
       />
     </div>
 
-    <q-dialog v-model="dialogOpen" persistent transition-show="fade" transition-hide="fade">
+    <q-dialog
+      v-model="dialogOpen"
+      persistent
+      :maximized="$q.screen.xs"
+      transition-show="fade"
+      transition-hide="fade"
+    >
       <q-card flat bordered class="composer-dialog" :style="dialogCardStyle">
         <div class="composer-dialog__header">
           <div>
@@ -78,7 +84,7 @@
               <div class="composer-dialog__editor-label">内容</div>
               <div class="composer-dialog__editor-hint">标题至少 6 个字，正文至少 20 个字。</div>
             </div>
-            <div class="composer-dialog__editor-shell">
+            <div ref="editorShellRef" class="composer-dialog__editor-shell">
               <html-editor v-if="dialogOpen" v-model:html="contentHtml" mode="common" />
             </div>
           </div>
@@ -105,12 +111,14 @@
 </template>
 
 <script setup lang="ts">
+import { OverlayScrollbars } from 'overlayscrollbars'
 import { useQuasar } from 'quasar'
 
 import sanitizerHtml from 'src/utils/sanitizeHtml'
 
 import HtmlEditor from 'components/html/HtmlEditor.vue'
 
+import type { OverlayScrollbars as OverlayScrollbarsInstance } from 'overlayscrollbars'
 import type { CommunityBoardKey, CommunityCatalogBoard, CreateCommunityThreadRequest } from 'src/services/forum'
 
 const props = defineProps<{
@@ -133,6 +141,8 @@ const title = ref('')
 const contentHtml = ref('<p></p>')
 const boardKey = ref<Exclude<CommunityBoardKey, 'all'>>('')
 const subCategoryKey = ref('')
+const editorShellRef = ref<HTMLElement | null>(null)
+let editorScrollbarInstances: OverlayScrollbarsInstance[] = []
 
 const catalogBoardMap = computed(() => new Map(props.catalogBoards.map((item) => [item.Key, item])))
 
@@ -185,12 +195,78 @@ function syncSubCategoryForBoard() {
   subCategoryKey.value = (matched?.value as string) ?? ''
 }
 
+function destroyEditorScrollbars() {
+  editorScrollbarInstances.forEach((instance) => instance.destroy())
+  editorScrollbarInstances = []
+}
+
+function initEditorScrollbars() {
+  destroyEditorScrollbars()
+
+  const targets = editorShellRef.value?.querySelectorAll<HTMLElement>(
+    '.q-editor__content, .md-editor-toolbar-wrapper, .cm-scroller, .md-editor-preview-wrapper',
+  )
+
+  targets?.forEach((target) => {
+    const horizontalOnly = target.classList.contains('md-editor-toolbar-wrapper')
+    const allowHorizontal = horizontalOnly || target.classList.contains('cm-scroller')
+
+    editorScrollbarInstances.push(
+      OverlayScrollbars(
+        {
+          target,
+          elements: {
+            viewport: target,
+            padding: false,
+            content: false,
+          },
+          scrollbars: {
+            slot: target.parentElement,
+          },
+        },
+        {
+          overflow: {
+            x: allowHorizontal ? 'scroll' : 'hidden',
+            y: horizontalOnly ? 'hidden' : 'scroll',
+          },
+          scrollbars: {
+            theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+            autoHide: 'move',
+            autoHideDelay: 300,
+            autoHideSuspend: false,
+          },
+        },
+      ),
+    )
+  })
+}
+
+watch(
+  () => $q.dark.isActive,
+  () => {
+    editorScrollbarInstances.forEach((instance) => {
+      instance.options({
+        scrollbars: {
+          theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+        },
+      })
+    })
+  },
+)
+
+onBeforeUnmount(destroyEditorScrollbars)
+
 watch(
   () => dialogOpen.value,
-  (open) => {
-    if (open) {
-      syncBoardFromProps()
+  async (open) => {
+    if (!open) {
+      destroyEditorScrollbars()
+      return
     }
+
+    syncBoardFromProps()
+    await nextTick()
+    initEditorScrollbars()
   },
 )
 
@@ -318,10 +394,10 @@ function submit() {
 .composer-dialog {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  width: min(1100px, 96vw);
+  width: min(1100px, calc(100vw - 32px));
   max-width: 1100px;
-  height: 92vh;
-  min-height: 720px;
+  height: min(860px, calc(100dvh - 32px));
+  min-height: min(720px, calc(100dvh - 32px));
   max-height: 860px;
   margin: auto;
   border-radius: 30px;
@@ -441,26 +517,54 @@ function submit() {
   overflow: auto;
 }
 
-@media (max-width: 900px) {
-  .composer,
-  .composer__actions,
-  .composer-dialog__footer,
-  .composer-dialog__editor-row {
+@media (max-width: 599px) {
+  .composer {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .composer__title {
+    font-size: 21px;
+  }
+
+  .composer__actions {
+    align-items: stretch;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .composer__actions .q-btn {
+    width: 100%;
   }
 
   .composer-dialog {
     width: 100vw;
-    height: 100vh;
-    min-height: 100vh;
+    height: 100dvh;
+    min-height: 100dvh;
     max-width: none;
     max-height: none;
     border-radius: 0;
   }
 
+  .composer-dialog__header,
+  .composer-dialog__footer {
+    padding: 16px;
+  }
+
   .composer-dialog__header {
-    padding-right: 68px;
+    padding-right: 62px;
+  }
+
+  .composer-dialog__title {
+    font-size: 23px;
+  }
+
+  .composer-dialog__body {
+    gap: 14px;
+    padding: 14px 16px 16px;
   }
 
   .composer-dialog__meta {
@@ -469,6 +573,19 @@ function submit() {
 
   .composer-dialog__meta-row {
     grid-template-columns: 1fr;
+  }
+
+  .composer-dialog__editor-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .composer-dialog__footer-actions {
+    width: 100%;
+  }
+
+  .composer-dialog__footer-actions .q-btn {
+    flex: 1 1 0;
   }
 }
 </style>
