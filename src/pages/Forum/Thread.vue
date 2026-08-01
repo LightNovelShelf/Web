@@ -981,6 +981,12 @@ watch(
     linear-gradient(180deg, #020617 0%, #0f172a 48%, #111827 100%);
 }
 
+:deep(.thread-card__body) {
+  p {
+    text-indent: unset;
+  }
+}
+
 .thread-page__shell {
   max-width: 1360px;
   margin: 0 auto;

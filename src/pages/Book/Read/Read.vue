@@ -413,17 +413,6 @@ watch(
   * {
     line-break: anywhere;
   }
-
-  p {
-    margin: 0;
-    padding: 0;
-    line-height: 1.8em;
-    text-indent: 2em;
-
-    img {
-      margin: 0 5px;
-    }
-  }
 }
 
 /*居中功能*/
