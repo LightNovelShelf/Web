@@ -373,7 +373,21 @@ const definitions: Record<string, QEditorCommand> = {
 
 <style lang="scss" scoped>
 .common {
+  height: calc(100vh - 200px);
+  min-height: 500px;
+
+  :deep(.q-editor) {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+  }
+
   :deep(.q-editor__content) {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+
     @import '../../../css/read';
   }
 }

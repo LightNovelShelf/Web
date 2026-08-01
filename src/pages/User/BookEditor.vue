@@ -1,7 +1,7 @@
 <template>
-  <q-page padding style="max-width: 1920px" class="q-mx-auto">
+  <q-page style="max-width: 1920px" class="q-mx-auto">
     <div v-if="isActive">
-      <q-tab-panels v-model="tab">
+      <q-tab-panels v-model="tab" class="book-editor-panels">
         <q-tab-panel name="information">
           <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
             <q-grid-item>
@@ -64,34 +64,30 @@
           </div>
         </q-tab-panel>
         <q-tab-panel name="chapter">
-          <div class="chapter-editor">
-            <q-input label="标题" v-model="chapter['Title']" />
-            <comic-chapter-images
-              v-if="isComic"
-              v-model="chapter.Images"
-              v-model:previews="chapter.Previews"
-              v-model:uploading="comicUploading"
-            />
-            <template v-else>
-              <div class="text-opacity">内容</div>
-              <html-editor v-model:html="chapter['Content']" mode="common" />
-            </template>
-          </div>
+          <q-input label="标题" v-model="chapter['Title']" />
+          <comic-chapter-images
+            v-if="isComic"
+            v-model="chapter.Images"
+            v-model:previews="chapter.Previews"
+            v-model:uploading="comicUploading"
+          />
+          <template v-else>
+            <div class="text-opacity">内容</div>
+            <html-editor v-model:html="chapter['Content']" mode="common" />
+          </template>
         </q-tab-panel>
         <q-tab-panel name="new">
-          <div class="chapter-editor">
-            <q-input label="标题" v-model="creatingChapterContent.title" />
-            <comic-chapter-images
-              v-if="isComic"
-              v-model="creatingChapterContent.images"
-              v-model:previews="creatingChapterContent.previews"
-              v-model:uploading="comicUploading"
-            />
-            <template v-else>
-              <div class="text-opacity">内容</div>
-              <html-editor v-model:html="creatingChapterContent.html" mode="common" />
-            </template>
-          </div>
+          <q-input label="标题" v-model="creatingChapterContent.title" />
+          <comic-chapter-images
+            v-if="isComic"
+            v-model="creatingChapterContent.images"
+            v-model:previews="creatingChapterContent.previews"
+            v-model:uploading="comicUploading"
+          />
+          <template v-else>
+            <div class="text-opacity">内容</div>
+            <html-editor v-model:html="creatingChapterContent.html" mode="common" />
+          </template>
         </q-tab-panel>
       </q-tab-panels>
       <q-inner-loading
@@ -197,8 +193,8 @@ import type { BookServicesTypes } from 'src/services/book'
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
-
 const layout = useLayout()
+
 const { siderShow, siderBreakpoint } = layout
 const props = defineProps<{ bookId: string }>()
 const $q = useQuasar()
@@ -586,9 +582,9 @@ useInitRequest(request, { before: refresh, isActive })
 </script>
 
 <style lang="scss" scoped>
-.chapter-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.book-editor-panels {
+  :deep(.q-tab-panel) {
+    padding: 16px !important;
+  }
 }
 </style>

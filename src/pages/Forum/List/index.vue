@@ -92,6 +92,7 @@ import { useQuasar } from 'quasar'
 import { useAppStore } from 'stores/app'
 
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useIsActivated } from 'src/composition/useIsActivated'
 
 import { createCommunityThread, getCommunityFeed, getCommunityHome } from 'src/services/forum'
 
@@ -116,6 +117,7 @@ const { user } = storeToRefs(appStore)
 const $q = useQuasar()
 const router = useRouter()
 const route = useRoute()
+const isActivated = useIsActivated()
 
 const payload = ref<CommunityHomePayload>()
 const feedItems = ref<CommunityFeedItem[]>([])
@@ -393,6 +395,10 @@ async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadReques
 useInitRequest(requestCommunityHomeOnEnter)
 
 watch(routeQueryKey, () => {
+  if (!isActivated.value) {
+    return
+  }
+
   requestCommunityFeedForQueryChange()
 })
 </script>

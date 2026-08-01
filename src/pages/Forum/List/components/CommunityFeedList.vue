@@ -79,7 +79,7 @@
     <div v-else-if="items.length" class="feed__list">
       <div v-if="error" class="feed__inline-error">
         <q-icon name="mdiAlertCircleOutline" size="18px" color="negative" />
-        <span class="feed__state-text">{{ error }}</span>
+        <span class="feed__state-text">{{ error.trim() || '加载更多失败，请稍后重试。' }}</span>
         <q-btn flat no-caps color="primary" label="重试加载更多" @click="$emit('retry')" />
       </div>
 

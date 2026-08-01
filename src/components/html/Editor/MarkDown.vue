@@ -5,7 +5,6 @@
       v-model="markdownText"
       :onHtmlChanged="onHtmlChanged"
       :onUploadImg="onUploadImg"
-      style="height: calc(100vh - 200px)"
       :theme="$q.dark.isActive ? 'dark' : 'light'"
       :toolbars="mdToolBar"
       :sanitize="sanitize"
@@ -187,22 +186,25 @@ turndownService.addRule('convertPBrToBr', {
   },
 })
 
-let isInternalChange = false
+let lastEmittedHtml: string | undefined
 
 const onHtmlChanged = (html: string) => {
-  isInternalChange = true
+  if (html === props.html) return
+
+  lastEmittedHtml = html
   emit('update:html', html)
 }
 
 watch(
   () => props.html,
   (html) => {
-    if (isInternalChange) {
-      isInternalChange = false
-    } else {
-      // 对外部html的改变做初始化
-      markdownText.value = turndownService.turndown(html)
+    if (html === lastEmittedHtml) {
+      lastEmittedHtml = undefined
+      return
     }
+
+    lastEmittedHtml = undefined
+    markdownText.value = turndownService.turndown(html)
   },
   { immediate: true },
 )
@@ -210,8 +212,22 @@ watch(
 
 <style lang="scss" scoped>
 .common {
+  height: calc(100vh - 200px);
+  min-height: 500px;
+
+  :deep(.md-editor) {
+    height: 100%;
+    min-height: 0;
+  }
+
   :deep(.md-editor-preview) {
     @import '../../../css/read';
+  }
+}
+
+.simple {
+  :deep(.md-editor) {
+    height: calc(100vh - 200px);
   }
 }
 
