@@ -80,7 +80,7 @@
         <q-fab-action
           v-if="chapter?.CanEdit"
           color="primary"
-          :to="{ name: 'EditChapter', param: { bid, sortNum } }"
+          :to="{ name: 'EditChapter', params: { bid, sortNum } }"
           icon="mdiSquareEditOutline"
           :disable="isDragging"
         >
