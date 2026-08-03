@@ -16,8 +16,24 @@ export function useBookDownload(target: 'book' | 'chapter' = 'book') {
   /** 正在下载的 id，用于按钮各自的 loading */
   const downloadingId = ref<number | null>(null)
 
-  const download = async (id: number) => {
+  /** 扣费前的确认，cost 为 0（管理下载权限或自己的书）直接放行 */
+  const confirmCost = (cost: number) =>
+    new Promise<boolean>((resolve) => {
+      if (!cost) return resolve(true)
+      $q.dialog({
+        title: '下载确认',
+        message: `本次下载将消耗 <b>${cost}</b> 金币。<br class="q-mb-xs" /><span class="text-caption text-grey">2 小时内重复下载不再扣费。</span>`,
+        html: true,
+        cancel: true,
+        persistent: true,
+      })
+        .onOk(() => resolve(true))
+        .onCancel(() => resolve(false))
+    })
+
+  const download = async (id: number, cost = 0) => {
     if (downloadingId.value !== null) return
+    if (!(await confirmCost(cost))) return
     downloadingId.value = id
 
     const notify = $q.notify({

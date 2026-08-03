@@ -42,6 +42,7 @@ function toMangaChapter(chapter: ComicChapterSummary): MangaChapter {
     title: chapter.Title,
     publishedAt: chapter.UpdatedAt ?? chapter.CreatedAt,
     pages: chapter.PageCount,
+    downloadCost: chapter.DownloadCost,
     images: [],
   }
 }

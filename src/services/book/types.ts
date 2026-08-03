@@ -80,6 +80,8 @@ export interface GetBookInfoRes {
     Title: string
     CanEdit: boolean
     CanDownload: boolean
+    /** 下载整本需消耗的金币，0 表示免费 */
+    DownloadCost: number
     User: {
       Id: number
       Avatar: string

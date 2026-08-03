@@ -11,6 +11,8 @@ export interface MangaChapter {
   title: string
   publishedAt: string
   pages: number
+  /** 下载本话需消耗的金币，0 表示免费 */
+  downloadCost: number
   images: MangaImageAsset[]
 }
 

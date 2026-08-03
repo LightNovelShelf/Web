@@ -53,6 +53,19 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple @click="coinLogVisible = true">
+            <q-item-section class="avatar-item" avatar>
+              <q-avatar><coin-icon size="22px" /></q-avatar>
+            </q-item-section>
+            <q-item-section class="label-item">金币</q-item-section>
+            <q-item-section side>
+              <div class="row items-center no-wrap">
+                <span>{{ growth?.Coin ?? 0 }}</span>
+                <q-icon size="18px" name="mdiChevronRight" />
+              </div>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple @click="signInVisible = true">
             <q-item-section class="avatar-item" avatar>
               <q-avatar><q-icon name="mdiCalendarCheckOutline" /></q-avatar>
@@ -71,6 +84,7 @@
     </div>
 
     <point-log-dialog v-model="pointLogVisible" />
+    <point-log-dialog v-model="coinLogVisible" kind="coin" />
     <sign-in-dialog
       v-model="signInVisible"
       :streak="growth?.SignStreak ?? 0"
@@ -139,6 +153,7 @@ import { parseTime } from 'src/utils/time'
 
 import { useAppStore } from 'stores/app'
 
+import CoinIcon from 'src/components/points/CoinIcon.vue'
 import PointLogDialog from 'src/components/points/PointLogDialog.vue'
 import SignInDialog from 'src/components/points/SignInDialog.vue'
 
@@ -156,6 +171,7 @@ const { user } = storeToRefs(appStore)
 
 const growth = computed<Growth | undefined>(() => user.value?.Growth)
 const pointLogVisible = ref(false)
+const coinLogVisible = ref(false)
 const signInVisible = ref(false)
 
 async function refreshUser() {

@@ -4,6 +4,8 @@
 export interface Growth {
   /** 累计经验值 */
   Exp: number
+  /** 金币余额，用于下载消费 */
+  Coin: number
   /** 当前访问等级（含手动授予，用于展示） */
   Level: number
   /** 由经验值算出的成长等级 */
@@ -22,8 +24,10 @@ export namespace SignIn {
   export type Request = Record<string, never>
   export interface Response {
     Reward: number
+    CoinReward: number
     Streak: number
     Exp: number
+    Coin: number
     Level: number
   }
 }
@@ -45,6 +49,13 @@ export namespace GetPointLog {
     Page: number
     Data: Item[]
   }
+}
+
+/** 金币流水，结构与积分流水一致，仅来源枚举多出消费类 */
+export namespace GetCoinLog {
+  export type Request = GetPointLog.Request
+  export type Item = GetPointLog.Item
+  export type Response = GetPointLog.Response
 }
 
 export namespace GetSignInCalendar {

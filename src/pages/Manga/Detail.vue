@@ -94,9 +94,11 @@
                       round
                       icon="mdiDownload"
                       :loading="downloadingId === Number(chapter.id)"
-                      @click.stop.prevent="download(Number(chapter.id))"
+                      @click.stop.prevent="download(Number(chapter.id), chapter.downloadCost)"
                     >
-                      <q-tooltip>下载本话</q-tooltip>
+                      <q-tooltip>
+                        {{ chapter.downloadCost ? `下载本话 · ${chapter.downloadCost} 金币` : '下载本话' }}
+                      </q-tooltip>
                     </q-btn>
                   </q-item-section>
                 </q-item>

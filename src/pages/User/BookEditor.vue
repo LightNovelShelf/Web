@@ -61,6 +61,13 @@
                 </q-input>
               </div>
             </div>
+            <div>
+              <div class="q-gutter-sm light-radio">
+                <div class="text-subtitle1">下载</div>
+                <q-toggle v-model="bookSetting['DownloadAllowed']" label="允许下载" />
+                <div class="text-caption text-opacity">关闭后用户无法下载本书</div>
+              </div>
+            </div>
           </div>
         </q-tab-panel>
         <q-tab-panel name="chapter">
@@ -255,6 +262,7 @@ interface CreatingChapterState {
 interface BookSetting {
   Level?: number
   InteriorLevel?: number
+  DownloadAllowed?: boolean
 }
 
 watch(
@@ -562,6 +570,8 @@ const request = useTimeoutFn(async () => {
 
     bookSetting.Level = data.Book.Level
     bookSetting.InteriorLevel = data.Book.InteriorLevel
+    // 后端已按书籍类型解析好默认值
+    bookSetting.DownloadAllowed = data.Book.DownloadAllowed
   })
 
   await Promise.all([p1])

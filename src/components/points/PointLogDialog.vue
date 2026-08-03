@@ -2,7 +2,8 @@
   <q-dialog v-model="model">
     <q-card class="point-log-card">
       <q-card-section class="row items-center q-pb-sm">
-        <div class="text-h6">经验记录</div>
+        <coin-icon v-if="kind === 'coin'" size="20px" class="q-mr-sm" />
+        <div class="text-h6">{{ kind === 'coin' ? '金币记录' : '经验记录' }}</div>
         <q-space />
         <q-btn icon="mdiClose" flat round dense v-close-popup />
       </q-card-section>
@@ -49,11 +50,15 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { parseTime, toNow } from 'src/utils/time'
 
-import { getPointLog } from 'src/services/points'
+import CoinIcon from 'src/components/points/CoinIcon.vue'
+
+import { getCoinLog, getPointLog } from 'src/services/points'
 
 import type { GetPointLog } from 'src/services/points/type'
 
 const model = defineModel<boolean>({ default: false })
+// 经验与金币流水结构完全一致，只有标题、取数接口与来源文案不同
+const { kind = 'exp' } = defineProps<{ kind?: 'exp' | 'coin' }>()
 
 const $q = useQuasar()
 const list = ref<GetPointLog.Item[]>([])
@@ -80,11 +85,15 @@ const SOURCE_LABEL: Record<string, string> = {
   Thread: '发帖',
   Reply: '回复',
   BookComment: '评论',
+  DownloadNovel: '下载小说',
+  DownloadComic: '下载漫画',
   Admin: '系统',
 }
+// 消费类来源天然是负数，不该被当成「回收」
+const SPEND_SOURCES = new Set(['DownloadNovel', 'DownloadComic'])
 function sourceLabel(source: string, amount: number) {
   const label = SOURCE_LABEL[source] ?? source
-  return amount < 0 ? `${label}回收` : label
+  return amount < 0 && !SPEND_SOURCES.has(source) ? `${label}回收` : label
 }
 
  
@@ -104,7 +113,8 @@ async function loadMore() {
   if (loading.value || finished) return
   loading.value = true
   try {
-    const res = await getPointLog({ Page: page, Size: 20 })
+    const fetch = kind === 'coin' ? getCoinLog : getPointLog
+    const res = await fetch({ Page: page, Size: 20 })
     list.value.push(...res.Data)
     loaded.value = true
     page += 1

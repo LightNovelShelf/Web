@@ -70,6 +70,11 @@
                 </q-item>
               </div>
 
+              <div class="coin-item">
+                <coin-icon size="18px" />
+                <span>{{ growth?.Coin ?? 0 }}</span>
+              </div>
+
               <div class="level-item">
                 <template v-if="levelValue >= 6">
                   <div class="row q-col-gutter-sm items-center">
@@ -177,6 +182,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { longTermToken, sessionToken } from 'src/utils/session'
 
 import { useAppStore } from 'stores/app'
+
+import CoinIcon from 'src/components/points/CoinIcon.vue'
 
 import { useMedia } from 'src/composition/useMedia'
 
@@ -298,7 +305,16 @@ function logout() {
     .nickname-item {
       font-size: 18px;
       font-weight: 500;
-      margin-bottom: 12px;
+    }
+
+    .coin-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      font-weight: 500;
     }
 
     .level-item {

@@ -45,6 +45,8 @@ export interface ComicChapterSummary {
   CreatedAt: string
   UpdatedAt?: string | null
   PageCount: number
+  /** 下载本话需消耗的金币，0 表示免费（管理下载权限或自己上传的书） */
+  DownloadCost: number
 }
 
 export interface ComicReadPosition {

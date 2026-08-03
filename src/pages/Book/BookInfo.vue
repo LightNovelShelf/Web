@@ -84,9 +84,9 @@
                   v-if="book.CanDownload"
                   color="secondary"
                   :loading="downloadingId === _bid"
-                  @click="download(_bid)"
+                  @click="download(_bid, book.DownloadCost)"
                 >
-                  下载
+                  {{ book.DownloadCost ? `下载 · ${book.DownloadCost} 金币` : '下载' }}
                 </q-btn>
                 <q-btn v-if="book.CanEdit" color="red" :to="{ name: 'EditBook', param: { bid: bid } }">快速编辑</q-btn>
               </div>

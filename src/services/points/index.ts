@@ -14,6 +14,11 @@ export function getPointLog(req: Types.GetPointLog.Request) {
   return requestWithSignalr<Types.GetPointLog.Response>('GetPointLog', req)
 }
 
+/** 金币流水（分页，最新在前） */
+export function getCoinLog(req: Types.GetCoinLog.Request) {
+  return requestWithSignalr<Types.GetCoinLog.Response>('GetCoinLog', req)
+}
+
 /** 指定年月的签到日历 */
 export function getSignInCalendar(req: Types.GetSignInCalendar.Request) {
   return requestWithSignalr<Types.GetSignInCalendar.Response>('GetSignInCalendar', req)
