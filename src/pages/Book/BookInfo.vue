@@ -80,6 +80,14 @@
               <div class="row book-actions" v-if="isActive">
                 <add-to-shelf :book="bookInList" />
                 <q-btn color="primary" @click="startRead">{{ position ? '继续阅读' : '开始阅读' }}</q-btn>
+                <q-btn
+                  v-if="book.CanDownload"
+                  color="secondary"
+                  :loading="downloadingId === _bid"
+                  @click="download(_bid)"
+                >
+                  下载
+                </q-btn>
                 <q-btn v-if="book.CanEdit" color="red" :to="{ name: 'EditBook', param: { bid: bid } }">快速编辑</q-btn>
               </div>
             </div>
@@ -154,6 +162,7 @@ import { BookUserAvatar, Comment, BlurHash } from 'components'
 import AddToShelf from 'components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from 'components/grid'
 
+import { useBookDownload } from 'src/composition/biz/useBookDownload'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useToNowRef } from 'src/composition/useToNowRef'
@@ -205,6 +214,8 @@ const startRead = async () => {
   if (sortNum == 0) sortNum = 1
   await router.push({ name: 'Read', params: { bid: _bid.value, sortNum: sortNum } })
 }
+
+const { downloadingId, download } = useBookDownload()
 
 // 只要数据中的id和props不同，就当在加载
 const isActive = computed(() => book.value?.Id === _bid.value)

@@ -79,6 +79,7 @@ export interface GetBookInfoRes {
     Favorite: number
     Title: string
     CanEdit: boolean
+    CanDownload: boolean
     User: {
       Id: number
       Avatar: string

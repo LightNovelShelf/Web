@@ -78,6 +78,7 @@ export interface ComicSeriesInfoResponse {
       UserName: string
       Avatar: string
     }
+    CanDownload: boolean
     Cover: string
     CreatedAt: string
     LastUpdatedChapter: string

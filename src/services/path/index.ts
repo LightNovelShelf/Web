@@ -45,5 +45,11 @@ export const PATH = {
   /** ----- end user ----- */
 
   /** ----- book ----- */
+  get BOOK_DOWNLOAD() {
+    return `${apiServer.value}/api/book/download`
+  },
+  get BOOK_DOWNLOAD_CHAPTER() {
+    return `${apiServer.value}/api/book/download_chapter`
+  },
   /** ----- end book ----- */
 }

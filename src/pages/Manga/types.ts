@@ -51,6 +51,7 @@ export interface MangaBook {
     UserName: string
     Avatar: string
   }
+  canDownload: boolean
   cover: MangaImageAsset
   createdAt: string
   updatedAt: string

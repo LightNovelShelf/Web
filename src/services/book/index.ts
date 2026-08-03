@@ -3,6 +3,9 @@ import type { ComicListResponse } from 'src/services/manga/types'
 
 import * as Types from './types'
 import { requestWithSignalr } from '../internal/request'
+import { ServerError } from '../internal/ServerError'
+import { PATH } from '../path'
+import { getSessionToken } from '../utils'
 
 export { Types as BookServicesTypes }
 
@@ -101,4 +104,76 @@ export function getBookEditInfo(bid: number) {
 /** 删除书籍 */
 export function deleteBook(bid: number) {
   return requestWithSignalr('DeleteBook', { Id: bid })
+}
+
+interface DownloadOptions {
+  signal?: AbortSignal
+  onProgress?: (loaded: number, total: number) => void
+}
+
+/** 下载小说，导出 epub，需要下载权限 */
+export function downloadBook(bid: number, options: DownloadOptions = {}) {
+  return downloadFile(`${PATH.BOOK_DOWNLOAD}?bid=${bid}`, String(bid), options)
+}
+
+/** 下载漫画的一话，导出 cbz，需要下载权限 */
+export function downloadChapter(cid: number, options: DownloadOptions = {}) {
+  return downloadFile(`${PATH.BOOK_DOWNLOAD_CHAPTER}?cid=${cid}`, String(cid), options)
+}
+
+/** 响应是流式的，onProgress 只在服务端给了 Content-Length 时能拿到 total */
+async function downloadFile(url: string, fallbackName: string, options: DownloadOptions) {
+  const headers = new Headers({ Accept: 'application/octet-stream, application/json' })
+  const token = await getSessionToken()
+  if (token) headers.append('Authorization', `Bearer ${token}`)
+
+  const res = await fetch(url, { headers, signal: options.signal })
+
+  if (!res.ok) {
+    // 失败时后端返回的仍是统一的 MessageModel
+    const content = await res.json().catch(() => null)
+    throw new ServerError(content?.Msg || `下载失败(${res.status})`, content?.Status ?? res.status)
+  }
+
+  return {
+    blob: await readBody(res, options.onProgress),
+    fileName: parseFileName(res) ?? fallbackName,
+  }
+}
+
+/** 边收边报进度；没有 onProgress 或不支持流时直接取 blob */
+async function readBody(res: Response, onProgress?: (loaded: number, total: number) => void) {
+  if (!onProgress || !res.body) return res.blob()
+
+  const total = Number(res.headers.get('Content-Length')) || 0
+  const reader = res.body.getReader()
+  const chunks: Uint8Array[] = []
+  let loaded = 0
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+    loaded += value.length
+    onProgress(loaded, total)
+  }
+
+  return new Blob(chunks as BlobPart[], { type: res.headers.get('Content-Type') ?? 'application/octet-stream' })
+}
+
+/** 从 Content-Disposition 里取文件名，中文书名走 filename*（RFC 5987） */
+function parseFileName(res: Response) {
+  const disposition = res.headers.get('Content-Disposition')
+  if (!disposition) return null
+
+  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)
+  if (encoded?.[1]) {
+    try {
+      return decodeURIComponent(encoded[1])
+    } catch {
+      /* 退回下面的 filename */
+    }
+  }
+
+  return disposition.match(/filename="?([^";]+)"?/i)?.[1] ?? null
 }

@@ -87,6 +87,18 @@
                       {{ chapterDateFormat(chapter.publishedAt) }} · {{ chapter.pages }}P
                     </q-item-label>
                   </q-item-section>
+                  <q-item-section v-if="book.canDownload" side>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      icon="mdiDownload"
+                      :loading="downloadingId === Number(chapter.id)"
+                      @click.stop.prevent="download(Number(chapter.id))"
+                    >
+                      <q-tooltip>下载本话</q-tooltip>
+                    </q-btn>
+                  </q-item-section>
                 </q-item>
               </q-grid-item>
             </q-grid>
@@ -138,6 +150,7 @@ import { parseTime } from 'src/utils/time'
 import { BookUserAvatar, Comment } from 'components'
 import { QGrid, QGridItem } from 'components/grid'
 
+import { useBookDownload } from 'src/composition/biz/useBookDownload'
 import { useInitRequest } from 'src/composition/biz/useInitRequest'
 import { useTimeoutFn } from 'src/composition/useTimeoutFn'
 import { useToNowRef } from 'src/composition/useToNowRef'
@@ -160,6 +173,7 @@ const order = computed<ComicOrder>(() => {
 })
 const ascending = ref<Record<string, boolean>>({})
 const { progress } = useMangaLibrary()
+const { downloadingId, download } = useBookDownload('chapter')
 const manga = ref<MangaSeries>()
 const loadError = ref('')
 

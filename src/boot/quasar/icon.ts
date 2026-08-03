@@ -141,4 +141,5 @@ export {
   mdiTrophyVariantOutline,
   mdiStarFourPointsOutline,
   mdiCalendarCheckOutline,
+  mdiDownload,
 } from '@quasar/extras/mdi-v7'

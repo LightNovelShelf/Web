@@ -66,6 +66,7 @@ export function toMangaSeries(info: ComicSeriesInfoResponse): MangaSeries {
       id: String(book.Id),
       title: book.Title,
       uploader: book.Uploader,
+      canDownload: book.CanDownload,
       cover: toMangaImage(book.Cover),
       createdAt: book.CreatedAt,
       updatedAt: book.LastUpdatedAt,
