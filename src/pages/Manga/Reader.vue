@@ -31,7 +31,7 @@
       ></button>
 
       <div v-if="settings.mode === 'horizontal'" class="horizontal-stage" @click.self="toggleToolbar">
-        <div class="page-spread" :class="{ double: effectivePageMode === 'double', rtl: settings.direction === 'rtl' }">
+        <div class="page-spread" :class="{ double: isSpread, rtl: settings.direction === 'rtl' }">
           <manga-page
             v-for="page in windowPages"
             :key="`${currentChapter.id}-${page.number}`"
@@ -156,7 +156,7 @@
         </div>
         <div class="setting-group" :class="{ disabled: settings.mode === 'vertical' || $q.screen.lt.sm }">
           <label>页面模式 <span v-if="$q.screen.lt.sm">· 手机端固定单页</span></label>
-          <div class="segmented">
+          <div class="segmented triple">
             <button
               type="button"
               :class="{ active: settings.pageMode === 'single' }"
@@ -170,6 +170,13 @@
               @click="settings.pageMode = 'double'"
             >
               双页
+            </button>
+            <button
+              type="button"
+              :class="{ active: settings.pageMode === 'doubleOffset' }"
+              @click="settings.pageMode = 'doubleOffset'"
+            >
+              错位双页
             </button>
           </div>
         </div>
@@ -224,7 +231,7 @@
             v-model="sliderPage"
             :min="1"
             :max="currentChapter.pages"
-            :step="effectivePageMode === 'double' && settings.mode === 'horizontal' ? 2 : 1"
+            :step="1"
             color="amber-7"
             track-color="grey-7"
             @change="commitSliderPage"
@@ -269,6 +276,9 @@ import MangaPage from './components/MangaPage.vue'
 import { toManga, toMangaImage } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
 
+// single: 单页；double: 双页(1+2、3+4)；doubleOffset: 错位双页(首页单独，其后 2+3、4+5)
+type PageMode = 'single' | 'double' | 'doubleOffset'
+
 const props = defineProps<{ mangaId: string; chapterId: string }>()
 const $q = useQuasar()
 const router = useRouter()
@@ -291,9 +301,12 @@ const savedSettings = (() => {
 })()
 const settings = reactive({
   mode: savedSettings.mode === 'vertical' ? 'vertical' : 'horizontal',
-  pageMode: savedSettings.pageMode === 'double' ? 'double' : 'single',
+  pageMode:
+    savedSettings.pageMode === 'double' || savedSettings.pageMode === 'doubleOffset'
+      ? savedSettings.pageMode
+      : 'single',
   direction: savedSettings.direction === 'rtl' ? 'rtl' : 'ltr',
-} as { mode: 'horizontal' | 'vertical'; pageMode: 'single' | 'double'; direction: 'ltr' | 'rtl' })
+} as { mode: 'horizontal' | 'vertical'; pageMode: PageMode; direction: 'ltr' | 'rtl' })
 
 const swipeTarget = computed(() => (settings.mode === 'horizontal' ? readerCanvas.value : undefined))
 useSwipe(swipeTarget, {
@@ -328,43 +341,77 @@ const chapterIndex = computed(() =>
 const previousChapter = computed(() => manga.value?.chapters[chapterIndex.value - 1])
 const nextChapter = computed(() => manga.value?.chapters[chapterIndex.value + 1])
 
-// 跨页宽图(宽>=高)或超长条图(高>=宽*3)在双页并排时会撑破屏幕，强制单页
+// 跨页宽图(宽>=高)或超长条图(高>=宽*3)在双页并排时会撑破屏幕，只能独占一屏
 function isOversizedImage(image?: { width: number; height: number }) {
   if (!image?.width || !image?.height) return false
   return image.width / image.height >= 1 || image.height / image.width >= 3
 }
-const forceSinglePage = computed(() => {
-  const images = currentChapter.value?.images
-  if (!images) return false
-  // 当前页或其配对的下一页任一为异常比例，都退回单页
-  return isOversizedImage(images[currentPage.value - 1]) || isOversizedImage(images[currentPage.value])
+// 整章的分屏布局：从第一页顺序推导每屏显示哪几页。
+// 宽图/长条图独占一屏，错位双页把首页单独成屏（1、2+3、4+5）。
+// 必须整章推导而非按当前页临时判断：否则宽图后的配对起点在前进/后退时会算成两套，回退时重复页。
+const pageGroups = computed<Array<{ start: number; size: number }>>(() => {
+  const chapter = currentChapter.value
+  if (!chapter) return []
+  const total = chapter.pages
+  const groups: Array<{ start: number; size: number }> = []
+  const mode: PageMode = $q.screen.lt.sm || settings.mode === 'vertical' ? 'single' : settings.pageMode
+  if (mode === 'single') {
+    for (let n = 1; n <= total; n++) groups.push({ start: n, size: 1 })
+    return groups
+  }
+  let n = 1
+  if (mode === 'doubleOffset' && total >= 1) {
+    groups.push({ start: 1, size: 1 })
+    n = 2
+  }
+  while (n <= total) {
+    // 本页或下一页任一异常比例，本屏就只放一页；未加载页是 2:3 占位，按可配对处理，批次到达后重算
+    const pairable = n + 1 <= total && !isOversizedImage(chapter.images[n - 1]) && !isOversizedImage(chapter.images[n])
+    groups.push({ start: n, size: pairable ? 2 : 1 })
+    n += pairable ? 2 : 1
+  }
+  return groups
 })
-const effectivePageMode = computed(() =>
-  $q.screen.lt.sm || forceSinglePage.value ? 'single' : settings.pageMode,
-)
+// 页码 → 所属屏的下标，进度恢复/拖动进度条落在配对中间时也能定位到整屏
+const groupIndexOfPage = computed(() => {
+  const map = new Map<number, number>()
+  pageGroups.value.forEach((group, index) => {
+    for (let n = group.start; n < group.start + group.size; n++) map.set(n, index)
+  })
+  return map
+})
+const currentGroupIndex = computed(() => groupIndexOfPage.value.get(currentPage.value) ?? 0)
+const currentGroup = computed(() => pageGroups.value[currentGroupIndex.value] ?? { start: currentPage.value, size: 1 })
+// 当前屏是否并排两页，决定 .double 布局与预载跨度
+const isSpread = computed(() => currentGroup.value.size > 1)
 const pages = computed(() =>
   (currentChapter.value?.images ?? []).map((image, index) => ({ number: index + 1, image })),
 )
 // 当前正在显示的页码（单页 1 个，双页 2 个）
 const activePageNumbers = computed(() =>
-  effectivePageMode.value === 'single' ? [currentPage.value] : [currentPage.value, currentPage.value + 1],
+  Array.from({ length: currentGroup.value.size }, (_, index) => currentGroup.value.start + index),
 )
 function isActivePage(pageNumber: number) {
   return activePageNumbers.value.includes(pageNumber)
 }
-// 渲染窗口：以当前页为中心前后各 RENDER_RADIUS 页常驻挂载（含 active），
+// 渲染窗口：以当前屏为中心前后各 RENDER_RADIUS 页常驻挂载（含 active），
 // 非 active 页移出窗口但保持已解码，翻页只切 active，不卸载/不重挂 → 无加载闪烁
 const RENDER_RADIUS = 2
 const windowPages = computed(() => {
   const chapter = currentChapter.value
   if (!chapter) return []
-  const span = effectivePageMode.value === 'double' ? 1 : 0
-  const start = Math.max(1, currentPage.value - RENDER_RADIUS)
-  const end = Math.min(chapter.pages, currentPage.value + span + RENDER_RADIUS)
+  const group = currentGroup.value
+  const start = Math.max(1, group.start - RENDER_RADIUS)
+  const end = Math.min(chapter.pages, group.start + group.size - 1 + RENDER_RADIUS)
   const list: Array<{ number: number; image: (typeof chapter.images)[number] }> = []
   for (let n = start; n <= end; n++) list.push({ number: n, image: chapter.images[n - 1] })
   return list
 })
+// 把当前页对齐到所在屏的首页，保证进度显示与翻页步进都以屏为单位
+function alignToGroupStart() {
+  const start = currentGroup.value.start
+  if (start !== currentPage.value) currentPage.value = start
+}
 const themeStyle = computed(() => ({
   '--reader-primary': manga.value?.theme.primary,
   '--reader-secondary': manga.value?.theme.secondary,
@@ -375,7 +422,7 @@ watch(
   settings,
   () => {
     window.localStorage.setItem('light-novel-shelf:manga-reader-settings', JSON.stringify(settings))
-    if (effectivePageMode.value === 'double' && currentPage.value % 2 === 0) currentPage.value -= 1
+    alignToGroupStart()
     if (settings.mode === 'vertical') void scrollToCurrentPage()
   },
   { deep: true },
@@ -417,6 +464,8 @@ watch(
         saveProgress(mangaId, String(serverPosition.ChapterId), Number(serverPosition.Position) || 1)
       const saved = progress.value[mangaId]
       currentPage.value = saved?.chapterId === chapterId ? Math.min(saved.page, loadedChapter.pages) : 1
+      // 断点可能落在某一屏的第二页，对齐到该屏首页
+      alignToGroupStart()
       // 断点续读可能落在非首批，确保当前页所在批次也被加载
       ensurePagesLoaded(currentPage.value)
       panel.value = null
@@ -440,7 +489,7 @@ watch(currentPage, (page) => {
   saveCurrentProgress()
 })
 
-watch([currentPage, () => currentChapter.value?.id, effectivePageMode, () => settings.mode], preloadNearbyPages, {
+watch([currentPage, () => currentChapter.value?.id, isSpread, () => settings.mode], preloadNearbyPages, {
   immediate: true,
 })
 
@@ -485,7 +534,7 @@ function ensurePagesLoaded(page: number) {
   if (!chapter) return
   const cid = Number(chapter.id)
   const version = requestVersion
-  const span = settings.mode === 'horizontal' && effectivePageMode.value === 'double' ? 1 : 0
+  const span = settings.mode === 'horizontal' ? currentGroup.value.size - 1 : 0
   const from = Math.max(1, page - RENDER_RADIUS)
   const to = Math.min(chapter.pages, page + span + RENDER_RADIUS)
   for (let batch = Math.floor((from - 1) / PAGE_BATCH); batch <= Math.floor((to - 1) / PAGE_BATCH); batch++) {
@@ -500,7 +549,7 @@ function preloadNearbyPages() {
   ensurePagesLoaded(currentPage.value)
   // 渲染窗口(±RENDER_RADIUS)内的页已由 DOM 常驻加载；这里额外预热窗口外沿再往前 2 页，
   // 保证连续翻页时下一批将要挂载的边缘页 URL 已在缓存
-  const span = settings.mode === 'horizontal' && effectivePageMode.value === 'double' ? 1 : 0
+  const span = settings.mode === 'horizontal' ? currentGroup.value.size - 1 : 0
   const margin = 2
   const start = Math.max(1, currentPage.value - RENDER_RADIUS - margin)
   const end = Math.min(chapter.pages, currentPage.value + span + RENDER_RADIUS + margin)
@@ -539,20 +588,24 @@ function saveCurrentProgress() {
 }
 
 function commitSliderPage(page: number | null) {
-  if (page === null || page === currentPage.value) return
-  currentPage.value = page
+  if (page === null) return
+  const index = groupIndexOfPage.value.get(page)
+  const target = index === undefined ? page : pageGroups.value[index]!.start
+  // 拖到的页落在某屏中间时回退到该屏首页；目标就是当前屏则把滑块拨回首页
+  if (target === currentPage.value) sliderPage.value = target
+  else currentPage.value = target
 }
 
 function previousPage() {
-  const step = effectivePageMode.value === 'double' ? 2 : 1
-  if (currentPage.value > 1) currentPage.value = Math.max(1, currentPage.value - step)
+  const previous = pageGroups.value[currentGroupIndex.value - 1]
+  if (previous) currentPage.value = previous.start
   else if (previousChapter.value) goToChapter(previousChapter.value.id, 'last')
 }
 
 function nextPage() {
   if (!currentChapter.value) return
-  const step = effectivePageMode.value === 'double' ? 2 : 1
-  if (currentPage.value + step <= currentChapter.value.pages) currentPage.value += step
+  const next = pageGroups.value[currentGroupIndex.value + 1]
+  if (next) currentPage.value = next.start
   else if (nextChapter.value) goToChapter(nextChapter.value.id)
   else showNotice('已经是最后一卷了')
 }
@@ -898,6 +951,9 @@ onBeforeUnmount(() => {
   padding: 3px;
   background: #202126;
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.segmented.triple {
+  grid-template-columns: repeat(3, 1fr);
 }
 .segmented button {
   min-height: 40px;
