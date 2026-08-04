@@ -87,6 +87,8 @@ const SOURCE_LABEL: Record<string, string> = {
   BookComment: '评论',
   DownloadNovel: '下载小说',
   DownloadComic: '下载漫画',
+  ShareNovel: '小说下载分成',
+  ShareComic: '漫画下载分成',
   Admin: '系统',
 }
 // 消费类来源天然是负数，不该被当成「回收」

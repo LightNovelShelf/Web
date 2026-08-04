@@ -1,8 +1,10 @@
 import { useQuasar } from 'quasar'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { getErrMsg } from 'src/utils/getErrMsg'
 import { saveFile } from 'src/utils/saveFile'
+
+import { useAppStore } from 'stores/app'
 
 import { downloadBook, downloadChapter } from 'src/services/book'
 
@@ -13,16 +15,31 @@ import { downloadBook, downloadChapter } from 'src/services/book'
  */
 export function useBookDownload(target: 'book' | 'chapter' = 'book') {
   const $q = useQuasar()
+  const appStore = useAppStore()
   /** 正在下载的 id，用于按钮各自的 loading */
   const downloadingId = ref<number | null>(null)
+  const balance = computed(() => appStore.user?.Growth?.Coin ?? 0)
 
   /** 扣费前的确认，cost 为 0（管理下载权限或自己的书）直接放行 */
   const confirmCost = (cost: number) =>
     new Promise<boolean>((resolve) => {
       if (!cost) return resolve(true)
+
+      // 余额只是本地快照，服务端仍会再判一次；这里拦掉注定 402 的请求
+      if (balance.value < cost) {
+        $q.dialog({
+          title: '金币不足',
+          message: `本次下载需要 <b>${cost}</b> 金币，你当前只有 <b>${balance.value}</b> 枚，还差 ${cost - balance.value} 枚。`,
+          html: true,
+        }).onDismiss(() => resolve(false))
+        return
+      }
+
       $q.dialog({
         title: '下载确认',
-        message: `本次下载将消耗 <b>${cost}</b> 金币。<br class="q-mb-xs" /><span class="text-caption text-grey">2 小时内重复下载不再扣费。</span>`,
+        message:
+          `本次下载将消耗 <b>${cost}</b> 金币，当前余额 ${balance.value}。` +
+          `<br class="q-mb-xs" /><span class="text-caption text-grey">2 小时内重复下载不再扣费。</span>`,
         html: true,
         cancel: true,
         persistent: true,
