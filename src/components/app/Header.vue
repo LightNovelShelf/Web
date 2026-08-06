@@ -76,7 +76,7 @@
               </div>
 
               <div class="level-item">
-                <template v-if="levelValue >= 6">
+                <template v-if="growthLevel >= 6">
                   <div class="row q-col-gutter-sm items-center">
                     <div class="col level-item__bar--tag level-item__bar--now">lv6</div>
                     <div class="col">
@@ -89,11 +89,11 @@
                 </template>
                 <template v-else>
                   <div class="row q-col-gutter-sm items-center">
-                    <div class="col level-item__bar--tag level-item__bar--now">lv{{ levelValue }}</div>
+                    <div class="col level-item__bar--tag level-item__bar--now">lv{{ growthLevel }}</div>
                     <div class="col">
                       <q-linear-progress size="xs" :value="expProgress" />
                     </div>
-                    <div class="col level-item__bar--tag level-item__bar--next">lv{{ levelValue + 1 }}</div>
+                    <div class="col level-item__bar--tag level-item__bar--next">lv{{ growthLevel + 1 }}</div>
                   </div>
 
                   <div class="text-caption text-opacity level-item__text">{{ expText }}</div>
@@ -205,9 +205,9 @@ const layout = useLayout()
 const { appName, user } = storeToRefs(appStore)
 const { siderShow, headerHeight, siderBreakpoint } = layout
 
-// 等级/经验进度：数据来自 user.Growth（随 GetMyInfo 返回）
+// 经验进度使用由经验值计算出的 GrowthLevel；Level 可能包含手动授予的访问等级
 const growth = computed(() => user.value?.Growth)
-const levelValue = computed<number>(() => growth.value?.Level ?? user.value?.Level ?? 0)
+const growthLevel = computed<number>(() => growth.value?.GrowthLevel ?? 0)
 const expProgress = computed<number>(() => {
   const g = growth.value
   if (!g || g.NextLevelExp == null) return 0
@@ -219,7 +219,7 @@ const expText = computed<string>(() => {
   const g = growth.value
   if (!g) return ''
   if (g.NextLevelExp == null) return '恭喜你已经是满级了'
-  return `当前经验 ${g.Exp}，还需 ${g.NextLevelExp - g.Exp} 经验升级到 lv${g.Level + 1}`
+  return `当前经验 ${g.Exp}，还需 ${g.NextLevelExp - g.Exp} 经验升级到 lv${g.GrowthLevel + 1}`
 })
 const searchKey = ref('')
 const reveal = useMedia(
