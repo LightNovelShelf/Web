@@ -26,7 +26,7 @@
                 上传书籍
               </q-btn>
               <q-btn color="primary" @click="createBookShow = true">
-                {{ tab === GetMyBooks.BookType.Comic ? '发布漫画' : '发布新书' }}
+                {{ tab === GetMyBooks.BookType.Comic ? '发布漫画' : '发布小说' }}
               </q-btn>
             </div>
           </div>

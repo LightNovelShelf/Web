@@ -1,7 +1,7 @@
 <template>
   <q-input
     :label="label"
-    placeholder="https://"
+    placeholder="可以直接粘贴一张图片"
     :model-value="modelValue"
     @update:model-value="emit('update:modelValue', $event)"
     @paste="onPaste"
