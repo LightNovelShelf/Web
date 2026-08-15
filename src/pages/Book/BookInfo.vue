@@ -29,13 +29,13 @@
             </q-card>
           </q-grid-item>
           <q-grid-item span="2" xs="1" sm="1" md="1">
-            <div v-if="isActive" class="book-info-content">
-              <div class="book-author-avatar">
+            <div v-if="isActive">
+              <div class="row items-center no-wrap book-info-header">
+                <div class="text-subtitle1 text-weight-bold ellipsis">《{{ book['Title'] }}》</div>
+                <q-space />
                 <book-user-avatar :user="book.User" />
               </div>
-
-              <div class="text-subtitle1 text-weight-bold">《{{ book['Title'] }}》</div>
-              <div style="margin-top: 24px">作者：{{ displayAuthor }}</div>
+              <div style="margin-top: 16px">作者：{{ displayAuthor }}</div>
               <div>
                 系列名：
                 <router-link
@@ -279,15 +279,8 @@ function commentBeShown(entries) {
 </script>
 
 <style scoped lang="scss">
-.book-info-content {
-  position: relative;
-  padding-right: 52px;
-}
-
-.book-author-avatar {
-  position: absolute;
-  top: 0;
-  right: 0;
+.book-info-header {
+  gap: 12px;
 }
 
 .cover-stat,
