@@ -40,7 +40,7 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
-import type { CommunityBoardKey, CommunityBoardSummary } from 'src/services/forum'
+import type { CommunityBoardKey, CommunityBoardSummary } from '@/services/forum'
 
 const props = defineProps<{
   boards: CommunityBoardSummary[]

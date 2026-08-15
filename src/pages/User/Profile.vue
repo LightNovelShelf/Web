@@ -147,19 +147,18 @@ import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { computed, defineComponent, onMounted, ref, watch, reactive } from 'vue'
 
+import { getErrMsg } from '@/utils/getErrMsg'
+import { parseTime } from '@/utils/time'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { parseTime } from 'src/utils/time'
+import { useAppStore } from '@/stores/app'
 
-import { useAppStore } from 'stores/app'
+import CoinIcon from '@/components/points/CoinIcon.vue'
+import PointLogDialog from '@/components/points/PointLogDialog.vue'
+import SignInDialog from '@/components/points/SignInDialog.vue'
 
-import CoinIcon from 'src/components/points/CoinIcon.vue'
-import PointLogDialog from 'src/components/points/PointLogDialog.vue'
-import SignInDialog from 'src/components/points/SignInDialog.vue'
+import { setAvatar, getMyInfo } from '@/services/user'
 
-import { setAvatar, getMyInfo } from 'src/services/user'
-
-import type { Growth } from 'src/services/points'
+import type { Growth } from '@/services/points'
 
 const avatar = computed(() => appStore.avatar)
 

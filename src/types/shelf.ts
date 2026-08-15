@@ -7,11 +7,11 @@ export enum ShelfItemTypeEnum {
 }
 
 export enum SHELF_STRUCT_VER {
-  'V20220211' = '20220211',
-  /** 最新版本号，动态改变 */
-  /* eslint-disable-next-line */
-  LATEST = '20220211',
+  V20220211 = '20220211',
 }
+
+/** 最新的书架结构版本号，随结构升级而改变 */
+export const SHELF_STRUCT_VER_LATEST = SHELF_STRUCT_VER.V20220211
 
 interface ShelfCommonItem {
   /** 类型 */

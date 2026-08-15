@@ -48,17 +48,17 @@
 import { useQuasar } from 'quasar'
 import { computed, ref, toRaw } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import { HtmlEditor, BlurHash, DragPageSticky, ImageInput } from 'components'
-import { QGrid, QGridItem } from 'components/grid'
+import { HtmlEditor, BlurHash, DragPageSticky, ImageInput } from '@/components'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { getBookEditInfo, editBook } from 'src/services/book'
+import { getBookEditInfo, editBook } from '@/services/book'
 
 const props = defineProps<{ bid: string }>()
 const bid = computed(() => ~~props.bid)

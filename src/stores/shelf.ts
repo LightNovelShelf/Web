@@ -4,12 +4,12 @@ import { defineStore } from 'pinia'
 import { is, Notify } from 'quasar'
 import { toRaw } from 'vue'
 
-import { shelfDB, shelfStructVerDB } from 'src/utils/storage/db'
+import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 
-import { getBookShelfBinary, saveBookShelf } from 'src/services/user'
-import { ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
+import { getBookShelfBinary, saveBookShelf } from '@/services/user'
+import { ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
 
-import type { ShelfItem, ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
+import type { ShelfItem, ShelfBookItem, ShelfFolderItem, SHELF_STRUCT_VER } from '@/types/shelf'
 
 export enum ShelfBranch {
   main = 'main',
@@ -167,7 +167,7 @@ const shelfStore = defineStore('app.shelf', {
     /** push到db */
     async push(config: { syncRetome?: boolean } = {}) {
       /** 记录的时候结构一定是最新的 */
-      await shelfStructVerDB.set('VER', SHELF_STRUCT_VER.LATEST)
+      await shelfStructVerDB.set('VER', SHELF_STRUCT_VER_LATEST)
 
       this.commit({
         shelf: this.squeezeShelfItemIndex(toRaw(this.shelf)),
@@ -209,9 +209,9 @@ const shelfStore = defineStore('app.shelf', {
       const structVer = await shelfStructVerDB.get<SHELF_STRUCT_VER>('VER')
 
       // 如果版本不对，丢掉，多兼容一份数据逻辑有点烦了，等服务器返回就好
-      if (structVer !== SHELF_STRUCT_VER.LATEST) {
+      if (structVer !== SHELF_STRUCT_VER_LATEST) {
         this.commit({ shelf: [] })
-        this.push({ syncRetome: false })
+        void this.push({ syncRetome: false })
         return
       }
 
@@ -225,9 +225,9 @@ const shelfStore = defineStore('app.shelf', {
       const serve = await getBookShelfBinary()
       let shelf: ShelfItem[]
 
-      if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
+      if (serve.ver !== SHELF_STRUCT_VER_LATEST) {
         shelf = await (
-          await import('src/utils/migrations/shelf/struct/action')
+          await import('@/utils/migrations/shelf/struct/action')
         ).shelfStructMigration(serve.data, serve.ver ?? null)
       } else {
         shelf = serve.data as ShelfItem[]
@@ -237,13 +237,13 @@ const shelfStore = defineStore('app.shelf', {
       this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
 
       // 如果版本不对那就触发一次push
-      if (serve.ver !== SHELF_STRUCT_VER.LATEST) {
-        this.push({ syncRetome: true })
+      if (serve.ver !== SHELF_STRUCT_VER_LATEST) {
+        void this.push({ syncRetome: true })
       }
     },
     /** 同步到服务器 */
     async syncToRemote() {
-      await saveBookShelf({ data: toRaw(this.shelf), ver: SHELF_STRUCT_VER.LATEST })
+      await saveBookShelf({ data: toRaw(this.shelf), ver: SHELF_STRUCT_VER_LATEST })
     },
 
     /**
@@ -535,7 +535,7 @@ export function useShelfStore() {
 
   // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (!store.initialized && !store.useLoading().value) {
-    store
+    void store
       // 先从缓存读出来，展示在界面
       .pull()
       // 缓存读取之后就写入store，标记已经初始化完成

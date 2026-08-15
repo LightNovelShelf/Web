@@ -20,12 +20,12 @@ import * as prettierPluginHtml from 'prettier/plugins/html'
 import { format } from 'prettier/standalone'
 import { debounce, useQuasar } from 'quasar'
 
-import bbCodeParser from 'src/utils/bbcode/simple'
-import sanitizerHtml from 'src/utils/sanitizeHtml'
+import bbCodeParser from '@/utils/bbcode/simple'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { useIsActivated } from 'src/composition/useIsActivated'
+import { useIsActivated } from '@/composition/useIsActivated'
 
-import { uploadImage } from 'src/services/user'
+import { uploadImage } from '@/services/user'
 
 import type { QEditor, QEditorCommand } from 'quasar'
 
@@ -247,10 +247,10 @@ const insertDot = () => {
   }
 }
 const inputHtml = async () => {
-  let html = ''
+  let html: string
   try {
     html = await htmlFormat(htmlContent.value)
-  } catch (e) {
+  } catch {
     html = htmlContent.value
   }
 

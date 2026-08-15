@@ -143,24 +143,24 @@ import { useQuasar } from 'quasar'
 import { ref, computed, watch, defineComponent, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { ImageInput } from 'components'
-import BookCard from 'components/BookCard.vue'
-import { QGrid, QGridItem } from 'components/grid'
+import { ImageInput } from '@/components'
+import BookCard from '@/components/BookCard.vue'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { deleteBook } from 'src/services/book'
-import { PATH } from 'src/services/path'
-import { getMyBooks, quickCreateComic, quickCreateNovel } from 'src/services/user'
-import { GetMyBooks } from 'src/services/user/type'
-import { getSessionToken } from 'src/services/utils'
+import { deleteBook } from '@/services/book'
+import { PATH } from '@/services/path'
+import { getMyBooks, quickCreateComic, quickCreateNovel } from '@/services/user'
+import { GetMyBooks } from '@/services/user/type'
+import { getSessionToken } from '@/services/utils'
 
+import type { BookInList } from '@/services/book/types'
+import type { QuickCreateComic, QuickCreateNovel } from '@/services/user/type'
 import type { QUploaderFactoryFn } from 'quasar'
-import type { BookInList } from 'src/services/book/types'
-import type { QuickCreateComic, QuickCreateNovel } from 'src/services/user/type'
 
 defineComponent({ QGrid, QGridItem })
 

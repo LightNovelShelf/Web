@@ -67,20 +67,20 @@
 import { noop } from '@vueuse/core'
 import { ref, defineComponent, computed, watch } from 'vue'
 
-import BookCard from 'components/BookCard.vue'
-import { QGrid, QGridItem } from 'components/grid'
+import BookCard from '@/components/BookCard.vue'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import MangaCover from 'src/pages/Manga/components/MangaCover.vue'
-import MangaUpdateTime from 'src/pages/Manga/components/MangaUpdateTime.vue'
-import { toMangaListItem } from 'src/pages/Manga/data'
-import { getBookListByIds, getComicSeriesByIds } from 'src/services/book'
-import { getReadHistory, clearHistory } from 'src/services/user'
+import MangaCover from '@/pages/Manga/components/MangaCover.vue'
+import MangaUpdateTime from '@/pages/Manga/components/MangaUpdateTime.vue'
+import { toMangaListItem } from '@/pages/Manga/data'
+import { getBookListByIds, getComicSeriesByIds } from '@/services/book'
+import { getReadHistory, clearHistory } from '@/services/user'
 
-import type { MangaListItem } from 'src/pages/Manga/types'
-import type { BookInList } from 'src/services/book/types'
+import type { MangaListItem } from '@/pages/Manga/types'
+import type { BookInList } from '@/services/book/types'
 
 defineComponent({ QGrid, QGridItem })
 
@@ -192,7 +192,7 @@ const onLoad = async (index: number, done: (stop?: boolean) => void) => {
 </script>
 
 <style scoped lang="scss">
-@import 'src/css/mixin';
+@import '@/css/mixin';
 
 .series-card {
   color: inherit;

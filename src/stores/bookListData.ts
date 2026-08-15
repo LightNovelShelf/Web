@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { toRaw } from 'vue'
 
-import { getBookListByIds } from 'src/services/book'
+import { getBookListByIds } from '@/services/book'
 
-import type { BookInList } from 'src/services/book/types'
+import type { BookInList } from '@/services/book/types'
 
 export interface BookListStore {
   books: Map<number, BookInList>

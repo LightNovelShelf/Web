@@ -1,4 +1,4 @@
-import { getPlaceholder } from 'src/utils/url'
+import { getPlaceholder } from '@/utils/url'
 
 import type { Manga, MangaChapter, MangaImageAsset, MangaListItem, MangaSeries } from './types'
 import type {
@@ -6,7 +6,7 @@ import type {
   ComicInfoResponse,
   ComicListItem,
   ComicSeriesInfoResponse,
-} from 'src/services/manga/types'
+} from '@/services/manga/types'
 
 const mangaTheme = {
   primary: '#137fc4',

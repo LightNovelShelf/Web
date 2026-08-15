@@ -1,4 +1,4 @@
-import type { GetBookListRequest, GetBookListRes } from 'src/services/book/types'
+import type { GetBookListRequest, GetBookListRes } from '@/services/book/types'
 
 export namespace Login {
   export interface Param {

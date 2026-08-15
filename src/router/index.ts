@@ -1,18 +1,19 @@
-import { defineRouter } from '#q-app/wrappers'
 import { nanoid } from 'nanoid'
 import { Notify } from 'quasar'
 import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 
-import { longTermToken, sessionToken } from 'src/utils/session'
+import { longTermToken, sessionToken } from '@/utils/session'
 
-import type { HistoryState, RouteRecordNameGeneric } from 'vue-router'
+import { defineRouter } from '#q-app'
 
 import routes from './routes'
 
-const localApiServerStorageKey = `${process.env.VUE_APP_NAME || 'LightNovelShelf'}_Api_Server_V7`
+import type { HistoryState, RouteRecordNameGeneric } from 'vue-router'
+
+const localApiServerStorageKey = `${import.meta.env.VUE_APP_NAME || 'LightNovelShelf'}_Api_Server_V7`
 
 function canBypassAuthForLocalCommunity(to: { name?: RouteRecordNameGeneric }) {
-  if (!process.env.DEV || process.env.SERVER || to.name !== 'UserProfile') {
+  if (!import.meta.env.QUASAR_DEV || import.meta.env.QUASAR_SERVER || to.name !== 'UserProfile') {
     return false
   }
 
@@ -31,13 +32,13 @@ function canBypassAuthForLocalCommunity(to: { name?: RouteRecordNameGeneric }) {
 export default defineRouter(function (/* { store, ssrContext } */) {
   const keys: string[] = []
 
-  const createHistory = process.env.SERVER
+  const createHistory = import.meta.env.QUASAR_SERVER
     ? createMemoryHistory
-    : process.env.VUE_ROUTER_MODE === 'history'
+    : import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history'
       ? (baseUrl?: string) => {
           const history = createWebHistory(baseUrl)
-          const _push = history.push
-          const _replace = history.replace
+          const _push = history.push.bind(history)
+          const _replace = history.replace.bind(history)
           const setKey = (to: string, data?: HistoryState) => {
             if (!data) data = {}
             data['key'] = `[${to}] ${nanoid()}`
@@ -77,7 +78,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // Leave this as is and make changes in quasar.conf.js instead!
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
-    history: createHistory(process.env.VUE_ROUTER_BASE),
+    history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE),
   })
 
   Router.beforeEach(async function (to) {

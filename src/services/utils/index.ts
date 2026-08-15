@@ -1,6 +1,6 @@
-import { longTermToken, sessionToken } from 'src/utils/session'
+import { longTermToken, sessionToken } from '@/utils/session'
 
-import { connectState as _connectState } from 'src/services/internal/request/signalr'
+import { connectState as _connectState } from '@/services/internal/request/signalr'
 
 import { ServerError } from '../internal/ServerError'
 import { refreshToken } from '../user'

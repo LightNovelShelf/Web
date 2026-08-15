@@ -1,4 +1,4 @@
-import type { BookServicesTypes } from 'src/services/book'
+import type { BookServicesTypes } from '@/services/book'
 
 /** 书架书籍 */
 interface ShelfBook extends BookServicesTypes.BookInList {}

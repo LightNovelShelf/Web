@@ -1,5 +1,7 @@
 import { computed, ref } from 'vue'
 
+import { NOOP } from '@/const/empty'
+
 import type { _ActionsTree, PiniaPlugin } from 'pinia'
 import type { Ref } from 'vue'
 
@@ -171,9 +173,12 @@ export const createPiniaLoading = (): PiniaPlugin => {
 
         // 处理异步调用
         if (result instanceof Promise) {
-          result.finally(() => {
-            dispatchRecordMap.value[storeName][actionName].delete(actionID)
-          })
+          result
+            .finally(() => {
+              dispatchRecordMap.value[storeName][actionName].delete(actionID)
+            })
+            // action 的拒绝由调用方处理，这里只负责清理调用记录
+            .catch(NOOP)
         } else {
           dispatchRecordMap.value[storeName][actionName].delete(actionID)
         }

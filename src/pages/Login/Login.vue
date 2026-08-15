@@ -55,13 +55,13 @@ import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { sha256 } from 'src/utils/hash'
-import { longTermToken } from 'src/utils/session'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { sha256 } from '@/utils/hash'
+import { longTermToken } from '@/utils/session'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { login } from 'src/services/user'
+import { login } from '@/services/user'
 
 import type { RouteLocationRaw } from 'vue-router'
 
@@ -93,9 +93,9 @@ const _login = async () => {
 
     try {
       const from = route.query.from as string | undefined
-      from && (to = decodeURIComponent(from))
-    } catch (e) {
-      // ignore
+      if (from) to = decodeURIComponent(from)
+    } catch {
+      // 来源路由解析失败时回落到首页
     }
 
     await router.replace(to)

@@ -1,16 +1,16 @@
 import { stringifyQuery } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { sessionToken } from 'src/utils/session'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { sessionToken } from '@/utils/session'
 
-import { ServerError } from 'src/services/internal/ServerError'
-import { RequestMethod } from 'src/services/types'
-import { getSessionToken } from 'src/services/utils'
-
-import type { RequestConfig } from 'src/services/types'
+import { ServerError } from '@/services/internal/ServerError'
+import { RequestMethod } from '@/services/types'
+import { getSessionToken } from '@/services/utils'
 
 import { queue } from './createRequestQueue'
 import { getVisitorId } from './getVisitorId'
+
+import type { RequestConfig } from '@/services/types'
 
 async function requestWithFetch<Res = unknown, Data = any>(
   url: string,
@@ -64,7 +64,7 @@ async function requestWithFetch<Res = unknown, Data = any>(
       break
     }
     default: {
-      throw new Error(`unknown request method: ${options.method}`)
+      throw new Error(`unknown request method: ${String(options.method)}`)
     }
   }
 

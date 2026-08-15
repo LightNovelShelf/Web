@@ -3,20 +3,21 @@ import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack'
 import { ungzip } from 'pako'
 import { ref } from 'vue'
 
-import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { longTermToken, sessionToken } from 'src/utils/session'
+import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { longTermToken, sessionToken } from '@/utils/session'
 
-import { apiServer } from 'src/services/apiServer'
-import { RetryPolicy } from 'src/services/internal/request/signalr/RetryPolicy'
-import { ServerError } from 'src/services/internal/ServerError'
-import { refreshToken } from 'src/services/user'
-
-import type { HubConnection } from '@microsoft/signalr'
+import { NOOP } from '@/const/empty'
+import { apiServer } from '@/services/apiServer'
+import { RetryPolicy } from '@/services/internal/request/signalr/RetryPolicy'
+import { ServerError } from '@/services/internal/ServerError'
+import { refreshToken } from '@/services/user'
 
 import { queue } from '../createRequestQueue'
 import { tryResponseFromCache, updateResponseCache } from './cache'
 import { SignalrInspector } from './inspector'
+
+import type { HubConnection } from '@microsoft/signalr'
 
 /** 是否是未授权产生的signalr错误 */
 const IS_UN_AUTH_ERR = (err: unknown): boolean =>
@@ -59,7 +60,7 @@ function buildHub(url: string) {
     })
     .withAutomaticReconnect(new RetryPolicy())
     .withHubProtocol(new MessagePackHubProtocol())
-    .configureLogging(process.env.APP_URL ? LogLevel.Information : LogLevel.Critical)
+    .configureLogging(import.meta.env.QUASAR_APP_URL ? LogLevel.Information : LogLevel.Critical)
     .build()
   h.onclose(setState)
   h.onreconnecting(setState)
@@ -81,11 +82,15 @@ function getSignalr(): Promise<HubConnection> {
     const startPromise = hub.start().then(() => hub)
     startPromise.catch(() => {
       lastReConnect.value = setInterval(() => {
-        hub.start().then(() => clearInterval(lastReConnect.value))
+        // 重连失败继续等待下一次定时器
+        hub
+          .start()
+          .then(() => clearInterval(lastReConnect.value))
+          .catch(NOOP)
       }, 15000) as unknown as number
     })
     /** 记录已连接标志 */
-    startPromise.then(setState)
+    startPromise.then(setState).catch(NOOP)
     return startPromise
   }
 }
@@ -171,7 +176,7 @@ async function requestWithSignalr<Res = unknown, Data extends unknown[] = unknow
     if (Response instanceof Uint8Array) {
       inspector.add(inspector.TYPE_ENUM.REVICE, { message: '请求Response为 Uint8Array, 尝试进行gzip解码', data: res })
       // Response是一个gzip后的json, 解码出来
-      Response = JSON.parse(ungzip(Response, { to: 'string' }))
+      Response = JSON.parse(ungzip(Response, { toText: true }))
     } else {
       inspector.add(inspector.TYPE_ENUM.REVICE, { data: res })
     }
@@ -226,7 +231,7 @@ export { requestWithSignalrInRateLimit as requestWithSignalr }
 export function subscribeWithSignalr<Res = unknown>(methodName: string, cb: (res: Res) => void) {
   let _cb = cb
   const inspector = new SignalrInspector(methodName, [])
-  if (process.env.DEV && process.env.VUE_TRACE_SERVER) {
+  if (import.meta.env.QUASAR_DEV && import.meta.env.VUE_TRACE_SERVER) {
     _cb = (res: Res): void => {
       inspector.add(inspector.TYPE_ENUM.REVICE, { data: res })
       inspector.flush({ clear: false })

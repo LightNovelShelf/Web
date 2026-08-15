@@ -1,11 +1,11 @@
-import type { SaveReadPositionRequest } from './types'
-import type { ComicListResponse } from 'src/services/manga/types'
-
-import * as Types from './types'
 import { requestWithSignalr } from '../internal/request'
 import { ServerError } from '../internal/ServerError'
 import { PATH } from '../path'
 import { getSessionToken } from '../utils'
+import * as Types from './types'
+
+import type { SaveReadPositionRequest } from './types'
+import type { ComicListResponse } from '@/services/manga/types'
 
 export { Types as BookServicesTypes }
 

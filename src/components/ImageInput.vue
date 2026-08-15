@@ -18,7 +18,7 @@
 import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 
-import { uploadImage } from 'src/services/user'
+import { uploadImage } from '@/services/user'
 
 withDefaults(
   defineProps<{

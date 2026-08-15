@@ -19,9 +19,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import BlurHash from 'components/BlurHash.vue'
+import BlurHash from '@/components/BlurHash.vue'
 
 import type { MangaImageAsset } from '../types'
 

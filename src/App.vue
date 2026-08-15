@@ -10,20 +10,20 @@
 import { useOverlayScrollbars } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
-import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { longTermToken, sessionToken } from 'src/utils/session'
+import sanitizerHtml from '@/utils/sanitizeHtml'
+import { longTermToken, sessionToken } from '@/utils/session'
 
-import { useAppStore } from 'stores/app'
-import { useSettingStore } from 'stores/setting'
+import { useAppStore } from '@/stores/app'
+import { useSettingStore } from '@/stores/setting'
 
-import { AppSide, AppHeader, AppContainer } from 'components/app/index'
+import { AppSide, AppHeader, AppContainer } from '@/components/app/index'
 
-import { NOOP } from 'src/const/empty'
-import { getMyInfo } from 'src/services/user'
-import { useServerNotify } from 'src/services/utils/useServerNotify'
+import { NOOP } from '@/const/empty'
+import { getMyInfo } from '@/services/user'
+import { useServerNotify } from '@/services/utils/useServerNotify'
 
+import type { Growth } from '@/services/points'
 import type { UseOverlayScrollbarsParams } from 'overlayscrollbars-vue'
-import type { Growth } from 'src/services/points'
 
 import 'overlayscrollbars/overlayscrollbars.css'
 
@@ -142,19 +142,17 @@ watchEffect(() => {
   metaThemeColor?.setAttribute('content', color.value)
 })
 
-const scrollbarParams = computed(
-  (): UseOverlayScrollbarsParams => ({
-    defer: true,
-    options: {
-      scrollbars: {
-        theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
-        autoHide: 'move',
-        autoHideDelay: 500,
-        autoHideSuspend: false,
-      },
+const scrollbarParams = computed((): UseOverlayScrollbarsParams => ({
+  defer: true,
+  options: {
+    scrollbars: {
+      theme: $q.dark.isActive ? 'os-theme-light' : 'os-theme-dark',
+      autoHide: 'move',
+      autoHideDelay: 500,
+      autoHideSuspend: false,
     },
-  }),
-)
+  },
+}))
 
 const [initBodyOverlayScrollbars] = useOverlayScrollbars(scrollbarParams)
 onMounted(() => {

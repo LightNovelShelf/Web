@@ -6,11 +6,11 @@
 import { scroll, useQuasar } from 'quasar'
 import { inject } from 'vue'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import { useLayout } from 'components/app/useLayout'
+import { useLayout } from '@/components/app/useLayout'
 
-import { PROVIDE } from 'src/const/provide'
+import { PROVIDE } from '@/const/provide'
 
 const $q = useQuasar()
 const router = useRouter()
@@ -81,11 +81,11 @@ function makeUrl(link: string) {
   try {
     // normal link
     if (/^https?:\/\//.test(link)) return new URL(link, location.origin)
-    if (/^\/\//.test(link)) return new URL(`https:${link}`, location.origin)
+    if (link.startsWith('//')) return new URL(`https:${link}`, location.origin)
     // origin ex. www.lightnovel.app
     if (/^[a-z0-9-]+([.][a-z0-9-]+)+$/.test(link)) return new URL(`https://${link}`, location.origin)
     // same site
-    if (/^\//.test(link) && router.resolve(link).matched.length !== 0) return new URL(link, location.origin)
+    if (link.startsWith('/') && router.resolve(link).matched.length !== 0) return new URL(link, location.origin)
   } catch {
     return null
   }

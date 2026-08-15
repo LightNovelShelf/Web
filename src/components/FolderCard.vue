@@ -57,13 +57,13 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import { getPlaceholder } from 'src/utils/url'
+import { getPlaceholder } from '@/utils/url'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import { BlurHash } from 'components'
+import { BlurHash } from '@/components'
 
-import { useToNowRef } from 'src/composition/useToNowRef'
+import { useToNowRef } from '@/composition/useToNowRef'
 
 import type { RouteLocationRaw } from 'vue-router'
 
@@ -102,7 +102,7 @@ function onClick(evt: MouseEvent) {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/css/mixin';
+@import '@/css/mixin';
 
 .folder-cover {
   position: relative;

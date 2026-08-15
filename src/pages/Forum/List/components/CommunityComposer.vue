@@ -18,13 +18,7 @@
       />
     </div>
 
-    <q-dialog
-      v-model="dialogOpen"
-      persistent
-      :maximized="$q.screen.xs"
-      transition-show="fade"
-      transition-hide="fade"
-    >
+    <q-dialog v-model="dialogOpen" persistent :maximized="$q.screen.xs" transition-show="fade" transition-hide="fade">
       <q-card flat bordered class="composer-dialog" :style="dialogCardStyle">
         <div class="composer-dialog__header">
           <div>
@@ -114,12 +108,12 @@
 import { OverlayScrollbars } from 'overlayscrollbars'
 import { useQuasar } from 'quasar'
 
-import sanitizerHtml from 'src/utils/sanitizeHtml'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import HtmlEditor from 'components/html/HtmlEditor.vue'
+import HtmlEditor from '@/components/html/HtmlEditor.vue'
 
+import type { CommunityBoardKey, CommunityCatalogBoard, CreateCommunityThreadRequest } from '@/services/forum'
 import type { OverlayScrollbars as OverlayScrollbarsInstance } from 'overlayscrollbars'
-import type { CommunityBoardKey, CommunityCatalogBoard, CreateCommunityThreadRequest } from 'src/services/forum'
 
 const props = defineProps<{
   user: any

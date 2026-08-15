@@ -1,9 +1,10 @@
-import { defineBoot } from '#q-app/wrappers'
 import Cropper from 'cropperjs'
 import { config } from 'md-editor-v3'
 import * as prettier from 'prettier'
 import parserMarkdown from 'prettier/plugins/markdown'
 import screenfull from 'screenfull'
+
+import { defineBoot } from '#q-app'
 
 export default defineBoot(() => {
   config({

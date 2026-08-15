@@ -39,9 +39,9 @@ import { MdEditor, NormalToolbar } from 'md-editor-v3'
 import { useQuasar } from 'quasar'
 import { ref, watch } from 'vue'
 
-import sanitizerHtml from 'src/utils/sanitizeHtml'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { uploadImage } from 'src/services/user'
+import { uploadImage } from '@/services/user'
 
 import type { ToolbarNames, ExposeParam } from 'md-editor-v3'
 

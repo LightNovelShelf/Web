@@ -83,12 +83,12 @@ import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { sha256 } from 'src/utils/hash'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { sha256 } from '@/utils/hash'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { register, sendRegisterEmail } from 'src/services/user'
+import { register, sendRegisterEmail } from '@/services/user'
 
 const $q = useQuasar()
 const appStore = useAppStore()

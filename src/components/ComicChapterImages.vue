@@ -56,8 +56,8 @@
 import { useQuasar } from 'quasar'
 import Draggable from 'vuedraggable'
 
-import { PROVIDE } from 'src/const/provide'
-import { uploadImage } from 'src/services/user'
+import { PROVIDE } from '@/const/provide'
+import { uploadImage } from '@/services/user'
 
 const props = defineProps<{
   modelValue: string[]
@@ -138,7 +138,7 @@ async function onFileChange(event: Event) {
   uploadTotal.value = files.length
   uploadedCount.value = 0
 
-  const uploadedImages = new Array<{ Url: string; MediumUrl: string } | undefined>(files.length)
+  const uploadedImages = Array.from<{ Url: string; MediumUrl: string } | undefined>({ length: files.length })
   const failedFiles: string[] = []
   let cursor = 0
 
@@ -161,8 +161,8 @@ async function onFileChange(event: Event) {
 
   try {
     await Promise.all(Array.from({ length: Math.min(3, files.length) }, uploadWorker))
-    const successfulImages = uploadedImages.filter(
-      (image): image is { Url: string; MediumUrl: string } => Boolean(image),
+    const successfulImages = uploadedImages.filter((image): image is { Url: string; MediumUrl: string } =>
+      Boolean(image),
     )
     images.value = [...images.value, ...successfulImages.map((image) => image.Url)]
     previews.value = [...previews.value, ...successfulImages.map((image) => image.MediumUrl)]

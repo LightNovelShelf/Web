@@ -28,14 +28,14 @@
 import { useQuasar } from 'quasar'
 import { computed, ref, toRaw } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { HtmlEditor, DragPageSticky } from 'components'
+import { HtmlEditor, DragPageSticky } from '@/components'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { getNovelEditInfo, updateNovelChapter } from 'src/services/chapter'
+import { getNovelEditInfo, updateNovelChapter } from '@/services/chapter'
 
 const props = defineProps<{ bid: string; sortNum: string }>()
 const bid = computed(() => ~~props.bid)

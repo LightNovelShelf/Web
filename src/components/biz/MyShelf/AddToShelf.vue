@@ -13,14 +13,14 @@ import { HubConnectionState } from '@microsoft/signalr'
 import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useShelfStore } from 'stores/shelf'
+import { useShelfStore } from '@/stores/shelf'
 
-import { connectState } from 'src/services/utils'
+import { connectState } from '@/services/utils'
 
-import type { BookServicesTypes } from 'src/services/book'
-import type { AnyVoidFunc } from 'src/types/utils'
+import type { BookServicesTypes } from '@/services/book'
+import type { AnyVoidFunc } from '@/types/utils'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 

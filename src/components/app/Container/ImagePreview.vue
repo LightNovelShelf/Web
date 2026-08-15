@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import { provide } from 'vue'
 
-import { PROVIDE } from 'src/const/provide'
+import { PROVIDE } from '@/const/provide'
 
 import 'viewerjs/dist/viewer.min.css'
 

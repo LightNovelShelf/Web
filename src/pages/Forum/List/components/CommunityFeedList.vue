@@ -120,15 +120,15 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
+import CommunityThreadCard from './CommunityThreadCard.vue'
+
 import type {
   CommunityFeedItem,
   CommunityFeedOrder,
   CommunityFeedScope,
   CommunityPagination,
   CommunitySubCategorySummary,
-} from 'src/services/forum'
-
-import CommunityThreadCard from './CommunityThreadCard.vue'
+} from '@/services/forum'
 
 const $q = useQuasar()
 

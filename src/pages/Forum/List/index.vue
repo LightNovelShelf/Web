@@ -89,12 +89,18 @@
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useIsActivated } from 'src/composition/useIsActivated'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useIsActivated } from '@/composition/useIsActivated'
 
-import { createCommunityThread, getCommunityFeed, getCommunityHome } from 'src/services/forum'
+import { createCommunityThread, getCommunityFeed, getCommunityHome } from '@/services/forum'
+
+import CommunityBlueprintCanvas from './components/CommunityBlueprintCanvas.vue'
+import CommunityBoardRail from './components/CommunityBoardRail.vue'
+import CommunityComposer from './components/CommunityComposer.vue'
+import CommunityFeedList from './components/CommunityFeedList.vue'
+import CommunityRightRail from './components/CommunityRightRail.vue'
 
 import type {
   CommunityBoardKey,
@@ -104,13 +110,7 @@ import type {
   CommunityHomePayload,
   CommunityPagination,
   CreateCommunityThreadRequest,
-} from 'src/services/forum'
-
-import CommunityBlueprintCanvas from './components/CommunityBlueprintCanvas.vue'
-import CommunityBoardRail from './components/CommunityBoardRail.vue'
-import CommunityComposer from './components/CommunityComposer.vue'
-import CommunityFeedList from './components/CommunityFeedList.vue'
-import CommunityRightRail from './components/CommunityRightRail.vue'
+} from '@/services/forum'
 
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)

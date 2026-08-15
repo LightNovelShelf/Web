@@ -1,0 +1,19 @@
+{
+  "name": "quasar-pwa-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quasar PWA Folder",
+  "type": "module",
+  "dependencies": {
+    "register-service-worker": "^1.7.2"
+  },
+  "devDependencies": {
+    "workbox-build": "^7.0.0",
+    "workbox-cacheable-response": "^7.0.0",
+    "workbox-core": "^7.0.0",
+    "workbox-expiration": "^7.0.0",
+    "workbox-precaching": "^7.0.0",
+    "workbox-routing": "^7.0.0",
+    "workbox-strategies": "^7.0.0"
+  }
+}

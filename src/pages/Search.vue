@@ -38,10 +38,7 @@
                 <template v-if="state.comicData.length">
                   <q-grid :x-gap="12" :y-gap="20" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
                     <q-grid-item v-for="manga in state.comicData" :key="manga.id">
-                      <router-link
-                        class="series-card"
-                        :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id } }"
-                      >
+                      <router-link class="series-card" :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id } }">
                         <div class="cover-wrap">
                           <q-card class="overflow-hidden">
                             <manga-cover :manga="manga" />
@@ -81,27 +78,26 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useSettingStore } from 'src/stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import BookCard from 'components/BookCard.vue'
-import { QGrid, QGridItem } from 'components/grid'
-import SearchInput from 'components/SearchInput.vue'
+import BookCard from '@/components/BookCard.vue'
+import { QGrid, QGridItem } from '@/components/grid'
+import SearchInput from '@/components/SearchInput.vue'
 
-import MangaCover from 'src/pages/Manga/components/MangaCover.vue'
-import MangaUpdateTime from 'src/pages/Manga/components/MangaUpdateTime.vue'
-import { toMangaListItem } from 'src/pages/Manga/data'
+import MangaCover from '@/pages/Manga/components/MangaCover.vue'
+import MangaUpdateTime from '@/pages/Manga/components/MangaUpdateTime.vue'
+import { toMangaListItem } from '@/pages/Manga/data'
 import {
   getBookList,
   getBookListByTitle,
   getBookListByAuthor,
   getBookListByName,
   getBookListByTags,
-} from 'src/services/book'
-import { searchComicSeries } from 'src/services/manga'
+} from '@/services/book'
+import { searchComicSeries } from '@/services/manga'
 
-import type { MangaListItem } from 'src/pages/Manga/types'
-import type { SearchMode } from 'src/services/book/types'
-
+import type { MangaListItem } from '@/pages/Manga/types'
+import type { SearchMode } from '@/services/book/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -253,8 +249,7 @@ function tryResyncSearchStateFromUrl(toRoute = route) {
   const mode = ((toRoute.query?.mode as SearchMode) || (toRoute.query?.exact ? 'exact' : 'fuzzy')) as SearchMode
   const tab = toRoute.query?.tab === 'Comic' ? 'Comic' : 'Book'
 
-  const isSameSearchQuery =
-    keyword === state.value.searchKey && mode === state.value.mode && tab === state.value.tab
+  const isSameSearchQuery = keyword === state.value.searchKey && mode === state.value.mode && tab === state.value.tab
   // 搜索条件对比url上的没变就不再触发
   if (isSameSearchQuery) return
 
@@ -288,7 +283,7 @@ onBeforeRouteUpdate(tryResyncSearchStateFromUrl)
 </script>
 
 <style scoped lang="scss">
-@import 'src/css/mixin';
+@import '@/css/mixin';
 
 .series-card {
   color: inherit;

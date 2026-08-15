@@ -132,10 +132,10 @@ import { storeToRefs } from 'pinia'
 import { Dark } from 'quasar'
 import { watch, ref } from 'vue'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import { apiServer, apiServerOptions } from 'src/services/apiServer'
-import { switchSignalr } from 'src/services/internal/request/signalr'
+import { apiServer, apiServerOptions } from '@/services/apiServer'
+import { switchSignalr } from '@/services/internal/request/signalr'
 
 const tabOptions: Array<Record<string, any>> = [
   {

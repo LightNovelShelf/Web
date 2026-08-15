@@ -35,9 +35,9 @@
 <script lang="ts" setup>
 import { computed, ref, toRefs } from 'vue'
 
-import { useMergeState } from 'src/composition/useMergeState'
+import { useMergeState } from '@/composition/useMergeState'
 
-import type { SearchMode } from 'src/services/book/types'
+import type { SearchMode } from '@/services/book/types'
 
 const props = withDefaults(
   defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),

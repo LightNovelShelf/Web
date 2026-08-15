@@ -24,16 +24,16 @@ import { useQuasar } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
-import BookCard from 'components/BookCard.vue'
-import { QGrid, QGridItem } from 'components/grid'
+import BookCard from '@/components/BookCard.vue'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { NOOP } from 'src/const/empty'
-import { getRank } from 'src/services/book'
+import { NOOP } from '@/const/empty'
+import { getRank } from '@/services/book'
 
-import type { BookInList } from 'src/services/book/types'
+import type { BookInList } from '@/services/book/types'
 
 const props = defineProps<{ type: 'daily' | 'weekly' | 'monthly' }>()
 
@@ -81,8 +81,8 @@ watch(request.loading, (nextLoading) => {
   }
 })
 
-onBeforeRouteUpdate((to, from, next) => {
-  request(to.params.type).then(() => next(), NOOP)
+onBeforeRouteUpdate(async (to) => {
+  await request(to.params.type).catch(NOOP)
 })
 
 useInitRequest(request)

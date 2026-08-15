@@ -7,16 +7,16 @@ export default {
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-import { debounceInFrame } from 'src/utils/debounceInFrame'
+import { debounceInFrame } from '@/utils/debounceInFrame'
 
-import { useMasonry } from 'src/composition/useMasonry'
-import { useResizeObserver } from 'src/composition/useResizeObserver'
+import { useMasonry } from '@/composition/useMasonry'
+import { useResizeObserver } from '@/composition/useResizeObserver'
 
-import { getCollaboratorList } from 'src/services/context'
-
-import type { Card } from 'src/types/collaborator'
+import { getCollaboratorList } from '@/services/context'
 
 import CardItem from './components/Card.vue'
+
+import type { Card } from '@/types/collaborator'
 
 /** 数据源 */
 const collaborators = ref<Card[]>([])

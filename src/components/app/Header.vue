@@ -179,20 +179,20 @@ import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { longTermToken, sessionToken } from 'src/utils/session'
+import { longTermToken, sessionToken } from '@/utils/session'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import CoinIcon from 'src/components/points/CoinIcon.vue'
+import CoinIcon from '@/components/points/CoinIcon.vue'
 
-import { useMedia } from 'src/composition/useMedia'
+import { useMedia } from '@/composition/useMedia'
 
-import { rebootSignalr } from 'src/services/internal/request'
+import { rebootSignalr } from '@/services/internal/request'
 
-import type { SearchMode } from 'src/services/book/types'
-
-import { useLayout } from './useLayout'
 import SearchInput from '../SearchInput.vue'
+import { useLayout } from './useLayout'
+
+import type { SearchMode } from '@/services/book/types'
 
 const route = useRoute()
 

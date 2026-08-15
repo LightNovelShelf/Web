@@ -1,11 +1,11 @@
 import { computed, onDeactivated, onUnmounted, ref } from 'vue'
 
-import { NOOP } from 'src/const/empty'
-
-import type { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from 'src/types/utils'
-import type { Ref } from 'vue'
+import { NOOP } from '@/const/empty'
 
 import { useLoadingFn } from './useFnLoading'
+
+import type { AnyVoidFunc, AnyAsyncFunc, AnyFunc } from '@/types/utils'
+import type { Ref } from 'vue'
 
 /** 延时执行 */
 export interface UseTimeoutFnAction<P extends any[] = any[], R = any> extends AnyAsyncFunc<P, Promise<R>> {
@@ -69,7 +69,7 @@ export function useTimeoutFn<P extends any[] = any[], R = any>(
   delay: number = DELAY_MS,
   config?: UseTimeoutFnConfig,
 ): UseTimeoutFnAction<P, R> {
-  let timeoutContext: NodeJS.Timeout | undefined
+  let timeoutContext: number | undefined
   let rejector: ((err?: unknown) => void) | undefined
   /** 是否有执行计划 */
   const scheduled = ref(false)
@@ -114,12 +114,12 @@ export function useTimeoutFn<P extends any[] = any[], R = any>(
     scheduled.value = true
 
     const evalResult = _cb(...args)
-    Promise.resolve(evalResult).finally(reset)
+    Promise.resolve(evalResult).finally(reset).catch(NOOP)
     return evalResult
   }
   fn.cancel = function () {
-    timeoutContext && clearTimeout(timeoutContext)
-    rejector && rejector(CANCEL_ERR)
+    if (timeoutContext !== undefined) clearTimeout(timeoutContext)
+    if (rejector !== undefined) rejector(CANCEL_ERR)
     reset()
   }
 

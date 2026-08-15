@@ -14,7 +14,7 @@ export enum HashMethod {
  */
 async function hash(message: string, method: HashMethod = HashMethod.SHA256): Promise<string> {
   // dev环境下提供fallback，方便局域网调试
-  if (process.env.DEV) {
+  if (import.meta.env.QUASAR_DEV) {
     // 单独写，方便在production模式下消除deadcode
     if (!window.isSecureContext) {
       const lib = await import('hash.js')

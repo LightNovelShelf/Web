@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useSettingStore } from 'src/stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
 import HtmlEditor from './Editor/Html.vue'
 import MdEditor from './Editor/MarkDown.vue'

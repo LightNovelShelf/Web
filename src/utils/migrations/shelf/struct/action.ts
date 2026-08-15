@@ -1,8 +1,8 @@
-import { ShelfItemTypeEnum, SHELF_STRUCT_VER } from 'src/types/shelf'
-
-import type { ShelfItem } from 'src/types/shelf'
+import { ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
 
 import * as ShelfLegacyStruct from './types'
+
+import type { ShelfItem, SHELF_STRUCT_VER } from '@/types/shelf'
 
 /**
  * 书架数据结构版本合并逻辑
@@ -13,7 +13,7 @@ export async function shelfStructMigration(
   input: (ShelfItem | ShelfLegacyStruct.ServerShelfItem)[],
   inputVer: SHELF_STRUCT_VER | null,
 ): Promise<ShelfItem[]> {
-  if (inputVer === SHELF_STRUCT_VER.LATEST) {
+  if (inputVer === SHELF_STRUCT_VER_LATEST) {
     return input as ShelfItem[]
   }
 
@@ -67,5 +67,5 @@ export async function shelfStructMigration(
     })
   }
 
-  throw new Error(`shelfStructMigration:未知结构版本: ${inputVer}`)
+  throw new Error(`shelfStructMigration:未知结构版本: ${String(inputVer)}`)
 }

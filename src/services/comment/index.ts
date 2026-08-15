@@ -1,8 +1,8 @@
-import { requestWithSignalr } from 'src/services/internal/request'
-
-import type { GetComments, PostComment } from './types'
+import { requestWithSignalr } from '@/services/internal/request'
 
 import { CommentType } from './types'
+
+import type { GetComments, PostComment } from './types'
 
 /** 评论 */
 export function postComment(req: PostComment.Request) {

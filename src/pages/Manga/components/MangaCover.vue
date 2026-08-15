@@ -20,9 +20,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import { BlurHash } from 'components'
+import { BlurHash } from '@/components'
 
 import type { MangaImageAsset } from '../types'
 

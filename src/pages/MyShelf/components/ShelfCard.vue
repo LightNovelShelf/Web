@@ -8,12 +8,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ShelfItemTypeEnum } from 'src/types/shelf'
-
-import type { ShelfItem } from 'src/types/shelf'
+import { ShelfItemTypeEnum } from '@/types/shelf'
 
 import ShelfBook from './ShelfBook.vue'
 import ShelfFolder from './ShelfFolder.vue'
+
+import type { ShelfItem } from '@/types/shelf'
 
 defineProps<{ item: ShelfItem }>()
 </script>

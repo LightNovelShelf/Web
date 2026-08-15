@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { toValue } from 'vue'
 
-import { parseTime, toNow } from 'src/utils/time'
+import { parseTime, toNow } from '@/utils/time'
 
 import type { Dayjs } from 'dayjs'
 import type { MaybeRefOrGetter } from 'vue'

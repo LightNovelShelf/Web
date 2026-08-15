@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 
-import type { Card } from 'src/types/collaborator'
+import type { Card } from '@/types/collaborator'
 
 const imgs: string[] = [
   'https://img.acgdmzy.com:45112/images/2021/08/22/08579907e581.webp',
@@ -11,7 +11,7 @@ const imgs: string[] = [
 ]
 
 const mock = (): Card[] => {
-  return new Array(40).fill('').map((_, idx) => {
+  return Array.from({ length: 40 }).map((_, idx) => {
     return {
       Id: nanoid(),
       Job: 'Epub',

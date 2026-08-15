@@ -46,18 +46,18 @@ import { useQuasar } from 'quasar'
 import { ref, computed, watch, defineComponent } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import BookCard from 'components/BookCard.vue'
-import { QGrid, QGridItem } from 'components/grid'
+import BookCard from '@/components/BookCard.vue'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { NOOP } from 'src/const/empty'
-import { getBooksBySeries } from 'src/services/book'
+import { NOOP } from '@/const/empty'
+import { getBooksBySeries } from '@/services/book'
 
-import type { BookInList } from 'src/services/book/types'
+import type { BookInList } from '@/services/book/types'
 
 defineComponent({ QGrid, QGridItem })
 const props = defineProps<{ name: string; page: string; order: 'new' | 'view' | 'latest' }>()
@@ -128,8 +128,8 @@ watch(request.loading, (nextLoading) => {
   }
 })
 
-onBeforeRouteUpdate((to, from, next) => {
-  request(`${to.params.name}`, ~~to.params.page || 1, `${to.params.order}`).then(() => next(), NOOP)
+onBeforeRouteUpdate(async (to) => {
+  await request(`${to.params.name}`, ~~to.params.page || 1, `${to.params.order}`).catch(NOOP)
 })
 
 useInitRequest(request)

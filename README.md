@@ -1,41 +1,49 @@
 # 轻书架 (light_novel_shelf)
 
-A PWA-focused online novel reading project built with Quasar.
+A PWA-focused online novel reading project built with Quasar (@quasar/app-vite v3).
 
 ## Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Start development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-## Lint
+## Lint (oxlint)
 
 ```bash
-npm run lint
+pnpm lint        # oxlint --fix
+pnpm lint:check  # oxlint, CI friendly
 ```
 
-## Format
+## Format (oxfmt)
 
 ```bash
-npm run format
+pnpm format        # oxfmt, rewrites files
+pnpm format:check  # oxfmt --check, CI friendly
+```
+
+## Type check
+
+```bash
+pnpm typecheck
 ```
 
 ## Build
 
 ```bash
-npm run build
+pnpm build
 ```
 
 ## Build PWA
 
 ```bash
-npm run build:pwa
+pnpm build:pwa
 ```
 
 ## Configuration

@@ -1,10 +1,10 @@
-import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { parseTime } from 'src/utils/time'
+import sanitizerHtml from '@/utils/sanitizeHtml'
+import { parseTime } from '@/utils/time'
 
-import { useToNowRef } from 'src/composition/useToNowRef'
+import { useToNowRef } from '@/composition/useToNowRef'
 
+import type { Announcement as _Announcement } from '@/services/context/type'
 import type { Dayjs } from 'dayjs'
-import type { Announcement as _Announcement } from 'src/services/context/type'
 import type { Ref } from 'vue'
 
 export interface Announcement {

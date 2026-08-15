@@ -211,29 +211,29 @@ import Sortable from 'sortablejs'
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { safeCall } from 'src/utils/safeCall'
-import { parseTime } from 'src/utils/time'
-import { useForwardRef } from 'src/utils/useForwardRef'
+import { safeCall } from '@/utils/safeCall'
+import { parseTime } from '@/utils/time'
+import { useForwardRef } from '@/utils/useForwardRef'
 
-import { useBookListStore } from 'stores/bookListData'
-import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from 'stores/shelf'
+import { useBookListStore } from '@/stores/bookListData'
+import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/stores/shelf'
 
-import { useLayout } from 'components/app/useLayout'
-import { QGrid, QGridItem } from 'components/grid'
+import { useLayout } from '@/components/app/useLayout'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useIsActivated } from 'src/composition/useIsActivated'
+import { useIsActivated } from '@/composition/useIsActivated'
 
-import { ALL_VALUE } from 'src/const'
-import { NOOP } from 'src/const/empty'
-import { connectState } from 'src/services/utils'
-import * as ShelfTypes from 'src/types/shelf'
-
-import type { BookInList } from 'src/services/book/types'
-import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
+import { ALL_VALUE } from '@/const'
+import { NOOP } from '@/const/empty'
+import { connectState } from '@/services/utils'
+import * as ShelfTypes from '@/types/shelf'
 
 import NavBackToParentFolder from './components/NavBackToParentFolder.vue'
 import RenameDialog from './components/RenameDialog.vue'
 import ShelfCard from './components/ShelfCard.vue'
+
+import type { BookInList } from '@/services/book/types'
+import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
 
 interface QSelectorOption {
   label: string
@@ -300,13 +300,11 @@ const folderOptions = computed<QSelectorOption[]>(() => {
   const realFolders = shelfStore.folders
     // 过滤掉自己，移动到自己没有意义
     .filter((i) => i.id !== parentFolder.value)
-    .map(
-      (i): QSelectorOption => ({
-        label: i.title,
-        value: i.id,
-        updateAt: parseTime(i.updateAt).toLocaleString(),
-      }),
-    )
+    .map((i): QSelectorOption => ({
+      label: i.title,
+      value: i.id,
+      updateAt: parseTime(i.updateAt).toLocaleString(),
+    }))
     .filter((i) => {
       // 如果 selectorValue 有值 且不是选项值
       if (selectorValue.value && typeof selectorValue.value !== 'object') {

@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-import type { ShelfFolderItem } from 'src/types/shelf'
+import type { ShelfFolderItem } from '@/types/shelf'
 
 const props = defineProps<{
   modelValue: ShelfFolderItem | null

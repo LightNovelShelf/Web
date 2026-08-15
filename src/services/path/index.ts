@@ -1,4 +1,4 @@
-import { apiServer } from 'src/services/apiServer'
+import { apiServer } from '@/services/apiServer'
 
 /**
  * 路由表

@@ -1,6 +1,8 @@
 import { ref } from 'vue'
 
-import { signalrCacheDB } from 'src/utils/storage/db'
+import { signalrCacheDB } from '@/utils/storage/db'
+
+import { NOOP } from '@/const/empty'
 
 /** 最后一次返回的响应，目前用于监听cache使用情况 */
 export const lastResponseCache = ref<Promise<unknown> | null>(null)
@@ -70,5 +72,6 @@ export function updateResponseCache<Res = unknown, Data extends unknown[] = unkn
   if (!isCacheable(url)) return
 
   const key = JSON.stringify({ url, data })
-  signalrCacheDB.set(key, res)
+  // 缓存写入失败不影响请求结果
+  signalrCacheDB.set(key, res).catch(NOOP)
 }

@@ -11,7 +11,9 @@
       <q-card-section>
         <div class="row items-center justify-between q-mb-md">
           <div>
-            <div class="text-subtitle1">连续签到 <span class="text-primary text-weight-bold">{{ streak }}</span> 天</div>
+            <div class="text-subtitle1">
+              连续签到 <span class="text-primary text-weight-bold">{{ streak }}</span> 天
+            </div>
             <div class="text-caption text-opacity">每日签到累积经验，连签有额外奖励</div>
           </div>
           <q-btn
@@ -53,9 +55,9 @@
 import { useQuasar } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { getSignInCalendar, signIn } from 'src/services/points'
+import { getSignInCalendar, signIn } from '@/services/points'
 
 const props = defineProps<{ streak: number; todaySigned: boolean }>()
 const model = defineModel<boolean>({ default: false })

@@ -29,21 +29,21 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import sanitizerHtml from 'src/utils/sanitizeHtml'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { Comment } from 'components'
-import HtmlReader from 'components/html/HtmlReader.vue'
+import { Comment } from '@/components'
+import HtmlReader from '@/components/html/HtmlReader.vue'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { announcementFormat } from 'src/pages/Announcement/announcementFormat'
-import { CommentType } from 'src/services/comment/types'
-import { getAnnouncementDetail } from 'src/services/context'
+import { announcementFormat } from '@/pages/Announcement/announcementFormat'
+import { CommentType } from '@/services/comment/types'
+import { getAnnouncementDetail } from '@/services/context'
 
-import type { Announcement } from 'src/pages/Announcement/announcementFormat'
+import type { Announcement } from '@/pages/Announcement/announcementFormat'
 
 const props = defineProps<{ id: string | number }>()
 const _id = computed(() => ~~(props.id || '1'))

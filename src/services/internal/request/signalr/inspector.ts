@@ -36,7 +36,7 @@ export class SignalrInspector {
   }
 
   public flush = ({ clear = true }: { clear?: boolean } = {}) => {
-    if (process.env.DEV && process.env.VUE_TRACE_SERVER) {
+    if (import.meta.env.QUASAR_DEV && import.meta.env.VUE_TRACE_SERVER) {
       const groupName = `signalr request data trace: '${this.url}'`
       console.groupCollapsed(groupName)
       let lastRecord: RecordItem | null = null

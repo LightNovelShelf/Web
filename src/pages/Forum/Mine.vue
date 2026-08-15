@@ -98,16 +98,16 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
 
-import { parseTime, toNow } from 'src/utils/time'
+import { parseTime, toNow } from '@/utils/time'
 
-import { useAppStore } from 'src/stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
 
-import CommunityThreadCard from 'src/pages/Forum/List/components/CommunityThreadCard.vue'
-import { getMyCommunityOverview } from 'src/services/forum'
+import CommunityThreadCard from '@/pages/Forum/List/components/CommunityThreadCard.vue'
+import { getMyCommunityOverview } from '@/services/forum'
 
-import type { CommunityMyOverview } from 'src/services/forum'
+import type { CommunityMyOverview } from '@/services/forum'
 
 const $q = useQuasar()
 const appStore = useAppStore()

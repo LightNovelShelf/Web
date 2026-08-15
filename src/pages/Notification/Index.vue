@@ -87,15 +87,15 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-import { parseTime, toNow } from 'src/utils/time'
+import { parseTime, toNow } from '@/utils/time'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
 
-import { getMyInfo, getNotifications, markNotifications } from 'src/services/user'
+import { getMyInfo, getNotifications, markNotifications } from '@/services/user'
 
-import type { GetNotifications } from 'src/services/user/type'
+import type { GetNotifications } from '@/services/user/type'
 
 const router = useRouter()
 const appStore = useAppStore()

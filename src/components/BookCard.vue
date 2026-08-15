@@ -48,15 +48,15 @@
 import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 
-import { getPlaceholder } from 'src/utils/url'
+import { getPlaceholder } from '@/utils/url'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import { BlurHash } from 'components'
+import { BlurHash } from '@/components'
 
-import { useToNowRef } from 'src/composition/useToNowRef'
+import { useToNowRef } from '@/composition/useToNowRef'
 
-import type { BookInList } from 'src/services/book/types'
+import type { BookInList } from '@/services/book/types'
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
@@ -78,7 +78,7 @@ function onIntersection(entry: IntersectionObserverEntry) {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/css/mixin';
+@import '@/css/mixin';
 
 .book-cover {
   position: relative;

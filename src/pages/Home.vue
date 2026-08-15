@@ -174,21 +174,21 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 
-import { useSettingStore } from 'stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
-import BookCard from 'components/BookCard.vue'
-import { QGrid, QGridItem } from 'components/grid/'
+import BookCard from '@/components/BookCard.vue'
+import { QGrid, QGridItem } from '@/components/grid/'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { getLatestBookList } from 'src/services/book'
-import { getOnlineInfo, getAnnouncementList, getBanInfoList } from 'src/services/context'
-
-import type { BookInList } from 'src/services/book/types'
-import type { OnlineInfo } from 'src/services/context/type'
+import { getLatestBookList } from '@/services/book'
+import { getOnlineInfo, getAnnouncementList, getBanInfoList } from '@/services/context'
 
 import { announcementListFormat } from './Announcement/announcementFormat'
+
+import type { BookInList } from '@/services/book/types'
+import type { OnlineInfo } from '@/services/context/type'
 
 const onlineInfo = ref<OnlineInfo>()
 const announcementList = ref<any[]>()

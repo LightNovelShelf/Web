@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import { HubConnectionState } from '@microsoft/signalr'
 
-import { connectState } from 'src/services/utils'
+import { connectState } from '@/services/utils'
 
 import { useLayout } from './useLayout'
 
@@ -147,7 +147,7 @@ const menuOptions: Array<Record<string, any>> = [
     icon: 'mdiAccountMultiple',
   },
 ]
-const commitSha = process.env.VUE_COMMIT_SHA
+const commitSha = import.meta.env.VUE_COMMIT_SHA
 
 const layout = useLayout()
 const { siderShow, siderBreakpoint } = layout

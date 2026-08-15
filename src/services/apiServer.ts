@@ -12,7 +12,7 @@ const apiServerOptions = [
   },
 ]
 
-if (process.env.DEV) {
+if (import.meta.env.QUASAR_DEV) {
   apiServerOptions.unshift({
     label: '开发服务器',
     value: 'http://localhost:5204',
@@ -20,7 +20,7 @@ if (process.env.DEV) {
 }
 
 const apiServer = useStorage(
-  (process.env.VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V7',
+  (import.meta.env.VUE_APP_NAME || 'LightNovelShelf') + '_Api_Server_V7',
   apiServerOptions[0].value,
 )
 

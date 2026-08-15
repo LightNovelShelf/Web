@@ -1,6 +1,8 @@
 import { ref } from 'vue'
 
-import type { AnyFunc } from 'src/types/utils'
+import { NOOP } from '@/const/empty'
+
+import type { AnyFunc } from '@/types/utils'
 import type { Ref } from 'vue'
 
 export interface UseFnLoadingReturn<P extends any[] = any[], R = any> extends AnyFunc<P, R> {
@@ -33,16 +35,19 @@ export function useLoadingFn<P extends any[] = any[], R = any>(fn: AnyFunc<P, R>
     // 记录context
     context[0] = evalResult
 
-    Promise.resolve(evalResult).finally(() => {
-      // 判断这个loading是不是自己的context的
-      if (context[0] === evalResult) {
-        // 如果是，清除conetxt记录避免内存泄露
-        context[0] = null
-        // 然后重置loading
-        loading.value = false
-      }
-      // 如果loading是别人的，那就等别人去重置
-    })
+    Promise.resolve(evalResult)
+      .finally(() => {
+        // 判断这个loading是不是自己的context的
+        if (context[0] === evalResult) {
+          // 如果是，清除conetxt记录避免内存泄露
+          context[0] = null
+          // 然后重置loading
+          loading.value = false
+        }
+        // 如果loading是别人的，那就等别人去重置
+      })
+      // 结果的拒绝由调用方处理，这里只负责重置 loading
+      .catch(NOOP)
 
     return evalResult as R
   }

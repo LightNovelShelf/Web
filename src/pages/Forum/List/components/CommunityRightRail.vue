@@ -66,9 +66,9 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
-import { parseTime, toNow } from 'src/utils/time'
+import { parseTime, toNow } from '@/utils/time'
 
-import type { CommunityActiveUserItem, CommunityHotRankItem } from 'src/services/forum'
+import type { CommunityActiveUserItem, CommunityHotRankItem } from '@/services/forum'
 
 const props = defineProps<{
   hotThreads: CommunityHotRankItem[]

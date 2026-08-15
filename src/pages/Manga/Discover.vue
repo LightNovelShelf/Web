@@ -52,11 +52,7 @@
       {{ loadError || '暂无漫画' }}
     </div>
 
-    <div
-      v-if="mangas.length"
-      class="pagination"
-      style="display: flex; justify-content: center; padding-top: 24px"
-    >
+    <div v-if="mangas.length" class="pagination" style="display: flex; justify-content: center; padding-top: 24px">
       <q-pagination
         padding="4px"
         :disable="loading"
@@ -79,22 +75,22 @@ import { useQuasar } from 'quasar'
 import { ref, computed, watch } from 'vue'
 import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { QGrid, QGridItem } from 'components/grid'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { NOOP } from 'src/const/empty'
-import { getComicList } from 'src/services/manga'
-
-import type { MangaListItem } from './types'
-import type { ComicOrder } from 'src/services/manga'
+import { NOOP } from '@/const/empty'
+import { getComicList } from '@/services/manga'
 
 import MangaCover from './components/MangaCover.vue'
 import MangaUpdateTime from './components/MangaUpdateTime.vue'
 import { toMangaListItem } from './data'
+
+import type { MangaListItem } from './types'
+import type { ComicOrder } from '@/services/manga'
 
 const props = defineProps<{ order: ComicOrder; page?: string }>()
 
@@ -137,18 +133,17 @@ watch(loading, (nextLoading) => {
   if (nextLoading) $q.loadingBar.start()
 })
 
-onBeforeRouteUpdate((to, from, next) => {
-  request(~~`${to.params.page}` || 1, `${to.params.order}` as ComicOrder).then(() => {
-    window.scrollTo({ top: 0 })
-    next()
-  }, NOOP)
+onBeforeRouteUpdate(async (to) => {
+  await request(~~`${to.params.page}` || 1, `${to.params.order}` as ComicOrder)
+    .then(() => window.scrollTo({ top: 0 }))
+    .catch(NOOP)
 })
 
 useInitRequest(request)
 </script>
 
 <style lang="scss" scoped>
-@import 'src/css/mixin';
+@import '@/css/mixin';
 
 .series-card {
   color: inherit;

@@ -1,8 +1,8 @@
 import { debounce } from 'quasar'
 
-import { userReadPositionDB } from 'src/utils/storage/db'
+import { userReadPositionDB } from '@/utils/storage/db'
 
-import { saveReadPosition } from 'src/services/book'
+import { saveReadPosition } from '@/services/book'
 
 import type { Ref } from 'vue'
 

@@ -43,14 +43,13 @@
 </template>
 
 <script lang="ts" setup>
-import { noop } from '@vueuse/core'
 import { reactive, ref } from 'vue'
 
-import { getAnnouncementList } from 'src/services/context'
-
-import type { Announcement } from './announcementFormat'
+import { getAnnouncementList } from '@/services/context'
 
 import { announcementListFormat } from './announcementFormat'
+
+import type { Announcement } from './announcementFormat'
 
 const announcementList = reactive<Announcement[]>([])
 const size = 24
@@ -58,21 +57,20 @@ const size = 24
 const scroll = ref(null)
 
 // 滚动拉取数据
-function onLoad(index, done) {
-  const response = Promise.resolve(getAnnouncementList({ Page: index, Size: size }))
-  response
-    .then((res) => {
-      // @ts-expect-error 不知道谁的问题
-      announcementList.push(...announcementListFormat(res.Data))
-      if (res.TotalPages == index) {
-        // 无法再拉取
-        scroll.value.stop()
-      } else {
-        done()
-      }
-    })
-    // FIXME: 确认这个catch是干什么用的，是想真的catch error还是只是调试用
-    .catch(noop)
+async function onLoad(index, done) {
+  try {
+    const res = await getAnnouncementList({ Page: index, Size: size })
+    // @ts-expect-error 不知道谁的问题
+    announcementList.push(...announcementListFormat(res.Data))
+    if (res.TotalPages == index) {
+      // 无法再拉取
+      scroll.value.stop()
+    } else {
+      done()
+    }
+  } catch {
+    // 拉取失败时保留当前列表，等待用户重试
+  }
 }
 
 const updateAnnouncement = () => {

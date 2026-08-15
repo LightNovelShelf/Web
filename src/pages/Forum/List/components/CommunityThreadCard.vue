@@ -51,9 +51,9 @@
 </template>
 
 <script setup lang="ts">
-import { parseTime, toNow } from 'src/utils/time'
+import { parseTime, toNow } from '@/utils/time'
 
-import type { CommunityFeedItem } from 'src/services/forum'
+import type { CommunityFeedItem } from '@/services/forum'
 
 defineProps<{
   item: CommunityFeedItem

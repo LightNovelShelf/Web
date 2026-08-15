@@ -4,7 +4,7 @@
 import { defineComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { unAuthenticationNotify } from 'src/utils/biz/unAuthenticationNotify'
+import { unAuthenticationNotify } from '@/utils/biz/unAuthenticationNotify'
 
 /** 监听鉴权失败消息 */
 export default defineComponent({

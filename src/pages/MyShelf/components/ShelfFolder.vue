@@ -15,16 +15,16 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useBookListStore } from 'stores/bookListData'
-import { useShelfStore } from 'stores/shelf'
+import { useBookListStore } from '@/stores/bookListData'
+import { useShelfStore } from '@/stores/shelf'
 
-import FolderCard from 'components/FolderCard.vue'
+import FolderCard from '@/components/FolderCard.vue'
 
-import { useToNowRef } from 'src/composition/useToNowRef'
+import { useToNowRef } from '@/composition/useToNowRef'
 
-import { ShelfItemTypeEnum } from 'src/types/shelf'
+import { ShelfItemTypeEnum } from '@/types/shelf'
 
-import type { ShelfBookItem, ShelfFolderItem } from 'src/types/shelf'
+import type { ShelfBookItem, ShelfFolderItem } from '@/types/shelf'
 
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()

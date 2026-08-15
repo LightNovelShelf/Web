@@ -376,15 +376,15 @@
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 
-import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { parseTime, toNow } from 'src/utils/time'
+import sanitizerHtml from '@/utils/sanitizeHtml'
+import { parseTime, toNow } from '@/utils/time'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import HtmlReader from 'components/html/HtmlReader.vue'
+import HtmlReader from '@/components/html/HtmlReader.vue'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 import {
   createCommunityReply,
@@ -393,14 +393,14 @@ import {
   toggleReplyLike,
   toggleThreadFavorite,
   toggleThreadLike,
-} from 'src/services/forum'
+} from '@/services/forum'
 
 import type {
   CommunityPagination,
   CommunityReplyTarget,
   CommunityThreadDetail,
   CommunityThreadReply,
-} from 'src/services/forum'
+} from '@/services/forum'
 
 const props = defineProps<{ id: string }>()
 const RECENT_THREAD_STORAGE_KEY = 'community.recentThreads'

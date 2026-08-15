@@ -1,12 +1,12 @@
 import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { saveFile } from 'src/utils/saveFile'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { saveFile } from '@/utils/saveFile'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { downloadBook, downloadChapter } from 'src/services/book'
+import { downloadBook, downloadChapter } from '@/services/book'
 
 /**
  * 下载书籍，带进度提示

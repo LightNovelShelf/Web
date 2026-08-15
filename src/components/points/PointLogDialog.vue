@@ -47,14 +47,14 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 import { computed, nextTick, ref, watch } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { parseTime, toNow } from 'src/utils/time'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { parseTime, toNow } from '@/utils/time'
 
-import CoinIcon from 'src/components/points/CoinIcon.vue'
+import CoinIcon from '@/components/points/CoinIcon.vue'
 
-import { getCoinLog, getPointLog } from 'src/services/points'
+import { getCoinLog, getPointLog } from '@/services/points'
 
-import type { GetPointLog } from 'src/services/points/type'
+import type { GetPointLog } from '@/services/points/type'
 
 const model = defineModel<boolean>({ default: false })
 // 经验与金币流水结构完全一致，只有标题、取数接口与来源文案不同
@@ -66,7 +66,7 @@ const loading = ref(false)
 const loaded = ref(false)
 let page = 1
 let finished = false
- 
+
 let os: any = null
 
 const scrollbarOptions = computed(() => ({
@@ -98,12 +98,10 @@ function sourceLabel(source: string, amount: number) {
   return amount < 0 && !SPEND_SOURCES.has(source) ? `${label}回收` : label
 }
 
- 
 function onInit(instance: any) {
   os = instance
 }
 
- 
 function onScroll(instance: any) {
   const viewport = instance.elements().viewport
   if (viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 200) {

@@ -193,16 +193,16 @@ import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { toNow } from 'src/utils/time'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { toNow } from '@/utils/time'
 
-import { useAppStore } from 'stores/app'
+import { useAppStore } from '@/stores/app'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
 
-import { postComment, replyComment, getComments, deleteComment } from 'src/services/comment'
+import { postComment, replyComment, getComments, deleteComment } from '@/services/comment'
 
-import type { CommentType, GetComments } from 'src/services/comment/types'
+import type { CommentType, GetComments } from '@/services/comment/types'
 
 const props = withDefaults(defineProps<{ type: CommentType; id?: number; seriesTitle?: string }>(), {
   id: 0,

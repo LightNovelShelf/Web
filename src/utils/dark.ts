@@ -1,4 +1,4 @@
-const Key: string = (process.env.VUE_APP_NAME || 'LightNovelShelf') + '_Dark'
+const Key: string = (import.meta.env.VUE_APP_NAME || 'LightNovelShelf') + '_Dark'
 
 /** Dark设置 */
 export const Dark = {

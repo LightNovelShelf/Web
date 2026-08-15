@@ -178,19 +178,19 @@
 import { useQuasar } from 'quasar'
 import Draggable from 'vuedraggable'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useAppStore } from 'stores/app'
-import { useSettingStore } from 'stores/setting'
+import { useAppStore } from '@/stores/app'
+import { useSettingStore } from '@/stores/setting'
 
-import { BlurHash, HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from 'components'
-import { useLayout } from 'components/app/useLayout'
-import { QGrid, QGridItem } from 'components/grid'
+import { BlurHash, HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from '@/components'
+import { useLayout } from '@/components/app/useLayout'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { editBook, getBookEditInfo } from 'src/services/book'
+import { editBook, getBookEditInfo } from '@/services/book'
 import {
   reorderChapter,
   createNewNovelChapter,
@@ -200,9 +200,9 @@ import {
   createNewComicChapter,
   updateComicChapter,
   getComicEditInfo,
-} from 'src/services/chapter'
+} from '@/services/chapter'
 
-import type { BookServicesTypes } from 'src/services/book'
+import type { BookServicesTypes } from '@/services/book'
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
@@ -580,7 +580,7 @@ const request = useTimeoutFn(async () => {
     bookSetting.DownloadAllowed = data.Book.DownloadAllowed
   })
 
-  await Promise.all([p1])
+  await p1
 })
 
 const refresh = () => {

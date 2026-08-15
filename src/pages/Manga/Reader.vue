@@ -5,249 +5,261 @@
     :style="themeStyle"
   >
     <template v-if="manga && currentChapter">
-    <header class="reader-topbar" @click.stop>
-      <div class="topbar-leading">
+      <header class="reader-topbar" @click.stop>
+        <div class="topbar-leading">
+          <q-btn
+            flat
+            round
+            icon="mdiArrowLeft"
+            aria-label="返回作品详情"
+            :to="{ name: 'MangaDetail', params: { seriesTitle: manga.seriesTitle } }"
+          />
+          <div class="work-info">
+            <strong>{{ manga.title }}</strong>
+            <span>{{ currentChapter.title }}</span>
+          </div>
+        </div>
+      </header>
+
+      <main ref="readerCanvas" class="reader-canvas" @click.self="toggleToolbar" @wheel="handleWheel">
+        <button
+          v-if="settings.mode === 'horizontal'"
+          class="page-zone page-zone-left"
+          type="button"
+          :aria-label="settings.direction === 'rtl' ? '下一页' : '上一页'"
+          @click.stop="settings.direction === 'rtl' ? nextPage() : previousPage()"
+        ></button>
+
+        <div v-if="settings.mode === 'horizontal'" class="horizontal-stage" @click.self="toggleToolbar">
+          <div class="page-spread" :class="{ double: isSpread, rtl: settings.direction === 'rtl' }">
+            <manga-page
+              v-for="page in windowPages"
+              :key="`${currentChapter.id}-${page.number}`"
+              :class="isActivePage(page.number) ? 'page-live' : 'page-standby'"
+              :page-number="page.number"
+              :image="page.image"
+              loading="eager"
+            />
+          </div>
+        </div>
+
+        <div v-else class="vertical-stage">
+          <div class="chapter-opening">
+            <span>VOLUME {{ String(currentChapter.number).padStart(2, '0') }}</span>
+            <h1>{{ currentChapter.title }}</h1>
+            <p>{{ manga.title }}</p>
+          </div>
+          <manga-page
+            v-for="page in pages"
+            :key="`${currentChapter.id}-${page.number}`"
+            :data-page="page.number"
+            :page-number="page.number"
+            :image="page.image"
+          />
+          <div class="chapter-ending">
+            <div>本卷完</div>
+            <strong>下一卷 · {{ nextChapter?.title ?? '敬请期待' }}</strong>
+            <q-btn
+              v-if="nextChapter"
+              unelevated
+              color="amber-7"
+              text-color="grey-10"
+              label="阅读下一卷"
+              icon-right="mdiArrowRight"
+              @click="goToChapter(nextChapter.id)"
+            />
+          </div>
+        </div>
+
+        <button
+          v-if="settings.mode === 'horizontal'"
+          class="page-zone page-zone-right"
+          type="button"
+          :aria-label="settings.direction === 'rtl' ? '上一页' : '下一页'"
+          @click.stop="settings.direction === 'rtl' ? previousPage() : nextPage()"
+        ></button>
+
+        <button
+          v-if="settings.mode === 'horizontal'"
+          class="toolbar-zone"
+          type="button"
+          aria-label="显示或隐藏状态栏"
+          @click.stop="toggleToolbar"
+        />
+      </main>
+
+      <div class="reader-rail" @click.stop>
         <q-btn
           flat
           round
-          icon="mdiArrowLeft"
-          aria-label="返回作品详情"
-          :to="{ name: 'MangaDetail', params: { seriesTitle: manga.seriesTitle } }"
-        />
-        <div class="work-info">
-          <strong>{{ manga.title }}</strong>
-          <span>{{ currentChapter.title }}</span>
-        </div>
-      </div>
-    </header>
-
-    <main ref="readerCanvas" class="reader-canvas" @click.self="toggleToolbar" @wheel="handleWheel">
-      <button
-        v-if="settings.mode === 'horizontal'"
-        class="page-zone page-zone-left"
-        type="button"
-        :aria-label="settings.direction === 'rtl' ? '下一页' : '上一页'"
-        @click.stop="settings.direction === 'rtl' ? nextPage() : previousPage()"
-      ></button>
-
-      <div v-if="settings.mode === 'horizontal'" class="horizontal-stage" @click.self="toggleToolbar">
-        <div class="page-spread" :class="{ double: isSpread, rtl: settings.direction === 'rtl' }">
-          <manga-page
-            v-for="page in windowPages"
-            :key="`${currentChapter.id}-${page.number}`"
-            :class="isActivePage(page.number) ? 'page-live' : 'page-standby'"
-            :page-number="page.number"
-            :image="page.image"
-            loading="eager"
-          />
-        </div>
-      </div>
-
-      <div v-else class="vertical-stage">
-        <div class="chapter-opening">
-          <span>VOLUME {{ String(currentChapter.number).padStart(2, '0') }}</span>
-          <h1>{{ currentChapter.title }}</h1>
-          <p>{{ manga.title }}</p>
-        </div>
-        <manga-page
-          v-for="page in pages"
-          :key="`${currentChapter.id}-${page.number}`"
-          :data-page="page.number"
-          :page-number="page.number"
-          :image="page.image"
-        />
-        <div class="chapter-ending">
-          <div>本卷完</div>
-          <strong>下一卷 · {{ nextChapter?.title ?? '敬请期待' }}</strong>
-          <q-btn
-            v-if="nextChapter"
-            unelevated
-            color="amber-7"
-            text-color="grey-10"
-            label="阅读下一卷"
-            icon-right="mdiArrowRight"
-            @click="goToChapter(nextChapter.id)"
-          />
-        </div>
-      </div>
-
-      <button
-        v-if="settings.mode === 'horizontal'"
-        class="page-zone page-zone-right"
-        type="button"
-        :aria-label="settings.direction === 'rtl' ? '上一页' : '下一页'"
-        @click.stop="settings.direction === 'rtl' ? previousPage() : nextPage()"
-      ></button>
-
-      <button
-        v-if="settings.mode === 'horizontal'"
-        class="toolbar-zone"
-        type="button"
-        aria-label="显示或隐藏状态栏"
-        @click.stop="toggleToolbar"
-      />
-    </main>
-
-    <div class="reader-rail" @click.stop>
-      <q-btn
-        flat
-        round
-        icon="mdiTune"
-        aria-label="阅读设置"
-        :class="{ active: panel === 'settings' }"
-        @click="togglePanel('settings')"
-      >
-        <q-tooltip anchor="center left" self="center right">阅读设置</q-tooltip>
-      </q-btn>
-      <q-btn
-        flat
-        round
-        icon="mdiFormatListBulleted"
-        aria-label="分卷目录"
-        :class="{ active: panel === 'catalog' }"
-        @click="togglePanel('catalog')"
-      >
-        <q-tooltip anchor="center left" self="center right">分卷目录</q-tooltip>
-      </q-btn>
-      <q-btn
-        flat
-        round
-        :icon="$q.fullscreen.isActive ? 'mdiFullscreenExit' : 'mdiFullscreen'"
-        aria-label="切换全屏"
-        @click="$q.fullscreen.toggle()"
-      >
-        <q-tooltip anchor="center left" self="center right">全屏</q-tooltip>
-      </q-btn>
-      <q-btn
-        flat
-        round
-        :icon="toolbarVisible ? 'mdiEyeOff' : 'mdiEye'"
-        aria-label="显示或隐藏工具栏"
-        @click="toggleToolbar"
-      >
-        <q-tooltip anchor="center left" self="center right">沉浸模式</q-tooltip>
-      </q-btn>
-    </div>
-
-    <aside v-if="panel" class="reader-panel" @click.stop>
-      <div class="panel-header">
-        <div>
-          <span>{{ panel === 'settings' ? 'READING PREFERENCES' : 'EPISODE GUIDE' }}</span>
-          <strong>{{ panel === 'settings' ? '阅读设置' : '分卷目录' }}</strong>
-        </div>
-        <q-btn flat round dense icon="mdiClose" aria-label="关闭面板" @click="panel = null" />
-      </div>
-
-      <template v-if="panel === 'settings'">
-        <div class="setting-group">
-          <label>阅读模式</label>
-          <div class="segmented">
-            <button
-              type="button"
-              :class="{ active: settings.mode === 'horizontal' }"
-              @click="settings.mode = 'horizontal'"
-            >
-              左右翻页
-            </button>
-            <button type="button" :class="{ active: settings.mode === 'vertical' }" @click="settings.mode = 'vertical'">
-              上下滚动
-            </button>
-          </div>
-        </div>
-        <div class="setting-group" :class="{ disabled: settings.mode === 'vertical' || $q.screen.lt.sm }">
-          <label>页面模式 <span v-if="$q.screen.lt.sm">· 手机端固定单页</span></label>
-          <div class="segmented triple">
-            <button
-              type="button"
-              :class="{ active: settings.pageMode === 'single' }"
-              @click="settings.pageMode = 'single'"
-            >
-              单页
-            </button>
-            <button
-              type="button"
-              :class="{ active: settings.pageMode === 'double' }"
-              @click="settings.pageMode = 'double'"
-            >
-              双页
-            </button>
-            <button
-              type="button"
-              :class="{ active: settings.pageMode === 'doubleOffset' }"
-              @click="settings.pageMode = 'doubleOffset'"
-            >
-              错位双页
-            </button>
-          </div>
-        </div>
-        <div class="setting-group" :class="{ disabled: settings.mode === 'vertical' }">
-          <label>翻页方向</label>
-          <div class="segmented">
-            <button type="button" :class="{ active: settings.direction === 'ltr' }" @click="settings.direction = 'ltr'">
-              从左向右
-            </button>
-            <button type="button" :class="{ active: settings.direction === 'rtl' }" @click="settings.direction = 'rtl'">
-              日漫模式
-            </button>
-          </div>
-        </div>
-        <div class="setting-tip"><q-icon name="mdiInformation" /> 设置会自动保存在当前浏览器。</div>
-      </template>
-
-      <div v-else class="catalog-list">
-        <button
-          v-for="chapter in manga.chapters"
-          :key="chapter.id"
-          type="button"
-          :class="{ active: chapter.id === currentChapter.id }"
-          @click="goToChapter(chapter.id)"
+          icon="mdiTune"
+          aria-label="阅读设置"
+          :class="{ active: panel === 'settings' }"
+          @click="togglePanel('settings')"
         >
-          <span>{{ String(chapter.number).padStart(2, '0') }}</span>
-          <div>
-            <strong>{{ chapter.title }}</strong
-            ><small>{{ chapter.pages }}P · {{ toNow(parseTime(chapter.publishedAt)) }}</small>
-          </div>
-          <q-icon v-if="chapter.id === currentChapter.id" name="mdiBookmark" />
-        </button>
+          <q-tooltip anchor="center left" self="center right">阅读设置</q-tooltip>
+        </q-btn>
+        <q-btn
+          flat
+          round
+          icon="mdiFormatListBulleted"
+          aria-label="分卷目录"
+          :class="{ active: panel === 'catalog' }"
+          @click="togglePanel('catalog')"
+        >
+          <q-tooltip anchor="center left" self="center right">分卷目录</q-tooltip>
+        </q-btn>
+        <q-btn
+          flat
+          round
+          :icon="$q.fullscreen.isActive ? 'mdiFullscreenExit' : 'mdiFullscreen'"
+          aria-label="切换全屏"
+          @click="$q.fullscreen.toggle()"
+        >
+          <q-tooltip anchor="center left" self="center right">全屏</q-tooltip>
+        </q-btn>
+        <q-btn
+          flat
+          round
+          :icon="toolbarVisible ? 'mdiEyeOff' : 'mdiEye'"
+          aria-label="显示或隐藏工具栏"
+          @click="toggleToolbar"
+        >
+          <q-tooltip anchor="center left" self="center right">沉浸模式</q-tooltip>
+        </q-btn>
       </div>
-    </aside>
 
-    <footer class="reader-bottombar" @click.stop>
-      <q-btn
-        class="bottombar-nav bottombar-nav-previous"
-        flat
-        round
-        icon="mdiSkipPrevious"
-        :disable="!previousChapter"
-        aria-label="上一卷"
-        @click="previousChapter && goToChapter(previousChapter.id)"
-      />
-      <div class="progress-control">
-        <div class="page-count">
-          {{ sliderPage }} <span>/ {{ currentChapter.pages }}</span>
+      <aside v-if="panel" class="reader-panel" @click.stop>
+        <div class="panel-header">
+          <div>
+            <span>{{ panel === 'settings' ? 'READING PREFERENCES' : 'EPISODE GUIDE' }}</span>
+            <strong>{{ panel === 'settings' ? '阅读设置' : '分卷目录' }}</strong>
+          </div>
+          <q-btn flat round dense icon="mdiClose" aria-label="关闭面板" @click="panel = null" />
         </div>
-        <div class="slider-wrap">
-          <q-slider
-            v-model="sliderPage"
-            :min="1"
-            :max="currentChapter.pages"
-            :step="1"
-            color="amber-7"
-            track-color="grey-7"
-            @change="commitSliderPage"
-          />
+
+        <template v-if="panel === 'settings'">
+          <div class="setting-group">
+            <label>阅读模式</label>
+            <div class="segmented">
+              <button
+                type="button"
+                :class="{ active: settings.mode === 'horizontal' }"
+                @click="settings.mode = 'horizontal'"
+              >
+                左右翻页
+              </button>
+              <button
+                type="button"
+                :class="{ active: settings.mode === 'vertical' }"
+                @click="settings.mode = 'vertical'"
+              >
+                上下滚动
+              </button>
+            </div>
+          </div>
+          <div class="setting-group" :class="{ disabled: settings.mode === 'vertical' || $q.screen.lt.sm }">
+            <label>页面模式 <span v-if="$q.screen.lt.sm">· 手机端固定单页</span></label>
+            <div class="segmented triple">
+              <button
+                type="button"
+                :class="{ active: settings.pageMode === 'single' }"
+                @click="settings.pageMode = 'single'"
+              >
+                单页
+              </button>
+              <button
+                type="button"
+                :class="{ active: settings.pageMode === 'double' }"
+                @click="settings.pageMode = 'double'"
+              >
+                双页
+              </button>
+              <button
+                type="button"
+                :class="{ active: settings.pageMode === 'doubleOffset' }"
+                @click="settings.pageMode = 'doubleOffset'"
+              >
+                错位双页
+              </button>
+            </div>
+          </div>
+          <div class="setting-group" :class="{ disabled: settings.mode === 'vertical' }">
+            <label>翻页方向</label>
+            <div class="segmented">
+              <button
+                type="button"
+                :class="{ active: settings.direction === 'ltr' }"
+                @click="settings.direction = 'ltr'"
+              >
+                从左向右
+              </button>
+              <button
+                type="button"
+                :class="{ active: settings.direction === 'rtl' }"
+                @click="settings.direction = 'rtl'"
+              >
+                日漫模式
+              </button>
+            </div>
+          </div>
+          <div class="setting-tip"><q-icon name="mdiInformation" /> 设置会自动保存在当前浏览器。</div>
+        </template>
+
+        <div v-else class="catalog-list">
+          <button
+            v-for="chapter in manga.chapters"
+            :key="chapter.id"
+            type="button"
+            :class="{ active: chapter.id === currentChapter.id }"
+            @click="goToChapter(chapter.id)"
+          >
+            <span>{{ String(chapter.number).padStart(2, '0') }}</span>
+            <div>
+              <strong>{{ chapter.title }}</strong
+              ><small>{{ chapter.pages }}P · {{ toNow(parseTime(chapter.publishedAt)) }}</small>
+            </div>
+            <q-icon v-if="chapter.id === currentChapter.id" name="mdiBookmark" />
+          </button>
         </div>
-      </div>
-      <q-btn
-        class="bottombar-nav bottombar-nav-next"
-        flat
-        round
-        icon="mdiSkipNext"
-        :disable="!nextChapter"
-        aria-label="下一卷"
-        @click="nextChapter && goToChapter(nextChapter.id)"
-      />
-    </footer>
+      </aside>
+
+      <footer class="reader-bottombar" @click.stop>
+        <q-btn
+          class="bottombar-nav bottombar-nav-previous"
+          flat
+          round
+          icon="mdiSkipPrevious"
+          :disable="!previousChapter"
+          aria-label="上一卷"
+          @click="previousChapter && goToChapter(previousChapter.id)"
+        />
+        <div class="progress-control">
+          <div class="page-count">
+            {{ sliderPage }} <span>/ {{ currentChapter.pages }}</span>
+          </div>
+          <div class="slider-wrap">
+            <q-slider
+              v-model="sliderPage"
+              :min="1"
+              :max="currentChapter.pages"
+              :step="1"
+              color="amber-7"
+              track-color="grey-7"
+              @change="commitSliderPage"
+            />
+          </div>
+        </div>
+        <q-btn
+          class="bottombar-nav bottombar-nav-next"
+          flat
+          round
+          icon="mdiSkipNext"
+          :disable="!nextChapter"
+          aria-label="下一卷"
+          @click="nextChapter && goToChapter(nextChapter.id)"
+        />
+      </footer>
     </template>
     <div v-else class="reader-loading">
       <q-spinner-dots v-if="loading" color="amber-7" size="48px" />
@@ -262,19 +274,19 @@ import { useQuasar } from 'quasar'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import { parseTime, toNow } from 'src/utils/time'
-import { withReaderHeight } from 'src/utils/url'
+import { getErrMsg } from '@/utils/getErrMsg'
+import { parseTime, toNow } from '@/utils/time'
+import { withReaderHeight } from '@/utils/url'
 
-import { saveReadPosition } from 'src/services/book'
-import { getComicContent, getComicInfo } from 'src/services/manga'
-
-import type { Manga, MangaChapter, MangaImageAsset } from './types'
-import type { ComicImage } from 'src/services/manga/types'
+import { saveReadPosition } from '@/services/book'
+import { getComicContent, getComicInfo } from '@/services/manga'
 
 import MangaPage from './components/MangaPage.vue'
 import { toManga, toMangaImage } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
+
+import type { Manga, MangaChapter, MangaImageAsset } from './types'
+import type { ComicImage } from '@/services/manga/types'
 
 // single: 单页；double: 双页(1+2、3+4)；doubleOffset: 错位双页(首页单独，其后 2+3、4+5)
 type PageMode = 'single' | 'double' | 'doubleOffset'
@@ -323,9 +335,7 @@ useSwipe(swipeTarget, {
   },
 })
 
-const currentChapter = computed(() =>
-  manga.value?.chapters.find((chapter) => chapter.id === activeChapterId.value),
-)
+const currentChapter = computed(() => manga.value?.chapters.find((chapter) => chapter.id === activeChapterId.value))
 const currentPage = ref(1)
 const sliderPage = ref(1)
 const preloadedImageUrls = new Set<string>()
@@ -384,9 +394,7 @@ const currentGroupIndex = computed(() => groupIndexOfPage.value.get(currentPage.
 const currentGroup = computed(() => pageGroups.value[currentGroupIndex.value] ?? { start: currentPage.value, size: 1 })
 // 当前屏是否并排两页，决定 .double 布局与预载跨度
 const isSpread = computed(() => currentGroup.value.size > 1)
-const pages = computed(() =>
-  (currentChapter.value?.images ?? []).map((image, index) => ({ number: index + 1, image })),
-)
+const pages = computed(() => (currentChapter.value?.images ?? []).map((image, index) => ({ number: index + 1, image })))
 // 当前正在显示的页码（单页 1 个，双页 2 个）
 const activePageNumbers = computed(() =>
   Array.from({ length: currentGroup.value.size }, (_, index) => currentGroup.value.start + index),
@@ -460,8 +468,7 @@ watch(
       activeChapterId.value = chapterId
 
       const serverPosition = content.ReadPosition
-      if (serverPosition)
-        saveProgress(mangaId, String(serverPosition.ChapterId), Number(serverPosition.Position) || 1)
+      if (serverPosition) saveProgress(mangaId, String(serverPosition.ChapterId), Number(serverPosition.Position) || 1)
       const saved = progress.value[mangaId]
       currentPage.value = saved?.chapterId === chapterId ? Math.min(saved.page, loadedChapter.pages) : 1
       // 断点可能落在某一屏的第二页，对齐到该屏首页

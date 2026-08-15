@@ -129,23 +129,23 @@ import {
 } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { delay } from 'src/utils/delay'
-import { getErrMsg } from 'src/utils/getErrMsg'
-import sanitizerHtml from 'src/utils/sanitizeHtml'
+import { delay } from '@/utils/delay'
+import { getErrMsg } from '@/utils/getErrMsg'
+import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { useAppStore } from 'stores/app'
-import { useSettingStore } from 'stores/setting'
+import { useAppStore } from '@/stores/app'
+import { useSettingStore } from '@/stores/setting'
 
-import { DragPageSticky } from 'components'
-import { useLayout } from 'components/app/useLayout'
-import HtmlReader from 'components/html/HtmlReader.vue'
+import { DragPageSticky } from '@/components'
+import { useLayout } from '@/components/app/useLayout'
+import HtmlReader from '@/components/html/HtmlReader.vue'
 
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { NOOP } from 'src/const/empty'
-import { PROVIDE } from 'src/const/provide'
-import { apiServer } from 'src/services/apiServer'
-import { getNovelContent } from 'src/services/chapter'
+import { NOOP } from '@/const/empty'
+import { PROVIDE } from '@/const/provide'
+import { apiServer } from '@/services/apiServer'
+import { getNovelContent } from '@/services/chapter'
 
 import { syncReading, scrollToHistory, loadHistory } from './history'
 

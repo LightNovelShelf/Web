@@ -145,27 +145,27 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { getErrMsg } from 'src/utils/getErrMsg'
-import sanitizerHtml from 'src/utils/sanitizeHtml'
-import { parseTime } from 'src/utils/time'
+import { getErrMsg } from '@/utils/getErrMsg'
+import sanitizerHtml from '@/utils/sanitizeHtml'
+import { parseTime } from '@/utils/time'
 
-import { BookUserAvatar, Comment } from 'components'
-import { QGrid, QGridItem } from 'components/grid'
+import { BookUserAvatar, Comment } from '@/components'
+import { QGrid, QGridItem } from '@/components/grid'
 
-import { useBookDownload } from 'src/composition/biz/useBookDownload'
-import { useInitRequest } from 'src/composition/biz/useInitRequest'
-import { useTimeoutFn } from 'src/composition/useTimeoutFn'
-import { useToNowRef } from 'src/composition/useToNowRef'
+import { useBookDownload } from '@/composition/biz/useBookDownload'
+import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useToNowRef } from '@/composition/useToNowRef'
 
-import { CommentType } from 'src/services/comment/types'
-import { getComicSeriesInfo } from 'src/services/manga'
-
-import type { MangaBook, MangaSeries } from './types'
-import type { ComicOrder } from 'src/services/manga'
+import { CommentType } from '@/services/comment/types'
+import { getComicSeriesInfo } from '@/services/manga'
 
 import MangaCover from './components/MangaCover.vue'
 import { toMangaSeries } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
+
+import type { MangaBook, MangaSeries } from './types'
+import type { ComicOrder } from '@/services/manga'
 
 const props = defineProps<{ seriesTitle: string }>()
 const route = useRoute()
