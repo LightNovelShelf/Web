@@ -52,8 +52,12 @@ interface ChapterInfo {
   Id: number
 }
 
-interface BookClassification {
+export interface BookClassification {
   author?: string | null
+  /** 精确对应本书的 bgm.tv 条目 id；null 表示 bgm.tv 上没有对应条目 */
+  subject_id?: number | null
+  /** 该条目所属的系列主条目 id */
+  series_id?: number | null
   series_name?: string | null
   series_name_cn?: string | null
   tags?: string[]
@@ -127,6 +131,13 @@ export interface EditBookRequest {
   CategoryId?: number
   Level?: number
   InteriorLevel?: number
+  DownloadAllowed?: boolean
+  /** 以下五项写入 extra.classification，只提交出现的键 */
+  SubjectId?: number | null
+  SeriesId?: number | null
+  SeriesName?: string
+  SeriesNameCn?: string
+  Tags?: string[]
 }
 
 export interface SetBookSetting {

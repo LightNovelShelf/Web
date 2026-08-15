@@ -87,7 +87,8 @@ export namespace GetNotifications {
   export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread' | 'Series'
 
   export interface NotificationExtra {
-    object_id: number
+    /** 系列通知没有实体对象，为 null；跳转看 series_title */
+    object_id: number | null
     object_title: string
     series_title?: string | null
     preview: string
@@ -117,7 +118,7 @@ export namespace GetNotifications {
     } | null
     Type: NotificationType
     ObjectType: NotificationObjectType
-    ObjectId: number
+    ObjectId: number | null
     IsRead: boolean
     CreatedAt: string
     Extra: NotificationExtra

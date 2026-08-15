@@ -36,36 +36,88 @@
             <div>
               <div class="q-gutter-sm light-radio">
                 <div class="text-subtitle1">书籍等级</div>
-                <div class="q-px-md">
-                  <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
+                <div class="row items-center level-row">
+                  <div class="col-12 col-sm q-px-sm">
+                    <q-slider v-model="bookSetting['Level']" marker-labels :min="0" :max="6" />
+                  </div>
+                  <div v-if="appStore.user.InteriorLevel > 0" class="col-12 col-sm-auto">
+                    <q-input
+                      v-model.number="bookSetting['InteriorLevel']"
+                      type="number"
+                      label="书籍内部等级"
+                      filled
+                      :rules="[
+                        (val) =>
+                          (val <= appStore.user.InteriorLevel && val >= 0) ||
+                          `输入的等级需大于0且小于${appStore.user.InteriorLevel}`,
+                      ]"
+                      style="width: 200px"
+                    >
+                      <template v-slot:append>
+                        <q-icon name="mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
+                      </template>
+                    </q-input>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div v-if="appStore.user.InteriorLevel > 0">
-              <div class="q-gutter-sm light-radio">
-                <div class="text-subtitle1">书籍内部等级</div>
-                <q-input
-                  v-model.number="bookSetting['InteriorLevel']"
-                  type="number"
-                  filled
-                  :rules="[
-                    (val) =>
-                      (val <= appStore.user.InteriorLevel && val >= 0) ||
-                      `输入的等级需大于0且小于${appStore.user.InteriorLevel}`,
-                  ]"
-                  style="max-width: 200px"
-                >
-                  <template v-slot:append>
-                    <q-icon name="mdiClose" @click="bookSetting['InteriorLevel'] = 0" class="cursor-pointer" />
-                  </template>
-                </q-input>
               </div>
             </div>
             <div>
               <div class="q-gutter-sm light-radio">
-                <div class="text-subtitle1">下载</div>
+                <div class="text-subtitle1">选项</div>
                 <q-toggle v-model="bookSetting['DownloadAllowed']" label="允许下载" />
                 <div class="text-caption text-opacity">关闭后用户无法下载本书</div>
+              </div>
+            </div>
+            <div>
+              <div class="q-gutter-sm light-radio">
+                <div class="text-subtitle1">分类信息</div>
+                <div class="text-caption text-opacity">
+                  由 AI 识别，决定本书归入哪个系列（系列名取「中文名 → 原名 →
+                  书名」）。手工保存后本书不再参与自动分类。{{ classifiedAtText }}
+                </div>
+                <q-grid x-gap="16" y-gap="8" cols="2" xs="1">
+                  <q-grid-item>
+                    <q-input v-model="bookSetting['SeriesName']" label="系列名（原名）" filled />
+                  </q-grid-item>
+                  <q-grid-item>
+                    <q-input v-model="bookSetting['SeriesNameCn']" label="系列中文名" filled />
+                  </q-grid-item>
+                  <q-grid-item>
+                    <q-input
+                      v-model.number="bookSetting['SeriesId']"
+                      type="number"
+                      label="系列 id"
+                      hint="条目所属的 bgm.tv 系列主条目 id，留空表示没有"
+                      filled
+                      clearable
+                      :rules="[(val) => val == null || val === '' || val > 0 || 'id 必须大于 0']"
+                    />
+                  </q-grid-item>
+                  <q-grid-item>
+                    <q-input
+                      v-model.number="bookSetting['SubjectId']"
+                      type="number"
+                      label="条目 id"
+                      hint="精确对应本书的 bgm.tv 条目 id，留空表示没有"
+                      filled
+                      clearable
+                      :rules="[(val) => val == null || val === '' || val > 0 || 'id 必须大于 0']"
+                    />
+                  </q-grid-item>
+                  <q-grid-item span="2" xs="1">
+                    <q-select
+                      v-model="bookSetting['Tags']"
+                      label="标签"
+                      hint="回车添加，标签用于按标签搜索"
+                      filled
+                      multiple
+                      use-input
+                      use-chips
+                      hide-dropdown-icon
+                      new-value-mode="add-unique"
+                    />
+                  </q-grid-item>
+                </q-grid>
               </div>
             </div>
           </div>
@@ -179,6 +231,7 @@ import { useQuasar } from 'quasar'
 import Draggable from 'vuedraggable'
 
 import { getErrMsg } from '@/utils/getErrMsg'
+import { parseTime } from '@/utils/time'
 
 import { useAppStore } from '@/stores/app'
 import { useSettingStore } from '@/stores/setting'
@@ -243,6 +296,13 @@ const creatingChapterContent = reactive<CreatingChapterState>({
 })
 const tab = ref('information')
 const bookSetting = reactive({} as BookSetting)
+// 分类时间只读展示；分类字段本身在 bookSetting 里可改
+const classification = ref<BookServicesTypes.BookClassification>({})
+const classifiedAtText = computed(() =>
+  classification.value.classified_at
+    ? `上次分类：${parseTime(classification.value.classified_at).format('YYYY-MM-DD HH:mm')}`
+    : '',
+)
 //#endregion
 
 interface ChapterInfo {
@@ -269,6 +329,12 @@ interface BookSetting {
   Level?: number
   InteriorLevel?: number
   DownloadAllowed?: boolean
+  /** 以下五项落到 extra.classification */
+  SubjectId?: number | null
+  SeriesId?: number | null
+  SeriesName?: string
+  SeriesNameCn?: string
+  Tags?: string[]
 }
 
 watch(
@@ -578,6 +644,13 @@ const request = useTimeoutFn(async () => {
     bookSetting.InteriorLevel = data.Book.InteriorLevel
     // 后端已按书籍类型解析好默认值
     bookSetting.DownloadAllowed = data.Book.DownloadAllowed
+
+    classification.value = data.Book.Extra?.classification ?? {}
+    bookSetting.SubjectId = classification.value.subject_id ?? null
+    bookSetting.SeriesId = classification.value.series_id ?? null
+    bookSetting.SeriesName = classification.value.series_name ?? ''
+    bookSetting.SeriesNameCn = classification.value.series_name_cn ?? ''
+    bookSetting.Tags = [...(classification.value.tags ?? [])]
   })
 
   await p1
@@ -602,5 +675,10 @@ useInitRequest(request, { before: refresh, isActive })
   :deep(.q-tab-panel) {
     padding: 16px !important;
   }
+}
+
+// q-col-gutter-* 靠负 margin 撑开，会把滑块和它的刻度顶到区块左边界外面，这里用 gap 代替
+.level-row {
+  gap: 8px 16px;
 }
 </style>

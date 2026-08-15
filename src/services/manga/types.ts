@@ -32,6 +32,10 @@ export interface ComicListResponse extends ListResult<ComicListItem> {}
 
 export interface ComicClassification {
   author?: string | null
+  /** 精确对应本书的 bgm.tv 条目 id */
+  subject_id?: number | null
+  /** 该条目所属的系列主条目 id */
+  series_id?: number | null
   series_name?: string | null
   series_name_cn?: string | null
   tags?: string[]
