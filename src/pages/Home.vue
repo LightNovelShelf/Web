@@ -26,35 +26,6 @@
             </q-grid>
           </q-card-section>
         </q-card>
-
-        <q-card class="online" style="margin-top: 12px">
-          <q-card-section>
-            <div class="title text-h6">网站统计</div>
-          </q-card-section>
-          <div v-if="loading" class="row flex-center" style="height: 70px; padding-top: 0">
-            <q-spinner-dots color="primary" size="40px" />
-          </div>
-          <q-card-section v-else style="padding-top: 0">
-            <div class="content row full-width">
-              <div class="col-3">
-                <div class="text-opacity">当前在线</div>
-                <div class="text-h6">{{ onlineInfo?.OnlineUserCount }}</div>
-              </div>
-              <div class="col-3">
-                <div class="text-opacity">今日总数</div>
-                <div class="text-h6">{{ onlineInfo?.DayCount }}</div>
-              </div>
-              <div class="col-3">
-                <div class="text-opacity">今日注册</div>
-                <div class="text-h6">{{ onlineInfo?.DayRegister }}</div>
-              </div>
-              <div class="col-3">
-                <div class="text-opacity">最高在线</div>
-                <div class="text-h6">{{ onlineInfo?.MaxOnline }}</div>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
       </q-grid-item>
 
       <q-grid-item>
@@ -93,25 +64,36 @@
           </q-grid-item>
 
           <q-grid-item>
-            <q-card>
+            <q-card class="online">
               <q-card-section>
-                <div class="row flex-center">
-                  <div class="text-h6">更新日志</div>
-                  <q-space />
-                  <div class="text-subtitle2">更多</div>
-                </div>
+                <div class="title text-h6">网站统计</div>
               </q-card-section>
 
               <q-separator />
 
-              <q-list separator>
-                <q-item clickable v-ripple>
-                  <q-item-section>日志1</q-item-section>
-                </q-item>
-                <q-item clickable v-ripple>
-                  <q-item-section> 日志2 </q-item-section>
-                </q-item>
-              </q-list>
+              <div v-if="loading" class="row flex-center" style="height: 70px">
+                <q-spinner-dots color="primary" size="40px" />
+              </div>
+              <q-card-section v-else>
+                <div class="content row full-width">
+                  <div class="col-3">
+                    <div class="text-opacity">当前在线</div>
+                    <div class="text-h6">{{ onlineInfo?.OnlineUserCount }}</div>
+                  </div>
+                  <div class="col-3">
+                    <div class="text-opacity">今日上线</div>
+                    <div class="text-h6">{{ onlineInfo?.DayCount }}</div>
+                  </div>
+                  <div class="col-3">
+                    <div class="text-opacity">今日注册</div>
+                    <div class="text-h6">{{ onlineInfo?.DayRegister }}</div>
+                  </div>
+                  <div class="col-3">
+                    <div class="text-opacity">最高在线</div>
+                    <div class="text-h6">{{ onlineInfo?.MaxOnline }}</div>
+                  </div>
+                </div>
+              </q-card-section>
             </q-card>
           </q-grid-item>
 
