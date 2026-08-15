@@ -44,6 +44,13 @@
 
           <q-tab-panel name="Read">
             <div class="q-pa-md">
+              <div class="q-gutter-xs">
+                <div class="text-subtitle1">阅读模式</div>
+                <q-radio v-model="readSetting.readMode" val="scroll" label="上下滚动" />
+                <q-radio v-model="readSetting.readMode" val="flip" label="左右翻页" />
+                <div class="text-caption text-grey">左右翻页：点击页面左右边缘、方向键或左右滑动翻页，大屏自动双栏</div>
+              </div>
+              <q-separator class="q-mt-md" />
               <div class="q-gutter-xs bg-radio">
                 <div class="text-subtitle1">阅读背景</div>
                 <q-radio v-model="readSetting.bgType" val="none" label="无" />

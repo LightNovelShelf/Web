@@ -131,7 +131,10 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
 
   const urls: string[] = []
   for (const file of files) {
-    const { Url } = await uploadImage({ FileName: file.name, ImageData: new Uint8Array(await file.arrayBuffer()) })
+    const { Url } = await uploadImage({
+      FileName: file.name,
+      ImageData: new Uint8Array(await file.arrayBuffer()),
+    })
     urls.push(Url)
     notif({
       caption: `${urls.length}/${files.length}`,
@@ -155,7 +158,10 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
     }
   })
 }
-const turndownService = new TurndownService({ codeBlockStyle: 'fenced', headingStyle: 'atx' })
+const turndownService = new TurndownService({
+  codeBlockStyle: 'fenced',
+  headingStyle: 'atx',
+})
 turndownService.use(gfm)
 turndownService.keep(['ruby', 'rt'])
 // 去掉代码的工具栏

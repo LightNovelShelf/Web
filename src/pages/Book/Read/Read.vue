@@ -10,14 +10,22 @@
     </div>
     <div v-else>
       <div class="read-bg absolute-top-left fit" :style="bgStyle" />
-      <div class="read-page q-mx-auto" :style="['--width:' + settingStore['buildReaderWidth']]">
-        <html-reader
-          :html="chapterContent"
-          :style="readStyle"
-          style="position: relative; z-index: 1"
-          ref="readerRef"
-          class="read"
-        ></html-reader>
+      <div
+        ref="viewportRef"
+        class="read-page q-mx-auto"
+        :class="{ 'flip-viewport': flip }"
+        :style="[{ '--width': settingStore['buildReaderWidth'] }, flipStyle ?? {}]"
+        @wheel="flipWheel"
+      >
+        <div ref="flowRef" :class="{ 'flip-flow': flip }">
+          <html-reader
+            :html="chapterContent"
+            :style="[readStyle, { position: 'relative', zIndex: 1 }]"
+            ref="readerRef"
+            class="read"
+            @flip="flipTurn"
+          ></html-reader>
+        </div>
         <q-tooltip
           :target="note.target"
           class="note-style"
@@ -29,14 +37,18 @@
           <div v-html="note.content" />
         </q-tooltip>
       </div>
+      <!-- 翻页模式只留页码，底部按钮会挤出整页滚动条，换章交给悬浮按钮/边缘点击 -->
       <div
-        v-if="readSetting['showButton']"
-        class="row justify-between q-gutter-md"
-        style="margin-top: 24px; clear: both"
+        ref="footerRef"
+        v-if="flip || readSetting['showButton']"
+        :style="{ marginTop: flip ? '4px' : '24px', clear: 'both' }"
       >
-        <q-btn @click="prev" class="col">上一章</q-btn>
-        <q-btn @click="back" class="col">目录</q-btn>
-        <q-btn @click="next" class="col">下一章</q-btn>
+        <div v-if="flip" class="text-center text-caption">{{ flipPage + 1 }} / {{ flipPageCount }}</div>
+        <div v-else class="row justify-between q-gutter-md">
+          <q-btn @click="prev" class="col">上一章</q-btn>
+          <q-btn @click="back" class="col">目录</q-btn>
+          <q-btn @click="next" class="col">下一章</q-btn>
+        </div>
       </div>
     </div>
 
@@ -147,7 +159,8 @@ import { PROVIDE } from '@/const/provide'
 import { apiServer } from '@/services/apiServer'
 import { getNovelContent } from '@/services/chapter'
 
-import { syncReading, scrollToHistory, loadHistory } from './history'
+import { syncReading, scrollToHistory, findElementByXPath, loadHistory } from './history'
+import { useFlipPager } from './useFlipPager'
 
 const props = defineProps<{
   bid: string
@@ -168,6 +181,9 @@ const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
 const chapter = ref<any>()
 const noteElement = ref()
 const readerRef = ref()
+const viewportRef = ref<HTMLElement>()
+const flowRef = ref<HTMLElement>()
+const footerRef = ref<HTMLElement>()
 const note = reactive({
   target: '',
   content: '',
@@ -195,9 +211,8 @@ const getContent = useTimeoutFn(async () => {
     ;(async () => {
       if (res.ReadPosition && res.ReadPosition.ChapterId === res.Chapter.Id) {
         await delay(200)
-        await nextTick(() => {
-          scrollToHistory(readerRef.value!.contentRef, res.ReadPosition.Position, headerOffset)
-        })
+        await nextTick()
+        await restorePosition(res.ReadPosition.Position)
       }
     })().then(NOOP)
   } catch (error) {
@@ -279,12 +294,66 @@ function back() {
   router.push({ name: 'BookInfo', params: { bid: bid.value } })
 }
 
+/** 翻页模式；大屏（>=1024）分双栏 */
+const flip = computed(() => readSetting.readMode === 'flip')
+const flipColumns = computed(() => ($q.screen.gt.sm ? 2 : 1))
+/** 从后一章往前翻时，新章要停在最后一屏 */
+let flipToTail = false
+const {
+  page: flipPage,
+  pageCount: flipPageCount,
+  style: flipStyle,
+  turn: flipTurn,
+  goToLast: flipGoToLast,
+  goToPage: flipGoToPage,
+  goToElement: flipGoToElement,
+  remeasure: flipRemeasure,
+  scheduleRemeasure: flipScheduleRemeasure,
+  onWheel: flipWheel,
+} = useFlipPager({
+  enabled: flip,
+  columns: flipColumns,
+  viewportRef,
+  flowRef,
+  footerRef,
+  onOverflow: (delta) => {
+    if (delta === -1) {
+      if (sortNum.value > 1) flipToTail = true
+      prev()
+    } else {
+      next()
+    }
+  },
+})
+
+/** 按记录的 xpath 回到上次读到的位置：滚动模式滚过去，翻页模式翻到那一屏 */
+async function restorePosition(xPath: string) {
+  const content = readerRef.value?.contentRef as Element | undefined
+  if (!content) return
+  if (!flip.value) {
+    scrollToHistory(content, xPath, headerOffset)
+    return
+  }
+  // 从后一章往前翻时要停在末屏，不能被历史进度拉走
+  if (flipToTail) return
+  await flipRemeasure()
+  flipGoToElement(findElementByXPath(content, xPath))
+}
+
 function manageKeydown(event: KeyboardEvent) {
   if (imagePreview.isShow) return // 显示图片时不予响应
   if (event.code === 'ArrowRight') {
-    next()
+    if (flip.value) flipTurn(1)
+    else next()
   } else if (event.code === 'ArrowLeft') {
-    prev()
+    if (flip.value) flipTurn(-1)
+    else prev()
+  } else if (flip.value && (event.code === 'PageDown' || event.code === 'Space')) {
+    event.preventDefault()
+    flipTurn(1)
+  } else if (flip.value && event.code === 'PageUp') {
+    event.preventDefault()
+    flipTurn(-1)
   }
 }
 
@@ -331,6 +400,15 @@ watch(
         }
       })
       await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
+      if (flip.value) {
+        await flipRemeasure()
+        if (flipToTail) {
+          flipToTail = false
+          flipGoToLast()
+        } else {
+          flipGoToPage(0)
+        }
+      }
     })
   },
 )
@@ -361,7 +439,9 @@ onActivated(() => {
   if (sortNum.value === chapter.value?.SortNum && bid.value === chapter.value?.BookId) {
     const position = loadHistory(userId.value, bid.value)
     if (position && position.cid === cid.value) {
-      if (position.top) {
+      if (flip.value) {
+        void restorePosition(position.xPath)
+      } else if (position.top) {
         document.scrollingElement!.scrollTop = position.top
       } else {
         scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
@@ -369,6 +449,12 @@ onActivated(() => {
     }
   }
 })
+
+// 字号、页宽、对齐都会改变分栏切片位置，必须重新算屏数
+watch(
+  () => [readSetting.fontSize, settingStore.buildReaderWidth, readSetting.justify],
+  () => flipScheduleRemeasure(),
+)
 
 // 字体设置
 const style = document.createElement('style')
@@ -381,6 +467,8 @@ watch(
     if (fontUrl) {
       if (!fontUrl.startsWith('http')) fontUrl = apiServer.value + fontUrl
       style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
+      // 自定义字体到位后行高字宽都会变，分栏要重新切
+      void document.fonts.ready.then(() => flipScheduleRemeasure())
     }
   },
 )
@@ -421,6 +509,36 @@ watch(
     width: var(--width);
     max-width: 100%;
     min-width: 300px;
+  }
+}
+
+/*左右翻页：视口裁剪一屏，正文在 flip-flow 里被 CSS 多栏切片，靠 translateX 换屏*/
+.flip-viewport {
+  position: relative;
+  overflow: hidden;
+  height: var(--flip-height, 60vh);
+  touch-action: pan-y;
+}
+
+.flip-flow {
+  height: 100%;
+  column-count: var(--flip-columns, 1);
+  column-gap: var(--flip-gap, 40px);
+  column-fill: auto;
+  transform: translateX(calc(-1 * var(--flip-offset, 0px)));
+  transition: transform 220ms ease;
+  will-change: transform;
+
+  // HtmlReader 根节点被 all: unset 变成 inline，行内盒会在首栏占掉一条空行，
+  // 满栏高的插图放不下就被推到下一栏，首栏整栏空白
+  :deep(.html-reader) {
+    display: block;
+  }
+
+  // 过高的插图会顶破一屏导致分栏错位，限制在一屏内
+  :deep(img) {
+    max-height: var(--flip-height, 60vh);
+    object-fit: contain;
   }
 }
 </style>

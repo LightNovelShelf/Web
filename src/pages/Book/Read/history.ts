@@ -55,15 +55,21 @@ export async function saveHistory(
   await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
 }
 
-export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>) {
+/** 按记录的 xpath 在正文里找回当初的元素，翻页模式与滚动模式都要用它定位 */
+export function findElementByXPath(dom: Element, xPath: string): Element | null {
   try {
-    let rst = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
-    let target = rst.iterateNext() as Element
-    if (target) {
-      document.scrollingElement!.scrollTop = target.getBoundingClientRect().top - offset.value
-    }
+    const result = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+    return (result.iterateNext() as Element | null) ?? null
   } catch (e) {
     console.log(e)
+    return null
+  }
+}
+
+export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>) {
+  const target = findElementByXPath(dom, xPath)
+  if (target) {
+    document.scrollingElement!.scrollTop = target.getBoundingClientRect().top - offset.value
   }
 }
 

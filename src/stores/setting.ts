@@ -16,6 +16,8 @@ export const useSettingStore = defineStore('app.setting', {
     },
     readSetting: {
       fontSize: 16,
+      // scroll: 上下滚动；flip: 左右翻页（大屏自动双栏）
+      readMode: 'scroll' as 'scroll' | 'flip',
       bgType: 'none' as 'none' | 'paper' | 'custom',
       customColor: '#000000',
       convert: null as null | 't2s' | 's2t',

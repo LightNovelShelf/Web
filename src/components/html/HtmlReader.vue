@@ -22,6 +22,8 @@ const { headerOffset } = layout
 const { readSetting } = settingStore
 
 const props = defineProps<{ html: string }>()
+/** 翻页模式下点击左右边缘要翻页，翻页状态由父级维护，这里只上报方向 */
+const emit = defineEmits<{ flip: [delta: 1 | -1] }>()
 const contentRef = ref<HTMLElement>()
 const viewerRef = ref<HTMLElement>()
 
@@ -94,7 +96,14 @@ function makeUrl(link: string) {
 }
 
 function manageScrollClick(event: any) {
-  if (readSetting.tapToScroll && !imagePreview.isShow) {
+  if (imagePreview.isShow) return
+  if (readSetting.readMode === 'flip') {
+    const w = window.innerWidth
+    if (event.x < 0.3 * w) emit('flip', -1)
+    else if (event.x > 0.7 * w) emit('flip', 1)
+    return
+  }
+  if (readSetting.tapToScroll) {
     const h = window.innerHeight
     if (event.y < 0.25 * h || event.y > 0.75 * h) {
       const target = scroll.getScrollTarget(contentRef.value!)
