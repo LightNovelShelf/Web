@@ -1,4 +1,4 @@
-export function getPlaceholder(url: string): string | null {
+function getPlaceholder(url: string): string | null {
   if (!url) return null
   try {
     return new URL(url).searchParams.get('placeholder') || null
@@ -6,7 +6,7 @@ export function getPlaceholder(url: string): string | null {
     return null
   }
 }
-export function getImageSize(url: string): [width: number, height: number] | null {
+function getImageSize(url: string): [width: number, height: number] | null {
   if (!url) return null
   try {
     const size = new URL(url).searchParams.get('size')
@@ -16,6 +16,11 @@ export function getImageSize(url: string): [width: number, height: number] | nul
     return null
   }
 }
+export function getSystemImageMetadata(url: string): { placeholder: string; width: number; height: number } | null {
+  const placeholder = getPlaceholder(url)
+  const size = getImageSize(url)
+  return placeholder && size ? { placeholder, width: size[0], height: size[1] } : null
+}
 
 export function withImageHeight(url: string, height: number): string {
   if (!url) return url
@@ -24,7 +29,9 @@ export function withImageHeight(url: string, height: number): string {
   return uri.toString()
 }
 
-// 漫画阅读器按图片朝向请求缩放高度：横图（宽>高）1024，其余 2048。
-export function withReaderHeight(url: string, width: number, height: number): string {
-  return withImageHeight(url, width > height ? 1024 : 2048)
+// 只有完整系统图床元数据才添加缩放参数；横图 1024，其余 2048。
+export function withReaderHeight(url: string): string {
+  const metadata = getSystemImageMetadata(url)
+  if (!metadata) return url
+  return withImageHeight(url, metadata.width > metadata.height ? 1024 : 2048)
 }

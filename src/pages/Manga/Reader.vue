@@ -507,7 +507,7 @@ function createPlaceholderImage(): MangaImageAsset {
 function fillBatch(chapter: MangaChapter, skip: number, urls: string[]) {
   urls.forEach((url, index) => {
     const image = toMangaImage(url)
-    image.url = withReaderHeight(url, image.width, image.height)
+    image.url = withReaderHeight(url)
     chapter.images[skip + index] = image
   })
 }

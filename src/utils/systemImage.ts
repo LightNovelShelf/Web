@@ -1,6 +1,6 @@
 import { decode } from 'blurhash'
 
-import { getImageSize, getPlaceholder, withImageHeight } from './url'
+import { getSystemImageMetadata, withImageHeight } from './url'
 
 const placeholderCache = new Map<string, string>()
 
@@ -28,10 +28,7 @@ function placeholderDataUrl(hash: string, width: number, height: number): string
   }
 }
 
-function applySystemImageBlurHash(image: HTMLImageElement, url: string): void {
-  const placeholder = getPlaceholder(url)
-  if (!placeholder) return
-  const [width, height] = getImageSize(url) ?? [2, 3]
+function applySystemImageBlurHash(image: HTMLImageElement, placeholder: string, width: number, height: number): void {
   const dataUrl = placeholderDataUrl(placeholder, width, height)
   if (!dataUrl) return
   image.style.backgroundImage = `url("${dataUrl}")`
@@ -42,15 +39,16 @@ function applySystemImageBlurHash(image: HTMLImageElement, url: string): void {
 export function prepareSystemImages(root: ParentNode, requestHeight: number): void {
   root.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
     const originalUrl = image.dataset.systemImageUrl ?? image.getAttribute('src') ?? ''
-    const placeholder = getPlaceholder(originalUrl)
-    if (!placeholder) return
+    const metadata = getSystemImageMetadata(originalUrl)
+    if (!metadata) return
 
     image.dataset.systemImageUrl = originalUrl
-    const [width, height] = getImageSize(originalUrl) ?? [2, 3]
+    const { placeholder, width, height } = metadata
     image.src = withImageHeight(originalUrl, requestHeight)
     image.setAttribute('width', String(width))
     image.setAttribute('height', String(height))
-    applySystemImageBlurHash(image, originalUrl)
+    image.style.aspectRatio = `${width} / ${height}`
+    applySystemImageBlurHash(image, placeholder, width, height)
 
     if (!image.style.width) {
       image.dataset.systemImagePrefillWidth = 'true'
@@ -62,10 +60,7 @@ export function prepareSystemImages(root: ParentNode, requestHeight: number): vo
 
 function clearImageLoadingState(image: HTMLImageElement): void {
   if (!image.dataset.systemImageUrl) return
-  if (image.dataset.systemImagePrefillWidth) {
-    image.style.removeProperty('width')
-    delete image.dataset.systemImagePrefillWidth
-  }
+  if (image.dataset.systemImagePrefillWidth) delete image.dataset.systemImagePrefillWidth
   image.style.removeProperty('background-image')
   image.style.removeProperty('background-position')
   image.style.removeProperty('background-size')

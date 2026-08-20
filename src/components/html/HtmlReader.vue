@@ -45,6 +45,9 @@ watch(
   async () => {
     await nextTick()
     if (contentRef.value) clearLoadedSystemImageStates(contentRef.value)
+    requestAnimationFrame(() => {
+      if (contentRef.value) clearLoadedSystemImageStates(contentRef.value)
+    })
   },
   { immediate: true, flush: 'post' },
 )

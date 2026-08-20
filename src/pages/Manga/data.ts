@@ -1,4 +1,4 @@
-import { getImageSize, getPlaceholder } from '@/utils/url'
+import { getSystemImageMetadata } from '@/utils/url'
 
 import type { Manga, MangaChapter, MangaImageAsset, MangaListItem, MangaSeries } from './types'
 import type {
@@ -16,12 +16,12 @@ const mangaTheme = {
 }
 
 export function toMangaImage(url: string): MangaImageAsset {
-  const [width, height] = getImageSize(url) ?? [2, 3]
+  const metadata = getSystemImageMetadata(url)
   return {
     url,
-    placeholder: getPlaceholder(url) ?? '',
-    width,
-    height,
+    placeholder: metadata?.placeholder ?? '',
+    width: metadata?.width ?? 2,
+    height: metadata?.height ?? 3,
   }
 }
 
