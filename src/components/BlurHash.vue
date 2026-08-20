@@ -6,28 +6,35 @@
 import { decode } from 'blurhash'
 import { ref, watchEffect } from 'vue'
 
-const props = defineProps<{ blurhash?: string }>()
+const props = withDefaults(
+  defineProps<{
+    blurhash?: string
+    width?: number
+    height?: number
+  }>(),
+  {
+    width: 2,
+    height: 3,
+  },
+)
 
 const canvasRef = ref<HTMLCanvasElement>()
 
 watchEffect(() => {
   const { value: canvas } = canvasRef
   if (props.blurhash && canvas) {
-    /** img的比例就是 2/3 所以decode时也贴近这个比例 */
-    const decodeSize = {
-      width: 2 * 10,
-      height: 3 * 10,
-    }
+    const decodingWidth = 24
+    const decodingHeight = Math.min(64, Math.max(12, Math.round((decodingWidth * props.height) / props.width)))
 
     // canvas的width是指画布的逻辑大小，与canvas元素大小不一样时浏览器会自己拉伸，就像图片拉伸
-    canvas.width = decodeSize.width
-    canvas.height = decodeSize.height
-    const pixels = decode(props.blurhash, decodeSize.width, decodeSize.height)
+    canvas.width = decodingWidth
+    canvas.height = decodingHeight
+    const pixels = decode(props.blurhash, decodingWidth, decodingHeight)
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       return
     }
-    const imageData = ctx.createImageData(decodeSize.width, decodeSize.height)
+    const imageData = ctx.createImageData(decodingWidth, decodingHeight)
     imageData.data.set(pixels)
     ctx.putImageData(imageData, 0, 0)
   }

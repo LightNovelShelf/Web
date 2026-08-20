@@ -1,18 +1,14 @@
 <template>
   <div v-intersection.once="onIntersection">
-    <q-img
+    <system-image
       v-if="visible"
       class="manga-cover"
-      :src="manga.cover.url"
+      :url="manga.cover.url"
+      :request-height="requestHeight"
       :ratio="2 / 3"
       fit="cover"
-      no-spinner
       :alt="`${manga.title}封面`"
-    >
-      <template v-if="manga.cover.placeholder && generalSetting.enableBlurHash" #loading>
-        <blur-hash :blurhash="manga.cover.placeholder" />
-      </template>
-    </q-img>
+    />
     <q-responsive v-else :ratio="2 / 3" />
   </div>
 </template>
@@ -20,15 +16,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-import { useSettingStore } from '@/stores/setting'
-
-import { BlurHash } from '@/components'
+import SystemImage from '@/components/SystemImage.vue'
 
 import type { MangaImageAsset } from '../types'
 
-defineProps<{ manga: { title: string; cover: MangaImageAsset } }>()
-
-const { generalSetting } = useSettingStore()
+const props = defineProps<{
+  manga: { title: string; cover: MangaImageAsset }
+  requestHeight: number
+}>()
 
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {

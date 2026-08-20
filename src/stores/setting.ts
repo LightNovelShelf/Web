@@ -9,7 +9,6 @@ export const useSettingStore = defineStore('app.setting', {
     isInit: false,
     dark: Dark.get(), // dark 设置不保存到服务器
     generalSetting: {
-      enableBlurHash: true,
       globalWidth: 100,
       ignoreJapanese: false,
       ignoreAI: false,
@@ -42,7 +41,7 @@ export const useSettingStore = defineStore('app.setting', {
             const setting = await userSettingDB.get(key)
             if (setting) {
               Object.keys(setting).forEach((_key) => {
-                this[key][_key] = setting[_key]
+                if (_key in this[key]) this[key][_key] = setting[_key]
               })
             }
           })(),

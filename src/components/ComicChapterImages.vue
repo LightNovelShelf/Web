@@ -30,15 +30,17 @@
       class="comic-image-grid"
       ghost-class="comic-image-ghost"
       :disabled="uploading"
-      @change="handleOrderChange"
     >
       <template #item="{ element, index }">
         <q-card flat bordered class="comic-image-card">
           <div class="comic-image-preview">
-            <img
-              :src="previewFor(index)"
-              :alt="`第 ${index + 1} 页`"
+            <system-image
+              class="comic-image-thumbnail"
+              :url="element"
+              :request-height="256"
+              fit="cover"
               loading="lazy"
+              :alt="`第 ${index + 1} 页`"
               @click="previewImage(element, index)"
             />
           </div>
@@ -56,18 +58,18 @@
 import { useQuasar } from 'quasar'
 import Draggable from 'vuedraggable'
 
+import SystemImage from '@/components/SystemImage.vue'
+
 import { PROVIDE } from '@/const/provide'
 import { uploadImage } from '@/services/user'
 
 const props = defineProps<{
   modelValue: string[]
-  previews: string[]
   uploading?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string[]]
-  'update:previews': [value: string[]]
   'update:uploading': [value: boolean]
 }>()
 
@@ -82,10 +84,6 @@ const images = computed({
   get: () => props.modelValue ?? [],
   set: (value: string[]) => emit('update:modelValue', value),
 })
-const previews = computed({
-  get: () => props.previews ?? [],
-  set: (value: string[]) => emit('update:previews', value),
-})
 const uploading = computed(() => props.uploading ?? false)
 const uploadProgress = computed(() => (uploadTotal.value === 0 ? 0 : uploadedCount.value / uploadTotal.value))
 
@@ -97,25 +95,12 @@ function imageKey(url: string) {
   return url
 }
 
-function previewFor(index: number) {
-  return previews.value[index] || images.value[index]
-}
-
 function previewImage(url: string, index: number) {
   imagePreview?.show(url, `第 ${index + 1} 页`)
 }
 
 function removeImage(index: number) {
   images.value = images.value.filter((_, imageIndex) => imageIndex !== index)
-  previews.value = previews.value.filter((_, imageIndex) => imageIndex !== index)
-}
-
-function handleOrderChange(event: { moved?: { oldIndex: number; newIndex: number } }) {
-  if (!event.moved) return
-  const reorderedPreviews = [...previews.value]
-  const [movedPreview] = reorderedPreviews.splice(event.moved.oldIndex, 1)
-  reorderedPreviews.splice(event.moved.newIndex, 0, movedPreview)
-  previews.value = reorderedPreviews
 }
 
 function clearImages() {
@@ -125,7 +110,6 @@ function clearImages() {
     cancel: true,
   }).onOk(() => {
     images.value = []
-    previews.value = []
   })
 }
 
@@ -138,7 +122,7 @@ async function onFileChange(event: Event) {
   uploadTotal.value = files.length
   uploadedCount.value = 0
 
-  const uploadedImages = Array.from<{ Url: string; MediumUrl: string } | undefined>({ length: files.length })
+  const uploadedImages = Array.from<{ Url: string } | undefined>({ length: files.length })
   const failedFiles: string[] = []
   let cursor = 0
 
@@ -161,11 +145,8 @@ async function onFileChange(event: Event) {
 
   try {
     await Promise.all(Array.from({ length: Math.min(3, files.length) }, uploadWorker))
-    const successfulImages = uploadedImages.filter((image): image is { Url: string; MediumUrl: string } =>
-      Boolean(image),
-    )
+    const successfulImages = uploadedImages.filter((image): image is { Url: string } => Boolean(image))
     images.value = [...images.value, ...successfulImages.map((image) => image.Url)]
-    previews.value = [...previews.value, ...successfulImages.map((image) => image.MediumUrl)]
 
     if (failedFiles.length === 0) {
       $q.notify({ type: 'positive', message: `已上传 ${successfulImages.length} 张图片` })
@@ -225,11 +206,9 @@ async function onFileChange(event: Event) {
   background: rgba(127, 127, 127, 0.12);
 }
 
-.comic-image-preview img {
+.comic-image-thumbnail {
   width: 100%;
   height: 100%;
-  display: block;
-  object-fit: cover;
   cursor: zoom-in;
 }
 

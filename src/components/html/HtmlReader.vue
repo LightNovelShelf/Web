@@ -1,10 +1,19 @@
 <template>
-  <div ref="contentRef" class="html-reader print-hide" v-html="props.html" @click="clickHandle" />
+  <div
+    ref="contentRef"
+    class="html-reader print-hide"
+    v-html="preparedHtml"
+    @click="clickHandle"
+    @load.capture="clearSystemImagePrefill"
+    @error.capture="clearSystemImagePrefill"
+  />
 </template>
 
 <script lang="ts" setup>
 import { scroll, useQuasar } from 'quasar'
-import { inject } from 'vue'
+import { computed, inject, nextTick, watch } from 'vue'
+
+import { clearLoadedSystemImagePrefills, clearSystemImagePrefill, prepareSystemImages } from '@/utils/systemImage'
 
 import { useSettingStore } from '@/stores/setting'
 
@@ -25,7 +34,21 @@ const props = defineProps<{ html: string }>()
 /** 翻页模式下点击左右边缘要翻页，翻页状态由父级维护，这里只上报方向 */
 const emit = defineEmits<{ flip: [delta: 1 | -1] }>()
 const contentRef = ref<HTMLElement>()
-const viewerRef = ref<HTMLElement>()
+const preparedHtml = computed(() => {
+  if (!props.html) return props.html
+  const template = document.createElement('template')
+  template.innerHTML = props.html
+  prepareSystemImages(template.content, 2048)
+  return template.innerHTML
+})
+watch(
+  preparedHtml,
+  async () => {
+    await nextTick()
+    if (contentRef.value) clearLoadedSystemImagePrefills(contentRef.value)
+  },
+  { immediate: true, flush: 'post' },
+)
 
 function getElement(event: Event) {
   const target = <Node>event.target

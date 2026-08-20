@@ -77,7 +77,6 @@ export namespace UploadImage {
   }
   export interface Response {
     Url: string
-    MediumUrl: string
   }
 }
 

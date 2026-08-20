@@ -22,7 +22,7 @@
                 <router-link class="series-card" :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id } }">
                   <div class="cover-wrap">
                     <q-card class="overflow-hidden">
-                      <manga-cover :manga="manga" />
+                      <manga-cover :manga="manga" :request-height="512" />
                     </q-card>
                     <span class="chapter-count">{{ manga.chapterCount }} 话</span>
                   </div>

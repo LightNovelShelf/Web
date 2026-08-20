@@ -144,7 +144,7 @@ export async function quickCreateComic(req: Types.QuickCreateComic.Request) {
   return requestWithSignalr<Types.QuickCreateComic.Response>('QuickCreateComic', req)
 }
 
-/** 上传图片，返回原图与 MD 图链接 */
+/** 上传图片，返回原图链接 */
 export async function uploadImage(req: Types.UploadImage.Request) {
   return requestWithSignalr<Types.UploadImage.Response>('UploadImage', req)
 }

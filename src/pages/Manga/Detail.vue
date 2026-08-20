@@ -6,7 +6,7 @@
           <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
             <q-grid-item>
               <q-card>
-                <manga-cover :manga="manga" />
+                <manga-cover :manga="manga" :request-height="1024" />
                 <div class="absolute-bottom bottom-shadow q-pa-sm text-white">
                   <div class="row items-center">
                     <div class="row items-center gap-4">

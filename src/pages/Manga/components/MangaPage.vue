@@ -1,27 +1,20 @@
 <template>
-  <q-img
+  <system-image
     class="comic-page"
-    :src="image.url"
-    :ratio="image.width / image.height"
+    :url="image.url"
+    :request-height="requestHeight"
     :style="pageStyle"
     fit="contain"
-    no-spinner
     no-transition
     :loading="loading"
     :alt="`漫画第 ${pageNumber} 页`"
-  >
-    <template v-if="image.placeholder && generalSetting.enableBlurHash" #loading>
-      <blur-hash :blurhash="image.placeholder" />
-    </template>
-  </q-img>
+  />
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useSettingStore } from '@/stores/setting'
-
-import BlurHash from '@/components/BlurHash.vue'
+import SystemImage from '@/components/SystemImage.vue'
 
 import type { MangaImageAsset } from '../types'
 
@@ -34,7 +27,7 @@ const props = withDefaults(
   { loading: 'lazy' },
 )
 
-const { generalSetting } = useSettingStore()
+const requestHeight = computed(() => (props.image.width > props.image.height ? 1024 : 2048))
 // --page-hw = 高/宽，供阅读器按真实宽高比计算「宽度撑满时的高度上限」
 const pageStyle = computed(() => ({
   aspectRatio: `${props.image.width} / ${props.image.height}`,

@@ -123,13 +123,6 @@ export interface ComicInfoResponse {
   }
 }
 
-export interface ComicImage {
-  Url: string
-  Placeholder: string
-  Width: number
-  Height: number
-}
-
 export interface ComicContentResponse {
   Chapter: {
     Id: number
@@ -141,7 +134,7 @@ export interface ComicContentResponse {
     Total: number
     /** 本批图片在整章中的起始下标 */
     Skip: number
-    Images: ComicImage[]
+    Images: string[]
   }
   ReadPosition?: {
     ChapterId: number

@@ -34,11 +34,6 @@
                 <div class="text-subtitle1">服务器节点</div>
                 <q-select emit-value map-options filled v-model="apiServer" :options="apiServerOptions" />
               </div>
-              <q-separator />
-              <div class="q-gutter-xs light-radio q-mt-md">
-                <div class="text-subtitle1">其他选项</div>
-                <q-toggle v-model="generalSetting.enableBlurHash" label="打开书籍封面自定义占位符" />
-              </div>
             </div>
           </q-tab-panel>
 

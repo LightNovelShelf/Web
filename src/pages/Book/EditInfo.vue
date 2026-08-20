@@ -5,11 +5,7 @@
         <div class="q-gutter-sm">
           <div class="text-opacity">封面预览</div>
           <q-card>
-            <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3">
-              <template v-if="book?.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
-                <blur-hash :blurhash="book.Placeholder" />
-              </template>
-            </q-img>
+            <system-image v-if="book?.Cover" :url="book.Cover" :request-height="1024" :ratio="2 / 3" />
             <q-responsive v-else :ratio="2 / 3">
               <q-skeleton class="fit" square />
             </q-responsive>
@@ -50,10 +46,9 @@ import { computed, ref, toRaw } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useSettingStore } from '@/stores/setting'
-
-import { HtmlEditor, BlurHash, DragPageSticky, ImageInput } from '@/components'
+import { HtmlEditor, DragPageSticky, ImageInput } from '@/components'
 import { QGrid, QGridItem } from '@/components/grid'
+import SystemImage from '@/components/SystemImage.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -67,9 +62,6 @@ const options = ref([])
 const isActive = computed(() => book.value?.Id === bid.value)
 const comicCategoryNames = new Set(['原创', '连载', '完结'])
 const comicOnlyCategoryNames = new Set(['连载', '完结'])
-
-const settingStore = useSettingStore()
-const { generalSetting } = settingStore
 
 const request = useTimeoutFn(async () => {
   const data = (await getBookEditInfo(bid.value)) as any

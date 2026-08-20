@@ -15,24 +15,23 @@
             <!-- 未进入视口前不渲染封面，按需加载（与 BookCard 一致） -->
             <template v-if="visible">
               <!-- 单封面：铺满整卡 -->
-              <q-img v-if="limitedCovers.length <= 1" class="single-cover" :src="limitedCovers[0]" :ratio="2 / 3">
-                <template v-if="firstPlaceholder && generalSetting.enableBlurHash" v-slot:loading>
-                  <blur-hash :blurhash="firstPlaceholder" />
-                </template>
-              </q-img>
+              <system-image
+                v-if="limitedCovers.length <= 1"
+                class="single-cover"
+                :url="limitedCovers[0]"
+                :request-height="512"
+                :ratio="2 / 3"
+              />
               <!-- 多封面：2×2 网格 -->
               <div v-else class="books-group">
-                <q-img
+                <system-image
                   v-for="(cover, i) in limitedCovers"
                   :key="i"
                   class="books-group-cover"
-                  :src="cover"
+                  :url="cover"
+                  :request-height="256"
                   :ratio="2 / 3"
-                >
-                  <template v-if="getPlaceholder(cover) && generalSetting.enableBlurHash" v-slot:loading>
-                    <blur-hash :blurhash="getPlaceholder(cover)" />
-                  </template>
-                </q-img>
+                />
               </div>
             </template>
 
@@ -57,11 +56,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import { getPlaceholder } from '@/utils/url'
-
-import { useSettingStore } from '@/stores/setting'
-
-import { BlurHash } from '@/components'
+import SystemImage from '@/components/SystemImage.vue'
 
 import { useToNowRef } from '@/composition/useToNowRef'
 
@@ -82,9 +77,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ click: [] }>()
 
-const { generalSetting } = useSettingStore()
 const limitedCovers = computed(() => (props.covers ?? []).filter(Boolean).slice(0, 4))
-const firstPlaceholder = computed(() => getPlaceholder(limitedCovers.value[0] ?? ''))
 const updateTime = useToNowRef(() => props.updatedAt)
 
 const visible = ref(false)

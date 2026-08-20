@@ -1,4 +1,4 @@
-import { getPlaceholder } from '@/utils/url'
+import { getImageSize, getPlaceholder } from '@/utils/url'
 
 import type { Manga, MangaChapter, MangaImageAsset, MangaListItem, MangaSeries } from './types'
 import type {
@@ -15,10 +15,11 @@ const mangaTheme = {
   ink: '#ffffff',
 }
 
-export function toMangaImage(url: string, width = 2, height = 3, placeholder?: string): MangaImageAsset {
+export function toMangaImage(url: string): MangaImageAsset {
+  const [width, height] = getImageSize(url) ?? [2, 3]
   return {
     url,
-    placeholder: placeholder ?? getPlaceholder(url) ?? '',
+    placeholder: getPlaceholder(url) ?? '',
     width,
     height,
   }

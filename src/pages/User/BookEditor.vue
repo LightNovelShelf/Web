@@ -8,11 +8,7 @@
               <div class="q-gutter-sm">
                 <div class="text-opacity">封面预览</div>
                 <q-card>
-                  <q-img v-if="book?.Cover" :src="book['Cover']" :ratio="2 / 3">
-                    <template v-if="book?.Placeholder && generalSetting.enableBlurHash" v-slot:loading>
-                      <blur-hash :blurhash="book.Placeholder" />
-                    </template>
-                  </q-img>
+                  <system-image v-if="book?.Cover" :url="book.Cover" :request-height="1024" :ratio="2 / 3" />
                   <q-responsive v-else :ratio="2 / 3">
                     <q-skeleton class="fit" square />
                   </q-responsive>
@@ -124,12 +120,7 @@
         </q-tab-panel>
         <q-tab-panel name="chapter">
           <q-input label="标题" v-model="chapter['Title']" />
-          <comic-chapter-images
-            v-if="isComic"
-            v-model="chapter.Images"
-            v-model:previews="chapter.Previews"
-            v-model:uploading="comicUploading"
-          />
+          <comic-chapter-images v-if="isComic" v-model="chapter.Images" v-model:uploading="comicUploading" />
           <template v-else>
             <div class="text-opacity">内容</div>
             <html-editor v-model:html="chapter['Content']" mode="common" />
@@ -140,7 +131,6 @@
           <comic-chapter-images
             v-if="isComic"
             v-model="creatingChapterContent.images"
-            v-model:previews="creatingChapterContent.previews"
             v-model:uploading="comicUploading"
           />
           <template v-else>
@@ -234,11 +224,11 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { parseTime } from '@/utils/time'
 
 import { useAppStore } from '@/stores/app'
-import { useSettingStore } from '@/stores/setting'
 
-import { BlurHash, HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from '@/components'
+import { HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from '@/components'
 import { useLayout } from '@/components/app/useLayout'
 import { QGrid, QGridItem } from '@/components/grid'
+import SystemImage from '@/components/SystemImage.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -257,8 +247,6 @@ import {
 
 import type { BookServicesTypes } from '@/services/book'
 
-const settingStore = useSettingStore()
-const { generalSetting } = settingStore
 const layout = useLayout()
 
 const { siderShow, siderBreakpoint } = layout
@@ -282,7 +270,7 @@ const bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 const chapters = ref([] as ChapterInfo[])
 const _bid = computed(() => ~~(props.bookId || '1'))
 const _cid = ref(-1)
-const chapter = ref<ChapterEditState>({ Title: '加载中...', Content: '加载中...', Images: [], Previews: [] })
+const chapter = ref<ChapterEditState>({ Title: '加载中...', Content: '加载中...', Images: [] })
 const chapterLoaded = ref(true)
 const comicUploading = ref(false)
 const comicCategoryNames = new Set(['原创', '连载', '完结'])
@@ -292,7 +280,6 @@ const creatingChapterContent = reactive<CreatingChapterState>({
   title: '',
   html: '',
   images: [],
-  previews: [],
 })
 const tab = ref('information')
 const bookSetting = reactive({} as BookSetting)
@@ -314,7 +301,6 @@ interface ChapterEditState {
   Title: string
   Content?: string
   Images: string[]
-  Previews: string[]
 }
 
 interface CreatingChapterState {
@@ -322,7 +308,6 @@ interface CreatingChapterState {
   title: string
   html: string
   images: string[]
-  previews: string[]
 }
 
 interface BookSetting {
@@ -346,7 +331,7 @@ watch(
       chapterLoaded.value = true
       return
     }
-    chapter.value = { Title: '加载中...', Content: '加载中...', Images: [], Previews: [] }
+    chapter.value = { Title: '加载中...', Content: '加载中...', Images: [] }
     try {
       const result = isComic.value
         ? await getComicEditInfo({ Bid: _bid.value, Cid: cid })
@@ -354,7 +339,6 @@ watch(
       if (_cid.value === cid) {
         chapter.value = result as ChapterEditState
         chapter.value.Images ??= []
-        chapter.value.Previews ??= [...chapter.value.Images]
       }
     } catch (error) {
       $q.notify({ type: 'negative', message: getErrMsg(error) })
@@ -589,7 +573,6 @@ async function createComicChapterInner(sortNum: number) {
   chapters.value = response
   creatingChapterContent.title = ''
   creatingChapterContent.images = []
-  creatingChapterContent.previews = []
   creatingChapterContent.sortNum = ''
   tab.value = 'chapter'
   _cid.value = cid
@@ -658,13 +641,12 @@ const request = useTimeoutFn(async () => {
 
 const refresh = () => {
   // refresh page data when back to another book.
-  chapter.value = { Title: '加载中...', Content: '加载中...', Images: [], Previews: [] }
+  chapter.value = { Title: '加载中...', Content: '加载中...', Images: [] }
   _cid.value = -1
   tab.value = 'information'
   creatingChapterContent.title = ''
   creatingChapterContent.html = ''
   creatingChapterContent.images = []
-  creatingChapterContent.previews = []
   creatingChapterContent.sortNum = ''
 }
 useInitRequest(request, { before: refresh, isActive })

@@ -5,24 +5,21 @@
         <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
           <q-grid-item>
             <q-card>
-              <q-img v-if="isActive" :src="book.Cover" :ratio="2 / 3">
+              <system-image v-if="isActive && book?.Cover" :url="book.Cover" :request-height="1024" :ratio="2 / 3">
                 <div class="absolute-bottom bottom-shadow">
                   <div class="row">
                     <div class="row items-center cover-stat">
-                      <q-icon size="24px" name="mdiHeart" />
-                      <span>{{ book.Favorite }}</span>
+                      <q-icon size="22px" name="mdiHeart" />
+                      <span>{{ book['Favorite'] }}</span>
                     </div>
                     <q-space />
                     <div class="row items-center cover-stat">
-                      <q-icon size="24px" name="mdiEye" />
-                      <span>{{ book.Views }}</span>
+                      <q-icon size="22px" name="mdiEye" />
+                      <span>{{ book['Views'] }}</span>
                     </div>
                   </div>
                 </div>
-                <template v-if="placeholder && generalSetting.enableBlurHash" v-slot:loading>
-                  <blur-hash :blurhash="placeholder" />
-                </template>
-              </q-img>
+              </system-image>
               <q-responsive v-else :ratio="2 / 3">
                 <q-skeleton class="fit" square />
               </q-responsive>
@@ -153,14 +150,13 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { userReadPositionDB } from '@/utils/storage/db'
 import { parseTime } from '@/utils/time'
-import { getPlaceholder } from '@/utils/url'
 
 import { useAppStore } from '@/stores/app'
-import { useSettingStore } from '@/stores/setting'
 
-import { BookUserAvatar, Comment, BlurHash } from '@/components'
+import { BookUserAvatar, Comment } from '@/components'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from '@/components/grid'
+import SystemImage from '@/components/SystemImage.vue'
 
 import { useBookDownload } from '@/composition/biz/useBookDownload'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
@@ -176,8 +172,6 @@ import type { BookInList } from '@/services/book/types'
 
 const props = defineProps<{ bid: string }>()
 
-const settingStore = useSettingStore()
-const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const router = useRouter()
 const appStore = useAppStore()
@@ -243,7 +237,6 @@ const bookInList = computed<BookInList | null>(() =>
     : null,
 )
 const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdatedAt)
-const placeholder = computed(() => getPlaceholder(book.value?.Cover))
 const lastReadTitle = computed(() => {
   if (position.value && position.value?.cid) {
     const chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)

@@ -286,7 +286,6 @@ import { toManga, toMangaImage } from './data'
 import { useMangaLibrary } from './useMangaLibrary'
 
 import type { Manga, MangaChapter, MangaImageAsset } from './types'
-import type { ComicImage } from '@/services/manga/types'
 
 // single: 单页；double: 双页(1+2、3+4)；doubleOffset: 错位双页(首页单独，其后 2+3、4+5)
 type PageMode = 'single' | 'double' | 'doubleOffset'
@@ -505,14 +504,11 @@ function createPlaceholderImage(): MangaImageAsset {
   return { url: '', placeholder: '', width: 2, height: 3 }
 }
 
-function fillBatch(chapter: MangaChapter, skip: number, imgs: ComicImage[]) {
-  imgs.forEach((image, index) => {
-    chapter.images[skip + index] = toMangaImage(
-      withReaderHeight(image.Url, image.Width, image.Height),
-      image.Width,
-      image.Height,
-      image.Placeholder,
-    )
+function fillBatch(chapter: MangaChapter, skip: number, urls: string[]) {
+  urls.forEach((url, index) => {
+    const image = toMangaImage(url)
+    image.url = withReaderHeight(url, image.width, image.height)
+    chapter.images[skip + index] = image
   })
 }
 

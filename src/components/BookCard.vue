@@ -4,7 +4,7 @@
       <div class="book-cover">
         <q-card v-intersection.once="onIntersection">
           <div v-if="visible">
-            <q-img v-if="cover" :src="cover" :ratio="2 / 3">
+            <system-image v-if="book.Cover" :url="book.Cover" :request-height="512" :ratio="2 / 3">
               <div v-if="book.Level || book.InteriorLevel" class="absolute-bottom bottom-shadow">
                 <div class="row text-weight-bold">
                   <div>{{ book.Level && !book.InteriorLevel ? `Level ${book.Level}` : '' }}</div>
@@ -12,10 +12,7 @@
                   <div>{{ book.InteriorLevel ? `Level ${book.InteriorLevel}` : '' }}</div>
                 </div>
               </div>
-              <template v-if="placeholder && generalSetting.enableBlurHash" v-slot:loading>
-                <blur-hash :blurhash="placeholder" />
-              </template>
-            </q-img>
+            </system-image>
             <q-responsive v-else :ratio="2 / 3">
               <q-skeleton class="fit" />
             </q-responsive>
@@ -48,18 +45,12 @@
 import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 
-import { getPlaceholder } from '@/utils/url'
-
-import { useSettingStore } from '@/stores/setting'
-
-import { BlurHash } from '@/components'
+import SystemImage from '@/components/SystemImage.vue'
 
 import { useToNowRef } from '@/composition/useToNowRef'
 
 import type { BookInList } from '@/services/book/types'
 
-const settingStore = useSettingStore()
-const { generalSetting } = settingStore // 引入setting用于控制图片自定义占位符
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
 const detailRoute = computed(() =>
@@ -67,9 +58,7 @@ const detailRoute = computed(() =>
     ? { name: 'MangaDetail', params: { seriesTitle: props.book.SeriesTitle || props.book.Title } }
     : { name: 'BookInfo', params: { bid: props.book.Id } },
 )
-const cover = computed(() => props.book.Cover)
 const updateTime = useToNowRef(() => props.book.LastUpdatedAt)
-const placeholder = computed(() => getPlaceholder(props.book.Cover))
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting
