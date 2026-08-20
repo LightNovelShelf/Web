@@ -60,18 +60,24 @@ export function prepareSystemImages(root: ParentNode, requestHeight: number): vo
   })
 }
 
-function clearImagePrefill(image: HTMLImageElement): void {
-  if (!image.dataset.systemImagePrefillWidth) return
-  image.style.removeProperty('width')
-  delete image.dataset.systemImagePrefillWidth
+function clearImageLoadingState(image: HTMLImageElement): void {
+  if (!image.dataset.systemImageUrl) return
+  if (image.dataset.systemImagePrefillWidth) {
+    image.style.removeProperty('width')
+    delete image.dataset.systemImagePrefillWidth
+  }
+  image.style.removeProperty('background-image')
+  image.style.removeProperty('background-position')
+  image.style.removeProperty('background-size')
+  delete image.dataset.systemImageUrl
 }
 
-export function clearSystemImagePrefill(event: Event): void {
-  if (event.target instanceof HTMLImageElement) clearImagePrefill(event.target)
+export function clearSystemImageLoadingState(event: Event): void {
+  if (event.target instanceof HTMLImageElement) clearImageLoadingState(event.target)
 }
 
-export function clearLoadedSystemImagePrefills(root: ParentNode): void {
+export function clearLoadedSystemImageStates(root: ParentNode): void {
   root.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
-    if (image.complete && image.naturalWidth > 0) clearImagePrefill(image)
+    if (image.complete && image.naturalWidth > 0) clearImageLoadingState(image)
   })
 }

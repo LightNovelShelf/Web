@@ -4,8 +4,7 @@
     class="html-reader print-hide"
     v-html="preparedHtml"
     @click="clickHandle"
-    @load.capture="clearSystemImagePrefill"
-    @error.capture="clearSystemImagePrefill"
+    @load.capture="clearSystemImageLoadingState"
   />
 </template>
 
@@ -13,7 +12,7 @@
 import { scroll, useQuasar } from 'quasar'
 import { computed, inject, nextTick, watch } from 'vue'
 
-import { clearLoadedSystemImagePrefills, clearSystemImagePrefill, prepareSystemImages } from '@/utils/systemImage'
+import { clearLoadedSystemImageStates, clearSystemImageLoadingState, prepareSystemImages } from '@/utils/systemImage'
 
 import { useSettingStore } from '@/stores/setting'
 
@@ -45,7 +44,7 @@ watch(
   preparedHtml,
   async () => {
     await nextTick()
-    if (contentRef.value) clearLoadedSystemImagePrefills(contentRef.value)
+    if (contentRef.value) clearLoadedSystemImageStates(contentRef.value)
   },
   { immediate: true, flush: 'post' },
 )
