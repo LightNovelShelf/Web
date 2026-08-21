@@ -20,11 +20,16 @@ p {
   gap: 2px;
 
   img:not(.no-preview) {
-    margin-bottom: 6px;
     box-sizing: border-box;
     border: 1px solid #ddd;
     cursor: pointer;
   }
+}
+
+/* 只隔开连续图片，不给图后正文重复留白。 */
+:is(.illus, .illu, .duokan-image-single):has(> img:not(.no-preview))
+  + :is(.illus, .illu, .duokan-image-single):has(> img:not(.no-preview)) {
+  margin-top: 6px;
 }
 
 img {
