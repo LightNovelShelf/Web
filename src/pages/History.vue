@@ -17,7 +17,7 @@
             </q-grid>
           </q-tab-panel>
           <q-tab-panel name="Comic">
-            <q-grid :x-gap="12" :y-gap="20" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
+            <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
               <q-grid-item v-for="manga in comicData" :key="manga.id">
                 <router-link class="series-card" :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id } }">
                   <div class="cover-wrap">
@@ -31,7 +31,7 @@
                       <div class="series-title-text" :title="manga.title">{{ manga.title }}</div>
                     </div>
                     <div class="series-update-time">
-                      <manga-update-time :updated-at="manga.updatedAt" />
+                      <time-ago :value="manga.updatedAt" />
                     </div>
                   </div>
                 </router-link>
@@ -69,12 +69,12 @@ import { ref, defineComponent, computed, watch } from 'vue'
 
 import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/components/grid'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 import MangaCover from '@/pages/Manga/components/MangaCover.vue'
-import MangaUpdateTime from '@/pages/Manga/components/MangaUpdateTime.vue'
 import { toMangaListItem } from '@/pages/Manga/data'
 import { getBookListByIds, getComicSeriesByIds } from '@/services/book'
 import { getReadHistory, clearHistory } from '@/services/user'

@@ -36,7 +36,7 @@
 
     <div class="extra" style="display: flex; padding: 0 4px">
       <div class="user-name">{{ book.UserName }}</div>
-      <div class="time">{{ updateTime }}</div>
+      <div class="time"><time-ago :value="book.LastUpdatedAt" /></div>
     </div>
   </div>
 </template>
@@ -46,8 +46,7 @@ import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 
 import SystemImage from '@/components/SystemImage.vue'
-
-import { useToNowRef } from '@/composition/useToNowRef'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import type { BookInList } from '@/services/book/types'
 
@@ -58,7 +57,6 @@ const detailRoute = computed(() =>
     ? { name: 'MangaDetail', params: { seriesTitle: props.book.SeriesTitle || props.book.Title } }
     : { name: 'BookInfo', params: { bid: props.book.Id } },
 )
-const updateTime = useToNowRef(() => props.book.LastUpdatedAt)
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting

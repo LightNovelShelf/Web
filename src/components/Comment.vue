@@ -57,7 +57,7 @@
               </q-item-label>
               <q-item-label caption>
                 <div class="row items-center q-gutter-x-md">
-                  <div>{{ toNow(comment.Commentaries[`${item.Id}`].CreatedAt) }}</div>
+                  <div><time-ago :value="comment.Commentaries[`${item.Id}`].CreatedAt" /></div>
                   <div>
                     <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
                     <q-btn flat dense v-if="comment.Commentaries[`${item.Id}`].CanEdit" @click="_delete(item.Id)">
@@ -108,7 +108,7 @@
                         </q-item-label>
                         <q-item-label caption>
                           <div class="row items-center q-gutter-x-md">
-                            <div>{{ toNow(comment.Commentaries[`${replyId}`].CreatedAt) }}</div>
+                            <div><time-ago :value="comment.Commentaries[`${replyId}`].CreatedAt" /></div>
                             <div>
                               <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>
                               <q-btn
@@ -194,9 +194,10 @@ import { useQuasar } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
-import { toNow } from '@/utils/time'
 
 import { useAppStore } from '@/stores/app'
+
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 

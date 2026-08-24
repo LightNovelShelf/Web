@@ -5,7 +5,7 @@
         <div class="text-grey-7" style="display: flex; padding: 0 4px; font-size: 12px">
           <div></div>
           <div class="col"></div>
-          <div>{{ updateTime }}</div>
+          <div><time-ago :value="item.updateAt" /></div>
         </div>
       </template>
     </folder-card>
@@ -19,8 +19,7 @@ import { useBookListStore } from '@/stores/bookListData'
 import { useShelfStore } from '@/stores/shelf'
 
 import FolderCard from '@/components/FolderCard.vue'
-
-import { useToNowRef } from '@/composition/useToNowRef'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { ShelfItemTypeEnum } from '@/types/shelf'
 
@@ -28,7 +27,6 @@ import type { ShelfBookItem, ShelfFolderItem } from '@/types/shelf'
 
 const props = defineProps<{ item: ShelfFolderItem }>()
 const shelfStore = useShelfStore()
-const updateTime = useToNowRef(() => new Date(props.item.updateAt))
 const folderIDs = computed(() => [...props.item.parents, props.item.id])
 const listDataStore = useBookListStore()
 // 限制最多四本书的封面

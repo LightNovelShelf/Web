@@ -142,4 +142,5 @@ export {
   mdiStarFourPointsOutline,
   mdiCalendarCheckOutline,
   mdiDownload,
+  mdiDotsHorizontal,
 } from '@quasar/extras/mdi-v7'

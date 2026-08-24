@@ -217,7 +217,7 @@
             <span>{{ String(chapter.number).padStart(2, '0') }}</span>
             <div>
               <strong>{{ chapter.title }}</strong
-              ><small>{{ chapter.pages }}P · {{ toNow(parseTime(chapter.publishedAt)) }}</small>
+              ><small>{{ chapter.pages }}P · <time-ago :value="chapter.publishedAt" /></small>
             </div>
             <q-icon v-if="chapter.id === currentChapter.id" name="mdiBookmark" />
           </button>
@@ -275,8 +275,9 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
-import { parseTime, toNow } from '@/utils/time'
 import { withReaderHeight } from '@/utils/url'
+
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { saveReadPosition } from '@/services/book'
 import { getComicContent, getComicInfo } from '@/services/manga'

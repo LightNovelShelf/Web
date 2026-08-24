@@ -29,7 +29,7 @@
             </q-item-label>
           </q-item-section>
           <q-item-section side top>
-            <q-item-label caption>{{ announcement.Before }}</q-item-label>
+            <q-item-label caption><time-ago :value="announcement.CreatedAt" /></q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -44,6 +44,8 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
+
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { getAnnouncementList } from '@/services/context'
 
@@ -60,7 +62,6 @@ const scroll = ref(null)
 async function onLoad(index, done) {
   try {
     const res = await getAnnouncementList({ Page: index, Size: size })
-    // @ts-expect-error 不知道谁的问题
     announcementList.push(...announcementListFormat(res.Data))
     if (res.TotalPages == index) {
       // 无法再拉取

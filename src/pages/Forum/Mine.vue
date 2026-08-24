@@ -64,7 +64,8 @@
               >
                 <div class="community-replies__title">{{ reply.ThreadTitle }}</div>
                 <div class="community-replies__meta">
-                  {{ reply.BoardName }} · {{ formatPublishedAt(reply.PublishedAt) }}
+                  {{ reply.BoardName }} ·
+                  <time-ago :value="reply.PublishedAt" />
                 </div>
                 <div class="community-replies__content">
                   <span v-if="reply.ReplyToName" class="community-replies__reply-to"
@@ -98,9 +99,9 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
 
-import { parseTime, toNow } from '@/utils/time'
-
 import { useAppStore } from '@/stores/app'
+
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
@@ -115,10 +116,6 @@ const tab = ref<'threads' | 'replies' | 'favorites'>('threads')
 const overview = ref<CommunityMyOverview | null>(null)
 const loading = ref(true)
 const error = ref('')
-
-function formatPublishedAt(value: string) {
-  return toNow(parseTime(value))
-}
 
 async function loadOverview() {
   loading.value = true

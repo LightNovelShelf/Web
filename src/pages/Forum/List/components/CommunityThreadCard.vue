@@ -32,7 +32,7 @@
               {{ item.AuthorName }}
               <span v-if="item.AuthorIsDeleted" class="text-negative">（被封禁）</span>
             </span>
-            <span class="feed-item__author-time">{{ formatPublishedAt(item.PublishedAt) }}</span>
+            <time-ago class="feed-item__author-time" :value="item.PublishedAt" />
           </div>
         </div>
 
@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { parseTime, toNow } from '@/utils/time'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import type { CommunityFeedItem } from '@/services/forum'
 
@@ -64,10 +64,6 @@ const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#
 function avatarBackground(seed: string) {
   const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
-}
-
-function formatPublishedAt(value: string) {
-  return toNow(parseTime(value))
 }
 </script>
 

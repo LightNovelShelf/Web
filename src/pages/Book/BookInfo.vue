@@ -56,7 +56,7 @@
                 <span v-else>暂无</span>
               </div>
               <div>最后更新：{{ book['LastUpdatedChapter'] }}</div>
-              <div>更新时间：{{ dateFormat(book['LastUpdatedAt']) }} ({{ LastUpdateTimeDesc }})</div>
+              <div>更新时间：{{ dateFormat(book['LastUpdatedAt']) }} (<time-ago :value="book['LastUpdatedAt']" />)</div>
               <div>上次阅读：{{ lastReadTitle }}</div>
               <div v-if="classification.tags?.length" class="row book-tags q-mt-md">
                 <router-link
@@ -157,11 +157,11 @@ import { BookUserAvatar, Comment } from '@/components'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from '@/components/grid'
 import SystemImage from '@/components/SystemImage.vue'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useBookDownload } from '@/composition/biz/useBookDownload'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useToNowRef } from '@/composition/useToNowRef'
 
 import { loadHistory } from '@/pages/Book/Read/history'
 import { getBookInfo } from '@/services/book'
@@ -236,7 +236,6 @@ const bookInList = computed<BookInList | null>(() =>
       } as BookInList)
     : null,
 )
-const LastUpdateTimeDesc = useToNowRef(() => book.value?.LastUpdatedAt)
 const lastReadTitle = computed(() => {
   if (position.value && position.value?.cid) {
     const chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)

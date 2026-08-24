@@ -42,17 +42,21 @@
           <q-btn flat no-caps color="primary" label="查看板块" :to="payload?.AnnouncementLink" />
         </section>
 
-        <div class="community-home__composer">
-          <community-composer
-            :user="user"
-            :ready="initialRequestCompleted"
-            :catalog-boards="payload?.CatalogBoards ?? []"
-            :selected-board-key="boardKey"
-            :selected-sub-category-key="payload?.SelectedSubCategoryKey ?? ''"
-            :submitting="creatingThread"
-            @create="handleThreadCreate"
+        <section class="community-home__composer composer-entry">
+          <div>
+            <div class="composer-entry__title">发布帖子</div>
+            <div class="composer-entry__hint">先把核心观点写出来，再进详情页继续展开讨论。</div>
+          </div>
+
+          <q-btn
+            unelevated
+            no-caps
+            color="primary"
+            icon="mdiSquareEditOutline"
+            label="发布帖子"
+            :to="{ name: 'ForumCreate', query: createQuery }"
           />
-        </div>
+        </section>
 
         <main class="community-home__feed">
           <community-feed-list
@@ -86,19 +90,15 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-
-import { useAppStore } from '@/stores/app'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useIsActivated } from '@/composition/useIsActivated'
 
-import { createCommunityThread, getCommunityFeed, getCommunityHome } from '@/services/forum'
+import { getCommunityFeed, getCommunityHome } from '@/services/forum'
 
 import CommunityBlueprintCanvas from './components/CommunityBlueprintCanvas.vue'
 import CommunityBoardRail from './components/CommunityBoardRail.vue'
-import CommunityComposer from './components/CommunityComposer.vue'
 import CommunityFeedList from './components/CommunityFeedList.vue'
 import CommunityRightRail from './components/CommunityRightRail.vue'
 
@@ -109,11 +109,8 @@ import type {
   CommunityFeedScope,
   CommunityHomePayload,
   CommunityPagination,
-  CreateCommunityThreadRequest,
 } from '@/services/forum'
 
-const appStore = useAppStore()
-const { user } = storeToRefs(appStore)
 const $q = useQuasar()
 const router = useRouter()
 const route = useRoute()
@@ -123,11 +120,9 @@ const payload = ref<CommunityHomePayload>()
 const feedItems = ref<CommunityFeedItem[]>([])
 const loading = ref(true)
 const loadingMore = ref(false)
-const creatingThread = ref(false)
 const error = ref('')
 const currentPage = ref(1)
 const latestRequestId = ref(0)
-const initialRequestCompleted = ref(false)
 
 const emptyPagination: CommunityPagination = {
   Page: 1,
@@ -166,6 +161,10 @@ const scope = computed<CommunityFeedScope>(() => {
 const boards = computed(() => payload.value?.Boards ?? [])
 const pagination = computed(() => payload.value?.FeedPage ?? emptyPagination)
 const routeQueryKey = computed(() => [boardKey.value, order.value, scope.value, subCategoryKey.value].join(':'))
+const createQuery = computed(() => ({
+  board: boardKey.value === 'all' ? undefined : boardKey.value,
+  category: subCategoryKey.value || undefined,
+}))
 
 async function loadCommunityHome(options: { append?: boolean } = {}) {
   const append = options.append ?? false
@@ -294,11 +293,6 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
   }
 }
 
-async function requestCommunityHomeOnEnter() {
-  await loadCommunityHome()
-  initialRequestCompleted.value = true
-}
-
 function requestCommunityFeedForQueryChange() {
   void loadCommunityFeed()
 }
@@ -360,39 +354,7 @@ function handleRetry() {
   void loadCommunityFeed()
 }
 
-async function handleThreadCreate(payloadDraft: Omit<CreateCommunityThreadRequest, 'authorName'>) {
-  if (!user.value) {
-    $q.notify({
-      type: 'warning',
-      message: '请先登录后再发帖',
-    })
-    void router.push({ name: 'Login', query: { from: encodeURIComponent(route.fullPath) } })
-    return
-  }
-
-  creatingThread.value = true
-
-  try {
-    const created = await createCommunityThread(payloadDraft)
-
-    $q.notify({
-      type: 'positive',
-      message: '帖子已发布',
-    })
-
-    await loadCommunityHome()
-    await router.push({ name: 'ForumThread', params: { id: created.Id } })
-  } catch (err) {
-    $q.notify({
-      type: 'negative',
-      message: err instanceof Error ? err.message : '发布失败',
-    })
-  } finally {
-    creatingThread.value = false
-  }
-}
-
-useInitRequest(requestCommunityHomeOnEnter)
+useInitRequest(() => void loadCommunityHome())
 
 watch(routeQueryKey, () => {
   if (!isActivated.value) {
@@ -512,6 +474,30 @@ watch(routeQueryKey, () => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
+}
+
+.composer-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px;
+  border: 1px solid var(--community-border);
+  border-radius: 28px;
+  background: var(--community-card-bg);
+  box-shadow: var(--community-shadow);
+}
+
+.composer-entry__title {
+  color: var(--community-text);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.composer-entry__hint {
+  margin-top: 8px;
+  color: var(--community-text-soft);
+  font-size: 12px;
 }
 
 .community-hero__title {
@@ -658,6 +644,18 @@ watch(routeQueryKey, () => {
 
   .community-home__grid {
     gap: 12px;
+  }
+
+  .composer-entry {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .composer-entry__title {
+    font-size: 21px;
   }
 
   .community-hero {

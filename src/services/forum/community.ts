@@ -1,6 +1,7 @@
 import { requestWithSignalr } from '@/services/internal/request'
 
 import type {
+  CommunityCatalogPayload,
   CommunityFeedPayload,
   CommunityHomePayload,
   CommunityListQuery,
@@ -10,6 +11,7 @@ import type {
   CreateCommunityReplyRequest,
   CreateCommunityThreadRequest,
   GetCommunityReplyChildrenRequest,
+  UpdateCommunityThreadRequest,
 } from './types'
 
 export async function getCommunityHome(query: CommunityListQuery = {}): Promise<CommunityHomePayload> {
@@ -32,6 +34,10 @@ export async function getCommunityFeed(query: CommunityListQuery = {}): Promise<
     Page: Math.max(1, query.page ?? 1),
     Size: Math.max(1, query.size ?? 6),
   })
+}
+
+export async function getCommunityCatalog(): Promise<CommunityCatalogPayload> {
+  return requestWithSignalr<CommunityCatalogPayload>('GetCommunityCatalog', {})
 }
 
 export async function getCommunityThread(
@@ -57,12 +63,30 @@ export async function createCommunityThread(req: CreateCommunityThreadRequest): 
   })
 }
 
+export async function updateCommunityThread(req: UpdateCommunityThreadRequest): Promise<{ Id: number }> {
+  return requestWithSignalr<{ Id: number }>('UpdateCommunityThread', {
+    ThreadId: req.threadId,
+    BoardKey: req.boardKey,
+    SubCategoryKey: req.subCategoryKey ?? '',
+    Title: req.title,
+    ContentHtml: req.contentHtml,
+  })
+}
+
+export async function deleteCommunityThread(threadId: number): Promise<{ Id: number }> {
+  return requestWithSignalr<{ Id: number }>('DeleteCommunityThread', { ThreadId: threadId })
+}
+
 export async function createCommunityReply(req: CreateCommunityReplyRequest): Promise<CommunityThreadReply> {
   return requestWithSignalr<CommunityThreadReply>('CreateCommunityReply', {
     ThreadId: req.threadId,
     Content: req.content,
     ReplyToId: req.replyToId,
   })
+}
+
+export async function deleteCommunityReply(replyId: number): Promise<{ Id: number; Removed: number }> {
+  return requestWithSignalr<{ Id: number; Removed: number }>('DeleteCommunityReply', { ReplyId: replyId })
 }
 
 export async function toggleThreadLike(id: number) {

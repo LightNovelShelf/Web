@@ -55,6 +55,35 @@
                     :aria-label="thread.Liked ? '已点赞' : '点赞'"
                     @click="handleToggleThreadLike"
                   />
+
+                  <q-btn
+                    v-if="thread.CanEdit"
+                    unelevated
+                    class="thread-card__action-btn"
+                    icon="mdiDotsHorizontal"
+                    aria-label="更多操作"
+                  >
+                    <q-menu anchor="bottom right" self="top right">
+                      <q-list dense class="thread-card__menu">
+                        <q-item v-close-popup clickable :to="{ name: 'ForumThreadEdit', params: { id: thread.Id } }">
+                          <q-item-section>
+                            <div class="thread-card__menu-item">
+                              <q-icon name="mdiPen" size="17px" />
+                              编辑
+                            </div>
+                          </q-item-section>
+                        </q-item>
+                        <q-item v-close-popup clickable :disable="deleting" @click="handleDeleteThread">
+                          <q-item-section>
+                            <div class="thread-card__menu-item">
+                              <q-icon name="mdiDelete" size="17px" />
+                              删除
+                            </div>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
                 </div>
               </div>
 
@@ -83,7 +112,13 @@
                       {{ thread.AuthorName }}
                       <span v-if="thread.AuthorIsDeleted" class="text-negative">（被封禁）</span>
                     </div>
-                    <div class="thread-card__author-time">{{ formatPublishedAt(thread.PublishedAt) }}</div>
+                    <div class="thread-card__author-time">
+                      <time-ago :value="thread.PublishedAt" />
+                      <template v-if="thread.EditedAt">
+                        •&nbsp;修改于
+                        <time-ago :value="thread.EditedAt" />
+                      </template>
+                    </div>
                   </div>
                 </div>
 
@@ -194,7 +229,7 @@
                             }}<span v-if="reply.ReplyTo.AuthorIsDeleted" class="text-negative">（被封禁）</span>
                           </button>
                         </div>
-                        <div class="reply-item__time">{{ formatPublishedAt(reply.PublishedAt) }}</div>
+                        <time-ago class="reply-item__time" :value="reply.PublishedAt" />
                       </div>
                     </div>
 
@@ -219,6 +254,17 @@
                         :label="`${reply.Likes}`"
                         :disable="thread.Locked || togglingReplyIds.has(reply.Id)"
                         @click="handleToggleReplyLike(reply.Id)"
+                      />
+                      <q-btn
+                        v-if="reply.CanDelete"
+                        flat
+                        no-caps
+                        dense
+                        class="reply-item__tool-btn"
+                        icon="mdiDelete"
+                        aria-label="删除回复"
+                        :disable="deletingReplyIds.has(reply.Id)"
+                        @click="handleDeleteReply(reply.Id)"
                       />
                     </div>
                   </div>
@@ -268,7 +314,7 @@
                                 }}<span v-if="child.ReplyTo.AuthorIsDeleted" class="text-negative">（被封禁）</span>
                               </button>
                             </div>
-                            <div class="reply-item__time">{{ formatPublishedAt(child.PublishedAt) }}</div>
+                            <time-ago class="reply-item__time" :value="child.PublishedAt" />
                           </div>
                         </div>
 
@@ -293,6 +339,17 @@
                             :label="`${child.Likes}`"
                             :disable="thread.Locked || togglingReplyIds.has(child.Id)"
                             @click="handleToggleReplyLike(child.Id)"
+                          />
+                          <q-btn
+                            v-if="child.CanDelete"
+                            flat
+                            no-caps
+                            dense
+                            class="reply-item__tool-btn"
+                            icon="mdiDelete"
+                            aria-label="删除回复"
+                            :disable="deletingReplyIds.has(child.Id)"
+                            @click="handleDeleteReply(child.Id)"
                           />
                         </div>
                       </div>
@@ -338,7 +395,10 @@
                   :to="{ name: 'ForumThread', params: { id: item.id } }"
                 >
                   <div class="related-item__title">{{ item.title }}</div>
-                  <div class="related-item__meta">{{ item.boardName }} · {{ item.viewedAtLabel }}</div>
+                  <div class="related-item__meta">
+                    {{ item.boardName }} ·
+                    <time-ago :value="item.viewedAt" />
+                  </div>
                 </router-link>
               </div>
               <div v-else class="side-panel__empty">你最近浏览过的帖子会显示在这里。</div>
@@ -364,8 +424,7 @@
 
       <div v-else class="thread-page__empty">
         <q-icon name="mdiFileAlertOutline" size="44px" color="primary" />
-        <h2>帖子不存在</h2>
-        <p>{{ loadError || '这条帖子可能已经被删除，或者当前 mock 数据里还没有它。' }}</p>
+        <p>{{ loadError || '这条帖子可能已经被删除。' }}</p>
         <q-btn unelevated no-caps color="primary" label="返回社区首页" :to="{ name: 'ForumList' }" />
       </div>
     </div>
@@ -377,17 +436,19 @@ import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 
 import sanitizerHtml from '@/utils/sanitizeHtml'
-import { parseTime, toNow } from '@/utils/time'
 
 import { useAppStore } from '@/stores/app'
 
 import HtmlReader from '@/components/html/HtmlReader.vue'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 import {
   createCommunityReply,
+  deleteCommunityReply,
+  deleteCommunityThread,
   getCommunityReplyChildren,
   getCommunityThread,
   toggleReplyLike,
@@ -413,10 +474,6 @@ interface RecentThreadHistoryItem {
   viewedAt: number
 }
 
-interface RecentThreadCardItem extends RecentThreadHistoryItem {
-  viewedAtLabel: string
-}
-
 const appStore = useAppStore()
 const { user } = storeToRefs(appStore)
 const $q = useQuasar()
@@ -430,7 +487,9 @@ const loadingMoreReplies = ref(false)
 const loadingChildReplyIds = ref<Set<number>>(new Set())
 const togglingLike = ref(false)
 const togglingFavorite = ref(false)
+const deleting = ref(false)
 const togglingReplyIds = ref<Set<number>>(new Set())
+const deletingReplyIds = ref<Set<number>>(new Set())
 const submittingReply = ref(false)
 const draftReply = ref('')
 const loadError = ref('')
@@ -438,7 +497,7 @@ const replyError = ref('')
 const replyPage = ref(1)
 const replyTarget = ref<CommunityReplyTarget | null>(null)
 const replyComposerRef = ref<HTMLElement | null>(null)
-const recentThreadItems = ref<RecentThreadCardItem[]>([])
+const recentThreadItems = ref<RecentThreadHistoryItem[]>([])
 
 const emptyPagination: CommunityPagination = {
   Page: 1,
@@ -494,27 +553,6 @@ function avatarBackground(seed: string) {
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
 }
 
-function formatPublishedAt(value: string) {
-  return toNow(parseTime(value))
-}
-
-function formatRecentViewedAt(viewedAt: number) {
-  const diff = Date.now() - viewedAt
-  const minute = 60 * 1000
-  const hour = 60 * minute
-  const day = 24 * hour
-
-  if (diff < hour) {
-    return `${Math.max(1, Math.floor(diff / minute))} 分钟前`
-  }
-
-  if (diff < day) {
-    return `${Math.floor(diff / hour)} 小时前`
-  }
-
-  return `${Math.floor(diff / day)} 天前`
-}
-
 function readRecentThreadHistory() {
   if (typeof window === 'undefined') {
     return []
@@ -542,10 +580,6 @@ function syncRecentThreadItems(currentThreadId?: number) {
     .filter((item) => item.id !== currentThreadId)
     .sort((a, b) => b.viewedAt - a.viewedAt)
     .slice(0, 4)
-    .map((item) => ({
-      ...item,
-      viewedAtLabel: formatRecentViewedAt(item.viewedAt),
-    }))
 }
 
 function pushRecentThreadHistory(item: RecentThreadHistoryItem) {
@@ -828,6 +862,33 @@ async function handleToggleFavorite() {
   }
 }
 
+function handleDeleteThread() {
+  if (!thread.value || deleting.value) {
+    return
+  }
+
+  const threadId = thread.value.Id
+
+  $q.dialog({
+    title: '提示',
+    message: '你确定要删除这个帖子吗？',
+    ok: { label: '删除', color: 'negative', unelevated: true, noCaps: true },
+    cancel: { label: '取消', color: 'grey-7', flat: true, noCaps: true },
+  }).onOk(async () => {
+    deleting.value = true
+
+    try {
+      await deleteCommunityThread(threadId)
+      $q.notify({ type: 'positive', message: '帖子已删除' })
+      await router.replace({ name: 'ForumList' })
+    } catch (err) {
+      $q.notify({ type: 'negative', message: err instanceof Error ? err.message : '删除失败' })
+    } finally {
+      deleting.value = false
+    }
+  })
+}
+
 async function handleToggleReplyLike(replyId: number) {
   if (!thread.value || thread.value.Locked || !requireLogin()) {
     return
@@ -846,6 +907,60 @@ async function handleToggleReplyLike(replyId: number) {
     const nextIds = new Set(togglingReplyIds.value)
     nextIds.delete(replyId)
     togglingReplyIds.value = nextIds
+  }
+}
+
+function handleDeleteReply(replyId: number) {
+  if (!thread.value || deletingReplyIds.value.has(replyId)) {
+    return
+  }
+
+  $q.dialog({
+    title: '提示',
+    message: '你确定要删除这条回复吗？',
+    ok: { label: '删除', color: 'negative', unelevated: true, noCaps: true },
+    cancel: { label: '取消', color: 'grey-7', flat: true, noCaps: true },
+  }).onOk(async () => {
+    deletingReplyIds.value = new Set(deletingReplyIds.value).add(replyId)
+
+    try {
+      const res = await deleteCommunityReply(replyId)
+      removeReplyFromList(replyId, res.Removed)
+      $q.notify({ type: 'positive', message: '回复已删除' })
+    } catch (err) {
+      $q.notify({ type: 'negative', message: err instanceof Error ? err.message : '删除失败' })
+    } finally {
+      const nextIds = new Set(deletingReplyIds.value)
+      nextIds.delete(replyId)
+      deletingReplyIds.value = nextIds
+    }
+  })
+}
+
+// 楼层删掉时它的子回复一起没了，服务端返回的 Removed 就是这次少掉的回复总数
+function removeReplyFromList(replyId: number, removed: number) {
+  const rootIndex = replyItems.value.findIndex((item) => item.Id === replyId)
+
+  if (rootIndex >= 0) {
+    replyItems.value.splice(rootIndex, 1)
+  } else {
+    const parent = findRootReply(replyId)
+    if (parent) {
+      parent.ChildReplies = parent.ChildReplies.filter((item) => item.Id !== replyId)
+      parent.ChildPage = { ...parent.ChildPage, Total: Math.max(0, parent.ChildPage.Total - 1) }
+    }
+  }
+
+  if (!thread.value) {
+    return
+  }
+
+  const total = Math.max(0, replyPagination.value.Total - (rootIndex >= 0 ? 1 : 0))
+  thread.value.Replies = Math.max(0, thread.value.Replies - removed)
+  thread.value.RepliesPage = {
+    ...replyPagination.value,
+    Total: total,
+    HasMore: replyItems.value.length < total,
   }
 }
 
@@ -985,6 +1100,12 @@ watch(
   p {
     text-indent: unset;
   }
+}
+
+.thread-card__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .thread-page__shell {

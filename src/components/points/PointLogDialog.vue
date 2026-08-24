@@ -19,7 +19,7 @@
           <q-item v-for="(item, i) in list" :key="i">
             <q-item-section>
               <q-item-label>{{ sourceLabel(item.Source, item.Amount) }}</q-item-label>
-              <q-item-label caption>{{ toNow(parseTime(item.OccurredAt)) }}</q-item-label>
+              <q-item-label caption><time-ago :value="item.OccurredAt" /></q-item-label>
             </q-item-section>
             <q-item-section side class="items-end">
               <div :class="item.Amount >= 0 ? 'text-positive' : 'text-negative'" class="text-weight-medium">
@@ -48,9 +48,9 @@ import { useQuasar } from 'quasar'
 import { computed, nextTick, ref, watch } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
-import { parseTime, toNow } from '@/utils/time'
 
 import CoinIcon from '@/components/points/CoinIcon.vue'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { getCoinLog, getPointLog } from '@/services/points'
 

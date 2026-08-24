@@ -1,17 +1,13 @@
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { parseTime } from '@/utils/time'
 
-import { useToNowRef } from '@/composition/useToNowRef'
-
 import type { Announcement as _Announcement } from '@/services/context/type'
 import type { Dayjs } from 'dayjs'
-import type { Ref } from 'vue'
 
 export interface Announcement {
   Id: number
   Title: string
   CreatedAt: Dayjs
-  Before: Ref<string>
   Content: string
   PreviewContent: string
 }
@@ -28,7 +24,6 @@ export function announcementFormat(element: _Announcement): Announcement {
   return {
     Id: element.Id,
     CreatedAt: parseTime(element.CreatedAt),
-    Before: useToNowRef(() => element.CreatedAt),
     PreviewContent: getPreview(element.Content),
     Content: element.Content,
     Title: element.Title,

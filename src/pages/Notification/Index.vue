@@ -34,7 +34,7 @@
                     {{ getNotificationLabel(notification) }}
                   </span>
                   <q-space />
-                  <span class="text-grey-6 text-caption">{{ formatTime(notification.CreatedAt) }}</span>
+                  <time-ago class="text-grey-6 text-caption" :value="notification.CreatedAt" />
                 </div>
 
                 <div v-if="notification.Extra" class="notification-preview-container">
@@ -87,9 +87,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-import { parseTime, toNow } from '@/utils/time'
-
 import { useAppStore } from '@/stores/app'
+
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
@@ -120,11 +120,6 @@ const refreshUnreadCount = async () => {
   } catch {
     // 保持通知页主流程可用，badge 刷新失败不阻断跳转
   }
-}
-
-// 格式化时间 - 使用项目统一的时间格式化函数
-const formatTime = (time: string) => {
-  return toNow(parseTime(time))
 }
 
 // 加载通知列表

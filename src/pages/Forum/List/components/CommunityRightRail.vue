@@ -21,7 +21,10 @@
                 <div class="rank-item__index" :class="{ 'rank-item__index--hot': index < 3 }">{{ index + 1 }}</div>
                 <div class="rank-item__copy">
                   <div class="rank-item__title">{{ item.Title }}</div>
-                  <div class="rank-item__meta">{{ item.BoardName }} · {{ formatPublishedAt(item.PublishedAt) }}</div>
+                  <div class="rank-item__meta">
+                    {{ item.BoardName }} ·
+                    <time-ago :value="item.PublishedAt" />
+                  </div>
                 </div>
                 <div class="rank-item__value">{{ item.Heat }}</div>
               </div>
@@ -66,7 +69,7 @@
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
-import { parseTime, toNow } from '@/utils/time'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import type { CommunityActiveUserItem, CommunityHotRankItem } from '@/services/forum'
 
@@ -96,10 +99,6 @@ const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#
 function avatarBackground(seed: string) {
   const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
   return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
-}
-
-function formatPublishedAt(value: string) {
-  return toNow(parseTime(value))
 }
 </script>
 

@@ -46,7 +46,7 @@
       <div class="folder-name">
         <div class="folder-name-text" :title="title">{{ title }}</div>
       </div>
-      <div v-if="updatedAt" class="folder-update-time">{{ updateTime }}</div>
+      <div v-if="updatedAt" class="folder-update-time"><time-ago :value="updatedAt" /></div>
     </div>
 
     <slot name="footer" />
@@ -57,8 +57,7 @@
 import { computed, ref } from 'vue'
 
 import SystemImage from '@/components/SystemImage.vue'
-
-import { useToNowRef } from '@/composition/useToNowRef'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import type { RouteLocationRaw } from 'vue-router'
 
@@ -78,7 +77,6 @@ const props = defineProps<{
 const emit = defineEmits<{ click: [] }>()
 
 const limitedCovers = computed(() => (props.covers ?? []).filter(Boolean).slice(0, 4))
-const updateTime = useToNowRef(() => props.updatedAt)
 
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {

@@ -31,7 +31,7 @@
                 <div>系列名：{{ manga.subtitle }}</div>
                 <div>系列中文名：{{ manga.title }}</div>
                 <div>最后更新：{{ manga.latestUpdate }}</div>
-                <div>更新时间：{{ dateFormat(manga.updatedAt) }} ({{ updatedAtDesc }})</div>
+                <div>更新时间：{{ dateFormat(manga.updatedAt) }} (<time-ago :value="manga.updatedAt" />)</div>
                 <div>上次阅读：{{ lastReadText }}</div>
               </div>
 
@@ -151,11 +151,11 @@ import { parseTime } from '@/utils/time'
 
 import { BookUserAvatar, Comment } from '@/components'
 import { QGrid, QGridItem } from '@/components/grid'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useBookDownload } from '@/composition/biz/useBookDownload'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
-import { useToNowRef } from '@/composition/useToNowRef'
 
 import { CommentType } from '@/services/comment/types'
 import { getComicSeriesInfo } from '@/services/manga'
@@ -200,7 +200,6 @@ const lastReadText = computed(() => {
   const saved = lastProgress.value
   return saved ? `${saved.book.title} / ${saved.chapter.title} · 第 ${saved.progress.page} 页` : '暂无'
 })
-const updatedAtDesc = useToNowRef(() => manga.value?.updatedAt)
 const isAscending = (bookId: string) => ascending.value[bookId] ?? true
 const toggleSort = (bookId: string) => {
   ascending.value = { ...ascending.value, [bookId]: !isAscending(bookId) }

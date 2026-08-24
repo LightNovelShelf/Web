@@ -94,6 +94,7 @@ export interface CommunityThreadReply {
   Content: string
   Likes: number
   Liked?: boolean
+  CanDelete?: boolean
   ReplyTo?: CommunityReplyTarget
   ChildReplies: CommunityThreadReply[]
   ChildPage: CommunityPagination
@@ -102,6 +103,8 @@ export interface CommunityThreadReply {
 export interface CommunityThreadDetail extends CommunityFeedItem {
   Liked?: boolean
   Favorited?: boolean
+  EditedAt?: string | null
+  CanEdit?: boolean
   BodyHtml: string
   RepliesPage: CommunityPagination
   ReplyItems: CommunityThreadReply[]
@@ -132,11 +135,19 @@ export interface CommunityFeedPayload {
   FeedPage: CommunityPagination
 }
 
+export interface CommunityCatalogPayload {
+  CatalogBoards: CommunityCatalogBoard[]
+}
+
 export interface CreateCommunityThreadRequest {
   boardKey: Exclude<CommunityBoardKey, 'all'>
   subCategoryKey?: string
   title: string
   contentHtml: string
+}
+
+export interface UpdateCommunityThreadRequest extends CreateCommunityThreadRequest {
+  threadId: number
 }
 
 export interface CreateCommunityReplyRequest {

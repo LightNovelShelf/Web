@@ -17,7 +17,7 @@
     <q-grid
       v-if="mangas.length"
       :x-gap="12"
-      :y-gap="20"
+      :y-gap="8"
       cols="6"
       xs="3"
       sm="4"
@@ -42,7 +42,7 @@
               <div class="series-title-text" :title="manga.title">{{ manga.title }}</div>
             </div>
             <div class="series-update-time">
-              <manga-update-time :updated-at="manga.updatedAt" />
+              <time-ago :value="manga.updatedAt" />
             </div>
           </div>
         </router-link>
@@ -78,6 +78,7 @@ import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 import { getErrMsg } from '@/utils/getErrMsg'
 
 import { QGrid, QGridItem } from '@/components/grid'
+import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -86,7 +87,6 @@ import { NOOP } from '@/const/empty'
 import { getComicList } from '@/services/manga'
 
 import MangaCover from './components/MangaCover.vue'
-import MangaUpdateTime from './components/MangaUpdateTime.vue'
 import { toMangaListItem } from './data'
 
 import type { MangaListItem } from './types'

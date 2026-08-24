@@ -93,23 +93,6 @@ export async function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT
   return requestWithSignalr('SaveBookShelf', json)
 }
 
-// /** 取用户书架信息 */
-// export async function getBookShelf() {
-//   const res = await requestWithSignalr<{
-//     data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
-//     /** @legacy 历史数据可能没有ver这个键值 */
-//     ver?: SHELF_STRUCT_VER
-//   }>('GetBookShelf')
-
-//   return res
-
-//   // return import('./mock.json') as unknown as Promise<{
-//   //   data: (Types.ServerShelf.Item | ShelfLegacyStruct.First.ServerShelfItem)[]
-//   //   /** @legacy 历史数据可能没有ver这个键值 */
-//   //   ver?: SHELF_STRUCT_VER
-//   // }>
-// }
-
 /** 取用户书架二进制信息 */
 export async function getBookShelfBinary() {
   return requestWithSignalr<{
