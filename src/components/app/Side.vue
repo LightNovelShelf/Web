@@ -14,6 +14,9 @@
 
           <q-item
             :to="!(option.disabled ?? false) && option.route ? { name: option.route, params: option.params } : null"
+            :href="option.href"
+            :target="option.href ? '_blank' : undefined"
+            :rel="option.href ? 'noopener noreferrer' : undefined"
             :disable="option.disabled"
             v-ripple="option.disabled ? !option.disabled : true"
             clickable
@@ -145,6 +148,12 @@ const menuOptions: Array<Record<string, any>> = [
     key: 'collaborator',
     route: 'Collaborator',
     icon: 'mdiAccountMultiple',
+  },
+  {
+    label: '赞助本站',
+    key: 'Sponsor',
+    href: 'https://www.ifdian.net/a/wuyu8512',
+    icon: 'mdiHeartOutline',
   },
 ]
 const commitSha = import.meta.env.VUE_COMMIT_SHA

@@ -1,6 +1,6 @@
-# 轻书架 (light_novel_shelf)
+# 轻书架
 
-A PWA-focused online novel reading project built with Quasar (@quasar/app-vite v3).
+A online novel reading project built with Quasar (@quasar/app-vite v3).
 
 ## Install dependencies
 
@@ -49,3 +49,9 @@ pnpm build:pwa
 ## Configuration
 
 See the Quasar config documentation for customization details.
+
+## 赞助本站
+
+[赞助本站](https://www.ifdian.net/a/wuyu8512)可以帮助我购买更多的 Token，让网站变得更好。
+
+<img src=".github/afdian.jpeg" height="300">
