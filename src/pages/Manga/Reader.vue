@@ -903,15 +903,15 @@ onBeforeUnmount(() => {
   position: fixed;
   z-index: 48;
   top: 58px;
-  right: 0;
   bottom: 52px;
+  left: 0;
   width: min(390px, calc(100vw - 28px));
   padding: 24px;
   overflow: auto;
   color: #eee;
   background: rgba(27, 28, 33, 0.97);
-  border-left: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: -20px 0 45px rgba(0, 0, 0, 0.28);
+  border-right: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 20px 0 45px rgba(0, 0, 0, 0.28);
 }
 .panel-header {
   display: flex;
@@ -1190,7 +1190,7 @@ onBeforeUnmount(() => {
     max-height: 70svh;
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 0;
+    border-right: 0;
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -20px 45px rgba(0, 0, 0, 0.35);
   }
