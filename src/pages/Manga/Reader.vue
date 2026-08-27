@@ -912,6 +912,10 @@ onBeforeUnmount(() => {
   background: rgba(27, 28, 33, 0.97);
   border-right: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: 20px 0 45px rgba(0, 0, 0, 0.28);
+  scrollbar-width: none;
+}
+.reader-panel::-webkit-scrollbar {
+  display: none;
 }
 .panel-header {
   display: flex;
