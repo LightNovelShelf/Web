@@ -44,7 +44,7 @@
         :style="{ marginTop: flip ? '4px' : '24px', clear: 'both' }"
       >
         <div v-if="flip" class="text-center text-caption">{{ flipPage + 1 }} / {{ flipPageCount }}</div>
-        <div v-else class="row justify-between q-gutter-md">
+        <div v-else class="row justify-between gap-16">
           <q-btn @click="prev" class="col">上一章</q-btn>
           <q-btn @click="back" class="col">目录</q-btn>
           <q-btn @click="next" class="col">下一章</q-btn>

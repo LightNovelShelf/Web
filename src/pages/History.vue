@@ -2,7 +2,7 @@
   <q-page padding>
     <!-- 滚动加载 -->
     <q-infinite-scroll @load="onLoad" :offset="100" ref="scroll" :disable="currentIds.length === 0">
-      <div class="q-gutter-y-md">
+      <div class="column gap-y-16">
         <q-tabs dense v-model="tab" class="text-teal">
           <template v-for="option in tabOptions" :key="option.key">
             <q-tab :name="option.name" :icon="option.icon" :label="option.label" :disable="option.disable" />

@@ -22,10 +22,19 @@ body.desktop {
   opacity: 0.6;
 }
 
+// 间距统一用 gap：Quasar 的 q-gutter-* / q-col-gutter-* 靠负 margin 撑开，会顶出容器边界
 @for $i from 1 through 6 {
   $gap: $i * 4;
 
   .gap-#{$gap} {
     gap: #{$gap}px;
+  }
+
+  .gap-x-#{$gap} {
+    column-gap: #{$gap}px;
+  }
+
+  .gap-y-#{$gap} {
+    row-gap: #{$gap}px;
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="fit row flex-center column absolute-full">
-    <div style="width: 300px" class="q-gutter-sm">
+    <div style="width: 300px" class="column gap-8">
       <div class="text-opacity text-center">
         <q-icon size="60px" name="mdiAccountCircle"></q-icon>
         <div class="text-opacity text-h5">重置密码</div>

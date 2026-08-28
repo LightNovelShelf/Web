@@ -2,7 +2,7 @@
   <q-page padding style="max-width: 1920px" class="items-center flex fit">
     <q-grid v-if="isActive" x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
       <q-grid-item>
-        <div class="q-gutter-sm">
+        <div class="column gap-8">
           <div class="text-opacity">封面预览</div>
           <q-card>
             <system-image v-if="book?.Cover" :url="book.Cover" :request-height="1024" :ratio="2 / 3" />
@@ -13,7 +13,7 @@
         </div>
       </q-grid-item>
       <q-grid-item span="2" xs="1" sm="1" md="1">
-        <div class="q-gutter-sm">
+        <div class="column gap-8">
           <image-input v-model="book['Cover']" />
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />

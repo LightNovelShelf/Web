@@ -1,7 +1,7 @@
 <template>
   <q-page padding style="max-width: 1920px" class="q-mx-auto">
     <div v-if="isActive">
-      <div class="q-gutter-sm">
+      <div class="column gap-8">
         <q-input label="标题" v-model="chapter['Title']" />
         <div class="text-opacity">内容</div>
         <html-editor v-model:html="chapter['Content']" mode="common" />

@@ -68,7 +68,7 @@
         <q-skeleton type="text" width="35%" />
         <q-skeleton type="text" width="85%" class="q-mt-sm" />
         <q-skeleton type="text" width="72%" class="q-mt-xs" />
-        <div class="row items-center q-gutter-sm q-mt-md">
+        <div class="row items-center gap-8 q-mt-md">
           <q-skeleton type="QAvatar" size="32px" />
           <q-skeleton type="text" width="22%" />
           <q-skeleton type="text" width="18%" />

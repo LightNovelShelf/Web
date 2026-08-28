@@ -56,7 +56,7 @@
                 {{ comment.Commentaries[`${item.Id}`].Content }}
               </q-item-label>
               <q-item-label caption>
-                <div class="row items-center q-gutter-x-md">
+                <div class="row items-center gap-x-16">
                   <div><time-ago :value="comment.Commentaries[`${item.Id}`].CreatedAt" /></div>
                   <div>
                     <q-btn flat dense @click="showReply(item.Id)">回复</q-btn>
@@ -107,7 +107,7 @@
                           {{ comment.Commentaries[`${replyId}`].Content }}
                         </q-item-label>
                         <q-item-label caption>
-                          <div class="row items-center q-gutter-x-md">
+                          <div class="row items-center gap-x-16">
                             <div><time-ago :value="comment.Commentaries[`${replyId}`].CreatedAt" /></div>
                             <div>
                               <q-btn flat dense @click="showReply(item.Id, replyId)">回复</q-btn>

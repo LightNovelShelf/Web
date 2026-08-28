@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <div class="q-pa-md q-mx-auto" :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`">
-      <div class="q-gutter-y-md">
+      <div class="column gap-y-16">
         <q-tabs dense v-model="tab" class="text-teal">
           <template v-for="option in tabOptions" :key="option.key">
             <q-tab :name="option.name" :icon="option.icon" :label="option.label" />
@@ -10,27 +10,33 @@
         <q-tab-panels v-model="tab" animated>
           <q-tab-panel name="Setting">
             <div class="q-pa-md">
-              <div class="q-gutter-xs light-radio">
+              <div class="column gap-4 light-radio">
                 <div class="text-subtitle1">网站模式</div>
-                <q-radio v-model="dark" :val="false" label="明亮" />
-                <q-radio v-model="dark" :val="true" label="夜间" />
-                <q-radio v-model="dark" val="auto" label="自动" />
+                <div class="row gap-4">
+                  <q-radio v-model="dark" :val="false" label="明亮" />
+                  <q-radio v-model="dark" :val="true" label="夜间" />
+                  <q-radio v-model="dark" val="auto" label="自动" />
+                </div>
               </div>
               <q-separator />
-              <div class="q-gutter-xs light-radio q-mt-md">
+              <div class="column gap-4 light-radio q-mt-md">
                 <div class="text-subtitle1">书籍列表</div>
-                <q-toggle v-model="generalSetting.ignoreJapanese" label="隐藏日版" />
-                <q-toggle v-model="generalSetting.ignoreAI" label="隐藏AI内容" />
+                <div class="row gap-4">
+                  <q-toggle v-model="generalSetting.ignoreJapanese" label="隐藏日版" />
+                  <q-toggle v-model="generalSetting.ignoreAI" label="隐藏AI内容" />
+                </div>
               </div>
               <q-separator />
-              <div class="q-gutter-xs light-radio q-mt-md">
+              <div class="column gap-4 light-radio q-mt-md">
                 <div class="text-subtitle1">全局宽度</div>
-                <q-radio v-model="generalSetting.globalWidth" :val="100" label="100%" />
-                <q-radio v-model="generalSetting.globalWidth" :val="75" label="75%" />
-                <q-radio v-model="generalSetting.globalWidth" :val="50" label="50%" />
+                <div class="row gap-4">
+                  <q-radio v-model="generalSetting.globalWidth" :val="100" label="100%" />
+                  <q-radio v-model="generalSetting.globalWidth" :val="75" label="75%" />
+                  <q-radio v-model="generalSetting.globalWidth" :val="50" label="50%" />
+                </div>
               </div>
               <q-separator />
-              <div class="q-gutter-xs light-radio q-mt-md q-mb-sm">
+              <div class="column gap-4 light-radio q-mt-md q-mb-sm">
                 <div class="text-subtitle1">服务器节点</div>
                 <q-select emit-value map-options filled v-model="apiServer" :options="apiServerOptions" />
               </div>
@@ -39,18 +45,22 @@
 
           <q-tab-panel name="Read">
             <div class="q-pa-md">
-              <div class="q-gutter-xs">
+              <div class="column gap-4">
                 <div class="text-subtitle1">阅读模式</div>
-                <q-radio v-model="readSetting.readMode" val="scroll" label="上下滚动" />
-                <q-radio v-model="readSetting.readMode" val="flip" label="左右翻页" />
+                <div class="row gap-4">
+                  <q-radio v-model="readSetting.readMode" val="scroll" label="上下滚动" />
+                  <q-radio v-model="readSetting.readMode" val="flip" label="左右翻页" />
+                </div>
                 <div class="text-caption text-grey">左右翻页：点击页面左右边缘、方向键或左右滑动翻页，大屏自动双栏</div>
               </div>
               <q-separator class="q-mt-md" />
-              <div class="q-gutter-xs bg-radio">
+              <div class="column gap-4 bg-radio">
                 <div class="text-subtitle1">阅读背景</div>
-                <q-radio v-model="readSetting.bgType" val="none" label="无" />
-                <q-radio v-model="readSetting.bgType" val="paper" label="纸质" />
-                <q-radio v-model="readSetting.bgType" val="custom" label="自定义颜色" />
+                <div class="row gap-4">
+                  <q-radio v-model="readSetting.bgType" val="none" label="无" />
+                  <q-radio v-model="readSetting.bgType" val="paper" label="纸质" />
+                  <q-radio v-model="readSetting.bgType" val="custom" label="自定义颜色" />
+                </div>
               </div>
               <q-color
                 style="max-width: 200px"
@@ -59,37 +69,43 @@
                 class="my-picker q-mt-md"
               />
               <q-separator />
-              <div class="q-gutter-xs q-mt-md">
+              <div class="column gap-4 q-mt-md">
                 <div class="text-subtitle1">文字转换</div>
-                <q-radio v-model="readSetting.convert" :val="null" label="无" />
-                <q-radio v-model="readSetting.convert" val="t2s" label="简化" />
-                <q-radio v-model="readSetting.convert" val="s2t" label="繁化" />
+                <div class="row gap-4">
+                  <q-radio v-model="readSetting.convert" :val="null" label="无" />
+                  <q-radio v-model="readSetting.convert" val="t2s" label="简化" />
+                  <q-radio v-model="readSetting.convert" val="s2t" label="繁化" />
+                </div>
               </div>
               <q-separator />
-              <div class="q-gutter-xs q-mt-md">
+              <div class="column gap-4 q-mt-md">
                 <div class="text-subtitle1">其他选项</div>
-                <q-toggle v-model="readSetting.justify" label="两端对齐" />
-                <q-toggle
-                  v-model="readSetting.showButton"
-                  :label="readSetting.showButton ? '显示底部按钮' : '隐藏底部按钮'"
-                />
-                <q-toggle v-model="readSetting.tapToScroll" label="点击边缘滚动页面" />
-                <q-toggle v-model="readSetting.hideFullScreen" label="隐藏全屏按钮" />
+                <div class="row gap-4">
+                  <q-toggle v-model="readSetting.justify" label="两端对齐" />
+                  <q-toggle
+                    v-model="readSetting.showButton"
+                    :label="readSetting.showButton ? '显示底部按钮' : '隐藏底部按钮'"
+                  />
+                  <q-toggle v-model="readSetting.tapToScroll" label="点击边缘滚动页面" />
+                  <q-toggle v-model="readSetting.hideFullScreen" label="隐藏全屏按钮" />
+                </div>
               </div>
               <q-separator />
-              <div class="q-gutter-xs q-mt-md">
+              <div class="column gap-4 q-mt-md">
                 <div class="text-subtitle1">字体大小</div>
                 <q-slider label v-model="readSetting.fontSize" :min="12" :max="30" />
               </div>
               <q-separator />
-              <div class="q-gutter-xs q-mt-md">
+              <div class="column gap-4 q-mt-md">
                 <div class="text-subtitle1">
                   阅读页宽度{{ readSetting.widthType === 'custom' ? '（设为 0 时为全屏，只在大屏幕下生效）' : '' }}
                 </div>
-                <q-radio v-model="readSetting.widthType" val="full" label="全屏" />
-                <q-radio v-model="readSetting.widthType" val="medium" label="中" />
-                <q-radio v-model="readSetting.widthType" val="small" label="小" />
-                <q-radio v-model="readSetting.widthType" val="custom" label="自定义" />
+                <div class="row gap-4">
+                  <q-radio v-model="readSetting.widthType" val="full" label="全屏" />
+                  <q-radio v-model="readSetting.widthType" val="medium" label="中" />
+                  <q-radio v-model="readSetting.widthType" val="small" label="小" />
+                  <q-radio v-model="readSetting.widthType" val="custom" label="自定义" />
+                </div>
                 <div style="max-width: 150px">
                   <q-input
                     v-model="readSetting.readPageWidth"
@@ -110,7 +126,7 @@
 
           <q-tab-panel name="Edit">
             <div class="q-pa-md">
-              <div class="q-gutter-xs">
+              <div class="column items-start gap-4">
                 <div class="text-subtitle1">编辑器</div>
                 <q-btn-toggle
                   v-model="editorSetting.mode"
