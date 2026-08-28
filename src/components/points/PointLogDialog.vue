@@ -89,10 +89,11 @@ const SOURCE_LABEL: Record<string, string> = {
   DownloadComic: '下载漫画',
   ShareNovel: '小说下载分成',
   ShareComic: '漫画下载分成',
+  ShopPurchase: '商店购买',
   Admin: '系统',
 }
 // 消费类来源天然是负数，不该被当成「回收」
-const SPEND_SOURCES = new Set(['DownloadNovel', 'DownloadComic'])
+const SPEND_SOURCES = new Set(['DownloadNovel', 'DownloadComic', 'ShopPurchase'])
 function sourceLabel(source: string, amount: number) {
   const label = SOURCE_LABEL[source] ?? source
   return amount < 0 && !SPEND_SOURCES.has(source) ? `${label}回收` : label

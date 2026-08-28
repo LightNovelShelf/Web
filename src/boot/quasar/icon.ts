@@ -69,7 +69,6 @@ export {
   mdiFullscreenExit,
   mdiDragVariant,
   mdiFire,
-  mdiPinwheel,
   mdiFormatBold,
   mdiFormatItalic,
   mdiFormatStrikethrough,
@@ -143,4 +142,5 @@ export {
   mdiCalendarCheckOutline,
   mdiDownload,
   mdiDotsHorizontal,
+  mdiStorefrontOutline,
 } from '@quasar/extras/mdi-v7'

@@ -80,13 +80,6 @@ const menuOptions: Array<Record<string, any>> = [
     icon: 'mdiBullhorn',
   },
   {
-    label: '订阅内容',
-    key: 'Subscriptions',
-    route: 'Subscriptions',
-    disabled: true,
-    icon: 'mdiPinwheel',
-  },
-  {
     label: 'separator',
     key: 'separator 0',
   },
@@ -132,6 +125,12 @@ const menuOptions: Array<Record<string, any>> = [
     key: 'History',
     route: 'History',
     icon: 'mdiHistory',
+  },
+  {
+    label: '商城',
+    key: 'Shop',
+    route: 'Shop',
+    icon: 'mdiStorefrontOutline',
   },
   {
     label: 'separator',

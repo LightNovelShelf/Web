@@ -130,6 +130,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Test.vue'),
   },
   {
+    path: '/shop',
+    name: 'Shop',
+    component: () => import('../pages/Shop/Index.vue'),
+  },
+  {
     path: '/',
     meta: { requiresAuth: false },
     component: () => import('../pages/Login/Index.vue'),

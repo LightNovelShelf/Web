@@ -38,7 +38,7 @@
 
       <q-space />
 
-      <div class="q-gutter-sm row items-center no-wrap">
+      <div class="row items-center no-wrap gap-8">
         <q-btn round dense flat @click="goToNotification">
           <q-badge v-if="user && user.UnreadNotificationCount > 0" color="red" floating>
             {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
@@ -70,14 +70,16 @@
                 </q-item>
               </div>
 
-              <div class="coin-item">
+              <router-link class="coin-item" :to="{ name: 'Shop' }">
                 <coin-icon size="18px" />
                 <span>{{ growth?.Coin ?? 0 }}</span>
-              </div>
+                <q-space />
+                <span class="text-caption text-opacity">去商城</span>
+              </router-link>
 
               <div class="level-item">
                 <template v-if="growthLevel >= 6">
-                  <div class="row q-col-gutter-sm items-center">
+                  <div class="row items-center gap-8">
                     <div class="col level-item__bar--tag level-item__bar--now">lv6</div>
                     <div class="col">
                       <q-linear-progress size="xs" :value="1" />
@@ -88,7 +90,7 @@
                   <div class="text-caption text-opacity level-item__text">恭喜你已经是满级了</div>
                 </template>
                 <template v-else>
-                  <div class="row q-col-gutter-sm items-center">
+                  <div class="row items-center gap-8">
                     <div class="col level-item__bar--tag level-item__bar--now">lv{{ growthLevel }}</div>
                     <div class="col">
                       <q-linear-progress size="xs" :value="expProgress" />
@@ -152,7 +154,7 @@
             </q-list>
 
             <div v-else class="q-pa-sm">
-              <div class="row q-col-gutter-sm">
+              <div class="row gap-8">
                 <div>
                   <router-link :to="{ name: 'Login' }">
                     <q-btn color="primary">登录</q-btn>
@@ -257,6 +259,12 @@ const userInfoMenuOptions: Array<Record<string, any>> = [
     icon: 'mdiFolderHeartOutline',
   },
   {
+    label: '商城',
+    key: 'Shop',
+    route: 'Shop',
+    icon: 'mdiStorefrontOutline',
+  },
+  {
     label: '我的社区',
     key: 'ForumMine',
     route: 'ForumMine',
@@ -315,6 +323,8 @@ function logout() {
       margin-bottom: 10px;
       font-size: 15px;
       font-weight: 500;
+      color: inherit;
+      cursor: pointer;
     }
 
     .level-item {

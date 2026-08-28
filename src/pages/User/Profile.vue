@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="list-card" style="max-width: 900px">
-      <div class="q-gutter-md">
+      <div class="column gap-16">
         <div class="h2 title">个人资料</div>
 
         <q-list class="card" bordered separator>
@@ -59,7 +59,8 @@
             </q-item-section>
             <q-item-section class="label-item">金币</q-item-section>
             <q-item-section side>
-              <div class="row items-center no-wrap">
+              <div class="row items-center no-wrap gap-8">
+                <q-btn outline size="sm" color="primary" label="商城" :to="{ name: 'Shop' }" @click.stop />
                 <span>{{ growth?.Coin ?? 0 }}</span>
                 <q-icon size="18px" name="mdiChevronRight" />
               </div>
