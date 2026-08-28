@@ -50,6 +50,11 @@ export async function getMyInfo() {
   return requestWithSignalr('GetMyInfo')
 }
 
+/** 重置邀请码，返回新邀请码 */
+export async function resetInviteCode() {
+  return requestWithSignalr<Types.ResetInviteCode.Res>('ResetInviteCode')
+}
+
 /** 获取用户阅读历史 */
 export async function getReadHistory() {
   return requestWithSignalr<{ Novel: number[]; Comic: number[] }>('GetReadHistory')

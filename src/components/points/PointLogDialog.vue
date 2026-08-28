@@ -85,6 +85,7 @@ const SOURCE_LABEL: Record<string, string> = {
   Thread: '发帖',
   Reply: '回复',
   BookComment: '评论',
+  Invite: '邀请注册',
   DownloadNovel: '下载小说',
   DownloadComic: '下载漫画',
   ShareNovel: '小说下载分成',

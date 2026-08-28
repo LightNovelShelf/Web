@@ -19,6 +19,16 @@
                   option.value ? option.value(user) : option.hide ? getHideChar(user?.[option.key]) : user?.[option.key]
                 }}
               </q-item-section>
+              <q-item-section side v-if="option.action">
+                <q-btn
+                  outline
+                  size="sm"
+                  color="primary"
+                  :label="option.action.label"
+                  :loading="option.action.loading"
+                  @click.stop="option.action.onClick()"
+                />
+              </q-item-section>
               <q-item-section side v-if="option.editable">
                 <q-icon size="18px" name="mdiChevronRight" />
               </q-item-section>
@@ -157,7 +167,7 @@ import CoinIcon from '@/components/points/CoinIcon.vue'
 import PointLogDialog from '@/components/points/PointLogDialog.vue'
 import SignInDialog from '@/components/points/SignInDialog.vue'
 
-import { setAvatar, getMyInfo } from '@/services/user'
+import { setAvatar, getMyInfo, resetInviteCode } from '@/services/user'
 
 import type { Growth } from '@/services/points'
 
@@ -180,6 +190,29 @@ async function refreshUser() {
   } catch (err) {
     $q.notify({ type: 'negative', message: getErrMsg(err) })
   }
+}
+
+/** 重置邀请码；旧码立即失效，成功后只改本地字段 */
+function handleResetInviteCode() {
+  const action = profileListOptions.find((x) => x.key === 'InviteCode').action
+  if (action.loading) return
+
+  $q.dialog({
+    title: '重置邀请码',
+    message: '重置后旧邀请码立即失效，确定继续？',
+    cancel: true,
+  }).onOk(async () => {
+    action.loading = true
+    try {
+      const res = await resetInviteCode()
+      user.value.InviteCode = res.InviteCode
+      $q.notify({ type: 'positive', message: '邀请码已重置' })
+    } catch (err) {
+      $q.notify({ type: 'negative', message: getErrMsg(err) })
+    } finally {
+      action.loading = false
+    }
+  })
 }
 
 // 确保进入个人资料时拿到最新成长数据（旧会话的 user 可能尚无 Growth）
@@ -231,6 +264,11 @@ const profileListOptions: Array<Record<string, any>> = reactive([
     icon: 'mdiLockPlus',
     copiable: true,
     hide: true,
+    action: {
+      label: '重置',
+      loading: false,
+      onClick: handleResetInviteCode,
+    },
   },
   {
     label: '用户组',

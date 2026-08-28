@@ -27,6 +27,12 @@ export namespace Register {
   }
 }
 
+export namespace ResetInviteCode {
+  export interface Res {
+    InviteCode: string
+  }
+}
+
 export namespace RefreshToken {
   export interface Param {
     token: string
