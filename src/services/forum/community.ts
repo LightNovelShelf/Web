@@ -118,6 +118,7 @@ export async function getCommunityReplyChildren(req: GetCommunityReplyChildrenRe
     ParentReplyId: req.parentReplyId,
     Page: Math.max(1, req.page ?? 1),
     Size: Math.max(1, req.size ?? 3),
+    AfterReplyId: Math.max(0, req.afterReplyId ?? 0),
   })
 }
 

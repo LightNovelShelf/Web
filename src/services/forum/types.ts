@@ -162,6 +162,7 @@ export interface GetCommunityReplyChildrenRequest {
   parentReplyId: number
   page?: number
   size?: number
+  afterReplyId?: number
 }
 
 export interface CommunityMyReplyItem {

@@ -654,6 +654,8 @@ async function loadMoreChildReplies(parentReplyId: number) {
       parentReplyId,
       page: target.ChildPage.Page + 1,
       size: target.ChildPage.Size,
+      // 锚点窗口不对齐页网格，拿已加载的最后一条当游标才不会重复或断档
+      afterReplyId: target.ChildReplies.at(-1)?.Id,
     })
 
     target.ChildReplies = [...target.ChildReplies, ...next.Items]
