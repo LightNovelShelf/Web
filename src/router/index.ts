@@ -61,6 +61,11 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     scrollBehavior(to, from, savedPosition) {
       // Read 页面的滚动历史由页面自己处理
       if (to.name !== 'Read' && to.name !== 'MangaReader') {
+        // 通知跳转带回复锚点时，帖子页自己定位到目标楼层，路由不要再滚回顶部
+        if (to.name === 'ForumThread' && to.query.replyId) {
+          return false
+        }
+
         if (savedPosition) {
           return savedPosition
         } else {
@@ -105,17 +110,6 @@ export default defineRouter(function (/* { store, ssrContext } */) {
       // 有材料就算过，授权失败等情况由其它地方保证
       return
     }
-
-    if (!to.params.authRedirect) {
-      Notify.create({
-        type: 'negative',
-        timeout: 1500,
-        position: 'bottom',
-        message: '此页面必须登录',
-      })
-    }
-
-    // 没有授权材料，跳转到登录页
     return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
   })
 

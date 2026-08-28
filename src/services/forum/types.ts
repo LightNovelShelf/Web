@@ -108,6 +108,7 @@ export interface CommunityThreadDetail extends CommunityFeedItem {
   BodyHtml: string
   RepliesPage: CommunityPagination
   ReplyItems: CommunityThreadReply[]
+  Focus?: { ReplyId: number } | null
   RelatedThreads: CommunityFeedItem[]
 }
 

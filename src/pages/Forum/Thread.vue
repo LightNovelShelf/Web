@@ -519,19 +519,9 @@ const notificationReplyId = computed(() => {
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null
 })
-const notificationParentReplyId = computed(() => {
-  const raw = route.query.parentReplyId
-  const value = Array.isArray(raw) ? raw[0] : raw
-  const parsed = Number(value)
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null
-})
-const notificationFocusKey = computed(() => {
-  if (!notificationReplyId.value && !notificationParentReplyId.value) {
-    return ''
-  }
-
-  return `${props.id}:${notificationReplyId.value ?? ''}:${notificationParentReplyId.value ?? ''}`
-})
+const notificationFocusKey = computed(() =>
+  notificationReplyId.value ? `${props.id}:${notificationReplyId.value}` : '',
+)
 const handledNotificationFocusKey = ref('')
 const isActive = computed(() => thread.value?.Id === threadId.value)
 const replyPlaceholder = computed(() => {
@@ -676,63 +666,6 @@ async function loadMoreChildReplies(parentReplyId: number) {
   }
 }
 
-async function ensureRootReplyVisible(parentReplyId: number) {
-  if (findReplyById(parentReplyId)) {
-    return true
-  }
-
-  while (thread.value?.RepliesPage.HasMore) {
-    await loadThread({ appendReplies: true, trackView: false })
-    if (findReplyById(parentReplyId)) {
-      return true
-    }
-  }
-
-  return false
-}
-
-async function ensureReplyVisible(replyId: number, parentReplyId?: number | null) {
-  if (findReplyById(replyId)) {
-    return true
-  }
-
-  if (parentReplyId && parentReplyId !== replyId) {
-    const rootVisible = await ensureRootReplyVisible(parentReplyId)
-    if (!rootVisible) {
-      return false
-    }
-
-    const rootReply = findRootReply(parentReplyId)
-    if (!rootReply) {
-      return false
-    }
-
-    while (rootReply.ChildPage.HasMore) {
-      await loadMoreChildReplies(rootReply.Id)
-      if (findReplyById(replyId)) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  if (!(await ensureRootReplyVisible(replyId))) {
-    return false
-  }
-
-  for (const reply of replyItems.value) {
-    while (reply.ChildPage.HasMore) {
-      await loadMoreChildReplies(reply.Id)
-      if (findReplyById(replyId)) {
-        return true
-      }
-    }
-  }
-
-  return false
-}
-
 function focusReply(replyId: number) {
   focusedReplyId.value = replyId
 
@@ -743,50 +676,21 @@ function focusReply(replyId: number) {
   }, 2600)
 }
 
-async function scrollToReply(replyId: number, parentReplyId?: number | null) {
-  if (!thread.value) {
-    return
-  }
-
-  const visible = await ensureReplyVisible(replyId, parentReplyId)
-  if (!visible) {
-    $q.notify({
-      type: 'warning',
-      message: '目标回复暂时未加载出来',
-    })
-    return
-  }
-
-  await nextTick()
-
-  const element = document.getElementById(replyDomId(replyId))
-  if (!element) {
-    return
-  }
-
-  element.scrollIntoView({
-    behavior: 'smooth',
+function scrollToReply(replyId: number) {
+  document.getElementById(replyDomId(replyId))?.scrollIntoView({
+    // 通知跳转是定位不是过渡，直接跳到锚点；smooth 在后台标签页会被浏览器冻结
+    behavior: 'auto',
     block: 'center',
   })
-
   focusReply(replyId)
 }
 
-async function focusReplyFromNotification() {
-  if (
-    !thread.value ||
-    !notificationFocusKey.value ||
-    handledNotificationFocusKey.value === notificationFocusKey.value
-  ) {
+function focusReplyFromNotification(focus: CommunityThreadDetail['Focus']) {
+  if (!focus || handledNotificationFocusKey.value === notificationFocusKey.value) {
     return
   }
 
-  const targetReplyId = notificationReplyId.value ?? notificationParentReplyId.value
-  if (!targetReplyId) {
-    return
-  }
-
-  await scrollToReply(targetReplyId, notificationParentReplyId.value)
+  scrollToReply(focus.ReplyId)
   handledNotificationFocusKey.value = notificationFocusKey.value
 }
 
@@ -807,6 +711,8 @@ async function loadThread(options: { appendReplies?: boolean; trackView?: boolea
 
   const data = await getCommunityThread(threadId.value, nextReplyPage, undefined, {
     trackView: options.trackView ?? !appendReplies,
+    // 每页都带锚点：服务端把它所在楼层置顶在第一页、后续页跳过，翻页才不会重复
+    focusReplyId: notificationReplyId.value ?? undefined,
   })
 
   if (!data) {
@@ -826,10 +732,15 @@ async function loadThread(options: { appendReplies?: boolean; trackView?: boolea
     boardName: data.BoardName,
     viewedAt: Date.now(),
   })
-  await nextTick()
-  await focusReplyFromNotification()
+
   loading.value = false
   loadingMoreReplies.value = false
+
+  // v-if=loading 与列表互斥，必须先关骨架屏再等一帧，列表 DOM 才存在
+  await nextTick()
+  if (!appendReplies) {
+    focusReplyFromNotification(data.Focus)
+  }
 }
 
 async function handleToggleThreadLike() {
@@ -1036,7 +947,7 @@ useInitRequest(requestThread, { isActive })
 
 watch(
   () => threadId.value,
-  (current, previous) => {
+  () => {
     void requestThread.syncCall()
   },
 )
@@ -1049,13 +960,7 @@ watch(
     }
 
     handledNotificationFocusKey.value = ''
-
-    if (thread.value?.Id === threadId.value) {
-      void loadThread({ trackView: false })
-      return
-    }
-
-    void focusReplyFromNotification()
+    void loadThread({ trackView: false })
   },
 )
 </script>

@@ -44,13 +44,14 @@ export async function getCommunityThread(
   id: number,
   replyPage = 1,
   replySize = 5,
-  options: { trackView?: boolean } = {},
+  options: { trackView?: boolean; focusReplyId?: number } = {},
 ): Promise<CommunityThreadDetail | null> {
   return requestWithSignalr<CommunityThreadDetail | null>('GetCommunityThread', {
     ThreadId: id,
     ReplyPage: Math.max(1, replyPage),
     ReplySize: Math.max(1, replySize),
     TrackView: options.trackView ?? replyPage === 1,
+    FocusReplyId: Math.max(0, options.focusReplyId ?? 0),
   })
 }
 

@@ -212,10 +212,8 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     router.push({
       name: 'ForumThread',
       params: { id: notification.Extra.object_id },
-      query: {
-        replyId: notification.Extra.reply_id ? String(notification.Extra.reply_id) : undefined,
-        parentReplyId: notification.Extra.parent_reply_id ? String(notification.Extra.parent_reply_id) : undefined,
-      },
+      // 只带 replyId，服务端会定位它所在的楼层
+      query: { replyId: notification.Extra.reply_id ? String(notification.Extra.reply_id) : undefined },
     })
   }
 }
