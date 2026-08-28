@@ -3,9 +3,6 @@ declare global {
     Sanitizer: any
     onTelegramAuth: (user: any) => void
   }
-  interface Element {
-    setHTML: any
-  }
 }
 
 export {}
