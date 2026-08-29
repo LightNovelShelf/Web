@@ -74,7 +74,13 @@ import { useAppStore } from '@/stores/app'
 import { DragPageSticky } from '@/components'
 import HtmlEditor from '@/components/html/HtmlEditor.vue'
 
-import { createCommunityThread, getCommunityCatalog, getCommunityThread, updateCommunityThread } from '@/services/forum'
+import {
+  createCommunityThread,
+  getCommunityCatalog,
+  getCommunityThreadEditInfo,
+  updateCommunityThread,
+} from '@/services/forum'
+import { ServerError } from '@/services/internal/ServerError'
 
 import type { CommunityCatalogBoard } from '@/services/forum'
 import type { OverlayScrollbars as OverlayScrollbarsInstance } from 'overlayscrollbars'
@@ -249,29 +255,28 @@ async function loadCatalog() {
   }
 }
 
-// 编辑态的初始内容：BodyHtml 是解码 + 签名后的正文，回存时 ImageEncoder 会按图片路径还原成 {res:id}
+// 编辑态的初始内容：Content 是解码 + 签名后的正文，回存时 ImageEncoder 会按图片路径还原成 {res:id}
 async function loadThread() {
   try {
-    const thread = await getCommunityThread(threadId.value, 1, 1, { trackView: false })
-    if (!thread) {
-      $q.notify({ type: 'negative', message: '帖子不存在' })
-      await router.replace({ name: 'ForumList' })
-      return
-    }
-
-    if (!thread.CanEdit) {
-      $q.notify({ type: 'warning', message: '没有权限编辑这个帖子' })
-      await router.replace({ name: 'ForumThread', params: { id: threadId.value } })
-      return
-    }
+    // 编辑器吃 Html（markdown 模式由编辑器自己转），所以取默认格式
+    const thread = await getCommunityThreadEditInfo(threadId.value)
 
     boardKey.value = thread.BoardKey
-    subCategoryKey.value = thread.SubCategoryKey ?? ''
+    subCategoryKey.value = thread.SubCategoryKey
     title.value = thread.Title
-    contentHtml.value = thread.BodyHtml || EMPTY_CONTENT
+    contentHtml.value = thread.Content || EMPTY_CONTENT
     threadLoaded.value = true
   } catch (err) {
-    $q.notify({ type: 'negative', message: err instanceof Error ? err.message : '帖子加载失败' })
+    const status = err instanceof ServerError ? err.status : 0
+    $q.notify({
+      type: status === 403 ? 'warning' : 'negative',
+      message: err instanceof Error ? err.message : '帖子加载失败',
+    })
+    if (status === 403) {
+      await router.replace({ name: 'ForumThread', params: { id: threadId.value } })
+    } else if (status === 404) {
+      await router.replace({ name: 'ForumList' })
+    }
   }
 }
 

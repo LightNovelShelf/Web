@@ -130,7 +130,7 @@
               </div>
 
               <div class="thread-card__body">
-                <html-reader :html="sanitizerHtml(thread.BodyHtml)" />
+                <html-reader :html="sanitizerHtml(thread.Content)" />
               </div>
 
               <div class="thread-card__tags">

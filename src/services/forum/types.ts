@@ -105,11 +105,22 @@ export interface CommunityThreadDetail extends CommunityFeedItem {
   Favorited?: boolean
   EditedAt?: string | null
   CanEdit?: boolean
-  BodyHtml: string
+  Content: string
   RepliesPage: CommunityPagination
   ReplyItems: CommunityThreadReply[]
   Focus?: { ReplyId: number } | null
   RelatedThreads: CommunityFeedItem[]
+}
+
+/** GetCommunityThreadEditInfo 的响应：只有编辑器要填的字段 */
+export interface CommunityThreadEditInfo {
+  Id: number
+  BoardKey: string
+  SubCategoryKey: string
+  Title: string
+  /** 正文，格式由 Format 说明 */
+  Content: string
+  Format: string
 }
 
 export interface CommunityHomePayload {

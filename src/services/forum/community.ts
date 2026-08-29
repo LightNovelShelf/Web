@@ -7,6 +7,7 @@ import type {
   CommunityListQuery,
   CommunityMyOverview,
   CommunityThreadDetail,
+  CommunityThreadEditInfo,
   CommunityThreadReply,
   CreateCommunityReplyRequest,
   CreateCommunityThreadRequest,
@@ -52,6 +53,17 @@ export async function getCommunityThread(
     ReplySize: Math.max(1, replySize),
     TrackView: options.trackView ?? replyPage === 1,
     FocusReplyId: Math.max(0, options.focusReplyId ?? 0),
+  })
+}
+
+/** 编辑帖子用：只取编辑器要的字段，markdown 时正文由服务端转换 */
+export async function getCommunityThreadEditInfo(
+  id: number,
+  format: 'html' | 'markdown' = 'html',
+): Promise<CommunityThreadEditInfo> {
+  return requestWithSignalr<CommunityThreadEditInfo>('GetCommunityThreadEditInfo', {
+    ThreadId: id,
+    Format: format,
   })
 }
 
