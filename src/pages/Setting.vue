@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <div class="q-pa-md q-mx-auto" :style="`width: ${$q.screen.gt.md ? settingStore['getGlobalWidth'] : '100%'}`">
-      <div class="column gap-y-16">
+      <div class="column no-wrap gap-y-16">
         <q-tabs dense v-model="tab" class="text-teal">
           <template v-for="option in tabOptions" :key="option.key">
             <q-tab :name="option.name" :icon="option.icon" :label="option.label" />

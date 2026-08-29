@@ -3,7 +3,7 @@
     <!-- todo 不懂他为什么不能放在q-tab-panel里面 -->
     <q-infinite-scroll @load="onLoad" :offset="100" ref="scrollEleInstanceRef">
       <template #default>
-        <div class="column gap-y-16">
+        <div class="column no-wrap gap-y-16">
           <div class="row flex-center">
             <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
             <search-input
@@ -15,7 +15,7 @@
               @search="onSearch"
             />
           </div>
-          <div class="column gap-y-16">
+          <div class="column no-wrap gap-y-16">
             <q-tabs dense v-model="state.tab" class="text-teal" @update:model-value="onTabChange">
               <template v-for="option in tabOptions" :key="option.key">
                 <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
