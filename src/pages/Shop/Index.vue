@@ -8,7 +8,6 @@
           <div class="row items-center no-wrap">
             <coin-icon size="20px" />
             <span class="q-ml-xs text-subtitle1">{{ coin }}</span>
-            <q-btn flat dense size="sm" class="q-ml-sm" label="流水" @click="coinLogVisible = true" />
           </div>
         </div>
 
@@ -79,7 +78,6 @@
       </div>
     </div>
 
-    <point-log-dialog v-model="coinLogVisible" kind="coin" />
     <sign-in-dialog
       v-model="signInVisible"
       :streak="growth?.SignStreak ?? 0"
@@ -99,7 +97,6 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { useAppStore } from '@/stores/app'
 
 import CoinIcon from '@/components/points/CoinIcon.vue'
-import PointLogDialog from '@/components/points/PointLogDialog.vue'
 import SignInDialog from '@/components/points/SignInDialog.vue'
 import SystemImage from '@/components/SystemImage.vue'
 
@@ -120,7 +117,6 @@ const shopCoin = ref(0)
 const items = ref<ShopItem[]>([])
 const ownedItems = ref<OwnedItem[]>([])
 const buying = ref('')
-const coinLogVisible = ref(false)
 const signInVisible = ref(false)
 
 function remaining(item: ShopItem) {
