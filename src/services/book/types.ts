@@ -18,6 +18,13 @@ export interface BookInList {
   }
 }
 
+export interface BookCategoryItem {
+  Id: number
+  Name: string
+  ShortName: string
+  Color: string
+}
+
 export interface GetBookListRes extends ListResult<BookInList> {}
 
 /** 系列列表项（分类器分组结果） */
@@ -40,6 +47,7 @@ export interface GetSeriesListRequest {
   Size?: number
   Order?: 'new' | 'view' | 'latest'
   IgnoreJapanese?: boolean
+  CategoryId?: number
   IgnoreAI?: boolean
 }
 
@@ -103,6 +111,7 @@ export interface GetBookListRequest {
   Order?: 'new' | 'view' | 'latest'
   IgnoreJapanese?: boolean
   IgnoreAI?: boolean
+  CategoryId?: number
 }
 
 /**

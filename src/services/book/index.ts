@@ -14,6 +14,11 @@ export function getBookList(param: Types.GetBookListRequest) {
   return requestWithSignalr<Types.GetBookListRes>('GetBookList', param)
 }
 
+/** 获取指定书籍类型启用的分类 */
+export function getBookCategories(type: 'Novel' | 'Comic') {
+  return requestWithSignalr<Types.BookCategoryItem[]>('GetBookCategories', { Type: type })
+}
+
 /** 按书名（卷标题）搜索 */
 export function getBookListByTitle(param: Types.GetBookListRequest) {
   return requestWithSignalr<Types.GetBookListRes>('GetBookListByTitle', param)
