@@ -14,7 +14,7 @@
         <div class="shop-grid">
           <div v-for="item in items" :key="item.Key">
             <q-card class="card shop-item" bordered flat>
-              <q-card-section horizontal class="q-pa-md">
+              <q-card-section horizontal class="q-pa-md full-height">
                 <system-image class="shop-item__image" :url="itemImage(item.Image)" :request-height="192" :ratio="1" />
 
                 <div class="col q-ml-md column justify-between">
@@ -180,13 +180,13 @@ onMounted(load)
 
 .shop-item {
   height: 100%;
+}
 
-  &__image {
-    width: 96px;
-    height: 96px;
-    border-radius: 12px;
-    flex: 0 0 auto;
-  }
+.shop-item__image {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  flex: 0 0 auto;
 }
 
 .owned-item__image {

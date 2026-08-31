@@ -70,12 +70,10 @@
                 </q-item>
               </div>
 
-              <router-link class="coin-item" :to="{ name: 'Shop' }">
+              <div class="coin-item">
                 <coin-icon size="18px" />
                 <span>{{ growth?.Coin ?? 0 }}</span>
-                <q-space />
-                <span class="text-caption text-opacity">去商城</span>
-              </router-link>
+              </div>
 
               <div class="level-item">
                 <template v-if="growthLevel >= 6">
@@ -324,7 +322,6 @@ function logout() {
       font-size: 15px;
       font-weight: 500;
       color: inherit;
-      cursor: pointer;
     }
 
     .level-item {
