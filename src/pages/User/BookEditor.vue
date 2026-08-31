@@ -5,7 +5,7 @@
         <q-tab-panel name="information">
           <q-grid x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
             <q-grid-item>
-              <div class="column gap-8">
+              <div class="book-editor-stack column gap-8">
                 <div class="text-opacity">封面预览</div>
                 <q-card>
                   <system-image v-if="book?.Cover" :url="book.Cover" :request-height="1024" :ratio="2 / 3" />
@@ -16,7 +16,7 @@
               </div>
             </q-grid-item>
             <q-grid-item span="2" xs="1" sm="1" md="1">
-              <div class="column gap-8">
+              <div class="book-editor-stack column gap-8">
                 <image-input v-model="book['Cover']" />
                 <q-input :label="isComic ? '漫画名' : '书名'" v-model="book['Title']" />
                 <q-input label="作者" v-model="book['Author']" />
@@ -28,9 +28,9 @@
           </q-grid>
         </q-tab-panel>
         <q-tab-panel name="setting">
-          <div class="column gap-16">
+          <div class="book-editor-stack column gap-16">
             <div>
-              <div class="column gap-8 light-radio">
+              <div class="book-editor-stack column gap-8 light-radio">
                 <div class="text-subtitle1">书籍等级</div>
                 <div class="row items-center level-row">
                   <div class="col-12 col-sm q-px-sm">
@@ -58,14 +58,14 @@
               </div>
             </div>
             <div>
-              <div class="column items-start gap-8 light-radio">
+              <div class="book-editor-stack column items-start gap-8 light-radio">
                 <div class="text-subtitle1">选项</div>
                 <q-toggle v-model="bookSetting['DownloadAllowed']" label="允许下载" />
                 <div class="text-caption text-opacity">关闭后用户无法下载本书</div>
               </div>
             </div>
             <div>
-              <div class="column gap-8 light-radio">
+              <div class="book-editor-stack column gap-8 light-radio">
                 <div class="text-subtitle1">分类信息</div>
                 <div class="text-caption text-opacity">
                   由 AI 识别，决定本书归入哪个系列（系列名取「中文名 → 原名 →
@@ -657,6 +657,11 @@ useInitRequest(request, { before: refresh, isActive })
   :deep(.q-tab-panel) {
     padding: 16px !important;
   }
+}
+
+.book-editor-stack,
+.book-editor-stack > * {
+  min-width: 0;
 }
 
 // q-col-gutter-* 靠负 margin 撑开，会把滑块和它的刻度顶到区块左边界外面，这里用 gap 代替

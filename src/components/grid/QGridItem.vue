@@ -51,6 +51,7 @@ export default defineComponent({
 
     const styleObj = computed(() => ({
       'grid-column': `span ${span.value} / span 1`,
+      'min-width': 0,
     }))
 
     return {
