@@ -24,7 +24,7 @@ export function getComicSeriesInfo(seriesTitle: string, order: Types.ComicOrder 
   })
 }
 
-/** 分批拉取漫画图片：一次最多 12 页（服务端也会夹取）。首批 Skip=0 时才返回阅读位置。 */
-export function getComicContent(cid: number, skip = 0, take = 12) {
+/** 分批拉取漫画图片，每次 6 页。首批 Skip=0 时才返回阅读位置。 */
+export function getComicContent(cid: number, skip = 0, take = 6) {
   return requestWithSignalr<Types.ComicContentResponse>('GetComicContent', { Cid: cid, Skip: skip, Take: take })
 }

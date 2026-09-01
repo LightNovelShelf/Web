@@ -339,8 +339,9 @@ const currentChapter = computed(() => manga.value?.chapters.find((chapter) => ch
 const currentPage = ref(1)
 const sliderPage = ref(1)
 const preloadedImageUrls = new Set<string>()
-// 漫画按 12 页一批懒加载：images 先用占位撑满整章，批次到达后回填；两个集合随换章重置
-const PAGE_BATCH = 12
+// 漫画按 6 页一批懒加载：images 先用占位撑满整章，批次到达后回填
+const PAGE_BATCH = 6
+const PRELOAD_COUNT = 4
 const loadedBatches = new Set<number>()
 const loadingBatches = new Map<number, Promise<void>>()
 const chapterIndex = computed(() =>
@@ -402,14 +403,13 @@ const activePageNumbers = computed(() =>
 function isActivePage(pageNumber: number) {
   return activePageNumbers.value.includes(pageNumber)
 }
-// 渲染窗口：以当前屏为中心前后各 RENDER_RADIUS 页常驻挂载（含 active），
-// 非 active 页移出窗口但保持已解码，翻页只切 active，不卸载/不重挂 → 无加载闪烁
+// 水平翻页只常驻当前屏及后两页，避免向前预加载
 const RENDER_RADIUS = 2
 const windowPages = computed(() => {
   const chapter = currentChapter.value
   if (!chapter) return []
   const group = currentGroup.value
-  const start = Math.max(1, group.start - RENDER_RADIUS)
+  const start = group.start
   const end = Math.min(chapter.pages, group.start + group.size - 1 + RENDER_RADIUS)
   const list: Array<{ number: number; image: (typeof chapter.images)[number] }> = []
   for (let n = start; n <= end; n++) list.push({ number: n, image: chapter.images[n - 1] })
@@ -457,11 +457,12 @@ watch(
       const loadedManga = toManga(info)
       const loadedChapter = loadedManga.chapters.find((chapter) => chapter.id === chapterId)
       if (!loadedChapter) throw new Error('分卷不存在')
-      // 用整章总页数预分配占位，真实图片按 12 页批次到达后回填对应下标
+      // 用整章总页数预分配占位，真实图片按 6 页批次到达后回填对应下标
       loadedChapter.pages = content.Chapter.Total
       loadedChapter.images = Array.from({ length: content.Chapter.Total }, createPlaceholderImage)
       loadedBatches.clear()
       loadingBatches.clear()
+      preloadedImageUrls.clear()
       fillBatch(loadedChapter, content.Chapter.Skip, content.Chapter.Images)
       loadedBatches.add(content.Chapter.Skip / PAGE_BATCH)
       manga.value = loadedManga
@@ -523,6 +524,7 @@ function ensureBatch(chapter: MangaChapter, cid: number, batch: number, version:
       if (version !== requestVersion) return
       fillBatch(chapter, res.Chapter.Skip, res.Chapter.Images)
       loadedBatches.add(batch)
+      if (chapter === currentChapter.value) preloadForwardImages(chapter)
     } finally {
       loadingBatches.delete(batch)
     }
@@ -531,37 +533,28 @@ function ensureBatch(chapter: MangaChapter, cid: number, batch: number, version:
   return task
 }
 
-// 严格对齐渲染窗口(±RENDER_RADIUS)：仅当窗口触及某批次时才加载它。
-// 效果即「再翻一页会导致预缓存不足时，才在当前页取下/上一批」，贴边按需，不提前。
+// 当前屏按需加载，图片只预加载后续 4 页
 function ensurePagesLoaded(page: number) {
   const chapter = currentChapter.value
   if (!chapter) return
   const cid = Number(chapter.id)
   const version = requestVersion
   const span = settings.mode === 'horizontal' ? currentGroup.value.size - 1 : 0
-  const from = Math.max(1, page - RENDER_RADIUS)
-  const to = Math.min(chapter.pages, page + span + RENDER_RADIUS)
+  const from = page
+  const to = Math.min(chapter.pages, page + span + PAGE_BATCH)
   for (let batch = Math.floor((from - 1) / PAGE_BATCH); batch <= Math.floor((to - 1) / PAGE_BATCH); batch++) {
     void ensureBatch(chapter, cid, batch, version)
   }
 }
 
-function preloadNearbyPages() {
-  const chapter = currentChapter.value
-  if (!chapter) return
-  // 翻页/滚动到附近时，先按需拉取缺失的 12 页批次
-  ensurePagesLoaded(currentPage.value)
-  // 渲染窗口(±RENDER_RADIUS)内的页已由 DOM 常驻加载；这里额外预热窗口外沿再往前 2 页，
-  // 保证连续翻页时下一批将要挂载的边缘页 URL 已在缓存
+function preloadForwardImages(chapter: MangaChapter) {
   const span = settings.mode === 'horizontal' ? currentGroup.value.size - 1 : 0
-  const margin = 2
-  const start = Math.max(1, currentPage.value - RENDER_RADIUS - margin)
-  const end = Math.min(chapter.pages, currentPage.value + span + RENDER_RADIUS + margin)
+  const start = currentPage.value + span + 1
+  const end = Math.min(chapter.pages, start + PRELOAD_COUNT - 1)
 
   for (let pageNumber = start; pageNumber <= end; pageNumber++) {
     const image = chapter.images[pageNumber - 1]
-    // 占位页(空 url)尚未加载，跳过预热
-    if (!image || !image.url || preloadedImageUrls.has(image.url)) continue
+    if (!image?.url || preloadedImageUrls.has(image.url)) continue
 
     preloadedImageUrls.add(image.url)
     const preloader = new Image()
@@ -569,6 +562,13 @@ function preloadNearbyPages() {
     preloader.onerror = () => preloadedImageUrls.delete(image.url)
     preloader.src = image.url
   }
+}
+
+function preloadNearbyPages() {
+  const chapter = currentChapter.value
+  if (!chapter) return
+  ensurePagesLoaded(currentPage.value)
+  preloadForwardImages(chapter)
 }
 
 async function scrollToCurrentPage() {
