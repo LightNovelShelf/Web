@@ -39,6 +39,7 @@ export namespace GetPointLog {
   }
   export interface Item {
     Source: string
+    SourceLabel: string
     Amount: number
     Balance: number
     RefId: number | null

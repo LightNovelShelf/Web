@@ -18,7 +18,7 @@
         <q-list separator>
           <q-item v-for="(item, i) in list" :key="i">
             <q-item-section>
-              <q-item-label>{{ sourceLabel(item.Source, item.Amount) }}</q-item-label>
+              <q-item-label>{{ item.SourceLabel }}</q-item-label>
               <q-item-label caption><time-ago :value="item.OccurredAt" /></q-item-label>
             </q-item-section>
             <q-item-section side class="items-end">
@@ -57,7 +57,7 @@ import { getCoinLog, getPointLog } from '@/services/points'
 import type { GetPointLog } from '@/services/points/type'
 
 const model = defineModel<boolean>({ default: false })
-// 经验与金币流水结构完全一致，只有标题、取数接口与来源文案不同
+// 经验与金币流水结构完全一致，只有标题与取数接口不同
 const { kind = 'exp' } = defineProps<{ kind?: 'exp' | 'coin' }>()
 
 const $q = useQuasar()
@@ -76,30 +76,6 @@ const scrollbarOptions = computed(() => ({
     autoHideDelay: 300,
   },
 }))
-
-const SOURCE_LABEL: Record<string, string> = {
-  SignIn: '签到',
-  Read: '阅读',
-  PublishNovel: '发布小说',
-  PublishComic: '发布漫画',
-  Thread: '发帖',
-  Reply: '回复',
-  BookComment: '评论',
-  Invite: '邀请注册',
-  DownloadNovel: '下载小说',
-  DownloadComic: '下载漫画',
-  ComicRead: '漫画阅读',
-  ShareNovel: '小说下载分成',
-  ShareComic: '漫画下载分成',
-  ShopPurchase: '商店购买',
-  Admin: '系统',
-}
-// 消费类来源天然是负数，不该被当成「回收」
-const SPEND_SOURCES = new Set(['DownloadNovel', 'DownloadComic', 'ComicRead', 'ShopPurchase'])
-function sourceLabel(source: string, amount: number) {
-  const label = SOURCE_LABEL[source] ?? source
-  return amount < 0 && !SPEND_SOURCES.has(source) ? `${label}回收` : label
-}
 
 function onInit(instance: any) {
   os = instance
