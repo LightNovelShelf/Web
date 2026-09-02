@@ -21,9 +21,9 @@
           >
             <q-card-section horizontal>
               <!-- 用户头像 -->
-              <q-avatar size="48px" class="q-mr-md">
-                <img v-if="notification.Actor?.Avatar" :src="notification.Actor.Avatar" />
-                <q-icon v-else name="mdiAccountCircle" size="48px" color="grey-5" />
+              <user-avatar v-if="notification.Actor" class="q-mr-md" :user="notification.Actor" size="48px" />
+              <q-avatar v-else size="48px" class="q-mr-md">
+                <q-icon name="mdiAccountCircle" size="48px" color="grey-5" />
               </q-avatar>
 
               <!-- 消息内容 -->
@@ -90,6 +90,7 @@ import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
 import TimeAgo from '@/components/TimeAgo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 

@@ -15,18 +15,11 @@
 
       <div class="feed-item__footer">
         <div class="feed-item__author">
-          <q-avatar
+          <user-avatar
+            :user="{ Id: item.AuthorId, UserName: item.AuthorName, Avatar: item.AuthorAvatar }"
+            :disabled="item.AuthorIsDeleted"
             size="34px"
-            :style="item.AuthorAvatar ? undefined : { background: avatarBackground(item.AuthorName), color: '#fff' }"
-          >
-            <img
-              v-if="item.AuthorAvatar"
-              class="community-avatar__image"
-              :src="item.AuthorAvatar"
-              :alt="item.AuthorName"
-            />
-            <template v-else>{{ item.AuthorName.slice(0, 1) }}</template>
-          </q-avatar>
+          />
           <div class="feed-item__author-copy">
             <span class="feed-item__author-name">
               {{ item.AuthorName }}
@@ -52,19 +45,13 @@
 
 <script setup lang="ts">
 import TimeAgo from '@/components/TimeAgo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 import type { CommunityFeedItem } from '@/services/forum'
 
 defineProps<{
   item: CommunityFeedItem
 }>()
-
-const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#0891b2']
-
-function avatarBackground(seed: string) {
-  const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
-  return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
-}
 </script>
 
 <style scoped lang="scss">
@@ -176,12 +163,6 @@ function avatarBackground(seed: string) {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.community-avatar__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .feed-item__author-copy {

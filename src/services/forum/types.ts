@@ -46,6 +46,7 @@ export interface CommunityFeedItem {
   SubCategoryLabel?: string
   Title: string
   Excerpt: string
+  AuthorId: number
   AuthorName: string
   AuthorIsDeleted: boolean
   AuthorAvatar: string
@@ -86,6 +87,7 @@ export interface CommunityReplyTarget {
 
 export interface CommunityThreadReply {
   Id: number
+  AuthorId: number
   AuthorName: string
   AuthorIsDeleted: boolean
   AuthorBadge?: string

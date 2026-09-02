@@ -42,13 +42,7 @@
 
           <div class="user-list">
             <div v-for="user in activeUsers" :key="user.Id" class="user-item">
-              <q-avatar
-                size="42px"
-                :style="user.Avatar ? undefined : { background: avatarBackground(user.Name), color: '#fff' }"
-              >
-                <img v-if="user.Avatar" class="community-avatar__image" :src="user.Avatar" :alt="user.Name" />
-                <template v-else>{{ user.Name.slice(0, 1) }}</template>
-              </q-avatar>
+              <user-avatar :user="{ Id: user.Id, UserName: user.Name, Avatar: user.Avatar }" size="42px" />
               <div class="user-item__copy">
                 <div class="user-item__name-row">
                   <span class="user-item__name">{{ user.Name }}</span>
@@ -70,6 +64,7 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-vue'
 import { useQuasar } from 'quasar'
 
 import TimeAgo from '@/components/TimeAgo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 import type { CommunityActiveUserItem, CommunityHotRankItem } from '@/services/forum'
 
@@ -93,13 +88,6 @@ const scrollbarOptions = computed(() => ({
     autoHideSuspend: false,
   },
 }))
-
-const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#0891b2']
-
-function avatarBackground(seed: string) {
-  const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
-  return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
-}
 </script>
 
 <style scoped lang="scss">
@@ -236,12 +224,6 @@ function avatarBackground(seed: string) {
 
 .user-item + .user-item {
   border-top: 1px solid var(--community-border);
-}
-
-.community-avatar__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .user-item__copy {

@@ -43,9 +43,7 @@
         <template v-for="item in comment.Data" :key="item.Id">
           <q-item>
             <q-item-section top avatar>
-              <q-avatar size="48px">
-                <img :src="comment.Users[`${comment.Commentaries[`${item.Id}`].UserId}`].Avatar" alt="avatar" />
-              </q-avatar>
+              <user-avatar :user="userByCommentId(item.Id)" size="48px" />
             </q-item-section>
 
             <q-item-section>
@@ -79,12 +77,7 @@
                   <template v-for="(replyId, replyIndex) in item.Reply" :key="replyId">
                     <q-item>
                       <q-item-section top avatar>
-                        <q-avatar size="24px">
-                          <img
-                            :src="comment.Users[`${comment.Commentaries[`${replyId}`].UserId}`].Avatar"
-                            alt="avatar"
-                          />
-                        </q-avatar>
+                        <user-avatar :user="userByCommentId(replyId)" size="24px" />
                       </q-item-section>
                       <q-item-section>
                         <q-item-label v-if="comment.Commentaries[`${replyId}`].ReplyId">
@@ -198,6 +191,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { useAppStore } from '@/stores/app'
 
 import TimeAgo from '@/components/TimeAgo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
@@ -230,6 +224,11 @@ const replyShow = ref(false)
 const inputReplyComment = ref()
 const parentId = ref<number>()
 const replyId = ref<number>()
+
+function userByCommentId(commentId: number) {
+  const userId = comment.value!.Commentaries[`${commentId}`].UserId
+  return { Id: userId, ...comment.value!.Users[`${userId}`] }
+}
 
 const request = async () => {
   comment.value = await getComments({

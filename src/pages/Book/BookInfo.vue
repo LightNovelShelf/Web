@@ -30,7 +30,7 @@
               <div class="row items-center no-wrap book-info-header">
                 <div class="text-subtitle1 text-weight-bold ellipsis">《{{ book['Title'] }}》</div>
                 <q-space />
-                <book-user-avatar :user="book.User" />
+                <user-avatar :user="book.User" menu-anchor="bottom left" menu-self="top right" />
               </div>
               <div style="margin-top: 16px">作者：{{ displayAuthor }}</div>
               <div>
@@ -153,7 +153,7 @@ import { parseTime } from '@/utils/time'
 
 import { useAppStore } from '@/stores/app'
 
-import { BookUserAvatar, Comment } from '@/components'
+import { Comment, UserAvatar } from '@/components'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
 import { QGrid, QGridItem } from '@/components/grid'
 import SystemImage from '@/components/SystemImage.vue'

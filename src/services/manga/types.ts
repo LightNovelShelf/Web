@@ -81,6 +81,7 @@ export interface ComicSeriesInfoResponse {
     Id: number
     Title: string
     Uploader: {
+      Id: number
       UserName: string
       Avatar: string
     }

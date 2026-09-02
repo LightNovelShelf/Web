@@ -1,5 +1,18 @@
 import type { GetBookListRequest, GetBookListRes } from '@/services/book/types'
 
+export interface PublicUserSummary {
+  Id: number
+  UserName: string
+  Avatar: string
+  Role: string
+  Level: number
+  RegisterAt: string
+  BookCount: number
+  CommunityThreadCount: number
+  CommunityReplyCount: number
+  CommentCount: number
+}
+
 export namespace Login {
   export interface Param {
     email: string

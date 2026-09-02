@@ -50,6 +50,7 @@ export interface MangaBook {
   id: string
   title: string
   uploader: {
+    Id: number
     UserName: string
     Avatar: string
   }

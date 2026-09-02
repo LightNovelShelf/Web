@@ -8,6 +8,10 @@ import type * as Types from './type'
 import type { ShelfItem, SHELF_STRUCT_VER } from '@/types/shelf'
 import type * as ShelfLegacyStruct from '@/utils/migrations/shelf/struct/types'
 
+const publicSummaryCache = new Map<string, { expiresAt: number; value: Types.PublicUserSummary }>()
+const publicSummaryRequests = new Map<string, Promise<Types.PublicUserSummary>>()
+const publicSummaryCacheDuration = 5 * 60 * 1000
+
 /** 登录 */
 export async function login(email: string, password: string) {
   const res = await requestWithFetch<Types.Login.Res, Types.Login.Param>(PATH.USER_LOGIN, {
@@ -48,6 +52,28 @@ export async function refreshToken(longTermToken: string) {
 /** 获取用户信息 */
 export async function getMyInfo() {
   return requestWithSignalr('GetMyInfo')
+}
+
+export function getPublicUserSummary(id: number) {
+  const key = `${PATH.USER_PUBLIC_SUMMARY}:${id}`
+  const cached = publicSummaryCache.get(key)
+  if (cached && cached.expiresAt > Date.now()) return Promise.resolve(cached.value)
+
+  const pending = publicSummaryRequests.get(key)
+  if (pending) return pending
+
+  const request = requestWithFetch<Types.PublicUserSummary, { id: number }>(PATH.USER_PUBLIC_SUMMARY, {
+    method: RequestMethod.GET,
+    payload: { id },
+  })
+    .then((value) => {
+      publicSummaryCache.set(key, { expiresAt: Date.now() + publicSummaryCacheDuration, value })
+      return value
+    })
+    .finally(() => publicSummaryRequests.delete(key))
+
+  publicSummaryRequests.set(key, request)
+  return request
 }
 
 /** 重置邀请码，返回新邀请码 */

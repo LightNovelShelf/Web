@@ -39,6 +39,9 @@ export const PATH = {
   get USER_REGISTER() {
     return `${apiServer.value}/api/user/register`
   },
+  get USER_PUBLIC_SUMMARY() {
+    return `${apiServer.value}/api/user/summary`
+  },
   get USER_UPLOAD_BOOK() {
     return `${apiServer.value}/api/user/upload_book`
   },

@@ -1,0 +1,172 @@
+diff --git a/dist/quasar.client.js b/dist/quasar.client.js
+index 918d312f5a7d94a0eaf8ba7fb63912f85baf24e3..210b10ceccae93319627d00a3c3a6514bab638d2 100644
+--- a/dist/quasar.client.js
++++ b/dist/quasar.client.js
+@@ -3558,7 +3558,7 @@ function setPosition(cfg, retryNumber = 0) {
+ 		}, 10);
+ 		return;
+ 	}
+-	const { targetEl, offset, anchorEl, anchorOrigin, selfOrigin, absoluteOffset, fit, cover, maxHeight, maxWidth } = cfg;
++	const { targetEl, offset, anchorEl, anchorOrigin, selfOrigin, absoluteOffset, fit, cover, maxHeight, maxWidth, viewportPadding } = cfg;
+ 	if (client.is.ios && window.visualViewport !== void 0) {
+ 		const el = document.body.style;
+ 		const { offsetLeft: left, offsetTop: top } = window.visualViewport;
+@@ -3632,6 +3632,7 @@ function setPosition(cfg, retryNumber = 0) {
+ 			applyBoundaries(props, anchorProps, targetProps, anchorOrigin, selfOrigin);
+ 		}
+ 	}
++	applyViewportPadding(props, targetProps, viewportPadding);
+ 	elStyle = {
+ 		top: props.top + "px",
+ 		left: props.left + "px"
+@@ -3674,6 +3675,21 @@ function applyBoundaries(props, anchorProps, targetProps, anchorOrigin, selfOrig
+ 		}
+ 	}
+ }
++function applyViewportPadding(props, targetProps, viewportPadding) {
++	if (viewportPadding === void 0) return;
++	const [horizontal, vertical] = viewportPadding;
++	if (horizontal === 0 && vertical === 0) return;
++	const maxRight = Math.max(horizontal, document.body.clientWidth - horizontal);
++	const maxBottom = Math.max(vertical, window.innerHeight - getScrollbarWidth() - vertical);
++	const availableWidth = Math.max(0, maxRight - horizontal);
++	const availableHeight = Math.max(0, maxBottom - vertical);
++	if (targetProps.right > availableWidth) props.maxWidth = Math.min(props.maxWidth ?? targetProps.right, availableWidth);
++	if (targetProps.bottom > availableHeight) props.maxHeight = Math.min(props.maxHeight ?? targetProps.bottom, availableHeight);
++	const width = props.maxWidth ?? targetProps.right;
++	const height = props.maxHeight ?? targetProps.bottom;
++	props.left = Math.min(Math.max(props.left, horizontal), Math.max(horizontal, maxRight - width));
++	props.top = Math.min(Math.max(props.top, vertical), Math.max(vertical, maxBottom - height));
++}
+ //#endregion
+ //#region src/components/menu/QMenu.js
+ var QMenu_default = /*#__PURE__*/ createComponent({
+@@ -3706,6 +3722,11 @@ var QMenu_default = /*#__PURE__*/ createComponent({
+ 			type: Array,
+ 			validator: validateOffset
+ 		},
++		viewportPadding: {
++			type: Array,
++			default: () => [8, 8],
++			validator: (value) => validateOffset(value) && value.every((item) => item >= 0)
++		},
+ 		scrollTarget: scrollTargetProp,
+ 		touchPosition: Boolean,
+ 		maxHeight: {
+@@ -3877,7 +3898,8 @@ var QMenu_default = /*#__PURE__*/ createComponent({
+ 				fit: props.fit,
+ 				cover: props.cover,
+ 				maxHeight: props.maxHeight,
+-				maxWidth: props.maxWidth
++				maxWidth: props.maxWidth,
++				viewportPadding: props.viewportPadding
+ 			});
+ 		}
+ 		function renderPortalContent() {
+diff --git a/dist/types/index.d.ts b/dist/types/index.d.ts
+index dcbe3821fd5ae95e4357e66e0d3325c059557824..95ffabb91ee57b9d103a348e04ed5ad887d0a861 100644
+--- a/dist/types/index.d.ts
++++ b/dist/types/index.d.ts
+@@ -8792,6 +8792,11 @@ export interface QMenuProps {
+    * An array of two numbers to offset the menu horizontally and vertically in pixels
+    */
+   offset?: readonly any[] | undefined;
++  /**
++   * Horizontal and vertical viewport padding kept around the menu
++   * Default value: [8, 8]
++   */
++  viewportPadding?: readonly [number, number] | undefined;
+   /**
+    * CSS selector or DOM element to be used as a custom scroll container instead of the auto detected one
+    */
+diff --git a/src/components/menu/QMenu.js b/src/components/menu/QMenu.js
+index 36e10765c067e13118c9b20b05304b8971c3d796..0cbd911109fac8eee6ddedc9ebf021a726b7d5fd 100644
+--- a/src/components/menu/QMenu.js
++++ b/src/components/menu/QMenu.js
+@@ -90,6 +90,11 @@ export default /*#__PURE__*/ createComponent({
+       type: Array,
+       validator: validateOffset
+     },
++    viewportPadding: {
++      type: Array,
++      default: () => [8, 8],
++      validator: value => validateOffset(value) && value.every(item => item >= 0)
++    },
+ 
+     scrollTarget: scrollTargetProp,
+ 
+@@ -392,7 +397,8 @@ export default /*#__PURE__*/ createComponent({
+         fit: props.fit,
+         cover: props.cover,
+         maxHeight: props.maxHeight,
+-        maxWidth: props.maxWidth
++        maxWidth: props.maxWidth,
++        viewportPadding: props.viewportPadding
+       })
+     }
+ 
+diff --git a/src/utils/private.position-engine/position-engine.js b/src/utils/private.position-engine/position-engine.js
+index fc52516dbddf32594f9e0364da4c10eb26ddd197..0ef8130f104507a451680ce74fc9c0c5867b811e 100644
+--- a/src/utils/private.position-engine/position-engine.js
++++ b/src/utils/private.position-engine/position-engine.js
+@@ -150,7 +150,8 @@ export function setPosition(cfg, retryNumber = 0) {
+     fit,
+     cover,
+     maxHeight,
+-    maxWidth
++    maxWidth,
++    viewportPadding
+   } = cfg
+ 
+   if (client.is.ios && window.visualViewport !== void 0) {
+@@ -270,6 +271,8 @@ export function setPosition(cfg, retryNumber = 0) {
+     }
+   }
+ 
++  applyViewportPadding(props, targetProps, viewportPadding)
++
+   elStyle = {
+     top: props.top + 'px',
+     left: props.left + 'px'
+@@ -376,3 +379,41 @@ function applyBoundaries(
+     }
+   }
+ }
++
++function applyViewportPadding(props, targetProps, viewportPadding) {
++  if (viewportPadding === void 0) return
++  const [ horizontal, vertical ] = viewportPadding
++  if (horizontal === 0 && vertical === 0) return
++
++  const maxRight = Math.max(horizontal, document.body.clientWidth - horizontal)
++  const maxBottom = Math.max(
++    vertical,
++    window.innerHeight - getScrollbarWidth() - vertical
++  )
++  const availableWidth = Math.max(0, maxRight - horizontal)
++  const availableHeight = Math.max(0, maxBottom - vertical)
++
++  if (targetProps.right > availableWidth) {
++    props.maxWidth = Math.min(
++      props.maxWidth ?? targetProps.right,
++      availableWidth
++    )
++  }
++  if (targetProps.bottom > availableHeight) {
++    props.maxHeight = Math.min(
++      props.maxHeight ?? targetProps.bottom,
++      availableHeight
++    )
++  }
++
++  const width = props.maxWidth ?? targetProps.right
++  const height = props.maxHeight ?? targetProps.bottom
++  props.left = Math.min(
++    Math.max(props.left, horizontal),
++    Math.max(horizontal, maxRight - width)
++  )
++  props.top = Math.min(
++    Math.max(props.top, vertical),
++    Math.max(vertical, maxBottom - height)
++  )
++}

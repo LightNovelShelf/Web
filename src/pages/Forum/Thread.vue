@@ -91,22 +91,15 @@
 
               <div class="thread-card__meta">
                 <div class="thread-card__author">
-                  <q-avatar
+                  <user-avatar
+                    :user="{
+                      Id: thread.AuthorId,
+                      UserName: thread.AuthorName,
+                      Avatar: thread.AuthorAvatar,
+                    }"
+                    :disabled="thread.AuthorIsDeleted"
                     size="42px"
-                    :style="
-                      thread.AuthorAvatar
-                        ? undefined
-                        : { background: avatarBackground(thread.AuthorName), color: '#fff' }
-                    "
-                  >
-                    <img
-                      v-if="thread.AuthorAvatar"
-                      class="community-avatar__image"
-                      :src="thread.AuthorAvatar"
-                      :alt="thread.AuthorName"
-                    />
-                    <template v-else>{{ thread.AuthorName.slice(0, 1) }}</template>
-                  </q-avatar>
+                  />
                   <div>
                     <div class="thread-card__author-name">
                       {{ thread.AuthorName }}
@@ -196,22 +189,15 @@
                 >
                   <div class="reply-item__header">
                     <div class="reply-item__author">
-                      <q-avatar
+                      <user-avatar
+                        :user="{
+                          Id: reply.AuthorId,
+                          UserName: reply.AuthorName,
+                          Avatar: reply.AuthorAvatar,
+                        }"
+                        :disabled="reply.AuthorIsDeleted"
                         size="34px"
-                        :style="
-                          reply.AuthorAvatar
-                            ? undefined
-                            : { background: avatarBackground(reply.AuthorName), color: '#fff' }
-                        "
-                      >
-                        <img
-                          v-if="reply.AuthorAvatar"
-                          class="community-avatar__image"
-                          :src="reply.AuthorAvatar"
-                          :alt="reply.AuthorName"
-                        />
-                        <template v-else>{{ reply.AuthorName.slice(0, 1) }}</template>
-                      </q-avatar>
+                      />
                       <div>
                         <div class="reply-item__name-row">
                           <span class="reply-item__name">
@@ -281,22 +267,15 @@
                     >
                       <div class="reply-child__header">
                         <div class="reply-item__author">
-                          <q-avatar
+                          <user-avatar
+                            :user="{
+                              Id: child.AuthorId,
+                              UserName: child.AuthorName,
+                              Avatar: child.AuthorAvatar,
+                            }"
+                            :disabled="child.AuthorIsDeleted"
                             size="30px"
-                            :style="
-                              child.AuthorAvatar
-                                ? undefined
-                                : { background: avatarBackground(child.AuthorName), color: '#fff' }
-                            "
-                          >
-                            <img
-                              v-if="child.AuthorAvatar"
-                              class="community-avatar__image"
-                              :src="child.AuthorAvatar"
-                              :alt="child.AuthorName"
-                            />
-                            <template v-else>{{ child.AuthorName.slice(0, 1) }}</template>
-                          </q-avatar>
+                          />
                           <div>
                             <div class="reply-item__name-row">
                               <span class="reply-item__name">
@@ -441,6 +420,7 @@ import { useAppStore } from '@/stores/app'
 
 import HtmlReader from '@/components/html/HtmlReader.vue'
 import TimeAgo from '@/components/TimeAgo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -535,13 +515,6 @@ const replyPlaceholder = computed(() => {
 
   return '写下你的看法，补充观点或者回应楼主。'
 })
-
-const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#0891b2']
-
-function avatarBackground(seed: string) {
-  const index = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % avatarPalette.length
-  return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
-}
 
 function readRecentThreadHistory() {
   if (typeof window === 'undefined') {
@@ -1173,12 +1146,6 @@ watch(
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.community-avatar__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .reply-item__header {

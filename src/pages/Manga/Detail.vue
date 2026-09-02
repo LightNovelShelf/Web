@@ -59,7 +59,7 @@
 
           <section v-for="book in manga.books" :key="book.id" class="chapter-group">
             <div class="row items-center chapter-header">
-              <book-user-avatar :user="book.uploader" />
+              <user-avatar :user="book.uploader" />
               <div>
                 <div class="text-h6">{{ book.title }}</div>
                 <div class="text-caption text-grey-7">共 {{ book.chapters.length }} 话</div>
@@ -149,7 +149,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 import { parseTime } from '@/utils/time'
 
-import { BookUserAvatar, Comment } from '@/components'
+import { Comment, UserAvatar } from '@/components'
 import { QGrid, QGridItem } from '@/components/grid'
 import TimeAgo from '@/components/TimeAgo.vue'
 

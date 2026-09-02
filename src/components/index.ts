@@ -6,4 +6,4 @@ export const TelegramLoginTemp = defineAsyncComponent(() => import('./TelegramLo
 export const DragPageSticky = defineAsyncComponent(() => import('./DragPageSticky.vue'))
 export const ImageInput = defineAsyncComponent(() => import('./ImageInput.vue'))
 export const ComicChapterImages = defineAsyncComponent(() => import('./ComicChapterImages.vue'))
-export const BookUserAvatar = defineAsyncComponent(() => import('./BookUserAvatar.vue'))
+export const UserAvatar = defineAsyncComponent(() => import('./UserAvatar.vue'))
