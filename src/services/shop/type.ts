@@ -7,12 +7,12 @@ export interface ShopItem {
   Description: string
   /** 道具图片 URL；站内资源会带 placeholder/size 查询参数 */
   Image: string
-  /** 单价（金币），由后端按签到金币规则推导 */
+  /** 单价（金币） */
   Price: number
   /** 当前持有数量 */
   Owned: number
-  /** 每个自然月购买上限 */
-  MonthlyLimit: number
+  /** 每个自然月购买上限；null 不限购，0 不可购买 */
+  MonthlyLimit: number | null
   /** 本自然月已购数量 */
   MonthlyPurchased: number
 }
@@ -65,6 +65,19 @@ export namespace UseSignMakeupCard {
     Streak: number
     Reward: number
     CoinReward: number
+    Owned: number
+  }
+}
+
+export namespace UseComicQuotaCard {
+  export type Request = Record<string, never>
+  export interface Response {
+    Key: string
+    /** 本次发放的额度点数 */
+    Granted: number
+    /** 使用后的漫画额度余额 */
+    Quota: number
+    /** 使用后的道具持有数量 */
     Owned: number
   }
 }

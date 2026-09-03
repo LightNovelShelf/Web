@@ -31,7 +31,7 @@
                       unelevated
                       color="primary"
                       size="sm"
-                      :label="remaining(item) > 0 ? '购买' : '本月已达上限'"
+                      :label="remaining(item) > 0 ? '购买' : item.MonthlyLimit === 0 ? '不可购买' : '本月已达上限'"
                       :disable="remaining(item) <= 0"
                       :loading="buying === item.Key"
                       @click="buy(item)"
@@ -39,7 +39,8 @@
                   </div>
 
                   <div class="text-caption text-opacity q-mt-xs">
-                    持有 {{ item.Owned }} · 本月还可买 {{ remaining(item) }}/{{ item.MonthlyLimit }}
+                    持有 {{ item.Owned }} ·
+                    {{ item.MonthlyLimit == null ? '不限购' : `本月还可买 ${remaining(item)}/${item.MonthlyLimit}` }}
                   </div>
                 </div>
               </q-card-section>
@@ -68,6 +69,15 @@
                   color="primary"
                   label="去补签"
                   @click="signInVisible = true"
+                />
+                <q-btn
+                  v-if="item.Key === COMIC_QUOTA_50_KEY"
+                  outline
+                  size="sm"
+                  color="primary"
+                  label="使用"
+                  :loading="usingQuota"
+                  @click="useQuota()"
                 />
               </div>
             </q-item-section>
@@ -101,7 +111,14 @@ import SignInDialog from '@/components/points/SignInDialog.vue'
 import SystemImage from '@/components/SystemImage.vue'
 
 import { apiServer } from '@/services/apiServer'
-import { SIGN_MAKEUP_KEY, buyShopItem, getMyItems, getShop } from '@/services/shop'
+import {
+  COMIC_QUOTA_50_KEY,
+  SIGN_MAKEUP_KEY,
+  buyShopItem,
+  getMyItems,
+  getShop,
+  useComicQuotaCard,
+} from '@/services/shop'
 
 import type { OwnedItem, ShopItem } from '@/services/shop'
 
@@ -117,10 +134,12 @@ const shopCoin = ref(0)
 const items = ref<ShopItem[]>([])
 const ownedItems = ref<OwnedItem[]>([])
 const buying = ref('')
+const usingQuota = ref(false)
 const signInVisible = ref(false)
 
 function remaining(item: ShopItem) {
-  return Math.max(0, item.MonthlyLimit - item.MonthlyPurchased)
+  // 线上 MessagePack/gzip 序列化会丢掉 null 字段，undefined 与 null 都表示不限购
+  return item.MonthlyLimit == null ? Infinity : Math.max(0, item.MonthlyLimit - item.MonthlyPurchased)
 }
 
 // 道具图放在 API 的 wwwroot 下，后端只下发相对路径；站内资源图（{res:ID}）解析出来已经是绝对地址
@@ -154,6 +173,25 @@ function buy(item: ShopItem) {
       $q.notify({ type: 'negative', message: getErrMsg(err) })
     } finally {
       buying.value = ''
+    }
+  })
+}
+
+function useQuota() {
+  $q.dialog({
+    title: '使用漫画额度卡',
+    message: '使用后立即获得 50 点漫画额度，永不过期。',
+    cancel: true,
+  }).onOk(async () => {
+    usingQuota.value = true
+    try {
+      const res = await useComicQuotaCard()
+      $q.notify({ type: 'positive', message: `已发放 ${res.Granted} 点漫画额度，当前余额 ${res.Quota} 点` })
+      await load()
+    } catch (err) {
+      $q.notify({ type: 'negative', message: getErrMsg(err) })
+    } finally {
+      usingQuota.value = false
     }
   })
 }

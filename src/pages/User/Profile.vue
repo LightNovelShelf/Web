@@ -2,7 +2,10 @@
   <q-page padding>
     <div class="list-card" style="max-width: 900px">
       <div class="column gap-16">
-        <div class="h2 title">个人资料</div>
+        <div class="row items-center justify-between">
+          <div class="h2 title">个人资料</div>
+          <q-btn flat round dense size="sm" icon="mdiRefresh" :loading="refreshing" @click="refreshUser" />
+        </div>
 
         <q-list class="card" bordered separator>
           <template v-for="option in profileListOptions" :key="option.key">
@@ -73,6 +76,18 @@
                 <q-btn outline size="sm" color="primary" label="商城" :to="{ name: 'Shop' }" @click.stop />
                 <span>{{ growth?.Coin ?? 0 }}</span>
                 <q-icon size="18px" name="mdiChevronRight" />
+              </div>
+            </q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section class="avatar-item" avatar>
+              <q-avatar><q-icon name="mdiBookOpenPageVariantOutline" /></q-avatar>
+            </q-item-section>
+            <q-item-section class="label-item">漫画额度</q-item-section>
+            <q-item-section side>
+              <div class="row items-center no-wrap">
+                <span>{{ growth?.ComicQuota ?? 0 }} 点 (永久) {{ growth?.ComicQuotaToday ?? 0 }} 点 (今日)</span>
               </div>
             </q-item-section>
           </q-item>
@@ -183,12 +198,17 @@ const growth = computed<Growth | undefined>(() => user.value?.Growth)
 const pointLogVisible = ref(false)
 const coinLogVisible = ref(false)
 const signInVisible = ref(false)
+const refreshing = ref(false)
 
 async function refreshUser() {
+  if (refreshing.value) return
+  refreshing.value = true
   try {
     appStore.user = await getMyInfo()
   } catch (err) {
     $q.notify({ type: 'negative', message: getErrMsg(err) })
+  } finally {
+    refreshing.value = false
   }
 }
 

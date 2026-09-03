@@ -6,6 +6,10 @@ export interface Growth {
   Exp: number
   /** 金币余额，用于下载消费 */
   Coin: number
+  /** 漫画额度余额（点），永不过期 */
+  ComicQuota: number
+  /** 今日剩余免费漫画页数 */
+  ComicQuotaToday: number
   /** 当前访问等级（含手动授予，用于展示） */
   Level: number
   /** 由经验值算出的成长等级 */

@@ -143,4 +143,5 @@ export {
   mdiDownload,
   mdiDotsHorizontal,
   mdiStorefrontOutline,
+  mdiBookOpenPageVariantOutline,
 } from '@quasar/extras/mdi-v7'
