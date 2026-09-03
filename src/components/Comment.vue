@@ -341,6 +341,7 @@ useInitRequest(
 <style scoped lang="scss">
 .pre {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .reply {
   :deep(.q-item__section--avatar) {

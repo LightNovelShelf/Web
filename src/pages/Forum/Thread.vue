@@ -1303,6 +1303,8 @@ watch(
   margin: 12px 0 0 46px;
   font-size: 14px;
   line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .reply-children {
@@ -1347,6 +1349,8 @@ watch(
   margin: 10px 0 0 40px;
   font-size: 13px;
   line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .reply-children__footer {
