@@ -11,9 +11,9 @@
           <template v-for="option in profileListOptions" :key="option.key">
             <q-item clickable v-ripple active-class="bg-teal-1 text-grey-8" @click="() => handleClick(option)">
               <q-item-section class="avatar-item" avatar>
-                <q-avatar>
-                  <q-img v-if="option.key === 'Avatar'" :src="user?.[option.key]" spinner-color="primary" />
-                  <q-icon v-else :name="option.icon" />
+                <base-avatar v-if="option.key === 'Avatar'" :src="user?.Avatar" :name="user?.UserName ?? '用户'" />
+                <q-avatar v-else>
+                  <q-icon :name="option.icon" />
                 </q-avatar>
               </q-item-section>
               <q-item-section class="label-item">{{ option.label }}</q-item-section>
@@ -178,6 +178,7 @@ import { parseTime } from '@/utils/time'
 
 import { useSessionStore } from '@/stores/session'
 
+import BaseAvatar from '@/components/BaseAvatar.vue'
 import CoinIcon from '@/components/points/CoinIcon.vue'
 import PointLogDialog from '@/components/points/PointLogDialog.vue'
 import SignInDialog from '@/components/points/SignInDialog.vue'

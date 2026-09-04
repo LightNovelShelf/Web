@@ -37,16 +37,13 @@
           <q-badge v-if="user && user.UnreadNotificationCount > 0" color="red" floating>
             {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
           </q-badge>
-          <q-tooltip>消息</q-tooltip>
+          <q-tooltip>通知</q-tooltip>
           <q-icon name="mdiMessageText"></q-icon>
         </q-btn>
 
         <div style="width: 10px" />
 
-        <q-avatar size="36px" ref="avatar">
-          <img v-if="user" :src="user.Avatar" alt="avatar" />
-          <q-icon size="36px" v-else name="mdiAccountCircle"></q-icon>
-
+        <base-avatar :src="user?.Avatar" :name="user?.UserName ?? '访客'" size="36px">
           <q-menu
             class="avatar-popover"
             :offset="[-30, 5]"
@@ -154,7 +151,7 @@
               </div>
             </div>
           </q-menu>
-        </q-avatar>
+        </base-avatar>
       </div>
     </q-toolbar>
   </q-header>
@@ -171,6 +168,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 
 import { useSessionStore } from '@/stores/session'
 
+import BaseAvatar from '@/components/BaseAvatar.vue'
 import CoinIcon from '@/components/points/CoinIcon.vue'
 
 import { useMedia } from '@/composition/useMedia'

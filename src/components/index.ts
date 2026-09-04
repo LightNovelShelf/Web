@@ -1,4 +1,5 @@
 import { defineAsyncComponent } from 'vue'
+export { default as BaseAvatar } from './BaseAvatar.vue'
 export { default as UserAvatar } from './UserAvatar.vue'
 
 export const HtmlEditor = defineAsyncComponent(() => import('./html/HtmlEditor.vue'))

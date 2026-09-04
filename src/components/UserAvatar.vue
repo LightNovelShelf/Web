@@ -13,10 +13,7 @@
     @keydown.enter.space="toggleMenu"
     @click="toggleMenu"
   >
-    <q-avatar :size="size" :style="user.Avatar ? undefined : { background: avatarBackground, color: '#fff' }">
-      <img v-if="user.Avatar" class="user-avatar__image" :src="user.Avatar" :alt="user.UserName" />
-      <template v-else>{{ user.UserName.slice(0, 1) }}</template>
-    </q-avatar>
+    <base-avatar :src="user.Avatar" :name="user.UserName" :size="size" />
 
     <q-menu
       v-if="!disabled"
@@ -32,18 +29,7 @@
     >
       <q-card class="user-summary">
         <q-card-section class="row items-center gap-12">
-          <q-avatar
-            size="56px"
-            :style="displayUser.Avatar ? undefined : { background: avatarBackground, color: '#fff' }"
-          >
-            <img
-              v-if="displayUser.Avatar"
-              class="user-avatar__image"
-              :src="displayUser.Avatar"
-              :alt="displayUser.UserName"
-            />
-            <template v-else>{{ displayUser.UserName.slice(0, 1) }}</template>
-          </q-avatar>
+          <base-avatar :src="displayUser.Avatar" :name="displayUser.UserName" size="56px" />
           <div class="col">
             <div class="row items-center gap-8">
               <span class="text-subtitle1 text-weight-medium">{{ displayUser.UserName }}</span>
@@ -85,6 +71,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
+import BaseAvatar from '@/components/BaseAvatar.vue'
 import TimeAgo from '@/components/TimeAgo.vue'
 
 import { getPublicUserSummary } from '@/services/user'
@@ -118,7 +105,6 @@ const props = withDefaults(
   },
 )
 
-const avatarPalette = ['#2563eb', '#7c3aed', '#0f766e', '#db2777', '#ea580c', '#0891b2']
 const menuOpen = ref(false)
 const loading = ref(false)
 const loadError = ref('')
@@ -127,11 +113,6 @@ let openTimer: ReturnType<typeof setTimeout> | undefined
 let closeTimer: ReturnType<typeof setTimeout> | undefined
 
 const displayUser = computed(() => summary.value ?? props.user)
-const avatarBackground = computed(() => {
-  const index =
-    props.user.UserName.split('').reduce((sum, character) => sum + character.charCodeAt(0), 0) % avatarPalette.length
-  return `linear-gradient(135deg, ${avatarPalette[index]}, #93c5fd)`
-})
 const stats = computed(() => {
   if (!summary.value) return []
   return [
@@ -215,12 +196,6 @@ onBeforeUnmount(() => {
 
 .user-avatar--disabled {
   cursor: default;
-}
-
-.user-avatar__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .user-summary {

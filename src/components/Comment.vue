@@ -4,9 +4,7 @@
     <q-list v-if="user">
       <q-item>
         <q-item-section avatar v-if="!$q.screen.xs">
-          <q-avatar size="48px">
-            <img :src="user.Avatar" alt="avatar" />
-          </q-avatar>
+          <base-avatar :src="user.Avatar" :name="user.UserName" size="48px" />
         </q-item-section>
 
         <q-item-section>
@@ -190,6 +188,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 
 import { useSessionStore } from '@/stores/session'
 
+import BaseAvatar from '@/components/BaseAvatar.vue'
 import TimeAgo from '@/components/TimeAgo.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 

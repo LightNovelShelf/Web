@@ -128,18 +128,19 @@
                   <q-spinner-dots color="primary" size="40px" />
                 </div>
                 <div v-else>
-                  <q-avatar
-                    class="cursor-pointer"
+                  <base-avatar
                     v-for="ban in banList"
                     :key="ban.Id"
+                    class="cursor-pointer"
+                    :src="ban.Avatar"
+                    :name="ban.Description || '封禁'"
                     size="32px"
                     @click="showImage(ban.Images)"
                   >
-                    <img :src="ban.Avatar" alt="avatar" />
                     <q-tooltip class="ban-tooltip">
                       {{ ban.Description }}
                     </q-tooltip>
-                  </q-avatar>
+                  </base-avatar>
                 </div>
               </q-card-section>
             </q-card>
@@ -158,6 +159,7 @@ import { ref, computed } from 'vue'
 
 import { useSettingStore } from '@/stores/setting'
 
+import BaseAvatar from '@/components/BaseAvatar.vue'
 import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/components/grid/'
 
