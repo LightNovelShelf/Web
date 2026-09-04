@@ -58,6 +58,7 @@ export {
   mdiChevronDown,
   mdiArrowUp,
   mdiArrowDown,
+  mdiShieldAlertOutline,
   mdiShieldCheck,
   mdiEyeOff,
   mdiAccount,

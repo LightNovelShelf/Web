@@ -80,20 +80,9 @@ export namespace UploadImage {
 }
 
 export namespace GetNotifications {
-  export type NotificationType = 'Comment' | 'CommentReply' | 'CommunityThreadReply' | 'CommunityThreadChildReply'
-
-  export type NotificationObjectType = 'Book' | 'Announcement' | 'CommunityThread' | 'Series'
-
-  export interface NotificationExtra {
-    /** 系列通知没有实体对象，为 null；跳转看 series_title */
-    object_id: number | null
-    object_title: string
-    series_title?: string | null
-    preview: string
-    reply_id?: number | null
-    parent_reply_id?: number | null
-    reply_to_reply_id?: number | null
-    reply_preview?: string | null
+  export interface NotificationAction {
+    Type: string
+    Data: Record<string, unknown>
   }
 
   export interface Request {
@@ -114,12 +103,16 @@ export namespace GetNotifications {
       UserName: string
       Avatar: string
     } | null
-    Type: NotificationType
-    ObjectType: NotificationObjectType
-    ObjectId: number | null
+    Kind: string
+    SchemaVersion: number
+    Title: string
+    Body: string
+    Tone: string
+    Action: NotificationAction | null
+    Data: Record<string, unknown>
     IsRead: boolean
+    ReadAt: string | null
     CreatedAt: string
-    Extra: NotificationExtra
   }
 }
 

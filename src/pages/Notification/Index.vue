@@ -3,11 +3,11 @@
     <div class="notification-page">
       <!-- 标题栏 -->
       <div class="q-mb-md">
-        <div class="text-h5 text-weight-medium q-mb-sm">消息中心</div>
+        <div class="text-h5 text-weight-medium q-mb-sm">通知中心</div>
         <q-separator />
       </div>
 
-      <!-- 消息列表 -->
+      <!-- 通知列表 -->
       <q-infinite-scroll @load="onLoad" :offset="250" ref="infiniteScroll">
         <div class="notification-list">
           <q-card
@@ -16,40 +16,38 @@
             class="notification-item q-mb-sm"
             flat
             bordered
-            :class="{ unread: !notification.IsRead }"
+            :class="{ unread: !notification.IsRead, actionable: supportsNotificationAction(notification.Action) }"
             @click="handleNotificationClick(notification)"
           >
             <q-card-section horizontal>
               <!-- 用户头像 -->
               <user-avatar v-if="notification.Actor" class="q-mr-md" :user="notification.Actor" size="48px" />
               <q-avatar v-else size="48px" class="q-mr-md">
-                <q-icon name="mdiAccountCircle" size="48px" color="grey-5" />
+                <q-icon
+                  :name="notificationTonePresentation(notification.Tone).icon"
+                  size="48px"
+                  :color="notificationTonePresentation(notification.Tone).color"
+                />
               </q-avatar>
 
-              <!-- 消息内容 -->
+              <!-- 通知内容 -->
               <div class="notification-content flex-1">
                 <div class="notification-header row items-center q-mb-xs">
                   <span class="text-weight-medium">{{ notification.Actor?.UserName || '系统' }}</span>
-                  <span class="text-grey-7 q-ml-xs">
-                    {{ getNotificationLabel(notification) }}
-                  </span>
                   <q-space />
                   <time-ago class="text-grey-6 text-caption" :value="notification.CreatedAt" />
                 </div>
 
-                <div v-if="notification.Extra" class="notification-preview-container">
-                  <div class="notification-preview q-pa-sm bg-grey-2 rounded-borders">
-                    <div v-if="notification.Extra.object_title" class="text-caption text-grey-7 q-mb-xs">
-                      《{{ notification.Extra.object_title }}》
+                <div class="notification-preview-container">
+                  <div
+                    class="notification-preview q-pa-sm bg-grey-2 rounded-borders"
+                    :class="notificationTonePresentation(notification.Tone).borderClass"
+                  >
+                    <div class="text-weight-medium text-grey-9 q-mb-xs">
+                      {{ notification.Title }}
                     </div>
-                    <div
-                      v-if="notification.Extra.reply_preview"
-                      class="notification-preview__reply q-mb-xs text-body2 text-grey-7"
-                    >
-                      回复：{{ notification.Extra.reply_preview }}
-                    </div>
-                    <div v-if="notification.Extra.preview" class="text-body2 text-grey-8">
-                      {{ notification.Extra.preview }}
+                    <div v-if="notification.Body" class="text-body2 text-grey-8">
+                      {{ notification.Body }}
                     </div>
                   </div>
                 </div>
@@ -71,7 +69,7 @@
       <!-- 空状态 -->
       <div v-if="notifications.length === 0 && !loading" class="empty-state text-center q-pa-xl">
         <q-icon name="mdiEmailOutline" size="64px" color="grey-5" />
-        <div class="text-grey-6 q-mt-md">暂无消息</div>
+        <div class="text-grey-6 q-mt-md">暂无通知</div>
       </div>
 
       <!-- 底部操作按钮 -->
@@ -95,6 +93,9 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
 import { getNotifications, markNotifications } from '@/services/user'
+
+import { executeNotificationAction, supportsNotificationAction } from './actions'
+import { notificationTonePresentation } from './presentation'
 
 import type { GetNotifications } from '@/services/user/type'
 
@@ -185,62 +186,7 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
     }
   }
 
-  if (notification.ObjectType === 'Book' && notification.Extra?.object_id) {
-    router.push({
-      name: 'BookInfo',
-      params: { bid: notification.Extra.object_id },
-    })
-    return
-  }
-
-  if (notification.ObjectType === 'Series' && notification.Extra?.series_title) {
-    router.push({
-      name: 'MangaDetail',
-      params: { seriesTitle: notification.Extra.series_title },
-    })
-    return
-  }
-
-  if (notification.ObjectType === 'Announcement' && notification.Extra?.object_id) {
-    router.push({
-      name: 'AnnouncementDetail',
-      params: { id: notification.Extra.object_id },
-    })
-    return
-  }
-
-  if (notification.ObjectType === 'CommunityThread' && notification.Extra?.object_id) {
-    router.push({
-      name: 'ForumThread',
-      params: { id: notification.Extra.object_id },
-      // 只带 replyId，服务端会定位它所在的楼层
-      query: { replyId: notification.Extra.reply_id ? String(notification.Extra.reply_id) : undefined },
-    })
-  }
-}
-
-const getNotificationLabel = (notification: GetNotifications.Notification) => {
-  if (notification.Type === 'Comment') {
-    if (notification.ObjectType === 'Announcement') return '评论了你的公告'
-    if (notification.ObjectType === 'Series') return '评论了你上传的系列'
-    return '评论了你的书籍'
-  }
-
-  if (notification.Type === 'CommentReply') {
-    if (notification.ObjectType === 'Announcement') return '回复了你的公告评论'
-    if (notification.ObjectType === 'Series') return '回复了你的系列评论'
-    return '回复了你的书籍评论'
-  }
-
-  if (notification.Type === 'CommunityThreadReply') {
-    return '回复了你的帖子'
-  }
-
-  if (notification.Type === 'CommunityThreadChildReply') {
-    return '回复了你的社区评论'
-  }
-
-  return notification.Type
+  await executeNotificationAction(router, notification.Action)
 }
 
 // 全部标记为已读
@@ -269,7 +215,7 @@ useInitRequest(requestNotifications)
 }
 
 .notification-item {
-  cursor: pointer;
+  cursor: default;
   transition: all 0.2s;
   position: relative;
 
@@ -277,9 +223,13 @@ useInitRequest(requestNotifications)
     background-color: rgba(33, 150, 243, 0.04);
   }
 
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+  &.actionable {
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
   }
 }
 
@@ -288,46 +238,25 @@ useInitRequest(requestNotifications)
   flex: 1;
 }
 
-.notification-text {
-  line-height: 1.6;
-}
+.notification-preview {
+  border-left: 3px solid #9e9e9e;
+  font-size: 13px;
+  line-height: 1.5;
 
-.notification-preview-container {
-  .notification-preview {
-    border-left: 3px solid #2196f3;
-    font-size: 13px;
-    line-height: 1.5;
+  &--info {
+    border-left-color: #2196f3;
   }
 
-  .notification-preview__reply {
-    padding-left: 10px;
-    border-left: 2px solid #cbd5e1;
-    color: #475569;
-    font-size: 12px;
-    line-height: 1.5;
+  &--success {
+    border-left-color: #21ba45;
   }
 
-  .notification-preview-left {
-    flex: 1;
-    min-width: 0;
+  &--warning {
+    border-left-color: #f2c037;
   }
 
-  .notification-preview-right {
-    flex: none;
-    width: 180px;
-    max-width: 30%;
-
-    .notification-preview {
-      border-left: 2px solid #9e9e9e;
-      font-size: 12px;
-      max-height: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      line-clamp: 4;
-      -webkit-box-orient: vertical;
-    }
+  &--danger {
+    border-left-color: #c10015;
   }
 }
 
