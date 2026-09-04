@@ -245,6 +245,7 @@ import { HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from '@/co
 import { useLayout } from '@/components/app/useLayout'
 import { QGrid, QGridItem } from '@/components/grid'
 import SystemImage from '@/components/SystemImage.vue'
+import { confirmEditorHtmlSave } from '@/components/html/editorSaveGuard'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -405,62 +406,54 @@ async function saveSetting() {
 }
 
 async function saveInfo() {
-  $q.dialog({
-    title: '提示',
-    message: '你确定要保存吗？',
-    cancel: true,
-  }).onOk(async () => {
-    try {
-      await editBook(_bid.value, toRaw(book.value))
+  if (!(await confirmEditorHtmlSave(book.value.Introduction, true))) return
 
-      $q.notify({
-        type: 'positive',
-        message: '修改成功',
-      })
-    } catch (e) {
-      $q.notify({
-        type: 'negative',
-        message: getErrMsg(e),
-      })
-    }
-  })
+  try {
+    await editBook(_bid.value, toRaw(book.value))
+
+    $q.notify({
+      type: 'positive',
+      message: '修改成功',
+    })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e),
+    })
+  }
 }
 
 async function saveChapter() {
-  $q.dialog({
-    title: '提示',
-    message: '你确定要保存吗？',
-    cancel: true,
-  }).onOk(async () => {
-    try {
-      if (isComic.value) {
-        await updateComicChapter({
-          Cid: _cid.value,
-          Map: { Title: chapter.value.Title, Images: toRaw(chapter.value.Images) },
-        })
-      } else {
-        await updateNovelChapter({ Cid: _cid.value, Map: toRaw(chapter.value) })
-      }
+  if (!(await confirmEditorHtmlSave(isComic.value ? '' : (chapter.value.Content ?? ''), true))) return
 
-      $q.notify({
-        type: 'positive',
-        message: '修改成功',
+  try {
+    if (isComic.value) {
+      await updateComicChapter({
+        Cid: _cid.value,
+        Map: { Title: chapter.value.Title, Images: toRaw(chapter.value.Images) },
       })
-    } catch (e) {
-      $q.notify({
-        type: 'negative',
-        message: getErrMsg(e),
-      })
-      return
+    } else {
+      await updateNovelChapter({ Cid: _cid.value, Map: toRaw(chapter.value) })
     }
 
-    chapters.value = chapters.value.map((c) => {
-      if (c.Id == _cid.value) {
-        return { Id: c.Id, Title: chapter.value.Title } as ChapterInfo
-      }
-
-      return c
+    $q.notify({
+      type: 'positive',
+      message: '修改成功',
     })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e),
+    })
+    return
+  }
+
+  chapters.value = chapters.value.map((c) => {
+    if (c.Id == _cid.value) {
+      return { Id: c.Id, Title: chapter.value.Title } as ChapterInfo
+    }
+
+    return c
   })
 }
 
@@ -550,6 +543,8 @@ async function createChapter() {
     }
 
     async function inner() {
+      if (!(await confirmEditorHtmlSave(creatingChapterContent.html))) return
+
       const { Chapters: resp, NewCid: cid } = <any>await createNewNovelChapter({
         Bid: _bid.value,
         SortNum: sort,

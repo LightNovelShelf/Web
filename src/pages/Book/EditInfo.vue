@@ -56,6 +56,7 @@ import { useSettingStore } from '@/stores/setting'
 import { HtmlEditor, DragPageSticky, ImageInput } from '@/components'
 import { QGrid, QGridItem } from '@/components/grid'
 import SystemImage from '@/components/SystemImage.vue'
+import { confirmEditorHtmlSave } from '@/components/html/editorSaveGuard'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -90,25 +91,21 @@ const request = useTimeoutFn(async () => {
 const $q = useQuasar()
 
 async function save() {
-  $q.dialog({
-    title: '提示',
-    message: '你确定要保存吗？',
-    cancel: true,
-  }).onOk(async () => {
-    try {
-      await editBook(bid.value, toRaw(book.value))
+  if (!(await confirmEditorHtmlSave(book.value.Introduction, true))) return
 
-      $q.notify({
-        type: 'positive',
-        message: '修改成功',
-      })
-    } catch (e) {
-      $q.notify({
-        type: 'negative',
-        message: getErrMsg(e),
-      })
-    }
-  })
+  try {
+    await editBook(bid.value, toRaw(book.value))
+
+    $q.notify({
+      type: 'positive',
+      message: '修改成功',
+    })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e),
+    })
+  }
 }
 
 useInitRequest(request, { isActive: isActive })

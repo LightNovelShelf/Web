@@ -79,6 +79,7 @@ import { useSettingStore } from '@/stores/setting'
 
 import { DragPageSticky } from '@/components'
 import HtmlEditor from '@/components/html/HtmlEditor.vue'
+import { confirmEditorHtmlSave } from '@/components/html/editorSaveGuard'
 
 import {
   createCommunityThread,
@@ -295,6 +296,8 @@ async function submit() {
     void router.push({ name: 'Login', query: { from: encodeURIComponent(route.fullPath) } })
     return
   }
+
+  if (!(await confirmEditorHtmlSave(contentHtml.value))) return
 
   submitting.value = true
 

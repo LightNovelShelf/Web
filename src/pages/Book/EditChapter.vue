@@ -38,6 +38,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { useSettingStore } from '@/stores/setting'
 
 import { HtmlEditor, DragPageSticky } from '@/components'
+import { confirmEditorHtmlSave } from '@/components/html/editorSaveGuard'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
@@ -60,25 +61,21 @@ const request = useTimeoutFn(async () => {
 const $q = useQuasar()
 
 async function save() {
-  $q.dialog({
-    title: '提示',
-    message: '你确定要保存吗？',
-    cancel: true,
-  }).onOk(async () => {
-    try {
-      await updateNovelChapter({ Cid: chapter.value.Id, Map: toRaw(chapter.value) })
+  if (!(await confirmEditorHtmlSave(chapter.value.Content, true))) return
 
-      $q.notify({
-        type: 'positive',
-        message: '修改成功',
-      })
-    } catch (e) {
-      $q.notify({
-        type: 'negative',
-        message: getErrMsg(e),
-      })
-    }
-  })
+  try {
+    await updateNovelChapter({ Cid: chapter.value.Id, Map: toRaw(chapter.value) })
+
+    $q.notify({
+      type: 'positive',
+      message: '修改成功',
+    })
+  } catch (e) {
+    $q.notify({
+      type: 'negative',
+      message: getErrMsg(e),
+    })
+  }
 }
 
 useInitRequest(request, { isActive: isActive })
