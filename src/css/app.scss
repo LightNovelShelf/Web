@@ -38,3 +38,25 @@ body.desktop {
     row-gap: #{$gap}px;
   }
 }
+
+// 编辑器用伪元素显示编号，权威 HTML 与阅读器注文不含编号。
+:is(.q-editor__content, .md-editor-preview) .footnotes {
+  counter-reset: editor-footnote;
+
+  > aside {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.5em;
+    counter-increment: editor-footnote;
+
+    &::before {
+      grid-row: 1;
+      grid-column: 1;
+      content: '[' counter(editor-footnote) ']';
+    }
+
+    > * {
+      grid-column: 2;
+    }
+  }
+}

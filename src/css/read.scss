@@ -9,6 +9,51 @@ p {
   }
 }
 
+.footnotes p,
+blockquote p {
+  text-indent: 0;
+}
+
+blockquote {
+  margin: 1em 0;
+  padding: 0 1em;
+  color: #59636e;
+  border-left: 0.25em solid #d1d9e0;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  body.body--dark & {
+    color: #9198a1;
+    border-left-color: #3d444d;
+  }
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+pre {
+  margin: 0.75em 0;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  border: 1px solid rgba(127, 127, 127, 0.2);
+  border-radius: 4px;
+  background: rgba(127, 127, 127, 0.12);
+  line-height: 1.5;
+  text-indent: 0;
+  white-space: pre;
+
+  code {
+    font-size: 0.9em;
+  }
+}
+
 /*图片相关*/
 .illus,
 .illu,
@@ -48,15 +93,11 @@ img.footnote {
 
 a.duokan-footnote {
   cursor: pointer;
+  text-indent: 0;
 }
 
 a.duokan-footnote img {
   height: 1em;
-  vertical-align: text-top;
-}
-
-sup {
-  vertical-align: text-top;
 }
 
 /*标题相关*/

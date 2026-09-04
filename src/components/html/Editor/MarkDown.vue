@@ -10,11 +10,10 @@
       :sanitize="sanitize"
       noMermaid
       noKatex
+      noEcharts
       noImgZoomIn
       noHighlight
-      autoDetectCode
       :showCodeRowNumber="false"
-      :codeFoldable="false"
     >
       <template #defToolbars>
         <NormalToolbar title="插入注音" @click="insertRuby">
@@ -25,6 +24,11 @@
         <NormalToolbar title="插入着重号" @click="insertDot">
           <template #trigger>
             <q-icon name="mdiCircleDouble" />
+          </template>
+        </NormalToolbar>
+        <NormalToolbar title="插入脚注" @click="insertFootnote">
+          <template #trigger>
+            <q-icon name="mdiTextBoxOutline" />
           </template>
         </NormalToolbar>
       </template>
@@ -59,6 +63,7 @@ const mdToolBar: ToolbarNames[] = [
   'strikeThrough',
   0,
   1,
+  2,
   '-',
   'title',
   'sub',
@@ -113,6 +118,64 @@ const insertDot = () => {
       deviationStart: 0,
       deviationEnd: 0,
     }
+  })
+}
+function nextFootnoteLabel(markdown: string) {
+  const labels = new Set(Array.from(markdown.matchAll(/\[\^([^\]\r\n]+)\]/g), (match) => match[1].toLowerCase()))
+  for (let number = 1; ; number++) {
+    const label = `note-${number}`
+    if (!labels.has(label)) return label
+  }
+}
+
+function footnoteDefinition(label: string, value: string) {
+  const [firstLine, ...otherLines] = value.trim().replace(/\r\n?/g, '\n').split(/\n+/)
+  const continuation = otherLines.map((line) => `\n    \n    ${line}`).join('')
+  return `[^${label}]: ${firstLine}${continuation}`
+}
+
+function insertFootnote() {
+  $q.dialog({
+    title: '添加脚注',
+    prompt: {
+      model: '',
+      type: 'textarea',
+      label: '注释内容',
+      outlined: true,
+      autofocus: true,
+      isValid: (value) => value.trim().length > 0,
+    },
+    cancel: true,
+  }).onOk((value: string) => {
+    const view = editorRef.value?.getEditorView()
+    if (!view) return
+
+    const markdown = view.state.doc.toString()
+    const { from, to } = view.state.selection.main
+    const selectedText = markdown.slice(from, to)
+    const label = nextFootnoteLabel(markdown)
+    const marker = `[^${label}]`
+    const markerText = selectedText + marker
+    const content = markdown.slice(0, from) + markerText + markdown.slice(to)
+    const separator = content.endsWith('\n\n') ? '' : content.endsWith('\n') ? '\n' : '\n\n'
+    const definition = separator + footnoteDefinition(label, value)
+    const cursor = from + markerText.length
+
+    if (to === markdown.length) {
+      view.dispatch({
+        changes: { from, to, insert: markerText + definition },
+        selection: { anchor: cursor },
+      })
+      return
+    }
+
+    view.dispatch({
+      changes: [
+        { from, to, insert: markerText },
+        { from: markdown.length, insert: definition },
+      ],
+      selection: { anchor: cursor },
+    })
   })
 }
 function sanitize(html: string) {

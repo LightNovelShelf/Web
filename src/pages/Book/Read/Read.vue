@@ -382,24 +382,37 @@ watch(
   () => chapter.value?.Id,
   () => {
     nextTick(async () => {
-      readerRef.value.contentRef.querySelectorAll('.duokan-footnote').forEach((element: HTMLElement) => {
-        const id = element.getAttribute('href')!.replace('#', '')
-        //获取注释内容
-        const noteElement = document.getElementById(id)!
+      const contentRoot = readerRef.value.contentRef as HTMLElement
+      contentRoot.querySelectorAll<HTMLElement>('.duokan-footnote').forEach((element, index) => {
+        const href = element.getAttribute('href')
+        if (!href?.startsWith('#') || href.length === 1) return
+
+        let id: string
+        try {
+          id = decodeURIComponent(href.slice(1))
+        } catch {
+          id = href.slice(1)
+        }
+        const noteElement = contentRoot.querySelector<HTMLElement>(`#${CSS.escape(id)}`)
+        if (!noteElement) return
+
         const content = noteElement.innerHTML
-        // 隐藏内容
         noteElement.style.display = 'none'
         element.removeAttribute('href')
         element.setAttribute('global-cancel', 'true')
-        element.id = `v-${id}`
+        const markerId = `v-footnote-${index}`
+        element.id = markerId
         if ($q.platform.is.mobile) {
-          element.onclick = (event) => showNote(event, content, `v-${id}`)
+          element.onclick = (event) => showNote(event, content, markerId)
         } else {
-          element.onmouseenter = (event) => showNote(event, content, `v-${id}`)
+          element.onmouseenter = (event) => showNote(event, content, markerId)
           element.onmouseleave = () => (note.showing = false)
         }
       })
-      await syncReading(readerRef.value.contentRef, userId, { BookId: bid, CId: cid }, headerOffset)
+      contentRoot.querySelectorAll<HTMLElement>('.footnotes').forEach((element) => {
+        element.style.display = 'none'
+      })
+      await syncReading(contentRoot, userId, { BookId: bid, CId: cid }, headerOffset)
       if (flip.value) {
         await flipRemeasure()
         if (flipToTail) {

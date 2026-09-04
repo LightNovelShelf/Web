@@ -1,0 +1,10 @@
+diff --git a/lib/style.css b/lib/style.css
+index de409eb67eed304abf9e86eb2a53a989f76c6461..e1ba5b97a2af01ad76d125dd0e3bf7e7e69de25b 100644
+--- a/lib/style.css
++++ b/lib/style.css
+@@ -1,5 +1,4 @@
+ @charset "UTF-8";
+-@import '@vavt/markdown-theme/css/all.css';
+ .md-editor-checkbox {
+   cursor: pointer;
+   width: 12px;
