@@ -100,9 +100,9 @@ const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
-const { editorSetting } = useSettingStore()
-// 空正文得按编辑器吃的格式给：markdown 模式下 '<p></p>' 会当成正文文字显示出来
-const EMPTY_CONTENT = editorSetting.mode === 'markdown' ? '' : '<p></p>'
+const { activeEditorMode } = useSettingStore()
+// markdown 模式下不能把 HTML 空段落作为初始内容
+const EMPTY_CONTENT = activeEditorMode === 'markdown' ? '' : '<p></p>'
 
 // 编辑态由 /forum/thread/:id/edit 复用本页，id 只在编辑时存在
 const props = defineProps<{ id?: string }>()
@@ -261,7 +261,7 @@ async function loadCatalog() {
 // 编辑态的初始内容：Content 是解码 + 签名后的正文，回存时 ImageEncoder 会按图片路径还原成 {res:id}
 async function loadThread() {
   try {
-    const thread = await getCommunityThreadEditInfo(threadId.value, editorSetting.mode)
+    const thread = await getCommunityThreadEditInfo(threadId.value, activeEditorMode)
 
     boardKey.value = thread.BoardKey
     subCategoryKey.value = thread.SubCategoryKey

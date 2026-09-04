@@ -30,6 +30,7 @@ export const useSettingStore = defineStore('app.setting', {
     editorSetting: {
       mode: 'markdown' as 'html' | 'markdown',
     },
+    activeEditorMode: 'markdown' as 'html' | 'markdown',
   }),
   actions: {
     async init() {
@@ -48,6 +49,7 @@ export const useSettingStore = defineStore('app.setting', {
         )
       })
       await Promise.all(p)
+      this.activeEditorMode = this.editorSetting.mode
       this.isInit = true
     },
     async save() {

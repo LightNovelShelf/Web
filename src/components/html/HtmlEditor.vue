@@ -1,15 +1,10 @@
 <template>
-  <html-editor
-    :mode="mode"
-    :html="content"
-    @update:html="emit('update:html', $event)"
-    v-if="editorSetting.mode === 'html'"
-  />
+  <html-editor :mode="mode" :html="content" @update:html="emit('update:html', $event)" v-if="editorMode === 'html'" />
   <md-editor
     :mode="mode"
     :markdown="content"
     @update:html="emit('update:html', $event)"
-    v-else-if="editorSetting.mode === 'markdown'"
+    v-else-if="editorMode === 'markdown'"
   />
 </template>
 
@@ -19,12 +14,12 @@ import { useSettingStore } from '@/stores/setting'
 import HtmlEditor from './Editor/Html.vue'
 import MdEditor from './Editor/MarkDown.vue'
 
-// content 的格式由 editorSetting.mode 决定（html 或服务端转换好的 markdown），编辑结果一律是 Html
+// 页面加载时固定编辑器格式，设置变更只在刷新后生效
 defineProps<{ mode: 'simple' | 'common'; content: string }>()
 
 const emit = defineEmits(['update:html'])
 
-const { editorSetting } = useSettingStore()
+const editorMode = useSettingStore().activeEditorMode
 </script>
 
 <style lang="scss"></style>

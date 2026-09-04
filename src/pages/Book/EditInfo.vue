@@ -65,10 +65,10 @@ const isActive = computed(() => book.value?.Id === bid.value)
 const comicCategoryNames = new Set(['原创', '连载', '完结'])
 const comicOnlyCategoryNames = new Set(['连载', '完结'])
 
-const { editorSetting } = useSettingStore()
+const { activeEditorMode } = useSettingStore()
 
 const request = useTimeoutFn(async () => {
-  const data = (await getBookEditInfo(bid.value, editorSetting.mode)) as any
+  const data = (await getBookEditInfo(bid.value, activeEditorMode)) as any
   const categories =
     data.Book.Type === 'Comic'
       ? data.Categories.filter((item) => comicCategoryNames.has(item.Name))

@@ -260,7 +260,7 @@ const layout = useLayout()
 
 const { siderShow, siderBreakpoint } = layout
 const props = defineProps<{ bookId: string }>()
-const { editorSetting } = useSettingStore()
+const { activeEditorMode } = useSettingStore()
 const $q = useQuasar()
 const route = useRoute()
 const appStore = useAppStore()
@@ -345,7 +345,7 @@ watch(
     try {
       const result = isComic.value
         ? await getComicEditInfo({ Bid: _bid.value, Cid: cid })
-        : await getNovelEditInfo({ Bid: _bid.value, Cid: cid, Format: editorSetting.mode })
+        : await getNovelEditInfo({ Bid: _bid.value, Cid: cid, Format: activeEditorMode })
       if (_cid.value === cid) {
         chapter.value = result as ChapterEditState
         chapter.value.Images ??= []
@@ -618,7 +618,7 @@ async function handleChange(evt) {
 }
 
 const request = useTimeoutFn(async () => {
-  const p1 = getBookEditInfo(_bid.value, editorSetting.mode).then((data: any) => {
+  const p1 = getBookEditInfo(_bid.value, activeEditorMode).then((data: any) => {
     bookInfo.value = data
     const categories =
       data.Book.Type === 'Comic'

@@ -46,10 +46,10 @@ const chapter = ref<any>()
 
 const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.value?.SortNum === sortNum.value)
 
-const { editorSetting } = useSettingStore()
+const { activeEditorMode } = useSettingStore()
 
 const request = useTimeoutFn(async () => {
-  chapter.value = await getNovelEditInfo({ Bid: bid.value, SortNum: sortNum.value, Format: editorSetting.mode })
+  chapter.value = await getNovelEditInfo({ Bid: bid.value, SortNum: sortNum.value, Format: activeEditorMode })
 })
 
 const $q = useQuasar()

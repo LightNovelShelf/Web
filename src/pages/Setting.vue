@@ -127,7 +127,10 @@
           <q-tab-panel name="Edit">
             <div class="q-pa-md">
               <div class="column items-start gap-4">
-                <div class="text-subtitle1">编辑器</div>
+                <div class="text-subtitle1">
+                  编辑器
+                  <span class="text-caption text-opacity">切换选项后必须刷新页面才能生效</span>
+                </div>
                 <q-btn-toggle
                   v-model="editorSetting.mode"
                   toggle-color="primary"
