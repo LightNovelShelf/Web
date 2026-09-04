@@ -3,6 +3,10 @@ export enum RequestMethod {
   GET = 'GET',
   POST = 'POST',
 }
+
+/** 编辑接口的正文格式，取值同 editorSetting.mode；markdown 由服务端转换 */
+export type EditorFormat = 'html' | 'markdown'
+
 /** 请求选项 */
 export interface RequestConfig<Data> {
   /** 中断信号，可用来立即中断某个请求的返回（并抛错） */

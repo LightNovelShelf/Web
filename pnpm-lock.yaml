@@ -14,12 +14,6 @@ importers:
       '@fingerprintjs/fingerprintjs':
         specifier: ^5.0.1
         version: 5.2.0
-      '@joplin/turndown':
-        specifier: ^4.0.82
-        version: 4.0.85
-      '@joplin/turndown-plugin-gfm':
-        specifier: ^1.0.64
-        version: 1.0.67
       '@microsoft/signalr':
         specifier: ^10.0.0
         version: 10.0.11
@@ -134,9 +128,6 @@ importers:
         version: 3.3.9(typescript@5.9.3)
 
 packages:
-
-  '@adobe/css-tools@4.4.4':
-    resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
 
   '@apideck/better-ajv-errors@0.3.7':
     resolution: {integrity: sha512-TajUJwGWbDwkCx/CZi7tRE8PVB7simCvKJfHUsSdvps+aTM/PDPP4gkLmKnc+x3CE//y9i/nj74GqdL/hwk7Iw==}
@@ -774,12 +765,6 @@ packages:
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
     engines: {node: '>=18'}
 
-  '@joplin/turndown-plugin-gfm@1.0.67':
-    resolution: {integrity: sha512-FZfW5EZfidhzd1IaY1uxHnIZPTVOxAdleMZ4/1U6Nt5b7+Qj5JThDnaIomuJtetnUBzuRNbe9FWMuqD4B3dlWA==}
-
-  '@joplin/turndown@4.0.85':
-    resolution: {integrity: sha512-JB/I1LSBtaS8EVveZPZU8CE4ypg79fPKYmVqDTvtOvQkPKk79nXkwtHeJQoitdivJRoxkpL4dCRUd4OmfFMVGg==}
-
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
@@ -863,9 +848,6 @@ packages:
 
   '@microsoft/signalr@10.0.11':
     resolution: {integrity: sha512-FulOJ2EEtKvLQcswe/U7v8pzyXyk7Jua5xgWJPPwyQU/2Z9ORvKcVjyO75VvLsem+CJ1ORRexJ+7Bz1FCei2aw==}
-
-  '@mixmark-io/domino@2.2.0':
-    resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
   '@msgpack/msgpack@2.8.0':
     resolution: {integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==}
@@ -2279,9 +2261,6 @@ packages:
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
 
-  html-entities@1.4.0:
-    resolution: {integrity: sha512-8nxjcBcd8wovbeKx7h3wTji4e6+rhaVuPNpMqwWgnHh+N9ToqsCs6XztWRBPQ+UtzsoMAdKZtUENoVzU/EMtZA==}
-
   html-minifier-terser@7.2.0:
     resolution: {integrity: sha512-tXgn3QfqPIpGl9o+K5tpcj3/MN4SfLtsx2GWwBC3SSd0tXQGyF3gsSqad8loJgKZGM3ZxbYDd5yhiBIdWpmvLA==}
     engines: {node: ^14.13.1 || >=16.0.0}
@@ -3685,8 +3664,6 @@ packages:
 
 snapshots:
 
-  '@adobe/css-tools@4.4.4': {}
-
   '@apideck/better-ajv-errors@0.3.7(ajv@8.20.0)':
     dependencies:
       ajv: 8.20.0
@@ -4736,14 +4713,6 @@ snapshots:
   '@isaacs/cliui@9.0.0':
     optional: true
 
-  '@joplin/turndown-plugin-gfm@1.0.67': {}
-
-  '@joplin/turndown@4.0.85':
-    dependencies:
-      '@adobe/css-tools': 4.4.4
-      '@mixmark-io/domino': 2.2.0
-      html-entities: 1.4.0
-
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -4887,8 +4856,6 @@ snapshots:
       - bufferutil
       - encoding
       - utf-8-validate
-
-  '@mixmark-io/domino@2.2.0': {}
 
   '@msgpack/msgpack@2.8.0': {}
 
@@ -6232,8 +6199,6 @@ snapshots:
     optional: true
 
   hookable@5.5.3: {}
-
-  html-entities@1.4.0: {}
 
   html-minifier-terser@7.2.0:
     dependencies:

@@ -1,3 +1,5 @@
+import type { EditorFormat } from '@/services/types'
+
 export interface GetNovelContentRequest {
   Bid: number
   SortNum: number
@@ -13,7 +15,10 @@ interface GetNovelEditInfoByCid {
   Cid?: number
 }
 
-export type GetNovelEditInfo = GetNovelEditInfoBySortNum | GetNovelEditInfoByCid
+export type GetNovelEditInfo = (GetNovelEditInfoBySortNum | GetNovelEditInfoByCid) & {
+  /** 默认 html；markdown 时 Content 由服务端转换 */
+  Format?: EditorFormat
+}
 
 export type GetComicEditInfo = GetNovelEditInfo
 

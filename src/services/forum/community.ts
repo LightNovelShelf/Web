@@ -14,6 +14,7 @@ import type {
   GetCommunityReplyChildrenRequest,
   UpdateCommunityThreadRequest,
 } from './types'
+import type { EditorFormat } from '@/services/types'
 
 export async function getCommunityHome(query: CommunityListQuery = {}): Promise<CommunityHomePayload> {
   return requestWithSignalr<CommunityHomePayload>('GetCommunityHome', {
@@ -59,7 +60,7 @@ export async function getCommunityThread(
 /** 编辑帖子用：只取编辑器要的字段，markdown 时正文由服务端转换 */
 export async function getCommunityThreadEditInfo(
   id: number,
-  format: 'html' | 'markdown' = 'html',
+  format: EditorFormat = 'html',
 ): Promise<CommunityThreadEditInfo> {
   return requestWithSignalr<CommunityThreadEditInfo>('GetCommunityThreadEditInfo', {
     ThreadId: id,

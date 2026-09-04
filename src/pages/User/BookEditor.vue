@@ -21,7 +21,11 @@
                 <q-input :label="isComic ? '漫画名' : '书名'" v-model="book['Title']" />
                 <q-input label="作者" v-model="book['Author']" />
                 <div class="text-opacity">简介</div>
-                <html-editor v-model:html="book['Introduction']" mode="simple" />
+                <html-editor
+                  :content="book['Introduction']"
+                  @update:html="book['Introduction'] = $event"
+                  mode="simple"
+                />
                 <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
               </div>
             </q-grid-item>
@@ -123,7 +127,7 @@
           <comic-chapter-images v-if="isComic" v-model="chapter.Images" v-model:uploading="comicUploading" />
           <template v-else>
             <div class="text-opacity">内容</div>
-            <html-editor v-model:html="chapter['Content']" mode="common" />
+            <html-editor :content="chapter['Content']" @update:html="chapter['Content'] = $event" mode="common" />
           </template>
         </q-tab-panel>
         <q-tab-panel name="new">
@@ -135,7 +139,11 @@
           />
           <template v-else>
             <div class="text-opacity">内容</div>
-            <html-editor v-model:html="creatingChapterContent.html" mode="common" />
+            <html-editor
+              :content="creatingChapterContent.html"
+              @update:html="creatingChapterContent.html = $event"
+              mode="common"
+            />
           </template>
         </q-tab-panel>
       </q-tab-panels>
@@ -224,6 +232,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { parseTime } from '@/utils/time'
 
 import { useAppStore } from '@/stores/app'
+import { useSettingStore } from '@/stores/setting'
 
 import { HtmlEditor, DragPageSticky, ImageInput, ComicChapterImages } from '@/components'
 import { useLayout } from '@/components/app/useLayout'
@@ -251,6 +260,7 @@ const layout = useLayout()
 
 const { siderShow, siderBreakpoint } = layout
 const props = defineProps<{ bookId: string }>()
+const { editorSetting } = useSettingStore()
 const $q = useQuasar()
 const route = useRoute()
 const appStore = useAppStore()
@@ -335,7 +345,7 @@ watch(
     try {
       const result = isComic.value
         ? await getComicEditInfo({ Bid: _bid.value, Cid: cid })
-        : await getNovelEditInfo({ Bid: _bid.value, Cid: cid })
+        : await getNovelEditInfo({ Bid: _bid.value, Cid: cid, Format: editorSetting.mode })
       if (_cid.value === cid) {
         chapter.value = result as ChapterEditState
         chapter.value.Images ??= []
@@ -608,7 +618,7 @@ async function handleChange(evt) {
 }
 
 const request = useTimeoutFn(async () => {
-  const p1 = getBookEditInfo(_bid.value).then((data: any) => {
+  const p1 = getBookEditInfo(_bid.value, editorSetting.mode).then((data: any) => {
     bookInfo.value = data
     const categories =
       data.Book.Type === 'Comic'

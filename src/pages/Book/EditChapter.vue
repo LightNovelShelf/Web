@@ -4,7 +4,7 @@
       <div class="column gap-8">
         <q-input label="标题" v-model="chapter['Title']" />
         <div class="text-opacity">内容</div>
-        <html-editor v-model:html="chapter['Content']" mode="common" />
+        <html-editor :content="chapter['Content']" @update:html="chapter['Content'] = $event" mode="common" />
       </div>
     </div>
 
@@ -30,6 +30,8 @@ import { computed, ref, toRaw } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
+import { useSettingStore } from '@/stores/setting'
+
 import { HtmlEditor, DragPageSticky } from '@/components'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
@@ -44,8 +46,10 @@ const chapter = ref<any>()
 
 const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.value?.SortNum === sortNum.value)
 
+const { editorSetting } = useSettingStore()
+
 const request = useTimeoutFn(async () => {
-  chapter.value = await getNovelEditInfo({ Bid: bid.value, SortNum: sortNum.value })
+  chapter.value = await getNovelEditInfo({ Bid: bid.value, SortNum: sortNum.value, Format: editorSetting.mode })
 })
 
 const $q = useQuasar()

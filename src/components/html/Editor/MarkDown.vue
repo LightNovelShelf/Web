@@ -33,8 +33,6 @@
 </template>
 
 <script lang="ts" setup>
-import TurndownService from '@joplin/turndown'
-import { gfm } from '@joplin/turndown-plugin-gfm'
 import { MdEditor, NormalToolbar } from 'md-editor-v3'
 import { useQuasar } from 'quasar'
 import { ref, watch } from 'vue'
@@ -48,7 +46,8 @@ import type { ToolbarNames, ExposeParam } from 'md-editor-v3'
 import 'cropperjs/dist/cropper.css'
 import 'md-editor-v3/lib/style.css'
 
-const props = defineProps<{ mode: 'simple' | 'common'; html: string }>()
+// markdown 由服务端转换后下发（编辑接口 Format=markdown），编辑结果一律以 Html 抛回去
+const props = defineProps<{ mode: 'simple' | 'common'; markdown: string }>()
 const $q = useQuasar()
 const editorRef = ref<ExposeParam>()
 const emit = defineEmits(['update:html'])
@@ -158,59 +157,21 @@ async function onUploadImg(files: Array<File>, callback: (urls: string[]) => voi
     }
   })
 }
-const turndownService = new TurndownService({
-  codeBlockStyle: 'fenced',
-  headingStyle: 'atx',
-})
-turndownService.use(gfm)
-turndownService.keep(['ruby', 'rt'])
-// 去掉代码的工具栏
-turndownService.addRule('ignoreCodeTool', {
-  filter: function (node) {
-    return node.classList && node.classList.contains('md-editor-code-action')
-  },
-  replacement: function (content, node, options) {
-    return ''
-  },
-})
-// 保留着重号
-turndownService.addRule('preserveDot', {
-  filter: function (node) {
-    return node.classList && node.classList.contains('dot')
-  },
-  replacement: function (content, node) {
-    return node.outerHTML // 保留元素的外部 HTML
-  },
-})
-// 保留<br>
-turndownService.addRule('convertPBrToBr', {
-  filter: function (node) {
-    return node.nodeName === 'BR'
-  },
-  replacement: function (content, node) {
-    return '<br>\r\n'
-  },
-})
 
 let lastEmittedHtml: string | undefined
 
 const onHtmlChanged = (html: string) => {
-  if (html === props.html) return
-
   lastEmittedHtml = html
   emit('update:html', html)
 }
 
 watch(
-  () => props.html,
-  (html) => {
-    if (html === lastEmittedHtml) {
-      lastEmittedHtml = undefined
-      return
-    }
+  () => props.markdown,
+  (markdown) => {
+    // 父组件回填的是本组件刚抛出的 Html，回填它会把正在编辑的 Markdown 冲掉
+    if (markdown === lastEmittedHtml) return
 
-    lastEmittedHtml = undefined
-    markdownText.value = turndownService.turndown(html)
+    markdownText.value = markdown
   },
   { immediate: true },
 )

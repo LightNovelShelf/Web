@@ -11,7 +11,7 @@ export function updateNovelChapter(request: Types.UpdateNovelChapterRequest) {
   return requestWithSignalr('UpdateNovelChapter', request)
 }
 
-export function getNovelEditInfo(request: Types.UpdateNovelChapterRequest) {
+export function getNovelEditInfo(request: Types.GetNovelEditInfo) {
   return requestWithSignalr('GetNovelEditInfo', request)
 }
 

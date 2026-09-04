@@ -18,7 +18,7 @@
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
-          <html-editor v-model:html="book['Introduction']" mode="simple" />
+          <html-editor :content="book['Introduction']" @update:html="book['Introduction'] = $event" mode="simple" />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
       </q-grid-item>
@@ -46,6 +46,8 @@ import { computed, ref, toRaw } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
+import { useSettingStore } from '@/stores/setting'
+
 import { HtmlEditor, DragPageSticky, ImageInput } from '@/components'
 import { QGrid, QGridItem } from '@/components/grid'
 import SystemImage from '@/components/SystemImage.vue'
@@ -63,8 +65,10 @@ const isActive = computed(() => book.value?.Id === bid.value)
 const comicCategoryNames = new Set(['原创', '连载', '完结'])
 const comicOnlyCategoryNames = new Set(['连载', '完结'])
 
+const { editorSetting } = useSettingStore()
+
 const request = useTimeoutFn(async () => {
-  const data = (await getBookEditInfo(bid.value)) as any
+  const data = (await getBookEditInfo(bid.value, editorSetting.mode)) as any
   const categories =
     data.Book.Type === 'Comic'
       ? data.Categories.filter((item) => comicCategoryNames.has(item.Name))

@@ -6,6 +6,7 @@ import * as Types from './types'
 
 import type { SaveReadPositionRequest } from './types'
 import type { ComicListResponse } from '@/services/manga/types'
+import type { EditorFormat } from '@/services/types'
 
 export { Types as BookServicesTypes }
 
@@ -101,9 +102,9 @@ export function editBook(bid: number, request: Types.EditBookRequest) {
   return requestWithSignalr('UpdateBook', { Id: bid, Map: request })
 }
 
-/** 取编辑用的书籍信息 */
-export function getBookEditInfo(bid: number) {
-  return requestWithSignalr('GetBookEditInfo', { Id: bid })
+/** 取编辑用的书籍信息；markdown 时简介由服务端转换 */
+export function getBookEditInfo(bid: number, format: EditorFormat = 'html') {
+  return requestWithSignalr('GetBookEditInfo', { Id: bid, Format: format })
 }
 
 /** 删除书籍 */

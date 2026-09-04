@@ -41,7 +41,7 @@
     </div>
 
     <div ref="editorShellRef" class="thread-create__editor">
-      <html-editor v-model:html="contentHtml" mode="common" />
+      <html-editor :content="contentHtml" @update:html="contentHtml = $event" mode="common" />
     </div>
 
     <drag-page-sticky v-slot="{ isDragging }">
@@ -70,6 +70,7 @@ import { useQuasar } from 'quasar'
 import sanitizeHtml from '@/utils/sanitizeHtml'
 
 import { useAppStore } from '@/stores/app'
+import { useSettingStore } from '@/stores/setting'
 
 import { DragPageSticky } from '@/components'
 import HtmlEditor from '@/components/html/HtmlEditor.vue'
@@ -94,12 +95,14 @@ interface ThreadDraft {
 }
 
 const DRAFT_STORAGE_KEY_PREFIX = 'light-novel-shelf:forum-thread-draft'
-const EMPTY_CONTENT = '<p></p>'
 
 const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const { editorSetting } = useSettingStore()
+// 空正文得按编辑器吃的格式给：markdown 模式下 '<p></p>' 会当成正文文字显示出来
+const EMPTY_CONTENT = editorSetting.mode === 'markdown' ? '' : '<p></p>'
 
 // 编辑态由 /forum/thread/:id/edit 复用本页，id 只在编辑时存在
 const props = defineProps<{ id?: string }>()
@@ -258,8 +261,7 @@ async function loadCatalog() {
 // 编辑态的初始内容：Content 是解码 + 签名后的正文，回存时 ImageEncoder 会按图片路径还原成 {res:id}
 async function loadThread() {
   try {
-    // 编辑器吃 Html（markdown 模式由编辑器自己转），所以取默认格式
-    const thread = await getCommunityThreadEditInfo(threadId.value)
+    const thread = await getCommunityThreadEditInfo(threadId.value, editorSetting.mode)
 
     boardKey.value = thread.BoardKey
     subCategoryKey.value = thread.SubCategoryKey
