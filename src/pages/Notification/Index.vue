@@ -87,19 +87,19 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import TimeAgo from '@/components/TimeAgo.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 
-import { getMyInfo, getNotifications, markNotifications } from '@/services/user'
+import { getNotifications, markNotifications } from '@/services/user'
 
 import type { GetNotifications } from '@/services/user/type'
 
 const router = useRouter()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const notifications = ref<GetNotifications.Notification[]>([])
 const currentPage = ref(1)
 const totalPages = ref(0)
@@ -117,7 +117,7 @@ const refreshUnreadCount = async () => {
   }
 
   try {
-    appStore.user = await getMyInfo()
+    await appStore.refreshUser()
   } catch {
     // 保持通知页主流程可用，badge 刷新失败不阻断跳转
   }

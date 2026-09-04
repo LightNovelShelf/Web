@@ -23,7 +23,9 @@ export function inspectEditorHtml(html: string): EditorHtmlIssues {
     withoutBreaks.querySelectorAll('br').forEach((br) => br.remove())
     const hasText = Boolean(withoutBreaks.textContent?.trim())
     const hasEmbeddedContent = Boolean(
-      withoutBreaks.querySelector('img, picture, svg, video, audio, iframe, canvas, object, embed, hr, input, textarea, select, table'),
+      withoutBreaks.querySelector(
+        'img, picture, svg, video, audio, iframe, canvas, object, embed, hr, input, textarea, select, table',
+      ),
     )
     if (hasText || hasEmbeddedContent) inlineBreakParagraphs++
   })

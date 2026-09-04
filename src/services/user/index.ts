@@ -1,60 +1,21 @@
-import { longTermToken, sessionToken } from '@/utils/session'
-
-import { rebootSignalr, requestWithFetch, requestWithSignalr } from '@/services/internal/request'
 import { PATH } from '@/services/path'
+import { invokeHub, requestHttp } from '@/services/transport'
 import { RequestMethod } from '@/services/types'
 
-import type * as Types from './type'
+import * as Types from './type'
+
 import type { ShelfItem, SHELF_STRUCT_VER } from '@/types/shelf'
 import type * as ShelfLegacyStruct from '@/utils/migrations/shelf/struct/types'
 
 const publicSummaryCache = new Map<string, { expiresAt: number; value: Types.PublicUserSummary }>()
 const publicSummaryRequests = new Map<string, Promise<Types.PublicUserSummary>>()
-const publicSummaryCacheDuration = 5 * 60 * 1000
+const PUBLIC_SUMMARY_CACHE_DURATION_MS = 5 * 60 * 1_000
 
-/** 登录 */
-export async function login(email: string, password: string) {
-  const res = await requestWithFetch<Types.Login.Res, Types.Login.Param>(PATH.USER_LOGIN, {
-    payload: { email, password },
-  })
-
-  // 记录到全局变量中, 方便其它业务取值
-  sessionToken.set(res.Token)
-
-  // 记录到DB缓存中, 方便下次会话使用它来换取token
-  await longTermToken.set(res.RefreshToken)
-
-  // 重启链接
-  await rebootSignalr()
-
-  // 触发一次请求, 连接ws服务
-  // 登录就是为了连接ws服务, 连接失败的话等于没有登录
-  // 所以这里await
-  const myInfo = await getMyInfo()
-
-  return [res, myInfo]
+export function getMyInfo(): Promise<Types.CurrentUser> {
+  return invokeHub<Types.CurrentUser>('GetMyInfo')
 }
 
-/** 换取会话密钥 */
-export async function refreshToken(longTermToken: string) {
-  const token = await requestWithFetch<Types.RefreshToken.Res, Types.RefreshToken.Param>(PATH.USER_REFRESH_TOKEN, {
-    payload: { token: longTermToken },
-  })
-
-  /** 刷新成功后自动更新会话密钥 */
-  if (token) {
-    sessionToken.set(token)
-  }
-
-  return token
-}
-
-/** 获取用户信息 */
-export async function getMyInfo() {
-  return requestWithSignalr('GetMyInfo')
-}
-
-export function getPublicUserSummary(id: number) {
+export function getPublicUserSummary(id: number): Promise<Types.PublicUserSummary> {
   const key = `${PATH.USER_PUBLIC_SUMMARY}:${id}`
   const cached = publicSummaryCache.get(key)
   if (cached && cached.expiresAt > Date.now()) return Promise.resolve(cached.value)
@@ -62,12 +23,12 @@ export function getPublicUserSummary(id: number) {
   const pending = publicSummaryRequests.get(key)
   if (pending) return pending
 
-  const request = requestWithFetch<Types.PublicUserSummary, { id: number }>(PATH.USER_PUBLIC_SUMMARY, {
+  const request = requestHttp<Types.PublicUserSummary, { id: number }>(PATH.USER_PUBLIC_SUMMARY, {
     method: RequestMethod.GET,
     payload: { id },
   })
     .then((value) => {
-      publicSummaryCache.set(key, { expiresAt: Date.now() + publicSummaryCacheDuration, value })
+      publicSummaryCache.set(key, { expiresAt: Date.now() + PUBLIC_SUMMARY_CACHE_DURATION_MS, value })
       return value
     })
     .finally(() => publicSummaryRequests.delete(key))
@@ -76,99 +37,55 @@ export function getPublicUserSummary(id: number) {
   return request
 }
 
-/** 重置邀请码，返回新邀请码 */
-export async function resetInviteCode() {
-  return requestWithSignalr<Types.ResetInviteCode.Res>('ResetInviteCode')
+export function resetInviteCode() {
+  return invokeHub<Types.ResetInviteCode.Res>('ResetInviteCode')
 }
 
-/** 获取用户阅读历史 */
-export async function getReadHistory() {
-  return requestWithSignalr<{ Novel: number[]; Comic: number[] }>('GetReadHistory')
+export function getReadHistory() {
+  return invokeHub<{ Novel: number[]; Comic: number[] }>('GetReadHistory')
 }
 
-export async function sendResetEmail(email: string) {
-  await requestWithFetch<void, { email: string }>(PATH.USER_SEND_RESET_EMAIL, {
-    payload: { email },
-    method: RequestMethod.GET,
-  })
+export function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT_VER }) {
+  return invokeHub('SaveBookShelf', json)
 }
 
-export async function sendRegisterEmail(email: string) {
-  await requestWithFetch<void, { email: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
-    payload: { email },
-    method: RequestMethod.GET,
-  })
-}
-
-export async function resetPassword(email: string, newPassword: string, code: string) {
-  await requestWithFetch<void, { email: string; code: string; newPassword: string }>(PATH.USER_RESET_PASSWORD, {
-    payload: { email, code, newPassword },
-  })
-}
-
-export async function register(userName: string, email: string, password: string, code: string, inviteCode: string) {
-  const res = await requestWithFetch<Types.Register.Res, Types.Register.Param>(PATH.USER_REGISTER, {
-    payload: { userName, email, password, code, inviteCode },
-  })
-
-  sessionToken.set(res.Token)
-  await longTermToken.set(res.RefreshToken)
-  await rebootSignalr()
-  const myInfo = await getMyInfo()
-
-  return [res, myInfo]
-}
-
-/** 保存用户书架信息 */
-export async function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT_VER }) {
-  return requestWithSignalr('SaveBookShelf', json)
-}
-
-/** 取用户书架二进制信息 */
-export async function getBookShelfBinary() {
-  return requestWithSignalr<{
+export function getBookShelfBinary() {
+  return invokeHub<{
     data: (ShelfItem | ShelfLegacyStruct.ServerShelfItem)[]
-    /** @legacy 历史数据可能没有ver这个键值 */
     ver?: SHELF_STRUCT_VER
   }>('GetBookShelf')
 }
 
-/** 清空用户历史记录 */
-export async function clearHistory() {
-  return requestWithSignalr('ClearReadHistory')
+export function clearHistory() {
+  return invokeHub('ClearReadHistory')
 }
 
-/** 设置头像 */
-export async function setAvatar(url: string) {
-  return requestWithSignalr('SetAvatar', { Url: url })
+export function setAvatar(url: string) {
+  return invokeHub('SetAvatar', { Url: url })
 }
 
-/** 取用户书籍 */
-export async function getMyBooks(req: Types.GetMyBooks.Request) {
-  return requestWithSignalr<Types.GetMyBooks.Response>('GetMyBooks', req)
+export function getMyBooks(request: Types.GetMyBooks.Request) {
+  return invokeHub<Types.GetMyBooks.Response>('GetMyBooks', request)
 }
 
-/** 快速新建书籍，返回新建的书籍id */
-export async function quickCreateNovel(req: Types.QuickCreateNovel.Request) {
-  return requestWithSignalr<Types.QuickCreateNovel.Response>('QuickCreateNovel', req)
+export function quickCreateNovel(request: Types.QuickCreateNovel.Request) {
+  return invokeHub<Types.QuickCreateNovel.Response>('QuickCreateNovel', request)
 }
 
-/** 新建漫画，不创建占位章节 */
-export async function quickCreateComic(req: Types.QuickCreateComic.Request) {
-  return requestWithSignalr<Types.QuickCreateComic.Response>('QuickCreateComic', req)
+export function quickCreateComic(request: Types.QuickCreateComic.Request) {
+  return invokeHub<Types.QuickCreateComic.Response>('QuickCreateComic', request)
 }
 
-/** 上传图片，返回原图链接 */
-export async function uploadImage(req: Types.UploadImage.Request) {
-  return requestWithSignalr<Types.UploadImage.Response>('UploadImage', req)
+export function uploadImage(request: Types.UploadImage.Request) {
+  return invokeHub<Types.UploadImage.Response>('UploadImage', request)
 }
 
-/** 获取通知列表 */
-export async function getNotifications(req: Types.GetNotifications.Request) {
-  return requestWithSignalr<Types.GetNotifications.Response>('GetNotifications', req)
+export function getNotifications(request: Types.GetNotifications.Request) {
+  return invokeHub<Types.GetNotifications.Response>('GetNotifications', request)
 }
 
-/** 标记通知为已读 */
-export async function markNotifications(req: Types.MarkNotifications.Request) {
-  return requestWithSignalr<Types.MarkNotifications.Response>('MarkNotifications', req)
+export function markNotifications(request: Types.MarkNotifications.Request) {
+  return invokeHub<Types.MarkNotifications.Response>('MarkNotifications', request)
 }
+
+export { Types as UserServiceTypes }

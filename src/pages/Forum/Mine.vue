@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import TimeAgo from '@/components/TimeAgo.vue'
 
@@ -111,7 +111,7 @@ import { getMyCommunityOverview } from '@/services/forum'
 import type { CommunityMyOverview } from '@/services/forum'
 
 const $q = useQuasar()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const tab = ref<'threads' | 'replies' | 'favorites'>('threads')
 const overview = ref<CommunityMyOverview | null>(null)
 const loading = ref(true)

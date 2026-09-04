@@ -1,4 +1,4 @@
-import type { ListResult } from '../types'
+import type { EditorFormat, ListResult } from '../types'
 
 export interface BookInList {
   Id: number
@@ -70,6 +70,29 @@ export interface BookClassification {
   series_name_cn?: string | null
   tags?: string[]
   classified_at?: string
+}
+export interface EditableBook extends EditBookRequest {
+  Id: number
+  Type: 'Novel' | 'Comic'
+  Cover: string
+  Title: string
+  Author: string
+  Introduction: string
+  CategoryId: number
+  Level: number
+  InteriorLevel: number
+  DownloadAllowed: boolean
+  Extra?: {
+    classification?: BookClassification
+    [key: string]: unknown
+  }
+  Chapters: Array<{ Id: number; Title: string }>
+  Format: EditorFormat
+}
+
+export interface GetBookEditInfoResponse {
+  Book: EditableBook
+  Categories: Array<{ Id: number; Name: string }>
 }
 
 export interface GetBookInfoRes {

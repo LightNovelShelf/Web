@@ -188,7 +188,7 @@ import { computed, ref, watch } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import TimeAgo from '@/components/TimeAgo.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -204,7 +204,7 @@ const props = withDefaults(defineProps<{ type: CommentType; id?: number; seriesT
   seriesTitle: '',
 })
 const $q = useQuasar()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const { user } = storeToRefs(appStore)
 const comment = ref<GetComments.Response>()
 

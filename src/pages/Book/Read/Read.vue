@@ -135,6 +135,7 @@ import {
   onActivated,
   onDeactivated,
   onMounted,
+  onUnmounted,
   reactive,
   ref,
   watch,
@@ -145,7 +146,7 @@ import { delay } from '@/utils/delay'
 import { getErrMsg } from '@/utils/getErrMsg'
 import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 import { useSettingStore } from '@/stores/setting'
 
 import { DragPageSticky } from '@/components'
@@ -156,11 +157,14 @@ import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 import { NOOP } from '@/const/empty'
 import { PROVIDE } from '@/const/provide'
-import { apiServer } from '@/services/apiServer'
 import { getNovelContent } from '@/services/chapter'
 
-import { syncReading, scrollToHistory, findElementByXPath, loadHistory } from './history'
+import { prepareReaderFootnotes } from './footnotes'
+import { findElementByXPath, loadHistory, observeReadingProgress, scrollToHistory } from './history'
 import { useFlipPager } from './useFlipPager'
+import { useReaderFont } from './useReaderFont'
+
+import type { NovelContentChapter } from '@/services/chapter/types'
 
 const props = defineProps<{
   bid: string
@@ -174,11 +178,11 @@ const sortNum = computed(() => ~~(props.sortNum || '1'))
 const $q = useQuasar()
 const layout = useLayout()
 const { headerOffset } = layout
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const settingStore = useSettingStore()
 const imagePreview = inject<any>(PROVIDE.IMAGE_PREVIEW)
 
-const chapter = ref<any>()
+const chapter = ref<NovelContentChapter>()
 const noteElement = ref()
 const readerRef = ref()
 const viewportRef = ref<HTMLElement>()
@@ -193,34 +197,33 @@ const showCatalog = ref(false)
 const cid = computed(() => chapter.value?.Id || 1)
 const userId = computed(() => appStore.userId)
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
-const chapterContent = computed(() => sanitizerHtml(chapter.value['Content']))
+const chapterContent = computed(() => sanitizerHtml(chapter.value?.Content ?? ''))
 
 const getContent = useTimeoutFn(async () => {
+  const requestedBookId = bid.value
+  const requestedSortNumber = sortNum.value
   try {
-    const res: any = await getNovelContent({
-      Bid: bid.value,
-      SortNum: sortNum.value,
+    const response = await getNovelContent({
+      Bid: requestedBookId,
+      SortNum: requestedSortNumber,
       Convert: settingStore.readSetting.convert,
     })
-    chapter.value = res.Chapter
-    $q.notify({
-      message: chapter.value['Title'],
-      color: 'purple',
-      timeout: 1500,
-    })
-    ;(async () => {
-      if (res.ReadPosition && res.ReadPosition.ChapterId === res.Chapter.Id) {
-        await delay(200)
-        await nextTick()
-        await restorePosition(res.ReadPosition.Position)
-      }
-    })().then(NOOP)
+    if (bid.value !== requestedBookId || sortNum.value !== requestedSortNumber) return
+
+    chapter.value = response.Chapter
+    $q.notify({ message: response.Chapter.Title, color: 'purple', timeout: 1_500 })
+
+    if (response.ReadPosition?.ChapterId === response.Chapter.Id) {
+      const chapterId = response.Chapter.Id
+      void delay(200)()
+        .then(() => nextTick())
+        .then(() => {
+          if (chapter.value?.Id === chapterId) return restorePosition(response.ReadPosition!.Position)
+        })
+        .catch(NOOP)
+    }
   } catch (error) {
-    $q.notify({
-      message: getErrMsg(error),
-      color: 'negative',
-      timeout: 1500,
-    })
+    $q.notify({ message: getErrMsg(error), color: 'negative', timeout: 1_500 })
   }
 })
 
@@ -246,10 +249,6 @@ const bgStyle = computed(() => ({
 }))
 
 const { dark } = storeToRefs(settingStore)
-watch(dark, (newDark) => {
-  Dark.set(newDark)
-  settingStore.save()
-})
 function toggleDark() {
   if (Dark.mode === 'auto') {
     dark.value = !Dark.isActive
@@ -332,7 +331,7 @@ async function restorePosition(xPath: string) {
   const content = readerRef.value?.contentRef as Element | undefined
   if (!content) return
   if (!flip.value) {
-    scrollToHistory(content, xPath, headerOffset)
+    scrollToHistory(content, xPath, headerOffset.value)
     return
   }
   // 从后一章往前翻时要停在末屏，不能被历史进度拉走
@@ -363,6 +362,7 @@ onActivated(() => {
 })
 onDeactivated(() => {
   document.removeEventListener('keydown', manageKeydown)
+  stopReadingProgress()
 })
 
 onMounted(() => {
@@ -378,60 +378,61 @@ watch(
   },
 )
 
-// 如果章节变了，重新观察dom记录阅读记录，处理注释
+let stopReadingProgress = NOOP
+let stopFootnotes = NOOP
+
+function contentRoot(): HTMLElement | undefined {
+  return readerRef.value?.contentRef as HTMLElement | undefined
+}
+
+function startReadingProgress(): void {
+  stopReadingProgress()
+  const root = contentRoot()
+  if (!root || !chapter.value || userId.value <= 0) return
+
+  stopReadingProgress = observeReadingProgress({
+    root,
+    userId: userId.value,
+    bookId: chapter.value.BookId,
+    chapterId: chapter.value.Id,
+    getHeaderOffset: () => headerOffset.value,
+  })
+}
+
+async function initializeChapterDom(): Promise<void> {
+  const chapterId = chapter.value?.Id
+  await nextTick()
+  if (!chapterId || chapter.value?.Id !== chapterId) return
+
+  const root = contentRoot()
+  if (!root) return
+  stopFootnotes()
+  stopFootnotes = prepareReaderFootnotes(root, {
+    mobile: $q.platform.is.mobile,
+    show: showNote,
+    hide: () => (note.showing = false),
+  })
+  startReadingProgress()
+
+  if (!flip.value) return
+  await flipRemeasure()
+  if (flipToTail) {
+    flipToTail = false
+    flipGoToLast()
+  } else {
+    flipGoToPage(0)
+  }
+}
+
 watch(
-  () => chapter.value?.Id,
-  () => {
-    nextTick(async () => {
-      const contentRoot = readerRef.value.contentRef as HTMLElement
-      contentRoot.querySelectorAll<HTMLElement>('.duokan-footnote').forEach((element, index) => {
-        const href = element.getAttribute('href')
-        if (!href?.startsWith('#') || href.length === 1) return
-
-        let id: string
-        try {
-          id = decodeURIComponent(href.slice(1))
-        } catch {
-          id = href.slice(1)
-        }
-        const noteElement = contentRoot.querySelector<HTMLElement>(`#${CSS.escape(id)}`)
-        if (!noteElement) return
-
-        const content = noteElement.innerHTML
-        noteElement.style.display = 'none'
-        element.removeAttribute('href')
-        element.setAttribute('global-cancel', 'true')
-        const markerId = `v-footnote-${index}`
-        element.id = markerId
-        if ($q.platform.is.mobile) {
-          element.onclick = (event) => showNote(event, content, markerId)
-        } else {
-          element.onmouseenter = (event) => showNote(event, content, markerId)
-          element.onmouseleave = () => (note.showing = false)
-        }
-      })
-      contentRoot.querySelectorAll<HTMLElement>('.footnotes').forEach((element) => {
-        element.style.display = 'none'
-      })
-      await syncReading(contentRoot, userId, { BookId: bid, CId: cid }, headerOffset)
-      if (flip.value) {
-        await flipRemeasure()
-        if (flipToTail) {
-          flipToTail = false
-          flipGoToLast()
-        } else {
-          flipGoToPage(0)
-        }
-      }
-    })
-  },
+  () => [chapter.value?.Id, chapter.value?.Content] as const,
+  () => void initializeChapterDom(),
+  { flush: 'post' },
 )
 
-function globalCancelShowing(event: any) {
-  const target = event.target
-  if (!target.hasAttribute('global-cancel') && !target.parentElement.hasAttribute('global-cancel')) {
-    note.showing = false
-  }
+function globalCancelShowing(event: MouseEvent) {
+  const target = event.target instanceof Element ? event.target : null
+  if (!target?.closest('[global-cancel]')) note.showing = false
 }
 
 function showNote(event: MouseEvent, html: string, id: string) {
@@ -450,6 +451,7 @@ if ($q.platform.is.mobile) {
 }
 
 onActivated(() => {
+  startReadingProgress()
   if (sortNum.value === chapter.value?.SortNum && bid.value === chapter.value?.BookId) {
     const position = loadHistory(userId.value, bid.value)
     if (position && position.cid === cid.value) {
@@ -458,7 +460,7 @@ onActivated(() => {
       } else if (position.top) {
         document.scrollingElement!.scrollTop = position.top
       } else {
-        scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset)
+        scrollToHistory(readerRef.value.contentRef, position.xPath, headerOffset.value)
       }
     }
   }
@@ -470,22 +472,15 @@ watch(
   () => flipScheduleRemeasure(),
 )
 
-// 字体设置
-const style = document.createElement('style')
-style.id = 'read_style'
-document.head.append(style)
-watch(
-  () => chapter.value?.Font,
-  () => {
-    let fontUrl = chapter.value?.Font
-    if (fontUrl) {
-      if (!fontUrl.startsWith('http')) fontUrl = apiServer.value + fontUrl
-      style.innerHTML = `@font-face{font-family:read;font-display: block;src:url(${fontUrl});}`
-      // 自定义字体到位后行高字宽都会变，分栏要重新切
-      void document.fonts.ready.then(() => flipScheduleRemeasure())
-    }
-  },
+useReaderFont(
+  computed(() => chapter.value?.Font),
+  flipScheduleRemeasure,
 )
+
+onUnmounted(() => {
+  stopReadingProgress()
+  stopFootnotes()
+})
 </script>
 
 <style scoped lang="scss">

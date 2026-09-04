@@ -41,12 +41,7 @@
     </div>
 
     <div ref="editorShellRef" class="thread-create__editor">
-      <html-editor
-        :content="contentHtml"
-        content-type="forum-post"
-        @update:html="contentHtml = $event"
-        mode="common"
-      />
+      <html-editor :content="contentHtml" content-type="forum-post" @update:html="contentHtml = $event" mode="common" />
     </div>
 
     <drag-page-sticky v-slot="{ isDragging }">
@@ -74,11 +69,10 @@ import { useQuasar } from 'quasar'
 
 import sanitizeHtml from '@/utils/sanitizeHtml'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 import { useSettingStore } from '@/stores/setting'
 
-import { DragPageSticky } from '@/components'
-import HtmlEditor from '@/components/html/HtmlEditor.vue'
+import { DragPageSticky, HtmlEditor } from '@/components'
 import { confirmEditorHtmlSave } from '@/components/html/editorSaveGuard'
 
 import {
@@ -87,7 +81,7 @@ import {
   getCommunityThreadEditInfo,
   updateCommunityThread,
 } from '@/services/forum'
-import { ServerError } from '@/services/internal/ServerError'
+import { ServerError } from '@/services/ServerError'
 
 import type { CommunityCatalogBoard } from '@/services/forum'
 import type { OverlayScrollbars as OverlayScrollbarsInstance } from 'overlayscrollbars'
@@ -105,7 +99,7 @@ const DRAFT_STORAGE_KEY_PREFIX = 'light-novel-shelf:forum-thread-draft'
 const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const { activeEditorMode } = useSettingStore()
 // markdown 模式下不能把 HTML 空段落作为初始内容
 const EMPTY_CONTENT = activeEditorMode === 'markdown' ? '' : '<p></p>'

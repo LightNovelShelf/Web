@@ -151,7 +151,7 @@ import sanitizerHtml from '@/utils/sanitizeHtml'
 import { userReadPositionDB } from '@/utils/storage/db'
 import { parseTime } from '@/utils/time'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import { Comment, UserAvatar } from '@/components'
 import AddToShelf from '@/components/biz/MyShelf/AddToShelf.vue'
@@ -174,7 +174,7 @@ const props = defineProps<{ bid: string }>()
 
 const $q = useQuasar()
 const router = useRouter()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const fabPos = ref([18, 18])
 const bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
 const _bid = computed(() => ~~(props.bid || '1'))

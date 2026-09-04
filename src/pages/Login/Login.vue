@@ -6,7 +6,7 @@
         <div class="text-opacity text-h5">登录到 轻书架</div>
       </div>
       <div>
-        <q-form @submit="_login">
+        <q-form @submit="submitLogin">
           <q-input
             no-error-icon
             :rules="[(val) => /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/i.test(val) || '必须是有效的邮箱']"
@@ -52,75 +52,56 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 import { sha256 } from '@/utils/hash'
-import { longTermToken } from '@/utils/session'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
-import { login } from '@/services/user'
+import { login, setRefreshToken } from '@/services/auth'
 
 import type { RouteLocationRaw } from 'vue-router'
 
 const $q = useQuasar()
-const appStore = useAppStore()
-
-const email = ref()
-const password = ref()
+const appStore = useSessionStore()
+const email = ref('')
+const password = ref('')
 const isPwd = ref(true)
 const loading = ref(false)
 const route = useRoute()
 const router = useRouter()
 
-const _login = async () => {
+async function submitLogin() {
   loading.value = true
-
   try {
-    // 登录
-    const [, user] = await login(email.value, await sha256(password.value))
-    appStore.user = user
+    appStore.user = await login(email.value, await sha256(password.value))
+    $q.notify({ message: '登录成功', timeout: 3_000 })
 
-    $q.notify({
-      message: '登录成功',
-      timeout: 3000,
-    })
-
-    // 跳转首页或者来源路由
-    let to: RouteLocationRaw = { name: 'Home' }
-
+    let destination: RouteLocationRaw = { name: 'Home' }
     try {
       const from = route.query.from as string | undefined
-      if (from) to = decodeURIComponent(from)
+      if (from) destination = decodeURIComponent(from)
     } catch {
-      // 来源路由解析失败时回落到首页
+      // 来源路由无效时返回首页。
     }
-
-    await router.replace(to)
-  } catch (e: any) {
-    $q.notify({
-      type: 'negative',
-      message: getErrMsg(e),
-    })
+    await router.replace(destination)
+  } catch (error) {
+    $q.notify({ type: 'negative', message: getErrMsg(error) })
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false
 }
 
-/** 检测一次在路由上的token并记录下来
- *
- * 方便局域网调试，规避局域网不好启用人机验证的问题
- */
-function checkTokenInQueryOnce() {
-  const preDefinedToken = route.query.token
-  if (!preDefinedToken) return
-  longTermToken.set(preDefinedToken as string)
+async function storeDebugToken() {
+  const token = route.query.token
+  if (!token) return
+  await setRefreshToken(String(token))
   alert('DEBUG: 已记录，请刷新')
 }
 
-onMounted(checkTokenInQueryOnce)
+onMounted(() => void storeDebugToken())
 </script>
 
 <style scoped lang="scss"></style>

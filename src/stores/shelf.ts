@@ -7,7 +7,7 @@ import { toRaw } from 'vue'
 import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 
 import { getBookShelfBinary, saveBookShelf } from '@/services/user'
-import { ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
+import { ROOT_LEVEL_FOLDER_NAME, ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
 
 import type { ShelfItem, ShelfBookItem, ShelfFolderItem, SHELF_STRUCT_VER } from '@/types/shelf'
 
@@ -28,16 +28,18 @@ export interface ShelfStore {
   branch: ShelfBranch
 }
 
-/** 初始state */
-const INIT: ShelfStore = {
-  initialized: false,
-  selected: new Set(),
-  source: {
-    [ShelfBranch.main]: [],
-    [ShelfBranch.draft]: [],
-  },
-  branch: ShelfBranch.main,
+function createInitialState(): ShelfStore {
+  return {
+    initialized: false,
+    selected: new Set(),
+    source: {
+      [ShelfBranch.main]: [],
+      [ShelfBranch.draft]: [],
+    },
+    branch: ShelfBranch.main,
+  }
 }
+const ROOT_PARENT_KEY = ''
 
 /**
  * 升序排序
@@ -61,11 +63,8 @@ function ascSorter<T extends ShelfItem>(a: T, b: T): number {
   return a.index - b.index
 }
 
-/** 排序数组，immutable */
 function sort(shelf: ShelfItem[]): ShelfItem[] {
-  return produce(toRaw(shelf), (draft) => {
-    draft.sort(ascSorter)
-  })
+  return [...toRaw(shelf)].sort(ascSorter)
 }
 
 /** 返回数组中最后一个元素; 数组长度为零时返回null */
@@ -73,12 +72,9 @@ function lastItem<T>(arr: T[]): T | null {
   return arr[arr.length - 1] ?? null
 }
 
-/** 根文件夹名称（系统保留值） */
-export const ROOT_LEVEL_FOLDER_NAME = '根文件夹'
-
 /** @private 书架store */
 const shelfStore = defineStore('app.shelf', {
-  state: () => INIT,
+  state: createInitialState,
   getters: {
     /** 当前分支的全量项目 */
     shelf(): ShelfItem[] {
@@ -130,22 +126,6 @@ const shelfStore = defineStore('app.shelf', {
       })
       return map
     },
-    /** map格式的文件夹数据，方便查找 */
-    foldersMap(): Map<string, ShelfFolderItem> {
-      const map = new Map<string, ShelfFolderItem>()
-      this.folders.forEach((item) => {
-        map.set(item.id, toRaw(item))
-      })
-      return map
-    },
-    /** map格式的shelf数据，方便查找 */
-    shelfsMap(): Map<string, ShelfItem> {
-      const map = new Map<string, ShelfItem>()
-      this.shelf.forEach((item) => {
-        map.set(item.id + '', toRaw(item))
-      })
-      return map
-    },
     /** 选中计数 */
     selectedCount(): number {
       return this.selected.size
@@ -165,7 +145,7 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** push到db */
-    async push(config: { syncRetome?: boolean } = {}) {
+    async push(config: { syncRemote?: boolean } = {}) {
       /** 记录的时候结构一定是最新的 */
       await shelfStructVerDB.set('VER', SHELF_STRUCT_VER_LATEST)
 
@@ -176,11 +156,9 @@ const shelfStore = defineStore('app.shelf', {
       // 先把db内容清空，不然source中删除的项目，没法把删除的这个操作，同步到db中
       await shelfDB.clear()
 
-      for (const i of this.shelf) {
-        await shelfDB.set(i.id + '', i)
-      }
+      await Promise.all(this.shelf.map((item) => shelfDB.set(String(item.id), item)))
 
-      if (config.syncRetome) {
+      if (config.syncRemote) {
         await this.syncToRemote()
       }
     },
@@ -188,7 +166,7 @@ const shelfStore = defineStore('app.shelf', {
     /** 切换分支 */
     checkout({ to: branch, reset = false }: { to: ShelfBranch; reset?: boolean }) {
       if (reset) {
-        this.source[branch] = this.source[this.branch]
+        this.source[branch] = [...this.source[this.branch]]
       }
       this.branch = branch
     },
@@ -211,7 +189,6 @@ const shelfStore = defineStore('app.shelf', {
       // 如果版本不对，丢掉，多兼容一份数据逻辑有点烦了，等服务器返回就好
       if (structVer !== SHELF_STRUCT_VER_LATEST) {
         this.commit({ shelf: [] })
-        void this.push({ syncRetome: false })
         return
       }
 
@@ -235,11 +212,6 @@ const shelfStore = defineStore('app.shelf', {
 
       // 记录版本到本地
       this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
-
-      // 如果版本不对那就触发一次push
-      if (serve.ver !== SHELF_STRUCT_VER_LATEST) {
-        void this.push({ syncRetome: true })
-      }
     },
     /** 同步到服务器 */
     async syncToRemote() {
@@ -257,31 +229,13 @@ const shelfStore = defineStore('app.shelf', {
      * 这时候会出现A的index值+1了还是比B小，排序结果保存失效
      */
     squeezeShelfItemIndex(curShelf: ShelfItem[]): ShelfItem[] {
-      return produce(sort(toRaw(curShelf)), (draft) => {
-        /** 一个带前缀randomID表示顶层文件夹 */
-        const ROOT = '__ROOT__' + '.' + nanoid()
-
-        /**
-         * 当前index记录
-         *
-         * key是parents数组的最后一个值（代表直接父文件夹ID），ROOT代表根文件夹
-         * value是遇到过的个数
-         */
-        const minIndexMap = new Map<string, number>()
-
-        draft.forEach((item) => {
-          if (item.parents.length) {
-            // 只有在数组不为空的时候会lastItem，所以这里一定有
-            const parentID = lastItem(item.parents)!
-            // 更新当前index为最小index+1
-            item.index = (minIndexMap.get(parentID) ?? -1) + 1
-            // 记录该index
-            minIndexMap.set(parentID, item.index)
-          } else {
-            item.index = (minIndexMap.get(ROOT) ?? -1) + 1
-            minIndexMap.set(ROOT, item.index)
-          }
-        })
+      return produce(sort(curShelf), (draft) => {
+        const nextIndexByParent = new Map<string, number>()
+        for (const item of draft) {
+          const parentId = lastItem(item.parents) ?? ROOT_PARENT_KEY
+          item.index = (nextIndexByParent.get(parentId) ?? -1) + 1
+          nextIndexByParent.set(parentId, item.index)
+        }
       })
     },
 
@@ -298,18 +252,13 @@ const shelfStore = defineStore('app.shelf', {
       }
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
-          // 压入数据
+          for (const existing of draft) {
+            if (existing.parents.length === 0) existing.index += 1
+          }
           draft.unshift(item)
-          // 更新其它同层项目的index
-          draft.forEach((item) => {
-            const root: string[] = []
-            if (is.deepEqual(item.parents, root)) {
-              item.index += 1
-            }
-          })
         }),
       })
-      await this.push({ syncRetome: true })
+      await this.push({ syncRemote: true })
     },
     /** 移出书架 */
     async removeFromShelf(payload: { books: (string | number)[]; push: boolean }) {
@@ -325,7 +274,7 @@ const shelfStore = defineStore('app.shelf', {
 
       // 如果标记为立即push（比如 详请页 移出收藏 场景）
       if (payload.push) {
-        await this.push({ syncRetome: true })
+        await this.push({ syncRemote: true })
       }
     },
     /**
@@ -451,12 +400,9 @@ const shelfStore = defineStore('app.shelf', {
       this.commit({
         shelf: this.squeezeShelfItemIndex(
           produce(this.shelf, (draft) => {
-            // 腾出首位
-            draft.forEach((item) => {
-              item.index += 1
-            })
-
-            // 压入首位
+            for (const item of draft) {
+              if (item.parents.length === 0) item.index += 1
+            }
             draft.unshift(folder)
           }),
         ),
@@ -522,7 +468,22 @@ const shelfStore = defineStore('app.shelf', {
       this.clearSelected()
       this.merge({ to: ShelfBranch.main })
       this.checkout({ to: ShelfBranch.main })
-      await this.push({ syncRetome: true })
+      await this.push({ syncRemote: true })
+    },
+    async initialize() {
+      try {
+        await this.pull()
+      } catch {
+        this.commit({ shelf: [] })
+      }
+      this.initialized = true
+
+      await this.syncFromRemote()
+      const currentData = toRaw(this.shelf)
+      const normalizedData = this.squeezeShelfItemIndex(currentData)
+      const hasChange = currentData !== normalizedData
+      if (hasChange) this.commit({ shelf: normalizedData })
+      await this.push({ syncRemote: hasChange })
     },
 
     /** actions end */
@@ -532,34 +493,8 @@ const shelfStore = defineStore('app.shelf', {
 /** @public 书架store */
 export function useShelfStore() {
   const store = shelfStore()
-
-  // 第一次使用的时候，自动读取一次DB，避免每次使用store都要注意init
   if (!store.initialized && !store.useLoading().value) {
-    void store
-      // 先从缓存读出来，展示在界面
-      .pull()
-      // 缓存读取之后就写入store，标记已经初始化完成
-      .then(() => store.$patch({ initialized: true }))
-      // 从服务器更新一次
-      .then(() => store.syncFromRemote())
-      // 服务器有返回的话，就整理一次（本地的缓存不需要再整理了
-      .then(() => {
-        const currentData = toRaw(store.shelf)
-        const nextData = store.squeezeShelfItemIndex(currentData)
-
-        const hasChange = currentData !== nextData
-
-        if (hasChange) {
-          store.commit({ shelf: nextData })
-        }
-
-        return hasChange
-      })
-      // 根据整理结果决定是否需要触发服务器保存（没变也需要保存一次本地，防止本地与服务器不同步
-      .then(async (hasChange) => {
-        await store.push({ syncRetome: hasChange })
-      })
+    void store.initialize().catch(() => undefined)
   }
-
   return store
 }

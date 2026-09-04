@@ -76,12 +76,9 @@ import { useRouter } from 'vue-router'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { sha256 } from '@/utils/hash'
 
-import { useAppStore } from '@/stores/app'
-
-import { resetPassword, sendResetEmail } from '@/services/user'
+import { resetPassword, sendResetEmail } from '@/services/auth'
 
 const $q = useQuasar()
-const appStore = useAppStore()
 
 const email = ref('')
 const password = ref('')

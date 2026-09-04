@@ -8,17 +8,11 @@
     <q-toolbar>
       <q-btn flat dense round aria-label="Menu" icon="mdiMenu" @click="siderShow = !siderShow" />
 
-      <div
-        class="row q-ml-xs cursor-pointer flex-center non-selectable"
-        v-if="$q.screen.gt.xs"
-        style="padding: 0 0 0 12px"
-      >
+      <div class="row q-ml-xs flex-center non-selectable" v-if="$q.screen.gt.xs" style="padding: 0 0 0 12px">
         <div class="row flex-center">
           <q-icon size="24px" name="svguse:/icons.svg#book" />
         </div>
-        <q-toolbar-title shrink @click="changAppName">
-          {{ appName }}
-        </q-toolbar-title>
+        <q-toolbar-title shrink>轻书架</q-toolbar-title>
       </div>
 
       <!-- form 是为了规避 focus-index 跳到意外的地方的问题 -->
@@ -119,13 +113,7 @@
 
               <div class="link-item">
                 <template v-for="option in userInfoMenuOptions" :key="option.key">
-                  <q-item
-                    clickable
-                    v-ripple
-                    :to="
-                      (option.disabled ?? true) && option.route ? { name: option.route, params: option.params } : null
-                    "
-                  >
+                  <q-item clickable v-ripple :to="option.to">
                     <q-item-section avatar>
                       <q-icon size="18px" :name="option.icon" />
                     </q-item-section>
@@ -179,125 +167,82 @@ import { useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { longTermToken, sessionToken } from '@/utils/session'
+import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import CoinIcon from '@/components/points/CoinIcon.vue'
 
 import { useMedia } from '@/composition/useMedia'
 
-import { rebootSignalr } from '@/services/internal/request'
+import { logout as endSession } from '@/services/auth'
 
 import SearchInput from '../SearchInput.vue'
+import { accountNavigation } from './navigation'
 import { useLayout } from './useLayout'
 
 import type { SearchMode } from '@/services/book/types'
 
 const route = useRoute()
-
-// placeholder 跟随当前页面：漫画相关页搜漫画，其他页搜小说
-const searchPlaceholder = computed(() => (route.meta.searchTab === 'Comic' ? '搜索漫画' : '搜索小说'))
-
+const router = useRouter()
 const $q = useQuasar()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const layout = useLayout()
-const { appName, user } = storeToRefs(appStore)
+const { user } = storeToRefs(appStore)
 const { siderShow, headerHeight, siderBreakpoint } = layout
 
-// 经验进度使用由经验值计算出的 GrowthLevel；Level 可能包含手动授予的访问等级
+const searchPlaceholder = computed(() => (route.meta.searchTab === 'Comic' ? '搜索漫画' : '搜索小说'))
 const growth = computed(() => user.value?.Growth)
 const growthLevel = computed<number>(() => growth.value?.GrowthLevel ?? 0)
 const expProgress = computed<number>(() => {
-  const g = growth.value
-  if (!g || g.NextLevelExp == null) return 0
-  const span = g.NextLevelExp - g.CurrentLevelExp
+  const current = growth.value
+  if (!current || current.NextLevelExp == null) return 0
+  const span = current.NextLevelExp - current.CurrentLevelExp
   if (span <= 0) return 0
-  return Math.min(1, Math.max(0, (g.Exp - g.CurrentLevelExp) / span))
+  return Math.min(1, Math.max(0, (current.Exp - current.CurrentLevelExp) / span))
 })
 const expText = computed<string>(() => {
-  const g = growth.value
-  if (!g) return ''
-  if (g.NextLevelExp == null) return '恭喜你已经是满级了'
-  return `当前经验 ${g.Exp}，还需 ${g.NextLevelExp - g.Exp} 经验升级到 lv${g.GrowthLevel + 1}`
+  const current = growth.value
+  if (!current) return ''
+  if (current.NextLevelExp == null) return '恭喜你已经是满级了'
+  return `当前经验 ${current.Exp}，还需 ${current.NextLevelExp - current.Exp} 经验升级到 lv${current.GrowthLevel + 1}`
 })
 const searchKey = ref('')
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),
   window.innerWidth <= siderBreakpoint.value,
 )
-const router = useRouter()
 
 const { width } = useWindowSize()
 const isWideScreen = computed(() => width.value > 768)
 const searchInputWidth = computed(() => {
-  if (isWideScreen.value) {
-    return (visible: boolean) => (visible ? '40vw' : 'auto')
-  }
-  return (visible: boolean) => '50vw'
+  if (isWideScreen.value) return (visible: boolean) => (visible ? '40vw' : 'auto')
+  return () => '50vw'
 })
-
-const userInfoMenuOptions: Array<Record<string, any>> = [
-  {
-    label: '个人中心',
-    key: 'Account',
-    route: 'UserProfile',
-    icon: 'mdiAccountOutline',
-  },
-  {
-    label: '发布管理',
-    key: 'Contribution',
-    route: 'UserPublish',
-    icon: 'mdiAccountCog',
-  },
-  {
-    label: '我的书架',
-    key: 'MyShelf',
-    route: 'MyShelf',
-    icon: 'mdiFolderHeartOutline',
-  },
-  {
-    label: '商城',
-    key: 'Shop',
-    route: 'Shop',
-    icon: 'mdiStorefrontOutline',
-  },
-  {
-    label: '我的社区',
-    key: 'ForumMine',
-    route: 'ForumMine',
-    icon: 'mdiAccountBoxOutline',
-  },
-  {
-    label: '网站设置',
-    key: 'Setting',
-    route: 'Setting',
-    icon: 'mdiCog',
-  },
-]
+const userInfoMenuOptions = accountNavigation
 
 function onSearch(keywords: string, mode: SearchMode) {
-  // 漫画相关页面（meta.searchTab='Comic'）搜索直达漫画 tab，其他页面默认小说
   const tab = route.meta.searchTab as string | undefined
-  router.push({ name: 'Search', query: { keywords, mode, ...(tab ? { tab } : {}) } })
+  void router.push({ name: 'Search', query: { keywords, mode, ...(tab ? { tab } : {}) } })
   searchKey.value = ''
 }
-function changAppName() {
-  appStore.asyncReverse()
-}
+
 function goToNotification() {
-  router.push({ name: 'Notification' })
+  void router.push({ name: 'Notification' })
 }
+
 function logout() {
   $q.dialog({
     title: '提示',
     message: '你确定要退出登录吗？',
     cancel: true,
   }).onOk(async () => {
-    appStore.$reset()
-    await longTermToken.set('')
-    sessionToken.set('')
-    await rebootSignalr()
+    appStore.clearUser()
+    try {
+      await endSession()
+    } catch (error) {
+      $q.notify({ type: 'negative', message: getErrMsg(error) })
+    }
   })
 }
 </script>

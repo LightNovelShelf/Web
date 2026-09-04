@@ -1,4 +1,5 @@
 import type { GetBookListRequest, GetBookListRes } from '@/services/book/types'
+import type { Growth } from '@/services/points'
 
 export interface PublicUserSummary {
   Id: number
@@ -12,45 +13,24 @@ export interface PublicUserSummary {
   CommunityReplyCount: number
   CommentCount: number
 }
-
-export namespace Login {
-  export interface Param {
-    email: string
-    password: string
-  }
-
-  export interface Res {
-    RefreshToken: string
-    Token: string
-  }
-}
-
-export namespace Register {
-  export interface Param {
-    userName: string
-    email: string
-    password: string
-    code: string
-    inviteCode: string
-  }
-
-  export interface Res {
-    RefreshToken: string
-    Token: string
-  }
+export interface CurrentUser {
+  Id: number
+  Role: { Name: string }
+  Avatar: string
+  UserName: string
+  Email: string
+  RegisterAt: string
+  InviteCode: string
+  Level: number
+  InteriorLevel: number
+  UnreadNotificationCount: number
+  Growth: Growth | null
 }
 
 export namespace ResetInviteCode {
   export interface Res {
     InviteCode: string
   }
-}
-
-export namespace RefreshToken {
-  export interface Param {
-    token: string
-  }
-  export type Res = string
 }
 
 export namespace GetMyBooks {

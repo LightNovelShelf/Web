@@ -104,7 +104,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import CoinIcon from '@/components/points/CoinIcon.vue'
 import SignInDialog from '@/components/points/SignInDialog.vue'
@@ -123,7 +123,7 @@ import {
 import type { OwnedItem, ShopItem } from '@/services/shop'
 
 const $q = useQuasar()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const { user } = storeToRefs(appStore)
 
 // 余额以 GetShop 返回为准，购买后由 OnGrowthUpdate 推送同步 user.Growth

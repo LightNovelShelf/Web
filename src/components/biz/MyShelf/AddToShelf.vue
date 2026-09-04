@@ -1,67 +1,46 @@
 <template>
-  <!-- todo 这个icon要不要得考虑一下 -->
-  <q-btn v-if="bookId" :outline="outline" :color="color" :loading="loading" :label="label" @click="clickHandle" />
+  <q-btn v-if="bookId" :outline="liked" color="primary" :loading="loading" :label="label" @click="toggleShelf" />
 </template>
 
-<script lang="ts">
-export default {}
-</script>
-
 <script lang="ts" setup>
-// 加入书架按钮
-import { HubConnectionState } from '@microsoft/signalr'
 import { useQuasar } from 'quasar'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
 import { useShelfStore } from '@/stores/shelf'
 
-import { connectState } from '@/services/utils'
+import { isRealtimeConnected } from '@/services/transport'
 
 import type { BookServicesTypes } from '@/services/book'
 import type { AnyVoidFunc } from '@/types/utils'
 
 const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
-
-/** 目前的DB方案只能接受string类型的key */
-const bookId = computed<number | null>(() => props.book?.Id ?? null)
-const bookPath = ref<string[]>([])
-const $ = useQuasar()
+const quasar = useQuasar()
 const shelfStore = useShelfStore()
-/** 是否已经收藏 */
-const liked = computed<boolean>(() => shelfStore.booksMap.has(bookId.value ?? -1))
-/** 读取/写入中 */
+const bookId = computed(() => props.book?.Id ?? null)
+const liked = computed(() => shelfStore.booksMap.has(bookId.value ?? -1))
 const loading = computed(
-  () => shelfStore.useLoading((s) => s.pull || s.push).value || connectState.value !== HubConnectionState.Connected,
+  () => shelfStore.useLoading((state) => state.pull || state.push).value || !isRealtimeConnected.value,
 )
-/** 收起最后一次通知 */
-let disMiss: AnyVoidFunc
+const label = computed(() => (liked.value ? '移出书架' : '加入书架'))
+let dismissNotification: AnyVoidFunc | undefined
 
-const label = computed<string>(() => (liked.value ? '移出书架' : '加入书架'))
-const color = 'primary'
-const outline = computed<boolean>(() => liked.value)
+async function toggleShelf() {
+  if (!bookId.value) return
 
-/** 切换收藏与否 */
-const clickHandle = async () => {
-  if (!bookId.value) {
-    return
-  }
-
-  // 先取消，免得界面上有多个提示框
-  if (disMiss) disMiss()
-
-  const nextLike = !liked.value
+  dismissNotification?.()
+  const nextLiked = !liked.value
 
   try {
-    if (nextLike) {
+    if (nextLiked) {
       await shelfStore.addToShelf({ id: bookId.value })
     } else {
       await shelfStore.removeFromShelf({ books: [bookId.value], push: true })
     }
-    disMiss = $.notify({ message: nextLike ? '加入成功' : '移除成功' })
-  } catch (e) {
-    disMiss = $.notify({ type: 'waring', message: getErrMsg(e) })
+    dismissNotification = quasar.notify({ message: nextLiked ? '加入成功' : '移除成功' })
+  } catch (error) {
+    dismissNotification = quasar.notify({ type: 'warning', message: getErrMsg(error) })
   }
 }
 </script>

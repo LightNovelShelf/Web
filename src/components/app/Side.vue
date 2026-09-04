@@ -9,24 +9,22 @@
   >
     <q-scroll-area class="fit">
       <q-list padding>
-        <template v-for="option in menuOptions" :key="option.key">
-          <q-separator class="q-my-md" v-if="option.label === 'separator'" />
-
+        <template v-for="item in sidebarNavigation" :key="item.key">
+          <q-separator v-if="item.kind === 'separator'" class="q-my-md" />
           <q-item
-            :to="!(option.disabled ?? false) && option.route ? { name: option.route, params: option.params } : null"
-            :href="option.href"
-            :target="option.href ? '_blank' : undefined"
-            :rel="option.href ? 'noopener noreferrer' : undefined"
-            :disable="option.disabled"
-            v-ripple="option.disabled ? !option.disabled : true"
-            clickable
             v-else
+            :to="item.kind === 'route' ? item.to : undefined"
+            :href="item.kind === 'external' ? item.href : undefined"
+            :target="item.kind === 'external' ? '_blank' : undefined"
+            :rel="item.kind === 'external' ? 'noopener noreferrer' : undefined"
+            clickable
+            v-ripple
           >
             <q-item-section avatar>
-              <q-icon color="grey" :name="option.icon" />
+              <q-icon color="grey" :name="item.icon" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>{{ option.label }}</q-item-label>
+              <q-item-label>{{ item.label }}</q-item-label>
             </q-item-section>
           </q-item>
         </template>
@@ -43,15 +41,12 @@
         <div class="row items-center">
           <q-icon
             left
-            v-if="connectState === HubConnectionState.Connected"
-            color="positive"
+            :color="realtimeConnectionStatus === 'online' ? 'positive' : 'negative'"
             size="24px"
             name="mdiBroadcast"
           />
-          <q-icon left v-else color="negative" size="24px" name="mdiBroadcast" />
-
-          <span v-if="connectState === HubConnectionState.Connected">当前在线</span>
-          <span v-else-if="connectState === HubConnectionState.Reconnecting">正在尝试重新连接</span>
+          <span v-if="realtimeConnectionStatus === 'online'">当前在线</span>
+          <span v-else-if="realtimeConnectionStatus === 'reconnecting'">正在尝试重新连接</span>
           <span v-else>当前离线，等待连接</span>
         </div>
       </div>
@@ -60,118 +55,13 @@
 </template>
 
 <script lang="ts" setup>
-import { HubConnectionState } from '@microsoft/signalr'
+import { realtimeConnectionStatus } from '@/services/transport'
 
-import { connectState } from '@/services/utils'
-
+import { sidebarNavigation } from './navigation'
 import { useLayout } from './useLayout'
 
-const menuOptions: Array<Record<string, any>> = [
-  {
-    label: '首页',
-    key: 'Home',
-    route: 'Home',
-    icon: 'mdiHome',
-  },
-  {
-    label: '公告',
-    key: 'Announcement',
-    route: 'Announcement',
-    icon: 'mdiBullhorn',
-  },
-  {
-    label: 'separator',
-    key: 'separator 0',
-  },
-  {
-    label: '全部小说',
-    key: 'BookList',
-    icon: 'mdiBook',
-    route: 'BookList',
-    params: { order: 'latest', page: '1' },
-  },
-  {
-    label: '全部漫画',
-    key: 'MangaDiscover',
-    icon: 'mdiImage',
-    route: 'MangaDiscover',
-    params: { order: 'latest', page: '1' },
-  },
-  {
-    label: '近期排行',
-    key: 'BookRank',
-    icon: 'mdiFire',
-    route: 'BookRank',
-    params: { type: 'weekly' },
-  },
-  {
-    label: '我的书架',
-    key: 'MyShelf',
-    route: 'MyShelf',
-    icon: 'mdiFolderHeartOutline',
-  },
-  {
-    label: 'separator',
-    key: 'separator 1',
-  },
-  {
-    label: '社区',
-    key: 'Community',
-    route: 'ForumList',
-    icon: 'mdiForum',
-  },
-  {
-    label: '阅读历史',
-    key: 'History',
-    route: 'History',
-    icon: 'mdiHistory',
-  },
-  {
-    label: '商城',
-    key: 'Shop',
-    route: 'Shop',
-    icon: 'mdiStorefrontOutline',
-  },
-  {
-    label: 'separator',
-    key: 'separator 2',
-  },
-  {
-    label: '设置',
-    key: 'Setting',
-    route: 'Setting',
-    icon: 'mdiCog',
-  },
-  {
-    label: '贡献列表',
-    key: 'collaborator',
-    route: 'Collaborator',
-    icon: 'mdiAccountMultiple',
-  },
-  {
-    label: '赞助本站',
-    key: 'Sponsor',
-    href: 'https://www.ifdian.net/a/wuyu8512',
-    icon: 'mdiHeartOutline',
-  },
-]
 const commitSha = import.meta.env.VUE_COMMIT_SHA
-
-const layout = useLayout()
-const { siderShow, siderBreakpoint } = layout
-
-const currentRouteName = () => {
-  const routeName = useRoute().name
-
-  if (typeof routeName === 'string') {
-    return routeName
-  } else if (typeof routeName === 'symbol') {
-    // TODO
-    return ''
-  } else {
-    return ''
-  }
-}
+const { siderShow, siderBreakpoint } = useLayout()
 </script>
 
 <style scoped lang="scss">

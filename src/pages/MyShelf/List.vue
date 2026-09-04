@@ -6,9 +6,9 @@
         <!-- 占高度用的div -->
         <div class="actions-wrap-placeholder"></div>
         <!-- 实际展示的block -->
-        <div :class="getClass()">
+        <div :class="actionBarClass">
           <div style="flex-grow: 1" />
-          <q-btn class="action" color="primary" outline @click="quiteEditMode">取消</q-btn>
+          <q-btn class="action" color="primary" outline @click="exitEditMode">取消</q-btn>
           <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
         </div>
 
@@ -90,11 +90,11 @@
               <!-- 书籍相关的 -->
               <template v-if="item.type === ShelfTypes.ShelfItemTypeEnum.BOOK">
                 <!-- 有父层文件夹，代表已经在文件夹里了 -->
-                <q-item v-if="parentFolder" clickable v-close-popup @click="moveItemToFolderHandle(item)">
+                <q-item v-if="parentFolder" clickable v-close-popup @click="openFolderPicker(item)">
                   <q-item-section>移动到...</q-item-section>
                 </q-item>
                 <!-- 否则就是在root层 -->
-                <q-item v-else clickable v-close-popup @click="addItemToFolderHandle(item)">
+                <q-item v-else clickable v-close-popup @click="openFolderPicker(item)">
                   <q-item-section>加入到...</q-item-section>
                 </q-item>
 
@@ -137,67 +137,13 @@
 
     <template v-else />
 
-    <!-- 书架文件夹选择弹层 -->
-    <q-dialog :model-value="folderSelectorVisible" @update:model-value="toggleShelfFolderSelector">
-      <q-card class="shelf-folder-selector-card">
-        <q-card-section>
-          <div class="text-h6">{{ parentFolder ? '移动' : '加入' }}到...</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <!--
-          一定要监听 update:model-value 事件，需要依赖它来分辨 selectorValue 是筛选值还是选择值；
-          不监听的话 selectorValue 就都是字符串
-         -->
-          <q-select
-            filled
-            :model-value="selectorValue"
-            :options="folderOptions"
-            use-input
-            fill-input
-            hide-selected
-            input-debounce="0"
-            label="输入文件夹名称进行筛选或创建"
-            @input-value="selectorValue = $event"
-            @update:model-value="selectorValue = $event"
-          >
-            <!-- 空状态 -->
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  {{ selectorValue ? '没有找到，将新建文件夹' : '请输入文件夹名称' }}
-                </q-item-section>
-              </q-item>
-            </template>
-            <!-- 覆盖渲染模板 -->
-            <template v-slot:option="scope">
-              <!-- scope.opt 类型是 QSelectorOption -->
-              <q-item v-bind="scope.itemProps">
-                <q-item-section>
-                  <q-item-label class="max-len-text">{{ scope.opt.label }}</q-item-label>
-                </q-item-section>
-                <q-item-section side>{{ scope.opt.updateAt }}</q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn
-            flat
-            :disable="!selectorValue"
-            :label="
-              selectorValue && typeof selectorValue === 'object'
-                ? `${parentFolder ? '移动' : '加入'}(${selectedCount})`
-                : `${parentFolder ? '创建并移入' : '创建并加入'}(${selectedCount})`
-            "
-            color="primary"
-            v-close-popup
-            @click="folderSelectorSubmitHandle"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <shelf-folder-picker
+      v-model="folderSelectorVisible"
+      :folders="shelfStore.folders"
+      :parent-folder="parentFolder"
+      :selected-count="selectedCount"
+      @submit="moveSelectionToFolder"
+    />
 
     <!-- 书架文件夹重命名弹层 -->
     <rename-dialog v-model="currentFolderToRename" @rename="renameHandle" />
@@ -205,455 +151,210 @@
 </template>
 
 <script lang="ts" setup>
-import { HubConnectionState } from '@microsoft/signalr'
 import { useQuasar } from 'quasar'
-import Sortable from 'sortablejs'
-import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue'
+import { computed, onDeactivated, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { safeCall } from '@/utils/safeCall'
-import { parseTime } from '@/utils/time'
+import { getErrMsg } from '@/utils/getErrMsg'
 import { useForwardRef } from '@/utils/useForwardRef'
 
 import { useBookListStore } from '@/stores/bookListData'
-import { ROOT_LEVEL_FOLDER_NAME, ShelfBranch, useShelfStore } from '@/stores/shelf'
+import { ShelfBranch, useShelfStore } from '@/stores/shelf'
 
 import { useLayout } from '@/components/app/useLayout'
 import { QGrid, QGridItem } from '@/components/grid'
 
+import { useShelfSortable } from '@/composition/shelf/useShelfSortable'
 import { useIsActivated } from '@/composition/useIsActivated'
 
-import { ALL_VALUE } from '@/const'
-import { NOOP } from '@/const/empty'
-import { connectState } from '@/services/utils'
+import { isRealtimeConnected } from '@/services/transport'
+import { ROOT_LEVEL_FOLDER_NAME } from '@/types/shelf'
 import * as ShelfTypes from '@/types/shelf'
 
 import NavBackToParentFolder from './components/NavBackToParentFolder.vue'
 import RenameDialog from './components/RenameDialog.vue'
 import ShelfCard from './components/ShelfCard.vue'
+import ShelfFolderPicker from './components/ShelfFolderPicker.vue'
 
 import type { BookInList } from '@/services/book/types'
+import type { ShelfFolderDestination } from '@/types/shelf'
 import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
 
-interface QSelectorOption {
-  label: string
-  value: string
-  /** 格式化好的最后修改时间 */
-  updateAt: string
-  disable?: boolean
-}
-
-const $ = useQuasar()
-const layout = useLayout()
+const $q = useQuasar()
+const { headerOffset } = useLayout()
 const shelfStore = useShelfStore()
 const bookListStore = useBookListStore()
 const route = useRoute()
 const router = useRouter()
-/** 本组件是否激活展示 */
 const isActivated = useIsActivated()
 
-/** 站点header高度 */
-const headerHeight = computed(() => `${layout.headerOffset.value}px`)
-/** 加载标记 */
-const loading = computed(() => shelfStore.useLoading().value || connectState.value !== HubConnectionState.Connected)
-/** 选中项ID集合 */
+const headerHeight = computed(() => `${headerOffset.value}px`)
+const loading = computed(() => shelfStore.useLoading().value || !isRealtimeConnected.value)
 const selected = computed(() => shelfStore.selected)
-/** shelfStore 是否已经初始化 */
+const selectedCount = computed(() => shelfStore.selectedCount)
 const initialized = computed(() => shelfStore.initialized)
-/** 是否处于编辑模式 */
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
-/** 文件夹选择弹层 */
 const folderSelectorVisible = ref(false)
-/** 文件夹选择器model值 */
-const selectorValue = ref<string | QSelectorOption | null>(null)
-/** 右键菜单触发的Item ID */
 const contextMenuShelfItemID = ref<number | string>(-1)
+const currentFolderToRename = ref<ShelfTypes.ShelfFolderItem | null>(null)
+const [listWrapRef, setListWrapRef] = useForwardRef()
+
+const parentFolders = ref<string[]>(getParentFolders(route))
+const parentFolder = computed(() => parentFolders.value.at(-1) ?? null)
+const hasParentFolder = computed(() => parentFolder.value !== null)
+const shelfData = computed(() => shelfStore.getItemsByParents(parentFolders.value))
+const actionBarClass = computed(() => [
+  'actions-wrap',
+  { 'actions-wrap-visible': editMode.value },
+  $q.dark.isActive ? 'bg-grey-10' : 'bg-grey-1',
+])
+
 const contextMenuShelfItem = computed<ShelfTypes.ShelfFolderItem | BookInList | null>(() => {
-  const { value: id } = contextMenuShelfItemID
+  const id = contextMenuShelfItemID.value
+  if (!id || Number(id) < 0) return null
 
-  if (!id || ~~id < 0) {
-    return null
-  }
-
-  const shelfItem = shelfStore.shelfInMap.get(id)!
-
-  if (shelfItem.type === ShelfTypes.ShelfItemTypeEnum.BOOK) {
-    return bookListStore.getBook(+id)
-  }
-
-  return shelfItem
+  const shelfItem = shelfStore.shelfInMap.get(id)
+  if (!shelfItem) return null
+  return shelfItem.type === ShelfTypes.ShelfItemTypeEnum.BOOK ? bookListStore.getBook(shelfItem.id) : shelfItem
 })
 const contextMenuShelfItemTitle = computed(() => {
-  if (selected.value.size) {
-    return `已选${selected.value.size}项`
-  }
-
-  // 正常不会走到这个逻辑，这个分支只是make ts happy
-  if (!contextMenuShelfItem.value) {
-    return 'unknown'
-  }
-
+  if (selected.value.size) return `已选${selected.value.size}项`
+  if (!contextMenuShelfItem.value) return '未知项目'
   return 'type' in contextMenuShelfItem.value ? contextMenuShelfItem.value.title : contextMenuShelfItem.value.Title
 })
-/** 文件夹选项 */
-const folderOptions = computed<QSelectorOption[]>(() => {
-  const realFolders = shelfStore.folders
-    // 过滤掉自己，移动到自己没有意义
-    .filter((i) => i.id !== parentFolder.value)
-    .map((i): QSelectorOption => ({
-      label: i.title,
-      value: i.id,
-      updateAt: parseTime(i.updateAt).toLocaleString(),
-    }))
-    .filter((i) => {
-      // 如果 selectorValue 有值 且不是选项值
-      if (selectorValue.value && typeof selectorValue.value !== 'object') {
-        // 就筛选
-        return i.label.includes(selectorValue.value)
-      }
 
-      return true
-    })
-
-  // 如果不在根文件夹
-  if (parentFolder.value) {
-    // 把根文件夹推入选项
-    realFolders.push({
-      label: ROOT_LEVEL_FOLDER_NAME,
-      value: ALL_VALUE,
-      updateAt: '系统创建',
-    })
-  }
-  return realFolders
-})
-/** 选中计数 */
-const selectedCount = computed(() => shelfStore.selectedCount)
-/** 是否全选 */
-// const isSelectedAll = computed<boolean>(() => selectedCount.value === shelf.value.length)
-/** 排序列表容器 */
-const [listWrapRef, setListWrapRef] = useForwardRef()
-/** 排序操作句柄 */
-const sortableRef = ref<Sortable | null>(null)
-
-/** 父文件俺家数组 */
-function getParentFolders(curRoute: RouteLocationNormalizedLoaded): string[] {
-  if (!curRoute.params.folderID) {
-    return []
-  }
-
-  if (Array.isArray(curRoute.params.folderID)) {
-    return curRoute.params.folderID.filter((i) => !!i)
-  }
-
-  return [curRoute.params.folderID]
+function getParentFolders(currentRoute: RouteLocationNormalizedLoaded): string[] {
+  const folderId = currentRoute.params.folderID
+  if (!folderId) return []
+  return Array.isArray(folderId) ? folderId.filter(Boolean) : [folderId]
 }
 
-/** 是否有父文件夹(可能有多个); 初始值就解析一次 */
-const parentFolders = ref<string[]>(getParentFolders(route))
-
-/** 直接关系的父文件夹 */
-const parentFolder = computed<string | null>(() => [...parentFolders.value].pop() ?? null)
-/** 书架数据 */
-const shelfData = computed<ShelfTypes.ShelfItem[]>(() => {
-  return shelfStore.getItemsByParents(parentFolders.value)
-})
-
-/** 右键菜单 - 加入文件夹 */
-function addItemToFolderHandle(item: ShelfTypes.ShelfItem) {
-  if (selectedCount.value === 0) {
-    shelfStore.selectItem({ id: item.id })
-  }
-
-  // 打开文件夹弹层
+function openFolderPicker(item: ShelfTypes.ShelfItem) {
+  if (selectedCount.value === 0) shelfStore.selectItem({ id: item.id })
   folderSelectorVisible.value = true
 }
 
-/** 右键菜单 - 移出书架 */
-async function removeItemHandle(item: ShelfTypes.ShelfItem) {
-  // 没有选择书籍
-  if (selectedCount.value === 0) {
-    // 移除鼠标右键的那一本
-    await shelfStore.removeFromShelf({ books: [item.id], push: false })
-  } else {
-    // 否则就是移除已经选中的
-    await shelfStore.removeFromShelf({ books: shelfStore.selectedBooks.map((i) => i.id), push: false })
-  }
-
-  await removeFolderIfItEmpty()
-}
-
-/** 移除空文件夹 */
-async function removeFolderIfItEmpty(): Promise<void> {
-  // 如果是文件夹
-  if (parentFolder.value) {
-    const id = parentFolder.value
-    // 且文件夹是空的
-    if (!shelfData.value.length) {
-      // 弹层询问用户是否要清空文件夹
-      await new Promise((resolve, reject) => {
-        $.dialog({
-          title: '删除文件夹',
-          message: '该文件夹为空，是否删除文件夹？',
-          cancel: true,
-        })
-          .onOk(resolve)
-          .onCancel(reject)
-      })
-        .then(() => {
-          shelfStore.deleteFolder({ id })
-          // replace为父层
-          router.replace({
-            ...route,
-            params: { folderID: parentFolders.value.filter((i) => i !== id) },
-          } as RouteLocationRaw)
-        })
-        .catch(NOOP)
-    }
-  }
-}
-
-/** 右键菜单 - 删除文件夹 */
-function removeFolderHandle(item: ShelfTypes.ShelfFolderItem) {
-  const { id } = item
-  const children = shelfStore.getItemsByParent(id)
-  Promise.resolve()
-    .then(() => {
-      // 判断是否还有子元素
-      if (children.length) {
-        // 弹二次确认
-        return new Promise((resolve, reject) => {
-          $.dialog({
-            title: '删除文件夹',
-            message: `该文件夹不为空，删除后内容会转移到${ROOT_LEVEL_FOLDER_NAME}`,
-            cancel: true,
-          })
-            .onOk(resolve)
-            .onCancel(reject)
-        })
-      }
-    })
-    .then(() => {
-      shelfStore.deleteFolder({ id })
-    })
-    .catch(() => {
-      // 用户取消（或者代码有bug抛错）
-    })
-}
-
-/** 右键菜单 - 移动到文件夹 */
-function moveItemToFolderHandle(item: ShelfTypes.ShelfItem) {
-  if (selectedCount.value === 0) {
-    shelfStore.selectItem({ id: item.id })
-  }
-
-  // 打开文件夹弹层
-  folderSelectorVisible.value = true
-}
-
-/** 文件夹选择器提交 */
-async function folderSelectorSubmitHandle() {
-  // 没有文件夹名称或者文件夹id的话就不知道要移去哪了，所以返回
-  if (!selectorValue.value) {
-    // 弹个toast
-    $.notify({ type: 'warning', message: '请选择一个文件夹或者输入需要新建的文件夹名称' })
-    return
-  }
-
-  // 保险逻辑，没有选中的话就不走下边的各种创建、修改逻辑了，保持原样
+async function moveSelectionToFolder(destination: ShelfFolderDestination) {
   if (!selected.value.size) {
-    // 弹个toast
-    $.notify({ type: 'warning', message: '请先选择要加入文件夹的项目' })
+    $q.notify({ type: 'warning', message: '请先选择要移动的项目' })
     return
   }
 
-  let folderID
-
-  /** 需要创建文件夹：值是字符串而不是option */
-  if (typeof selectorValue.value === 'string') {
-    folderID = shelfStore.createFolder({ name: selectorValue.value })
+  let parents: string[]
+  if (destination.kind === 'new') {
+    const folderId = shelfStore.createFolder({ name: destination.name })
+    if (!folderId) return
+    parents = [folderId]
   } else {
-    folderID = selectorValue.value.value
+    parents = destination.parents
   }
 
-  // 创建文件夹失败（重名、数据错误等 ）会返回空folderID
-  // 选项有问题的时候也可能出现 folderID 为空
-  if (folderID) {
-    shelfStore.addToFolder({ parents: folderID === ALL_VALUE ? [] : [folderID] })
+  shelfStore.addToFolder({ parents })
+  await removeFolderIfEmpty()
+}
 
-    await removeFolderIfItEmpty()
+async function removeItemHandle(item: ShelfTypes.ShelfItem) {
+  const books = selectedCount.value === 0 ? [item.id] : shelfStore.selectedBooks.map((selectedBook) => selectedBook.id)
+  await shelfStore.removeFromShelf({ books, push: false })
+  await removeFolderIfEmpty()
+}
+
+async function removeFolderIfEmpty() {
+  const folderId = parentFolder.value
+  if (!folderId || shelfData.value.length > 0) return
+  if (!(await confirmDialog('删除文件夹', '该文件夹为空，是否删除文件夹？'))) return
+
+  shelfStore.deleteFolder({ id: folderId })
+  await router.replace({
+    ...route,
+    params: { folderID: parentFolders.value.filter((id) => id !== folderId) },
+  } as RouteLocationRaw)
+}
+
+async function removeFolderHandle(item: ShelfTypes.ShelfFolderItem) {
+  const children = shelfStore.getItemsByParent(item.id)
+  if (
+    children.length > 0 &&
+    !(await confirmDialog('删除文件夹', `该文件夹不为空，删除后内容会转移到${ROOT_LEVEL_FOLDER_NAME}`))
+  ) {
+    return
   }
+  shelfStore.deleteFolder({ id: item.id })
 }
 
-/** 清理排序句柄 */
-const destorySortable = () => {
-  safeCall(() => sortableRef.value?.destroy())
+function confirmDialog(title: string, message: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    let confirmed = false
+    $q.dialog({ title, message, cancel: true })
+      .onOk(() => {
+        confirmed = true
+      })
+      .onDismiss(() => resolve(confirmed))
+  })
 }
-/** 进入编辑模式 */
-const enterEditMode = () => {
+
+function enterEditMode() {
   shelfStore.checkout({ to: ShelfBranch.draft, reset: true })
-  // 编辑模式下尽快查询所有书籍
-  bookListStore.queryBooks({ ids: shelfStore.books.map((o) => o.id) })
+  bookListStore.queryBooks({ ids: shelfStore.books.map((book) => book.id) })
 }
-/** 退出编辑模式 */
-const quiteEditMode = () => {
+
+function exitEditMode() {
   shelfStore.clearSelected()
   shelfStore.checkout({ to: ShelfBranch.main })
 }
 
-/** 正在重命名的文件夹；置为某一个文件夹时就会触发重命名弹层显示 */
-const currentFolderToRename = ref<ShelfTypes.ShelfFolderItem | null>(null)
-/** 重命名 */
-function renameHandle(name: string, cb: (promise: Promise<unknown> | void) => void) {
-  // make ts happy；实际运行 currentFolderToRename 理应一定有值
-  if (currentFolderToRename.value?.id) {
-    cb(shelfStore.renameFolder({ name, id: currentFolderToRename.value.id }))
-  }
+function renameHandle(name: string, done: (promise: Promise<unknown> | void) => void) {
+  if (!currentFolderToRename.value) return
+  done(shelfStore.renameFolder({ name, id: currentFolderToRename.value.id }))
 }
 
-/** 屏蔽编辑模式下的列表有右键事件 */
-function preventListContextMenuHandle(evt: MouseEvent) {
-  if (editMode.value) {
-    evt.preventDefault()
-    // 不stop的话无法阻止menu组件弹出
-    evt.stopPropagation()
-  }
+function preventListContextMenuHandle(event: MouseEvent) {
+  if (!editMode.value) return
+  event.preventDefault()
+  event.stopPropagation()
 }
 
-/** 列表项目点击 */
-function listItemClickHandle(item: ShelfTypes.ShelfItem, evt: MouseEvent) {
-  if (editMode.value) {
-    const { id } = item
-    if (id === undefined) {
-      return
-    }
-
-    // 编辑模式下点击事件被蒙层接管，需要手动实现
-    if (item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER) {
-      router.push({ ...route, params: { folderID: item.id } } as RouteLocationRaw)
-      return
-    }
-
-    // 是书籍，干掉点击防止跳转到书籍详情
-
-    evt.preventDefault()
-    evt.stopPropagation()
-
-    // 选中书籍
-    shelfStore.selectItem({ id })
-  }
-}
-
-/** 备好右键菜单数据（菜单中展示对应书籍的某些元数据） */
-function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
-  if (!selected.value.size) {
-    /** 设置好ID后让 vue.computed 自己监听数据数据请求情况 */
-    contextMenuShelfItemID.value = item.id
-  } else {
-    /** 如果有已选的，置为-1，让菜单信息获取逻辑知道不需要特意去获取 */
-    contextMenuShelfItemID.value = -1
-  }
-}
-
-/** 弹出书架文件夹选择弹层 */
-function toggleShelfFolderSelector() {
-  folderSelectorVisible.value = !folderSelectorVisible.value
-  // 弹层状态改变时重置 selector 状态
-  selectorValue.value = ''
-}
-
-/** 同步排序结果到draft */
-const syncSortInfoToDraft = ({ oldIndex, newIndex }: { oldIndex?: number; newIndex?: number }) => {
-  if (newIndex === undefined || oldIndex === undefined) {
-    // 虽然不知道什么情况没这个index，但既然人家标注了这个可能，那就过滤一次
-    $.notify({ type: 'warning', message: '排序字段缺失，本次排序操作无效' })
+function listItemClickHandle(item: ShelfTypes.ShelfItem, event: MouseEvent) {
+  if (!editMode.value) return
+  if (item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER) {
+    void router.push({ ...route, params: { folderID: item.id } } as RouteLocationRaw)
     return
   }
 
-  shelfStore.commitSortInfo({ from: oldIndex, to: newIndex, parents: parentFolders.value })
+  event.preventDefault()
+  event.stopPropagation()
+  shelfStore.selectItem({ id: item.id })
 }
 
-/** 保存修改 */
-const submitListChange = async () => {
-  await shelfStore.submitChange()
+function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
+  contextMenuShelfItemID.value = selected.value.size ? -1 : item.id
 }
 
-/** 创建排序句柄 */
-const createSortable = (el: HTMLElement) => {
-  sortableRef.value = new Sortable(el, {
-    animation: 400,
-    // 不能拖动 no-drag 元素
-    // filter: '.no-drag',
-    // 不能用delay，和长按右键冲突
-    // delay: 300,
-    handle: '.js-drag-target',
-    // 不能放在 no-drop 元素上
-    onMove(evt) {
-      return !evt.related.className.includes('no-drop')
-    },
-    onEnd(evt) {
-      // index 0 起步，但是在文件夹场景下第一个是返回上一层图标，需要处理
-      let { oldIndex, newIndex } = evt
-
-      if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
-        return
-      }
-
-      if (parentFolder.value) {
-        oldIndex -= 1
-        newIndex -= 1
-      }
-
-      syncSortInfoToDraft({ oldIndex, newIndex })
-    },
-  })
-}
-
-function getClass(): string {
-  let cls = ''
-  cls += 'actions-wrap'
-  if (editMode.value) {
-    cls += ' actions-wrap-visible'
+async function submitListChange() {
+  try {
+    await shelfStore.submitChange()
+  } catch (error) {
+    $q.notify({ type: 'negative', message: getErrMsg(error) })
   }
-  if ($.dark.isActive) {
-    cls += ' bg-grey-10'
-  } else {
-    cls += ' bg-grey-1'
-  }
-  return cls
 }
 
-/** 监听路由 修改 parentFolders 值 */
+useShelfSortable({
+  element: listWrapRef,
+  enabled: editMode,
+  hasParentFolder,
+  onMove: ({ from, to }) => shelfStore.commitSortInfo({ from, to, parents: parentFolders.value }),
+  onInvalid: () => $q.notify({ type: 'warning', message: '排序字段缺失，本次排序操作无效' }),
+})
+
 watch(
-  () => [route, isActivated] as const,
-  ([nextRoute, nextActivated]) => {
-    if (!nextActivated.value) {
-      return
-    }
-
-    parentFolders.value = getParentFolders(nextRoute)
+  () => [route.params.folderID, isActivated.value] as const,
+  ([, active]) => {
+    if (active) parentFolders.value = getParentFolders(route)
   },
-  // immediate 保证mounted场景能触发
   { immediate: true, deep: true },
 )
 
-// 监控组件挂载情况，挂载了就初始化拖动排序
-watch([listWrapRef, editMode], ([el, mode]) => {
-  destorySortable()
-
-  if (el && mode) {
-    createSortable(el)
-  }
-})
-
-/** 页面销毁之前清掉拖动排序 */
-onBeforeUnmount(() => {
-  destorySortable()
-})
-
-// 页面切走时要退出编辑状态取消修改；不然的话加入书架等操作就被迫在草稿状态下读取进行了
-onDeactivated(() => {
-  quiteEditMode()
-})
+onDeactivated(exitEditMode)
 </script>
 
 <style lang="scss" scoped>
@@ -795,11 +496,6 @@ onDeactivated(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   cursor: grab;
-}
-
-// 文件夹选择弹层 相关
-.shelf-folder-selector-card {
-  min-width: 320px;
 }
 
 // 限制长度的文字

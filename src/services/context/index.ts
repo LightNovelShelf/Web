@@ -1,25 +1,25 @@
-import { requestWithSignalr } from '@/services/internal/request'
+import { invokeHub } from '@/services/transport'
 
 import type { GetAnnouncementDetail, GetAnnouncementList, OnlineInfo } from '@/services/context/type'
 import type { Card } from '@/types/collaborator'
 
 /** 获取贡献者列表 */
 export function getCollaboratorList() {
-  return requestWithSignalr<Card[]>('GetCollaboratorList')
+  return invokeHub<Card[]>('GetCollaboratorList')
 }
 
 export function getOnlineInfo() {
-  return requestWithSignalr<OnlineInfo>('GetOnlineInfo')
+  return invokeHub<OnlineInfo>('GetOnlineInfo')
 }
 
 export function getAnnouncementList(request: GetAnnouncementList.Request) {
-  return requestWithSignalr<GetAnnouncementList.Response>('GetAnnouncementList', request)
+  return invokeHub<GetAnnouncementList.Response>('GetAnnouncementList', request)
 }
 
 export function getAnnouncementDetail(request: GetAnnouncementDetail.Request) {
-  return requestWithSignalr<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request)
+  return invokeHub<GetAnnouncementDetail.Response>('GetAnnouncementDetail', request)
 }
 
 export function getBanInfoList() {
-  return requestWithSignalr('GetBanList')
+  return invokeHub('GetBanList')
 }

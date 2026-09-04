@@ -152,11 +152,11 @@ import { QGrid, QGridItem } from '@/components/grid'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
+import { getSessionToken } from '@/services/auth/session'
 import { deleteBook } from '@/services/book'
 import { PATH } from '@/services/path'
 import { getMyBooks, quickCreateComic, quickCreateNovel } from '@/services/user'
 import { GetMyBooks } from '@/services/user/type'
-import { getSessionToken } from '@/services/utils'
 
 import type { BookInList } from '@/services/book/types'
 import type { QuickCreateComic, QuickCreateNovel } from '@/services/user/type'

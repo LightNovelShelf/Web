@@ -151,13 +151,11 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import { Dark } from 'quasar'
-import { watch, ref } from 'vue'
+import { ref } from 'vue'
 
 import { useSettingStore } from '@/stores/setting'
 
 import { apiServer, apiServerOptions } from '@/services/apiServer'
-import { switchSignalr } from '@/services/internal/request/signalr'
 
 const tabOptions: Array<Record<string, any>> = [
   {
@@ -185,15 +183,6 @@ const { dark } = storeToRefs(settingStore)
 const { readSetting, generalSetting, editorSetting } = settingStore
 
 const tab = ref('Setting')
-
-watch(dark, (newDark) => {
-  Dark.set(newDark)
-  settingStore.save()
-})
-
-watch(apiServer, switchSignalr)
-
-watch([readSetting, generalSetting, editorSetting], settingStore.save)
 </script>
 
 <style lang="scss" scoped>

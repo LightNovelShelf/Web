@@ -12,6 +12,7 @@ export enum SHELF_STRUCT_VER {
 
 /** 最新的书架结构版本号，随结构升级而改变 */
 export const SHELF_STRUCT_VER_LATEST = SHELF_STRUCT_VER.V20220211
+export const ROOT_LEVEL_FOLDER_NAME = '根文件夹'
 
 interface ShelfCommonItem {
   /** 类型 */
@@ -38,3 +39,5 @@ export interface ShelfFolderItem extends ShelfCommonItem {
 }
 
 export type ShelfItem = ShelfBookItem | ShelfFolderItem
+
+export type ShelfFolderDestination = { kind: 'existing'; parents: string[] } | { kind: 'new'; name: string }

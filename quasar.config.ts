@@ -21,7 +21,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['app', 'quasar', 'v-viewer', 'dayjs', 'md-editor'],
+    boot: ['quasar', 'v-viewer', 'dayjs', 'md-editor'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss'],
@@ -85,19 +85,11 @@ export default defineConfig((ctx) => {
       extendViteConf(viteConf) {
         viteConf.build = {
           ...viteConf.build,
+          // 编辑器是独立懒加载 chunk。
+          chunkSizeWarningLimit: 550,
           rollupOptions: {
             output: {
               assetFileNames: 'assets/[ext]/[name]-[hash][extname]',
-              manualChunks: (id) => {
-                if (id.includes('node_modules')) {
-                  if (id.includes('md-editor-v3') || id.includes('codemirror')) return 'vendor-editor'
-                  return 'vendor'
-                }
-
-                if (id.includes('/src/')) {
-                  return 'chunk'
-                }
-              },
             },
           },
         }

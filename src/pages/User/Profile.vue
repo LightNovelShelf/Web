@@ -176,25 +176,22 @@ import { computed, defineComponent, onMounted, ref, watch, reactive } from 'vue'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { parseTime } from '@/utils/time'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import CoinIcon from '@/components/points/CoinIcon.vue'
 import PointLogDialog from '@/components/points/PointLogDialog.vue'
 import SignInDialog from '@/components/points/SignInDialog.vue'
 
-import { setAvatar, getMyInfo, resetInviteCode } from '@/services/user'
-
-import type { Growth } from '@/services/points'
-
-const avatar = computed(() => appStore.avatar)
+import { setAvatar, resetInviteCode } from '@/services/user'
 
 defineComponent({ name: 'Profile' })
 
 const $q = useQuasar()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const { user } = storeToRefs(appStore)
+const avatar = computed(() => appStore.avatar)
 
-const growth = computed<Growth | undefined>(() => user.value?.Growth)
+const growth = computed(() => user.value?.Growth)
 const pointLogVisible = ref(false)
 const coinLogVisible = ref(false)
 const signInVisible = ref(false)
@@ -204,7 +201,7 @@ async function refreshUser() {
   if (refreshing.value) return
   refreshing.value = true
   try {
-    appStore.user = await getMyInfo()
+    await appStore.refreshUser()
   } catch (err) {
     $q.notify({ type: 'negative', message: getErrMsg(err) })
   } finally {
@@ -325,7 +322,7 @@ async function handleSubmit() {
 
   try {
     await setAvatar(avatarVal)
-    appStore.user = await getMyInfo()
+    await appStore.refreshUser()
     visible.value = false // 关闭弹窗
 
     $q.notify({

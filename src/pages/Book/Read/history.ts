@@ -1,143 +1,121 @@
-import { debounce } from 'quasar'
-
 import { userReadPositionDB } from '@/utils/storage/db'
 
 import { saveReadPosition } from '@/services/book'
 
-import type { Ref } from 'vue'
-
-function findElementNode(node: Node): Element {
-  return node.nodeType === Node.ELEMENT_NODE ? (node as Element) : findElementNode(node.parentNode!)
+export interface ReadingHistory {
+  cid: number
+  xPath: string
+  top: number
 }
 
-function readXPath(element: Element, context: Element = document.body): string {
-  if (context === document.body) {
-    /* eslint-disable */
-    if (element.id !== '') {
-      return '//*[@id="' + element.id + '"]'
-    }
-  }
-  if (context && element === context) {
-    return '//*'
-  }
-
-  let ix = 1,
-    siblings = element.parentNode!.childNodes
-
-  for (let i = 0, l = siblings.length; i < l; i++) {
-    let sibling = siblings[i]
-    if (sibling === element) {
-      return readXPath(element.parentNode as Element, context) + '/' + element.tagName.toLowerCase() + '[' + ix + ']'
-    } else if (sibling.nodeType === 1 && (sibling as Element).tagName === element.tagName) {
-      ix++
-    }
-  }
-  return ''
+interface ReadingProgressOptions {
+  root: HTMLElement
+  userId: number
+  bookId: number
+  chapterId: number
+  getHeaderOffset: () => number
 }
 
-export function loadHistory(uid: number, BookId: number) {
-  return userReadPositionDB.get(`${uid}_${BookId}`)
+function historyKey(userId: number, bookId: number): string {
+  return `${userId}_${bookId}`
+}
+
+function findElementNode(node: Node): Element | null {
+  if (node.nodeType === Node.ELEMENT_NODE) return node as Element
+  return node.parentElement
+}
+
+function readXPath(element: Element, context: Element): string {
+  if (element.id) return `//*[@id="${element.id}"]`
+  if (element === context) return '.'
+
+  const parent = element.parentElement
+  if (!parent) return ''
+
+  let index = 1
+  for (const sibling of parent.children) {
+    if (sibling === element) break
+    if (sibling.tagName === element.tagName) index += 1
+  }
+  return `${readXPath(parent, context)}/${element.tagName.toLowerCase()}[${index}]`
+}
+
+export function loadHistory(userId: number, bookId: number): ReadingHistory | undefined {
+  return userReadPositionDB.get<ReadingHistory>(historyKey(userId, bookId))
 }
 
 export async function saveHistory(
-  uid: number,
-  BookId: number,
-  bookParam: {
-    Id: number
-    xpath: string
-  },
-) {
-  userReadPositionDB.set(`${uid}_${BookId}`, {
-    cid: bookParam.Id,
-    xPath: bookParam.xpath,
-    top: document.scrollingElement!.scrollTop,
+  userId: number,
+  bookId: number,
+  position: { chapterId: number; xPath: string },
+): Promise<void> {
+  userReadPositionDB.set<ReadingHistory>(historyKey(userId, bookId), {
+    cid: position.chapterId,
+    xPath: position.xPath,
+    top: document.scrollingElement?.scrollTop ?? 0,
   })
-  await saveReadPosition({ Bid: BookId, Cid: bookParam.Id, XPath: bookParam.xpath })
+  await saveReadPosition({ Bid: bookId, Cid: position.chapterId, XPath: position.xPath })
 }
 
-/** 按记录的 xpath 在正文里找回当初的元素，翻页模式与滚动模式都要用它定位 */
-export function findElementByXPath(dom: Element, xPath: string): Element | null {
+export function findElementByXPath(root: Element, xPath: string): Element | null {
   try {
-    const result = document.evaluate(xPath, dom, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
-    return (result.iterateNext() as Element | null) ?? null
-  } catch (e) {
-    console.log(e)
+    const result = document.evaluate(xPath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+    return result.singleNodeValue instanceof Element ? result.singleNodeValue : null
+  } catch {
     return null
   }
 }
 
-export function scrollToHistory(dom: Element, xPath: string, offset: Ref<number>) {
-  const target = findElementByXPath(dom, xPath)
-  if (target) {
-    document.scrollingElement!.scrollTop = target.getBoundingClientRect().top - offset.value
-  }
+export function scrollToHistory(root: Element, xPath: string, offset: number): void {
+  const target = findElementByXPath(root, xPath)
+  if (!target || !document.scrollingElement) return
+  document.scrollingElement.scrollTop =
+    target.getBoundingClientRect().top + document.scrollingElement.scrollTop - offset
 }
 
-export async function syncReading(
-  dom: Element,
-  uid: Ref<number>,
-  bookParam: {
-    BookId: Ref<number>
-    CId: Ref<number>
-  },
-  offset: Ref<number>,
-) {
-  let visibleDom: Element[] = []
-  let doSync = debounce(async () => {
-    let topTarget = visibleDom.reduce((res: { target: Element; rect: DOMRect } | null, target: Element) => {
-      // target.style.background = null
-      let rect = target.getBoundingClientRect()
-      if (rect.top >= offset.value) {
-        if (res) {
-          if (rect.top < res.rect.top) {
-            res = {
-              target,
-              rect,
-            }
-          }
-        } else {
-          res = {
-            target,
-            rect,
-          }
-        }
-      }
-      return res
-    }, null)
-    if (topTarget) {
-      // topTarget.target.style.background = 'red'
-      // console.log(topTarget.target, readXPath(topTarget.target))
-      let xpath = readXPath(topTarget.target, dom)
-      await saveHistory(uid.value, bookParam?.BookId.value, {
-        Id: bookParam?.CId.value,
-        xpath,
-      })
+export function observeReadingProgress(options: ReadingProgressOptions): () => void {
+  const visibleElements = new Set<Element>()
+  let saveTimer: number | undefined
+
+  const saveVisiblePosition = () => {
+    const offset = options.getHeaderOffset()
+    let closest: { element: Element; top: number } | undefined
+    for (const element of visibleElements) {
+      const top = element.getBoundingClientRect().top
+      if (top < offset || (closest && top >= closest.top)) continue
+      closest = { element, top }
     }
-  }, 300)
-  let io = new IntersectionObserver((entities) => {
-    entities.forEach((entity) => {
-      if (entity.target instanceof HTMLElement) {
-        let domTarget = entity.target as HTMLElement
-        domTarget.style.background = ''
-        if (entity.isIntersecting) {
-          visibleDom.push(domTarget)
-        } else {
-          visibleDom = visibleDom.filter((target) => target !== domTarget)
-        }
-      }
-      doSync()
-    })
+    if (!closest) return
+
+    const xPath = readXPath(closest.element, options.root)
+    if (!xPath) return
+    void saveHistory(options.userId, options.bookId, { chapterId: options.chapterId, xPath }).catch(() => undefined)
+  }
+
+  const scheduleSave = () => {
+    window.clearTimeout(saveTimer)
+    saveTimer = window.setTimeout(saveVisiblePosition, 300)
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) visibleElements.add(entry.target)
+      else visibleElements.delete(entry.target)
+    }
+    scheduleSave()
   })
 
-  let walker = document.createTreeWalker(dom, NodeFilter.SHOW_TEXT, (node) => {
-    return node.nodeValue!.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
-  })
+  const walker = document.createTreeWalker(options.root, NodeFilter.SHOW_TEXT, (node) =>
+    node.nodeValue?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
+  )
   while (walker.nextNode()) {
-    try {
-      let dom = findElementNode(walker.currentNode)
-      io.observe(dom)
-    } catch (e) {
-      console.log(e)
-    }
+    const element = findElementNode(walker.currentNode)
+    if (element) observer.observe(element)
+  }
+
+  return () => {
+    observer.disconnect()
+    visibleElements.clear()
+    window.clearTimeout(saveTimer)
   }
 }

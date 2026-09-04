@@ -1,4 +1,4 @@
-import { requestWithSignalr } from '@/services/internal/request'
+import { invokeHub } from '@/services/transport'
 
 import type {
   CommunityCatalogPayload,
@@ -17,7 +17,7 @@ import type {
 import type { EditorFormat } from '@/services/types'
 
 export async function getCommunityHome(query: CommunityListQuery = {}): Promise<CommunityHomePayload> {
-  return requestWithSignalr<CommunityHomePayload>('GetCommunityHome', {
+  return invokeHub<CommunityHomePayload>('GetCommunityHome', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
     Order: query.order ?? 'reply',
@@ -28,7 +28,7 @@ export async function getCommunityHome(query: CommunityListQuery = {}): Promise<
 }
 
 export async function getCommunityFeed(query: CommunityListQuery = {}): Promise<CommunityFeedPayload> {
-  return requestWithSignalr<CommunityFeedPayload>('GetCommunityFeed', {
+  return invokeHub<CommunityFeedPayload>('GetCommunityFeed', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
     Order: query.order ?? 'reply',
@@ -39,7 +39,7 @@ export async function getCommunityFeed(query: CommunityListQuery = {}): Promise<
 }
 
 export async function getCommunityCatalog(): Promise<CommunityCatalogPayload> {
-  return requestWithSignalr<CommunityCatalogPayload>('GetCommunityCatalog', {})
+  return invokeHub<CommunityCatalogPayload>('GetCommunityCatalog', {})
 }
 
 export async function getCommunityThread(
@@ -48,7 +48,7 @@ export async function getCommunityThread(
   replySize = 5,
   options: { trackView?: boolean; focusReplyId?: number } = {},
 ): Promise<CommunityThreadDetail | null> {
-  return requestWithSignalr<CommunityThreadDetail | null>('GetCommunityThread', {
+  return invokeHub<CommunityThreadDetail | null>('GetCommunityThread', {
     ThreadId: id,
     ReplyPage: Math.max(1, replyPage),
     ReplySize: Math.max(1, replySize),
@@ -62,14 +62,14 @@ export async function getCommunityThreadEditInfo(
   id: number,
   format: EditorFormat = 'html',
 ): Promise<CommunityThreadEditInfo> {
-  return requestWithSignalr<CommunityThreadEditInfo>('GetCommunityThreadEditInfo', {
+  return invokeHub<CommunityThreadEditInfo>('GetCommunityThreadEditInfo', {
     ThreadId: id,
     Format: format,
   })
 }
 
 export async function createCommunityThread(req: CreateCommunityThreadRequest): Promise<CommunityThreadDetail> {
-  return requestWithSignalr<CommunityThreadDetail>('CreateCommunityThread', {
+  return invokeHub<CommunityThreadDetail>('CreateCommunityThread', {
     BoardKey: req.boardKey,
     SubCategoryKey: req.subCategoryKey ?? '',
     Title: req.title,
@@ -78,7 +78,7 @@ export async function createCommunityThread(req: CreateCommunityThreadRequest): 
 }
 
 export async function updateCommunityThread(req: UpdateCommunityThreadRequest): Promise<{ Id: number }> {
-  return requestWithSignalr<{ Id: number }>('UpdateCommunityThread', {
+  return invokeHub<{ Id: number }>('UpdateCommunityThread', {
     ThreadId: req.threadId,
     BoardKey: req.boardKey,
     SubCategoryKey: req.subCategoryKey ?? '',
@@ -88,11 +88,11 @@ export async function updateCommunityThread(req: UpdateCommunityThreadRequest): 
 }
 
 export async function deleteCommunityThread(threadId: number): Promise<{ Id: number }> {
-  return requestWithSignalr<{ Id: number }>('DeleteCommunityThread', { ThreadId: threadId })
+  return invokeHub<{ Id: number }>('DeleteCommunityThread', { ThreadId: threadId })
 }
 
 export async function createCommunityReply(req: CreateCommunityReplyRequest): Promise<CommunityThreadReply> {
-  return requestWithSignalr<CommunityThreadReply>('CreateCommunityReply', {
+  return invokeHub<CommunityThreadReply>('CreateCommunityReply', {
     ThreadId: req.threadId,
     Content: req.content,
     ReplyToId: req.replyToId,
@@ -100,30 +100,30 @@ export async function createCommunityReply(req: CreateCommunityReplyRequest): Pr
 }
 
 export async function deleteCommunityReply(replyId: number): Promise<{ Id: number; Removed: number }> {
-  return requestWithSignalr<{ Id: number; Removed: number }>('DeleteCommunityReply', { ReplyId: replyId })
+  return invokeHub<{ Id: number; Removed: number }>('DeleteCommunityReply', { ReplyId: replyId })
 }
 
 export async function toggleThreadLike(id: number) {
-  return requestWithSignalr<{ Liked: boolean; Likes: number }>('ToggleCommunityThreadLike', {
+  return invokeHub<{ Liked: boolean; Likes: number }>('ToggleCommunityThreadLike', {
     ThreadId: id,
   })
 }
 
 export async function toggleThreadFavorite(id: number) {
-  return requestWithSignalr<{ Favorited: boolean; Favorites: number }>('ToggleCommunityThreadFavorite', {
+  return invokeHub<{ Favorited: boolean; Favorites: number }>('ToggleCommunityThreadFavorite', {
     ThreadId: id,
   })
 }
 
 export async function toggleReplyLike(threadId: number, replyId: number) {
   void threadId
-  return requestWithSignalr<{ Liked: boolean; Likes: number }>('ToggleCommunityReplyLike', {
+  return invokeHub<{ Liked: boolean; Likes: number }>('ToggleCommunityReplyLike', {
     ReplyId: replyId,
   })
 }
 
 export async function getCommunityReplyChildren(req: GetCommunityReplyChildrenRequest) {
-  return requestWithSignalr<{
+  return invokeHub<{
     Items: CommunityThreadReply[]
     Page: CommunityThreadDetail['RepliesPage']
   }>('GetCommunityReplyChildren', {
@@ -136,5 +136,5 @@ export async function getCommunityReplyChildren(req: GetCommunityReplyChildrenRe
 }
 
 export async function getMyCommunityOverview(): Promise<CommunityMyOverview> {
-  return requestWithSignalr<CommunityMyOverview>('GetMyCommunityOverview', {})
+  return invokeHub<CommunityMyOverview>('GetMyCommunityOverview', {})
 }

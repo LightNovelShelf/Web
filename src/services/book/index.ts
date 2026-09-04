@@ -1,7 +1,8 @@
-import { requestWithSignalr } from '../internal/request'
-import { ServerError } from '../internal/ServerError'
+import { getSessionToken } from '@/services/auth/session'
+import { ServerError } from '@/services/ServerError'
+import { invokeHub } from '@/services/transport'
+
 import { PATH } from '../path'
-import { getSessionToken } from '../utils'
 import * as Types from './types'
 
 import type { SaveReadPositionRequest } from './types'
@@ -12,57 +13,57 @@ export { Types as BookServicesTypes }
 
 /** 获取书籍列表 */
 export function getBookList(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookList', param)
+  return invokeHub<Types.GetBookListRes>('GetBookList', param)
 }
 
 /** 获取指定书籍类型启用的分类 */
 export function getBookCategories(type: 'Novel' | 'Comic') {
-  return requestWithSignalr<Types.BookCategoryItem[]>('GetBookCategories', { Type: type })
+  return invokeHub<Types.BookCategoryItem[]>('GetBookCategories', { Type: type })
 }
 
 /** 按书名（卷标题）搜索 */
 export function getBookListByTitle(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookListByTitle', param)
+  return invokeHub<Types.GetBookListRes>('GetBookListByTitle', param)
 }
 
 /** 按作者搜索 */
 export function getBookListByAuthor(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookListByAuthor', param)
+  return invokeHub<Types.GetBookListRes>('GetBookListByAuthor', param)
 }
 
 /** 按作品名/系列名搜索（分类器） */
 export function getBookListByName(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookListByName', param)
+  return invokeHub<Types.GetBookListRes>('GetBookListByName', param)
 }
 
 /** 按标签搜索（分类器，KeyWords 传逗号分隔多标签，AND 匹配） */
 export function getBookListByTags(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBookListByTags', param)
+  return invokeHub<Types.GetBookListRes>('GetBookListByTags', param)
 }
 
 /** 按系列分组列出（分类器） */
 export function getSeriesList(param: Types.GetSeriesListRequest) {
-  return requestWithSignalr<Types.GetSeriesListRes>('GetSeriesList', param)
+  return invokeHub<Types.GetSeriesListRes>('GetSeriesList', param)
 }
 
 /** 精确列出某个系列下的全部书籍（分类器） */
 export function getBooksBySeries(param: Types.GetBooksBySeriesRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetBooksBySeries', param)
+  return invokeHub<Types.GetBookListRes>('GetBooksBySeries', param)
 }
 
 /** 获取书籍信息 */
 export function getBookInfo(id: number) {
-  return requestWithSignalr<Types.GetBookInfoRes>('GetBookInfo', { Id: id })
+  return invokeHub<Types.GetBookInfoRes>('GetBookInfo', { Id: id })
 }
 
 /** 保存阅读位置 */
 export function saveReadPosition(param: SaveReadPositionRequest) {
-  return requestWithSignalr('SaveReadPosition', param)
+  return invokeHub('SaveReadPosition', param)
 }
 
 /** 获取阅读位置 */
 export function getReadPosition(id: number) {
-  return requestWithSignalr('GetReadPosition', { Id: id })
+  return invokeHub('GetReadPosition', { Id: id })
 }
 
 /** 从一批 id 获取书籍列表 */
@@ -72,7 +73,7 @@ export function getBookListByIds(ids: number[]) {
     throw new Error('单次批量操作最多 24 本')
   }
 
-  return requestWithSignalr<Types.BookInList[]>('GetBookListByIds', { Ids: ids })
+  return invokeHub<Types.BookInList[]>('GetBookListByIds', { Ids: ids })
 }
 
 /** 最大并行数量 */
@@ -84,32 +85,32 @@ export function getComicSeriesByIds(ids: number[]) {
     throw new Error('单次批量操作最多 24 本')
   }
 
-  return requestWithSignalr<ComicListResponse>('GetBookListByIds', { Ids: ids, Type: 'Comic' })
+  return invokeHub<ComicListResponse>('GetBookListByIds', { Ids: ids, Type: 'Comic' })
 }
 
 /** 取最新的 6 本书，无需登录 */
 export function getLatestBookList(param: Types.GetBookListRequest) {
-  return requestWithSignalr<Types.GetBookListRes>('GetLatestBookList', param)
+  return invokeHub<Types.GetBookListRes>('GetLatestBookList', param)
 }
 
 /** 取最近的排行榜 */
 export function getRank(days: number) {
-  return requestWithSignalr<Types.BookInList[]>('GetRank', { Days: days })
+  return invokeHub<Types.BookInList[]>('GetRank', { Days: days })
 }
 
 /** 编辑书籍信息 */
 export function editBook(bid: number, request: Types.EditBookRequest) {
-  return requestWithSignalr('UpdateBook', { Id: bid, Map: request })
+  return invokeHub('UpdateBook', { Id: bid, Map: request })
 }
 
 /** 取编辑用的书籍信息；markdown 时简介由服务端转换 */
 export function getBookEditInfo(bid: number, format: EditorFormat = 'html') {
-  return requestWithSignalr('GetBookEditInfo', { Id: bid, Format: format })
+  return invokeHub<Types.GetBookEditInfoResponse>('GetBookEditInfo', { Id: bid, Format: format })
 }
 
 /** 删除书籍 */
 export function deleteBook(bid: number) {
-  return requestWithSignalr('DeleteBook', { Id: bid })
+  return invokeHub('DeleteBook', { Id: bid })
 }
 
 interface DownloadOptions {

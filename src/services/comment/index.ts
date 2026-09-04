@@ -1,4 +1,4 @@
-import { requestWithSignalr } from '@/services/internal/request'
+import { invokeHub } from '@/services/transport'
 
 import { CommentType } from './types'
 
@@ -6,20 +6,20 @@ import type { GetComments, PostComment } from './types'
 
 /** 评论 */
 export function postComment(req: PostComment.Request) {
-  return requestWithSignalr('PostComment', req)
+  return invokeHub('PostComment', req)
 }
 
 /** 回复评论 */
 export function replyComment(req: PostComment.Request) {
-  return requestWithSignalr('ReplyComment', req)
+  return invokeHub('ReplyComment', req)
 }
 
 /** 获取评论 */
 export function getComments(req: GetComments.Request) {
-  return requestWithSignalr<GetComments.Response>('GetComments', req)
+  return invokeHub<GetComments.Response>('GetComments', req)
 }
 
 /** 删除评论 */
 export function deleteComment(id: number) {
-  return requestWithSignalr('DeleteComment', { Id: id })
+  return invokeHub('DeleteComment', { Id: id })
 }

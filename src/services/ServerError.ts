@@ -3,7 +3,7 @@ export class ServerError extends Error {
 
   constructor(
     public override readonly message = '未知错误',
-    public readonly status: number = 500,
+    public readonly status = 500,
   ) {
     super(message)
   }

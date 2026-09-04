@@ -1,114 +1,53 @@
 <template>
   <q-page padding style="max-width: 1920px" class="items-center flex fit">
-    <q-grid v-if="isActive" x-gap="24" y-gap="6" cols="3" xs="1" sm="2" md="2">
-      <q-grid-item>
-        <div class="column gap-8">
-          <div class="text-opacity">封面预览</div>
-          <q-card>
-            <system-image v-if="book?.Cover" :url="book.Cover" :request-height="1024" :ratio="2 / 3" />
-            <q-responsive v-else :ratio="2 / 3">
-              <q-skeleton class="fit" square />
-            </q-responsive>
-          </q-card>
-        </div>
-      </q-grid-item>
-      <q-grid-item span="2" xs="1" sm="1" md="1">
-        <div class="column gap-8">
-          <image-input v-model="book['Cover']" />
-          <q-input label="书名" v-model="book['Title']" />
-          <q-input label="作者" v-model="book['Author']" />
-          <div class="text-opacity">简介</div>
-          <html-editor
-            :content="book['Introduction']"
-            content-type="book-introduction"
-            @update:html="book['Introduction'] = $event"
-            mode="simple"
-          />
-          <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
-        </div>
-      </q-grid-item>
-    </q-grid>
+    <book-info-fields v-if="isActive && book" v-model="book" :category-options="categoryOptions" />
 
     <div v-else class="absolute-full">
-      <q-inner-loading :showing="!isActive" label="加载中..." label-class="text-teal" label-style="font-size: 1.1em" />
+      <q-inner-loading showing label="加载中..." label-class="text-teal" label-style="font-size: 1.1em" />
     </div>
 
-    <drag-page-sticky v-slot="{ isDragging }">
-      <q-fab icon="mdiPlus" direction="up" color="accent" :disable="isDragging">
-        <q-fab-action color="primary" @click="save" icon="mdiContentSave" :disable="isDragging">
-          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
-            保存
-          </q-tooltip>
-        </q-fab-action>
-      </q-fab>
-    </drag-page-sticky>
+    <editor-save-action :disabled="saving || !isActive" @save="save" />
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { useQuasar } from 'quasar'
 import { computed, ref, toRaw } from 'vue'
-
-import { getErrMsg } from '@/utils/getErrMsg'
 
 import { useSettingStore } from '@/stores/setting'
 
-import { HtmlEditor, DragPageSticky, ImageInput } from '@/components'
-import { QGrid, QGridItem } from '@/components/grid'
-import SystemImage from '@/components/SystemImage.vue'
-import { confirmEditorHtmlSave } from '@/components/html/editorSaveGuard'
+import { BookInfoFields, EditorSaveAction } from '@/components/editor'
+import { buildBookCategoryOptions, toBookInfoUpdate } from '@/components/editor/bookEditOptions'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
+import { useEditorAction } from '@/composition/editor/useEditorAction'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
-import { getBookEditInfo, editBook } from '@/services/book'
+import { editBook, getBookEditInfo } from '@/services/book'
+
+import type { BookCategoryOption } from '@/components/editor/bookEditOptions'
+import type { EditableBook } from '@/services/book/types'
 
 const props = defineProps<{ bid: string }>()
-const bid = computed(() => ~~props.bid)
-const book = ref<any>()
-const options = ref([])
+const bid = computed(() => Number(props.bid))
+const book = ref<EditableBook>()
+const categoryOptions = ref<BookCategoryOption[]>([])
 const isActive = computed(() => book.value?.Id === bid.value)
-const comicCategoryNames = new Set(['原创', '连载', '完结'])
-const comicOnlyCategoryNames = new Set(['连载', '完结'])
-
 const { activeEditorMode } = useSettingStore()
+const { saving, runEditorAction } = useEditorAction()
 
 const request = useTimeoutFn(async () => {
-  const data = (await getBookEditInfo(bid.value, activeEditorMode)) as any
-  const categories =
-    data.Book.Type === 'Comic'
-      ? data.Categories.filter((item) => comicCategoryNames.has(item.Name))
-      : data.Categories.filter((item) => !comicOnlyCategoryNames.has(item.Name))
-  options.value = categories.map((item) => {
-    return {
-      label: item.Name,
-      value: item.Id,
-    }
-  })
+  const data = await getBookEditInfo(bid.value, activeEditorMode)
+  categoryOptions.value = buildBookCategoryOptions(data)
   book.value = data.Book
 })
 
-const $q = useQuasar()
-
 async function save() {
-  if (!(await confirmEditorHtmlSave(book.value.Introduction, true))) return
-
-  try {
-    await editBook(bid.value, toRaw(book.value))
-
-    $q.notify({
-      type: 'positive',
-      message: '修改成功',
-    })
-  } catch (e) {
-    $q.notify({
-      type: 'negative',
-      message: getErrMsg(e),
-    })
-  }
+  if (!book.value) return
+  const currentBook = book.value
+  await runEditorAction({ content: currentBook.Introduction, confirmWhenClean: true }, () =>
+    editBook(bid.value, toRaw(toBookInfoUpdate(currentBook))),
+  )
 }
 
-useInitRequest(request, { isActive: isActive })
+useInitRequest(request, { isActive })
 </script>
-
-<style scoped lang="scss"></style>

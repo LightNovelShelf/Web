@@ -31,7 +31,7 @@ import { computed, ref } from 'vue'
 
 import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import { Comment } from '@/components'
 import HtmlReader from '@/components/html/HtmlReader.vue'
@@ -48,7 +48,7 @@ import type { Announcement } from '@/pages/Announcement/announcementFormat'
 const props = defineProps<{ id: string | number }>()
 const _id = computed(() => ~~(props.id || '1'))
 
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const user = computed(() => appStore.user)
 const announcement = ref<Announcement>()
 

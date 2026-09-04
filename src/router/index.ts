@@ -2,9 +2,8 @@ import { nanoid } from 'nanoid'
 import { Notify } from 'quasar'
 import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 
-import { longTermToken, sessionToken } from '@/utils/session'
-
 import { defineRouter } from '#q-app'
+import { hasSessionCredentials } from '@/services/auth/session'
 
 import routes from './routes'
 
@@ -105,11 +104,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
       return
     }
 
-    // 检查有没有授权所需的材料
-    if (sessionToken.get() || (await longTermToken.get())) {
-      // 有材料就算过，授权失败等情况由其它地方保证
-      return
-    }
+    if (await hasSessionCredentials()) return
     return { name: 'Login', query: { from: encodeURIComponent(to.fullPath) } }
   })
 

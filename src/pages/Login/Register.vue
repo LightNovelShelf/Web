@@ -86,12 +86,12 @@ import { useRouter } from 'vue-router'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { sha256 } from '@/utils/hash'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
-import { register, sendRegisterEmail } from '@/services/user'
+import { register, sendRegisterEmail } from '@/services/auth'
 
 const $q = useQuasar()
-const appStore = useAppStore()
+const appStore = useSessionStore()
 
 const userName = ref()
 const email = ref()
@@ -126,13 +126,7 @@ const _register = async () => {
   loading.value = true
 
   try {
-    const [, user] = await register(
-      userName.value,
-      email.value,
-      await sha256(password.value),
-      code.value,
-      inviteCode.value,
-    )
+    const user = await register(userName.value, email.value, await sha256(password.value), code.value, inviteCode.value)
     appStore.user = user
     $q.notify({
       message: '注册成功',

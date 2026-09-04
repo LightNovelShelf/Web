@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 import { getErrMsg } from '@/utils/getErrMsg'
 import { saveFile } from '@/utils/saveFile'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import { downloadBook, downloadChapter } from '@/services/book'
 
@@ -15,10 +15,10 @@ import { downloadBook, downloadChapter } from '@/services/book'
  */
 export function useBookDownload(target: 'book' | 'chapter' = 'book') {
   const $q = useQuasar()
-  const appStore = useAppStore()
+  const sessionStore = useSessionStore()
   /** 正在下载的 id，用于按钮各自的 loading */
   const downloadingId = ref<number | null>(null)
-  const balance = computed(() => appStore.user?.Growth?.Coin ?? 0)
+  const balance = computed(() => sessionStore.user?.Growth?.Coin ?? 0)
 
   /** 扣费前的确认，cost 为 0（管理下载权限或自己的书）直接放行 */
   const confirmCost = (cost: number) =>

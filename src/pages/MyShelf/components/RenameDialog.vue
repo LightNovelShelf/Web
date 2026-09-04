@@ -11,7 +11,7 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="确认" color="primary" @click="renameHandle" />
+        <q-btn flat label="确认" color="primary" :loading="loading" @click="renameHandle" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -63,3 +63,9 @@ function renameHandle() {
   })
 }
 </script>
+
+<style scoped>
+.shelf-folder-selector-card {
+  min-width: 320px;
+}
+</style>

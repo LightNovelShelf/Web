@@ -416,7 +416,7 @@ import { useQuasar } from 'quasar'
 
 import sanitizerHtml from '@/utils/sanitizeHtml'
 
-import { useAppStore } from '@/stores/app'
+import { useSessionStore } from '@/stores/session'
 
 import HtmlReader from '@/components/html/HtmlReader.vue'
 import TimeAgo from '@/components/TimeAgo.vue'
@@ -454,7 +454,7 @@ interface RecentThreadHistoryItem {
   viewedAt: number
 }
 
-const appStore = useAppStore()
+const appStore = useSessionStore()
 const { user } = storeToRefs(appStore)
 const $q = useQuasar()
 const router = useRouter()

@@ -4,10 +4,55 @@ import { toRaw } from 'vue'
 import { Dark } from '@/utils/dark'
 import { userSettingDB } from '@/utils/storage/db'
 
+export interface GeneralSetting {
+  globalWidth: number
+  ignoreJapanese: boolean
+  ignoreAI: boolean
+}
+
+export interface ReadSetting {
+  fontSize: number
+  readMode: 'scroll' | 'flip'
+  bgType: 'none' | 'paper' | 'custom'
+  customColor: string
+  convert: null | 't2s' | 's2t'
+  widthType: 'full' | 'medium' | 'small' | 'custom'
+  readPageWidth: number
+  justify: boolean
+  firstLineIndent: boolean
+  showButton: boolean
+  tapToScroll: boolean
+  hideFullScreen: boolean
+}
+
+export interface EditorSetting {
+  mode: 'html' | 'markdown'
+}
+
+interface SettingState {
+  isInit: boolean
+  dark: 'auto' | boolean
+  generalSetting: GeneralSetting
+  readSetting: ReadSetting
+  editorSetting: EditorSetting
+  activeEditorMode: EditorSetting['mode']
+}
+
+type PersistentSettingKey = 'generalSetting' | 'readSetting' | 'editorSetting'
+const PERSISTENT_SETTING_KEYS: PersistentSettingKey[] = ['generalSetting', 'readSetting', 'editorSetting']
+
+function mergeKnownProperties<Setting extends object>(target: Setting, stored: Record<string, unknown> | null): void {
+  if (!stored) return
+
+  for (const key of Object.keys(target) as Array<keyof Setting>) {
+    if (key in stored) target[key] = stored[key as string] as Setting[typeof key]
+  }
+}
+
 export const useSettingStore = defineStore('app.setting', {
-  state: () => ({
+  state: (): SettingState => ({
     isInit: false,
-    dark: Dark.get(), // dark 设置不保存到服务器
+    dark: Dark.get(),
     generalSetting: {
       globalWidth: 100,
       ignoreJapanese: false,
@@ -15,12 +60,11 @@ export const useSettingStore = defineStore('app.setting', {
     },
     readSetting: {
       fontSize: 16,
-      // scroll: 上下滚动；flip: 左右翻页（大屏自动双栏）
-      readMode: 'scroll' as 'scroll' | 'flip',
-      bgType: 'none' as 'none' | 'paper' | 'custom',
+      readMode: 'scroll',
+      bgType: 'none',
       customColor: '#000000',
-      convert: null as null | 't2s' | 's2t',
-      widthType: 'full' as 'full' | 'medium' | 'small' | 'custom',
+      convert: null,
+      widthType: 'full',
       readPageWidth: 0,
       justify: false,
       firstLineIndent: true,
@@ -29,38 +73,27 @@ export const useSettingStore = defineStore('app.setting', {
       hideFullScreen: false,
     },
     editorSetting: {
-      mode: 'markdown' as 'html' | 'markdown',
+      mode: 'markdown',
     },
-    activeEditorMode: 'markdown' as 'html' | 'markdown',
+    activeEditorMode: 'markdown',
   }),
   actions: {
-    async init() {
-      const p = []
-      const keys = ['readSetting', 'editorSetting', 'generalSetting']
-      keys.forEach((key) => {
-        p.push(
-          (async () => {
-            const setting = await userSettingDB.get(key)
-            if (setting) {
-              Object.keys(setting).forEach((_key) => {
-                if (_key in this[key]) this[key][_key] = setting[_key]
-              })
-            }
-          })(),
+    async init(): Promise<void> {
+      if (this.isInit) return
+
+      try {
+        await Promise.all(
+          PERSISTENT_SETTING_KEYS.map(async (key) => {
+            mergeKnownProperties(this[key], await userSettingDB.get(key))
+          }),
         )
-      })
-      await Promise.all(p)
-      this.activeEditorMode = this.editorSetting.mode
-      this.isInit = true
+        this.activeEditorMode = this.editorSetting.mode
+      } finally {
+        this.isInit = true
+      }
     },
-    async save() {
-      const p = []
-      const keys = ['readSetting', 'editorSetting', 'generalSetting']
-      keys.forEach((key) => {
-        p.push(userSettingDB.set(key, toRaw(this[key])))
-      })
-      await Promise.all(p)
-      Dark.set(this.dark)
+    async save(): Promise<void> {
+      await Promise.all(PERSISTENT_SETTING_KEYS.map((key) => userSettingDB.set(key, toRaw(this[key]))))
     },
   },
   getters: {
@@ -68,10 +101,10 @@ export const useSettingStore = defineStore('app.setting', {
       if (this.readSetting.widthType === 'full') return '100%'
       if (this.readSetting.widthType === 'medium') return '75%'
       if (this.readSetting.widthType === 'small') return '50%'
-      return this.readSetting.readPageWidth + 'px'
+      return `${this.readSetting.readPageWidth}px`
     },
     getGlobalWidth(): string {
-      return this.generalSetting.globalWidth + '%'
+      return `${this.generalSetting.globalWidth}%`
     },
   },
 })

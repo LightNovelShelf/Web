@@ -5,6 +5,53 @@ export interface GetNovelContentRequest {
   SortNum: number
   Convert?: 't2s' | 's2t' | null | undefined
 }
+export interface NovelContentChapter {
+  BookId: number
+  BookName: string
+  Id: number
+  Content: string
+  Title: string
+  SortNum: number
+  CanEdit: boolean
+  Chapters: string[]
+  Font?: string
+}
+
+export interface NovelReadPosition {
+  ChapterId: number
+  Position: string
+}
+
+export interface GetNovelContentResponse {
+  Chapter: NovelContentChapter
+  ReadPosition: NovelReadPosition | null
+}
+
+export interface ChapterInfo {
+  Id: number
+  Title: string
+}
+
+export interface ChapterEditState {
+  Id: number
+  BookId: number
+  SortNum: number
+  Title: string
+  Type: 'Novel' | 'Comic'
+  Content?: string
+  Format: EditorFormat
+  Images?: string[]
+}
+
+export interface ChapterTextContent {
+  Title: string
+  Content?: string
+}
+
+export interface CreateChapterResponse {
+  Chapters: ChapterInfo[]
+  NewCid: number
+}
 
 interface GetNovelEditInfoBySortNum {
   Bid?: number
