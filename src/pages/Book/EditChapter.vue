@@ -4,7 +4,12 @@
       <div class="column gap-8">
         <q-input label="标题" v-model="chapter['Title']" />
         <div class="text-opacity">内容</div>
-        <html-editor :content="chapter['Content']" @update:html="chapter['Content'] = $event" mode="common" />
+        <html-editor
+          :content="chapter['Content']"
+          content-type="novel-body"
+          @update:html="chapter['Content'] = $event"
+          mode="common"
+        />
       </div>
     </div>
 

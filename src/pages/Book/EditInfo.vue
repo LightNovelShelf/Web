@@ -18,7 +18,12 @@
           <q-input label="书名" v-model="book['Title']" />
           <q-input label="作者" v-model="book['Author']" />
           <div class="text-opacity">简介</div>
-          <html-editor :content="book['Introduction']" @update:html="book['Introduction'] = $event" mode="simple" />
+          <html-editor
+            :content="book['Introduction']"
+            content-type="book-introduction"
+            @update:html="book['Introduction'] = $event"
+            mode="simple"
+          />
           <q-select map-options emit-value v-model="book['CategoryId']" :options="options" label="分类" />
         </div>
       </q-grid-item>

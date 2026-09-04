@@ -41,7 +41,12 @@
     </div>
 
     <div ref="editorShellRef" class="thread-create__editor">
-      <html-editor :content="contentHtml" @update:html="contentHtml = $event" mode="common" />
+      <html-editor
+        :content="contentHtml"
+        content-type="forum-post"
+        @update:html="contentHtml = $event"
+        mode="common"
+      />
     </div>
 
     <drag-page-sticky v-slot="{ isDragging }">

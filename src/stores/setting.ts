@@ -23,6 +23,7 @@ export const useSettingStore = defineStore('app.setting', {
       widthType: 'full' as 'full' | 'medium' | 'small' | 'custom',
       readPageWidth: 0,
       justify: false,
+      firstLineIndent: true,
       showButton: true,
       tapToScroll: false,
       hideFullScreen: false,

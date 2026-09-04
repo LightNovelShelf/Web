@@ -23,6 +23,7 @@
                 <div class="text-opacity">简介</div>
                 <html-editor
                   :content="book['Introduction']"
+                  content-type="book-introduction"
                   @update:html="book['Introduction'] = $event"
                   mode="simple"
                 />
@@ -127,7 +128,12 @@
           <comic-chapter-images v-if="isComic" v-model="chapter.Images" v-model:uploading="comicUploading" />
           <template v-else>
             <div class="text-opacity">内容</div>
-            <html-editor :content="chapter['Content']" @update:html="chapter['Content'] = $event" mode="common" />
+            <html-editor
+              :content="chapter['Content']"
+              content-type="novel-body"
+              @update:html="chapter['Content'] = $event"
+              mode="common"
+            />
           </template>
         </q-tab-panel>
         <q-tab-panel name="new">
@@ -141,6 +147,7 @@
             <div class="text-opacity">内容</div>
             <html-editor
               :content="creatingChapterContent.html"
+              content-type="novel-body"
               @update:html="creatingChapterContent.html = $event"
               mode="common"
             />

@@ -260,6 +260,7 @@ function toggleDark() {
 
 const readStyle = computed(() => ({
   fontSize: readSetting.fontSize + 'px',
+  '--read-paragraph-indent': readSetting.firstLineIndent ? '2em' : '0',
   textAlign: readSetting.justify ? 'justify' : 'initial',
   color:
     readSetting.bgType === 'custom' ? (colors.brightness(readSetting.customColor) < 128 ? '#fff' : '#000') : 'inherit',
@@ -463,9 +464,9 @@ onActivated(() => {
   }
 })
 
-// 字号、页宽、对齐都会改变分栏切片位置，必须重新算屏数
+// 字号、页宽和排版设置都会改变分栏切片位置，必须重新算屏数
 watch(
-  () => [readSetting.fontSize, settingStore.buildReaderWidth, readSetting.justify],
+  () => [readSetting.fontSize, settingStore.buildReaderWidth, readSetting.justify, readSetting.firstLineIndent],
   () => flipScheduleRemeasure(),
 )
 

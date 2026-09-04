@@ -82,6 +82,7 @@
                 <div class="text-subtitle1">其他选项</div>
                 <div class="row gap-4">
                   <q-toggle v-model="readSetting.justify" label="两端对齐" />
+                  <q-toggle v-model="readSetting.firstLineIndent" label="首行缩进" />
                   <q-toggle
                     v-model="readSetting.showButton"
                     :label="readSetting.showButton ? '显示底部按钮' : '隐藏底部按钮'"
