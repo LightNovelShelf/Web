@@ -73,6 +73,7 @@ export const sidebarNavigation: SidebarNavigationItem[] = [
 
 export const accountNavigation: RouteNavigationItem[] = [
   { kind: 'route', key: 'Account', label: '个人中心', icon: 'mdiAccountOutline', to: { name: 'UserProfile' } },
+  { kind: 'route', key: 'DirectMessage', label: '我的私信', icon: 'mdiMessageText', to: { name: 'DirectMessage' } },
   { kind: 'route', key: 'Contribution', label: '发布管理', icon: 'mdiAccountCog', to: { name: 'UserPublish' } },
   { kind: 'route', key: 'MyShelf', label: '我的书架', icon: 'mdiFolderHeartOutline', to: { name: 'MyShelf' } },
   { kind: 'route', key: 'Shop', label: '商城', icon: 'mdiStorefrontOutline', to: { name: 'Shop' } },

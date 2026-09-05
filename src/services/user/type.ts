@@ -24,6 +24,7 @@ export interface CurrentUser {
   Level: number
   InteriorLevel: number
   UnreadNotificationCount: number
+  UnreadDirectMessageCount: number
   Growth: Growth | null
 }
 

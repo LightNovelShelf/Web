@@ -217,6 +217,13 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     component: () => import('../pages/Forum/Mine.vue'),
   },
+  {
+    path: '/messages/:peerId?',
+    name: 'DirectMessage',
+    meta: { requiresAuth: true },
+    props: true,
+    component: () => import('../pages/DirectMessage/Index.vue'),
+  },
 ]
 
 export default routes

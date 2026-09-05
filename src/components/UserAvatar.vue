@@ -61,6 +61,13 @@
             加入于 <time-ago :value="summary.RegisterAt" />
           </q-card-section>
         </template>
+
+        <template v-if="canSendDirectMessage">
+          <q-separator />
+          <q-card-actions align="right">
+            <q-btn flat dense color="primary" icon="mdiMessageText" label="私信" @click.stop="goToDirectMessage" />
+          </q-card-actions>
+        </template>
       </q-card>
     </q-menu>
   </span>
@@ -68,8 +75,11 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
+
+import { useSessionStore } from '@/stores/session'
 
 import BaseAvatar from '@/components/BaseAvatar.vue'
 import TimeAgo from '@/components/TimeAgo.vue'
@@ -105,6 +115,9 @@ const props = withDefaults(
   },
 )
 
+const router = useRouter()
+const sessionStore = useSessionStore()
+
 const menuOpen = ref(false)
 const loading = ref(false)
 const loadError = ref('')
@@ -122,6 +135,18 @@ const stats = computed(() => {
     { label: '评论', value: summary.value.CommentCount },
   ]
 })
+
+const canSendDirectMessage = computed(() => {
+  const me = sessionStore.user
+  return !!me && me.Id !== props.user.Id
+})
+
+function goToDirectMessage() {
+  cancelOpen()
+  cancelClose()
+  menuOpen.value = false
+  void router.push({ name: 'DirectMessage', params: { peerId: props.user.Id } })
+}
 
 async function loadSummary() {
   if (summary.value?.Id === props.user.Id || loading.value || props.user.Id <= 0) return

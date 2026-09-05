@@ -8,6 +8,7 @@ import { useSessionStore } from '@/stores/session'
 import { useSettingStore } from '@/stores/setting'
 
 import { useAppAppearance } from '@/composition/app/useAppAppearance'
+import { useDirectMessageEvents } from '@/composition/app/useDirectMessageEvents'
 import { useServerNotifications } from '@/composition/app/useServerNotifications'
 
 import { NOOP } from '@/const/empty'
@@ -22,6 +23,7 @@ export function useAppInitialization(): void {
 
   useAppAppearance()
   useServerNotifications()
+  useDirectMessageEvents()
 
   watch(
     () => settingStore.dark,

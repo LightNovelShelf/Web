@@ -38,6 +38,14 @@
             {{ user.UnreadNotificationCount > 99 ? '99+' : user.UnreadNotificationCount }}
           </q-badge>
           <q-tooltip>通知</q-tooltip>
+          <q-icon name="mdiBellOutline"></q-icon>
+        </q-btn>
+
+        <q-btn round dense flat @click="goToDirectMessage">
+          <q-badge v-if="user && user.UnreadDirectMessageCount > 0" color="red" floating>
+            {{ user.UnreadDirectMessageCount > 99 ? '99+' : user.UnreadDirectMessageCount }}
+          </q-badge>
+          <q-tooltip>私信</q-tooltip>
           <q-icon name="mdiMessageText"></q-icon>
         </q-btn>
 
@@ -227,6 +235,10 @@ function onSearch(keywords: string, mode: SearchMode) {
 
 function goToNotification() {
   void router.push({ name: 'Notification' })
+}
+
+function goToDirectMessage() {
+  void router.push({ name: 'DirectMessage' })
 }
 
 function logout() {
