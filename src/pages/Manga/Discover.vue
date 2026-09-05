@@ -27,10 +27,7 @@
       style="margin-top: 12px"
     >
       <q-grid-item v-for="manga in mangas" :key="manga.id">
-        <router-link
-          class="series-card"
-          :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id }, query: { order } }"
-        >
+        <router-link class="series-card" :to="{ name: 'MangaInfo', params: { bid: manga.bookId } }">
           <div class="cover-wrap">
             <q-card class="overflow-hidden">
               <manga-cover :manga="manga" :request-height="512" />

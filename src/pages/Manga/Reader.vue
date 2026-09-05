@@ -12,7 +12,7 @@
             round
             icon="mdiArrowLeft"
             aria-label="返回作品详情"
-            :to="{ name: 'MangaDetail', params: { seriesTitle: manga.seriesTitle } }"
+            :to="{ name: 'MangaInfo', params: { bid: manga.id } }"
           />
           <div class="work-info">
             <strong>{{ manga.title }}</strong>
@@ -279,12 +279,12 @@ import { withReaderHeight } from '@/utils/url'
 
 import TimeAgo from '@/components/TimeAgo.vue'
 
-import { saveReadPosition } from '@/services/book'
-import { getComicContent, getComicInfo } from '@/services/manga'
+import { getBookInfo, saveReadPosition } from '@/services/book'
+import { getComicContent } from '@/services/manga'
 
 import MangaPage from './components/MangaPage.vue'
 import { toManga, toMangaImage } from './data'
-import { useMangaLibrary } from './useMangaLibrary'
+import { useMangaProgress } from './useMangaProgress'
 
 import type { Manga, MangaChapter, MangaImageAsset } from './types'
 
@@ -294,7 +294,7 @@ type PageMode = 'single' | 'double' | 'doubleOffset'
 const props = defineProps<{ mangaId: string; chapterId: string }>()
 const $q = useQuasar()
 const router = useRouter()
-const { progress, saveProgress } = useMangaLibrary()
+const { progress, saveProgress } = useMangaProgress()
 const readerCanvas = ref<HTMLElement>()
 const toolbarVisible = ref(true)
 const panel = ref<'settings' | 'catalog' | null>(null)
@@ -450,7 +450,7 @@ watch(
       const bookId = Number(mangaId)
       const cid = Number(chapterId)
       if (!Number.isInteger(bookId) || !Number.isInteger(cid)) throw new Error('无效的漫画或分卷 ID')
-      const [info, content] = await Promise.all([getComicInfo(bookId), getComicContent(cid, 0, PAGE_BATCH)])
+      const [info, content] = await Promise.all([getBookInfo(bookId), getComicContent(cid, 0, PAGE_BATCH)])
       if (version !== requestVersion) return
       if (content.Chapter.BookId !== bookId) throw new Error('漫画与分卷不匹配')
 

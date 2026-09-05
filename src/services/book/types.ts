@@ -1,8 +1,10 @@
 import type { EditorFormat, ListResult } from '../types'
 
+export type BookType = 'Novel' | 'Comic'
+
 export interface BookInList {
   Id: number
-  Type?: 'Novel' | 'Comic'
+  Type?: BookType
   SeriesTitle?: string | null
   Cover: string
   // TODO: 走了二进制解码后自动转Date对象的特性丢失了，就是一个ISO 8601的日期
@@ -42,7 +44,7 @@ export interface SeriesInList {
 export interface GetSeriesListRes extends ListResult<SeriesInList> {}
 
 export interface GetSeriesListRequest {
-  Type?: number
+  Type?: BookType
   Page?: number
   Size?: number
   Order?: 'new' | 'view' | 'latest'
@@ -55,9 +57,20 @@ export interface GetBooksBySeriesRequest extends GetSeriesListRequest {
   SeriesName: string
 }
 
-interface ChapterInfo {
-  Title: string
+export interface ChapterInfo {
   Id: number
+  SortNum: number
+  Title: string
+  CreatedAt: Date
+  UpdatedAt?: Date | null
+  PageCount: number
+  DownloadCost: number
+}
+
+export interface BookSeriesItem {
+  Id: number
+  Title: string
+  Cover: string
 }
 
 export interface BookClassification {
@@ -96,11 +109,12 @@ export interface GetBookEditInfoResponse {
 }
 
 export interface GetBookInfoRes {
+  SeriesTitle: string
+  Series: BookSeriesItem[]
   Book: {
-    Arthur: string
-    Category: any
-    Chapter: ChapterInfo[]
     Id: number
+    Type: BookType
+    Chapters: ChapterInfo[]
     Cover: string
     Extra?: {
       classification?: BookClassification
@@ -124,7 +138,10 @@ export interface GetBookInfoRes {
     }
     Views: number
   }
-  ReadPosition: any
+  ReadPosition?: {
+    ChapterId: number
+    Position: string
+  } | null
 }
 
 export interface GetBookListRequest {

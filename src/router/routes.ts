@@ -48,6 +48,7 @@ const routes: RouteRecordRaw[] = [
     path: '/book/info/:bid',
     name: 'BookInfo',
     props: true,
+    meta: { searchTab: 'Book' },
     component: () => import('../pages/Book/BookInfo.vue'),
   },
   {
@@ -69,18 +70,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Book/BookRank.vue'),
   },
   {
+    path: '/manga/:bid',
+    name: 'MangaInfo',
+    props: true,
+    meta: { searchTab: 'Comic' },
+    component: () => import('../pages/Book/BookInfo.vue'),
+  },
+  {
     path: '/manga/list/:order/:page?',
     name: 'MangaDiscover',
     props: true,
     meta: { requiresAuth: false, searchTab: 'Comic' },
     component: () => import('../pages/Manga/Discover.vue'),
-  },
-  {
-    path: '/manga/:seriesTitle',
-    name: 'MangaDetail',
-    props: true,
-    meta: { requiresAuth: false, searchTab: 'Comic' },
-    component: () => import('../pages/Manga/Detail.vue'),
   },
   {
     path: '/manga/:mangaId/read/:chapterId',

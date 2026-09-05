@@ -52,11 +52,10 @@ import type { BookInList } from '@/services/book/types'
 
 const $q = useQuasar()
 const props = defineProps<{ book: BookInList }>()
-const detailRoute = computed(() =>
-  props.book.Type === 'Comic'
-    ? { name: 'MangaDetail', params: { seriesTitle: props.book.SeriesTitle || props.book.Title } }
-    : { name: 'BookInfo', params: { bid: props.book.Id } },
-)
+const detailRoute = computed(() => ({
+  name: props.book.Type === 'Comic' ? 'MangaInfo' : 'BookInfo',
+  params: { bid: props.book.Id },
+}))
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting

@@ -19,7 +19,7 @@
           <q-tab-panel name="Comic">
             <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6">
               <q-grid-item v-for="manga in comicData" :key="manga.id">
-                <router-link class="series-card" :to="{ name: 'MangaDetail', params: { seriesTitle: manga.id } }">
+                <router-link class="series-card" :to="{ name: 'MangaInfo', params: { bid: manga.bookId } }">
                   <div class="cover-wrap">
                     <q-card class="overflow-hidden">
                       <manga-cover :manga="manga" :request-height="512" />

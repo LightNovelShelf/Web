@@ -38,7 +38,10 @@
                 <router-link
                   v-if="classification.series_name"
                   class="search-link"
-                  :to="{ name: 'Search', query: { keywords: classification.series_name, mode: 'name' } }"
+                  :to="{
+                    name: 'Search',
+                    query: { keywords: classification.series_name, mode: 'name', tab: isComic ? 'Comic' : 'Book' },
+                  }"
                 >
                   {{ classification.series_name }}
                 </router-link>
@@ -49,7 +52,14 @@
                 <router-link
                   v-if="classification.series_name_cn"
                   class="search-link"
-                  :to="{ name: 'Search', query: { keywords: classification.series_name_cn, mode: 'name' } }"
+                  :to="{
+                    name: 'Search',
+                    query: {
+                      keywords: classification.series_name_cn,
+                      mode: 'name',
+                      tab: isComic ? 'Comic' : 'Book',
+                    },
+                  }"
                 >
                   {{ classification.series_name_cn }}
                 </router-link>
@@ -63,7 +73,7 @@
                   v-for="tag in classification.tags"
                   :key="tag"
                   class="tag-link"
-                  :to="{ name: 'Search', query: { keywords: tag, mode: 'tags' } }"
+                  :to="{ name: 'Search', query: { keywords: tag, mode: 'tags', tab: isComic ? 'Comic' : 'Book' } }"
                 >
                   <q-chip clickable dense outline color="primary">{{ tag }}</q-chip>
                 </router-link>
@@ -75,17 +85,19 @@
               <div style="margin-top: 24px"></div>
 
               <div class="row book-actions" v-if="isActive">
-                <add-to-shelf :book="bookInList" />
-                <q-btn color="primary" @click="startRead">{{ position ? '继续阅读' : '开始阅读' }}</q-btn>
-                <q-btn
-                  v-if="book.CanDownload"
-                  color="secondary"
-                  :loading="downloadingId === _bid"
-                  @click="download(_bid, book.DownloadCost)"
-                >
-                  {{ book.DownloadCost ? `下载 · ${book.DownloadCost} 金币` : '下载' }}
+                <add-to-shelf v-if="!isComic" :book="bookInList" />
+                <q-btn color="primary" :disable="chapters.length === 0" @click="startRead">
+                  {{ position ? '继续阅读' : '开始阅读' }}
                 </q-btn>
-                <q-btn v-if="book.CanEdit" color="red" :to="{ name: 'EditBook', param: { bid: bid } }">快速编辑</q-btn>
+                <q-btn
+                  v-if="!isComic && canDownloadBook"
+                  color="secondary"
+                  :loading="downloadingBookId === _bid"
+                  @click="downloadBook(_bid, bookDownloadCost)"
+                >
+                  {{ bookDownloadCost ? `下载 · ${bookDownloadCost} 金币` : '下载' }}
+                </q-btn>
+                <q-btn v-if="book.CanEdit" color="red" :to="{ name: 'EditBook', params: { bid } }">快速编辑</q-btn>
               </div>
             </div>
             <div v-else class="book-skeletons">
@@ -109,26 +121,51 @@
         <div v-if="isActive" class="row items-center chapter-header">
           <div>
             <div class="text-h6">章节列表</div>
-            <div class="text-caption text-grey-7">共 {{ book.Chapter.length }} 章</div>
+            <div class="text-caption text-grey-7">共 {{ chapters.length }} {{ isComic ? '话' : '章' }}</div>
           </div>
           <q-space />
           <q-btn flat dense no-caps :label="ascending ? '正序' : '倒序'" @click="ascending = !ascending" />
         </div>
         <q-separator v-if="isActive" />
-        <q-list v-if="isActive" separator>
-          <q-item
-            v-for="item in sortedChapters"
-            :key="item.Id"
-            :to="{ name: 'Read', params: { bid: bid, sortNum: item.sortNum } }"
-            clickable
-            v-ripple
-          >
+        <q-grid v-if="isActive && isComic" :x-gap="8" :y-gap="8" cols="3" xs="1" sm="2" md="3" class="comic-chapters">
+          <q-grid-item v-for="item in sortedChapters" :key="item.Id">
+            <q-item
+              clickable
+              v-ripple
+              class="chapter-item rounded-borders"
+              :active="position?.cid === item.Id"
+              active-class="bg-primary text-white"
+              :to="chapterRoute(item)"
+            >
+              <q-item-section avatar>
+                <q-avatar color="grey-3" text-color="grey-8" size="36px">{{ item.SortNum }}</q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label lines="1">{{ item.Title }}</q-item-label>
+                <q-item-label caption>{{ item.PageCount }}P</q-item-label>
+              </q-item-section>
+              <q-item-section v-if="book.CanDownload" side>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  icon="mdiDownload"
+                  :loading="downloadingChapterId === item.Id"
+                  @click.stop.prevent="downloadChapter(item.Id, item.DownloadCost)"
+                />
+              </q-item-section>
+            </q-item>
+          </q-grid-item>
+        </q-grid>
+        <q-list v-else-if="isActive" separator>
+          <q-item v-for="item in sortedChapters" :key="item.Id" :to="chapterRoute(item)" clickable v-ripple>
             <q-item-section>{{ item.Title }}</q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
     </q-card>
     <comment
+      :key="_bid"
       v-intersection="commentBeShown"
       class="comment"
       style="margin-top: 12px"
@@ -136,15 +173,55 @@
       :id="_bid"
     />
     <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
-      <q-btn class="col" round size="md" color="accent" :icon="scrollIcon" @click="scrollClick" />
+      <div class="column gap-8">
+        <q-btn v-if="isActive" round size="md" color="primary" icon="mdiBookMultiple" @click="seriesShow = true">
+          <q-tooltip>系列</q-tooltip>
+        </q-btn>
+        <q-btn round size="md" color="accent" :icon="scrollIcon" @click="scrollClick" />
+      </div>
     </q-page-sticky>
+
+    <q-dialog v-model="seriesShow">
+      <q-card class="series-dialog">
+        <q-card-section>
+          <div class="text-h6">系列</div>
+          <div class="text-caption text-grey-7">{{ seriesTitle }}</div>
+        </q-card-section>
+        <q-separator />
+        <q-list separator>
+          <q-item
+            v-for="item in seriesBooks"
+            :key="item.Id"
+            clickable
+            v-close-popup
+            :active="item.Id === _bid"
+            @click="openSeriesBook(item.Id)"
+          >
+            <q-item-section avatar>
+              <system-image
+                v-if="item.Cover"
+                class="series-cover rounded-borders"
+                :url="item.Cover"
+                :request-height="SERIES_COVER_REQUEST_HEIGHT"
+                :ratio="2 / 3"
+              />
+              <q-avatar v-else rounded color="grey-3" text-color="grey-7" icon="mdiBookOpenPageVariantOutline" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ item.Title }}</q-item-label>
+              <q-item-label v-if="item.Id === _bid" caption>当前书籍</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script lang="ts" setup>
 import { useQuasar, scroll } from 'quasar'
-import { computed, ref, onActivated, toRaw } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onActivated, ref, toRaw, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 import sanitizerHtml from '@/utils/sanitizeHtml'
@@ -164,31 +241,73 @@ import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 import { loadHistory } from '@/pages/Book/Read/history'
+import { useMangaProgress } from '@/pages/Manga/useMangaProgress'
 import { getBookInfo } from '@/services/book'
 import { CommentType } from '@/services/comment/types'
 
 import type { BookServicesTypes } from '@/services/book'
-import type { BookInList } from '@/services/book/types'
+import type { BookInList, BookSeriesItem, ChapterInfo } from '@/services/book/types'
+import type { RouteLocationRaw } from 'vue-router'
+
+const SERIES_COVER_REQUEST_HEIGHT = 256
+
+type DetailChapter = ChapterInfo
+type ReadPosition = { cid: number; xPath: string }
 
 const props = defineProps<{ bid: string }>()
 
 const $q = useQuasar()
+const route = useRoute()
 const router = useRouter()
 const appStore = useSessionStore()
+const { progress: mangaProgress } = useMangaProgress()
 const fabPos = ref([18, 18])
 const bookInfo = ref<BookServicesTypes.GetBookInfoRes>()
-const _bid = computed(() => ~~(props.bid || '1'))
-// 每次从服务器获取数据时，更新此字段，每次进入页面时，从缓存读取本数据
-const position = ref(null)
+const position = ref<ReadPosition | null>(null)
+const ascending = ref(true)
+const seriesShow = ref(false)
+const _bid = computed(() => Number(props.bid))
+const book = computed(() => bookInfo.value?.Book)
+const isComic = computed(() => book.value?.Type === 'Comic')
+const seriesTitle = computed(() => bookInfo.value?.SeriesTitle ?? '')
+const seriesBooks = computed<BookSeriesItem[]>(() => bookInfo.value?.Series ?? [])
+const chapters = computed<DetailChapter[]>(() => book.value?.Chapters ?? [])
+const sortedChapters = computed(() => {
+  const result = [...chapters.value]
+  return ascending.value ? result : result.reverse()
+})
+const canDownloadBook = computed(() => !isComic.value && Boolean(book.value?.CanDownload))
+const bookDownloadCost = computed(() => (isComic.value ? 0 : (book.value?.DownloadCost ?? 0)))
+const classification = computed(() => book.value?.Extra?.classification ?? {})
+const displayAuthor = computed(() => book.value?.Author || classification.value.author || '暂无')
+const isActive = computed(() => book.value?.Id === _bid.value)
+
+function cachedPosition(): ReadPosition | null {
+  if (isComic.value) {
+    const saved = mangaProgress.value[String(_bid.value)]
+    return saved ? { cid: Number(saved.chapterId), xPath: String(saved.page) } : null
+  }
+  return loadHistory(appStore.userId, _bid.value) ?? null
+}
+
 const getInfo = useTimeoutFn(async () => {
   try {
-    bookInfo.value = await getBookInfo(_bid.value)
-    const temp = bookInfo.value.ReadPosition
-    if (temp) {
-      position.value = {
-        cid: temp.ChapterId,
-        xPath: temp.Position,
-      }
+    const response = await getBookInfo(_bid.value)
+    bookInfo.value = response
+    const detailRoute = response.Book.Type === 'Comic' ? 'MangaInfo' : 'BookInfo'
+    if (route.name !== detailRoute) {
+      await router.replace({ name: detailRoute, params: { bid: _bid.value } })
+    }
+    const serverPosition = response.ReadPosition
+    position.value =
+      cachedPosition() ??
+      (serverPosition
+        ? {
+            cid: serverPosition.ChapterId,
+            xPath: serverPosition.Position,
+          }
+        : null)
+    if (!isComic.value && position.value) {
       userReadPositionDB.set(`${appStore.userId}_${_bid.value}`, toRaw(position.value))
     }
   } catch (error) {
@@ -199,72 +318,68 @@ const getInfo = useTimeoutFn(async () => {
     })
   }
 })
-const startRead = async () => {
-  let sortNum = 1
-  // 将章节id转换为sortNum
-  if (position.value?.xPath) {
-    sortNum = bookInfo.value.Book.Chapter.findIndex((x) => x.Id === position.value.cid) + 1
-  }
-  if (sortNum == 0) sortNum = 1
-  await router.push({ name: 'Read', params: { bid: _bid.value, sortNum: sortNum } })
+
+function chapterRoute(chapter: DetailChapter): RouteLocationRaw {
+  return isComic.value
+    ? { name: 'MangaReader', params: { mangaId: _bid.value, chapterId: chapter.Id } }
+    : { name: 'Read', params: { bid: _bid.value, sortNum: chapter.SortNum } }
 }
 
-const { downloadingId, download } = useBookDownload()
+async function startRead() {
+  const chapter = chapters.value.find((item) => item.Id === position.value?.cid) ?? chapters.value[0]
+  if (chapter) await router.push(chapterRoute(chapter))
+}
 
-// 只要数据中的id和props不同，就当在加载
-const isActive = computed(() => book.value?.Id === _bid.value)
-useInitRequest(getInfo, { isActive })
+async function openSeriesBook(id: number) {
+  if (id === _bid.value) return
+  await router.push({ name: isComic.value ? 'MangaInfo' : 'BookInfo', params: { bid: id } })
+}
 
-// 读取历史
-onActivated(() => {
-  position.value = loadHistory(appStore.userId, _bid.value)
-})
-
-const book = computed(() => bookInfo.value?.Book)
-const ascending = ref(true)
-const sortedChapters = computed(() => {
-  const chapters = (book.value?.Chapter ?? []).map((chapter, index) => ({ ...chapter, sortNum: index + 1 }))
-  return ascending.value ? chapters : chapters.reverse()
-})
-const classification = computed(() => book.value?.Extra?.classification ?? {})
-const displayAuthor = computed(() => book.value?.Author || classification.value.author || '暂无')
+const { downloadingId: downloadingBookId, download: downloadBook } = useBookDownload()
+const { downloadingId: downloadingChapterId, download: downloadChapter } = useBookDownload('chapter')
 const bookInList = computed<BookInList | null>(() =>
   book.value
     ? ({
         ...toRaw(book.value),
-        UserName: book.value?.User.UserName,
+        SeriesTitle: seriesTitle.value,
+        UserName: book.value.User.UserName,
       } as BookInList)
     : null,
 )
 const lastReadTitle = computed(() => {
-  if (position.value && position.value?.cid) {
-    const chap = bookInfo.value?.Book?.Chapter?.find((x) => x.Id === position.value.cid)
-    return chap?.Title
-  }
+  if (position.value?.cid) return chapters.value.find((chapter) => chapter.Id === position.value?.cid)?.Title ?? '暂无'
   return '暂无'
 })
-function dateFormat(time: Date) {
+
+function dateFormat(time: Date | string) {
   return parseTime(time).format('YYYY-MM-DD HH:mm')
 }
+
+watch(_bid, () => {
+  ascending.value = true
+  seriesShow.value = false
+  position.value = null
+  void getInfo()
+})
+useInitRequest(getInfo, { isActive })
+onActivated(() => {
+  position.value = cachedPosition() ?? position.value
+})
 
 const commentShow = ref(false)
 function upScrollClick() {
   const el = document.getElementsByClassName('book-info-card')[0] as HTMLElement
   const target = scroll.getScrollTarget(el)
-  const offset = el.offsetTop
-  const duration = 100
-  scroll.setVerticalScrollPosition(target, offset, duration)
+  scroll.setVerticalScrollPosition(target, el.offsetTop, 100)
 }
 function downScrollClick() {
   const el = document.getElementsByClassName('comment')[0] as HTMLElement
   const target = scroll.getScrollTarget(el)
-  const offset = el.offsetTop
-  const duration = 100
-  scroll.setVerticalScrollPosition(target, offset, duration)
+  scroll.setVerticalScrollPosition(target, el.offsetTop, 100)
 }
 const scrollClick = computed(() => (commentShow.value ? upScrollClick : downScrollClick))
 const scrollIcon = computed(() => (commentShow.value ? 'mdiArrowUp' : 'mdiArrowDown'))
-function commentBeShown(entries) {
+function commentBeShown(entries: IntersectionObserverEntry) {
   commentShow.value = entries.isIntersecting
   return true
 }
@@ -290,6 +405,35 @@ function commentBeShown(entries) {
   padding: 16px 0;
 }
 
+.comic-chapters {
+  padding-top: 16px;
+}
+
+.chapter-item {
+  min-width: 0;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+}
+
+.chapter-item :deep(.q-item__section--avatar) {
+  min-width: 44px;
+}
+
+.chapter-item.q-item--active :deep(.q-avatar) {
+  color: var(--q-primary) !important;
+}
+
+.chapter-item.q-item--active :deep(.q-item__label--caption) {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.series-dialog {
+  width: min(520px, 90vw);
+  max-height: 80vh;
+}
+
+.series-cover {
+  width: 48px;
+}
 .book-skeletons {
   display: flex;
   flex-direction: column;

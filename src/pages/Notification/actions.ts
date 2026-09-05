@@ -6,9 +6,6 @@ type NotificationActionHandler = (router: Router, data: Record<string, unknown>)
 const positiveInteger = (value: unknown): number | null =>
   typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : null
 
-const nonEmptyString = (value: unknown): string | null =>
-  typeof value === 'string' && value.trim().length > 0 ? value : null
-
 const actionHandlers: Record<string, NotificationActionHandler> = {
   open_book: async (router, data) => {
     const bookId = positiveInteger(data.book_id)
@@ -19,11 +16,6 @@ const actionHandlers: Record<string, NotificationActionHandler> = {
     const announcementId = positiveInteger(data.announcement_id)
     if (announcementId === null) return
     await router.push({ name: 'AnnouncementDetail', params: { id: announcementId } })
-  },
-  open_series: async (router, data) => {
-    const seriesTitle = nonEmptyString(data.series_title)
-    if (seriesTitle === null) return
-    await router.push({ name: 'MangaDetail', params: { seriesTitle } })
   },
   open_community_thread: async (router, data) => {
     const threadId = positiveInteger(data.thread_id)

@@ -198,9 +198,8 @@ import { postComment, replyComment, getComments, deleteComment } from '@/service
 
 import type { CommentType, GetComments } from '@/services/comment/types'
 
-const props = withDefaults(defineProps<{ type: CommentType; id?: number; seriesTitle?: string }>(), {
+const props = withDefaults(defineProps<{ type: CommentType; id?: number }>(), {
   id: 0,
-  seriesTitle: '',
 })
 const $q = useQuasar()
 const appStore = useSessionStore()
@@ -209,10 +208,7 @@ const comment = ref<GetComments.Response>()
 
 const isActive = computed(
   () =>
-    comment.value?.Type === props.type &&
-    comment.value?.Id === props.id &&
-    (comment.value?.SeriesTitle ?? '') === props.seriesTitle &&
-    currentPage.value === comment.value.Page,
+    comment.value?.Type === props.type && comment.value?.Id === props.id && currentPage.value === comment.value.Page,
 )
 
 const currentPage = ref(1)
@@ -234,7 +230,6 @@ const request = async () => {
     Type: props.type,
     Id: props.id,
     Page: currentPage.value,
-    SeriesTitle: props.seriesTitle || undefined,
   })
   posting.value = false
 }
@@ -259,7 +254,6 @@ const post = async () => {
         Type: props.type,
         Id: props.id,
         Content: inputComment.value,
-        SeriesTitle: props.seriesTitle || undefined,
       })
       $q.notify({
         message: '评论成功',
@@ -294,7 +288,6 @@ const reply = async () => {
         Content: inputReplyComment.value,
         ReplyId: replyId.value,
         ParentId: parentId.value!,
-        SeriesTitle: props.seriesTitle || undefined,
       })
       $q.notify({
         message: '评论成功',
