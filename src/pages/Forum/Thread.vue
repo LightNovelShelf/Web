@@ -73,6 +73,14 @@
                             </div>
                           </q-item-section>
                         </q-item>
+                        <q-item v-close-popup clickable :disable="locking" @click="handleToggleThreadLocked">
+                          <q-item-section>
+                            <div class="thread-card__menu-item">
+                              <q-icon :name="thread.Locked ? 'mdiLockOpenVariant' : 'mdiLock'" size="17px" />
+                              {{ thread.Locked ? '解除锁定' : '锁定' }}
+                            </div>
+                          </q-item-section>
+                        </q-item>
                         <q-item v-close-popup clickable :disable="deleting" @click="handleDeleteThread">
                           <q-item-section>
                             <div class="thread-card__menu-item">
@@ -431,6 +439,7 @@ import {
   deleteCommunityThread,
   getCommunityReplyChildren,
   getCommunityThread,
+  setCommunityThreadLocked,
   toggleReplyLike,
   toggleThreadFavorite,
   toggleThreadLike,
@@ -468,6 +477,7 @@ const loadingChildReplyIds = ref<Set<number>>(new Set())
 const togglingLike = ref(false)
 const togglingFavorite = ref(false)
 const deleting = ref(false)
+const locking = ref(false)
 const togglingReplyIds = ref<Set<number>>(new Set())
 const deletingReplyIds = ref<Set<number>>(new Set())
 const submittingReply = ref(false)
@@ -745,6 +755,25 @@ async function handleToggleFavorite() {
     thread.value.Favorites = nextState.Favorites
   } finally {
     togglingFavorite.value = false
+  }
+}
+
+async function handleToggleThreadLocked() {
+  if (!thread.value || locking.value) {
+    return
+  }
+
+  const locked = !thread.value.Locked
+  locking.value = true
+
+  try {
+    const nextState = await setCommunityThreadLocked(thread.value.Id, locked)
+    thread.value.Locked = nextState.Locked
+    $q.notify({ type: 'positive', message: nextState.Locked ? '帖子已锁定' : '帖子已解除锁定' })
+  } catch (err) {
+    $q.notify({ type: 'negative', message: err instanceof Error ? err.message : '操作失败' })
+  } finally {
+    locking.value = false
   }
 }
 

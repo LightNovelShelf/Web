@@ -91,6 +91,16 @@ export async function deleteCommunityThread(threadId: number): Promise<{ Id: num
   return invokeHub<{ Id: number }>('DeleteCommunityThread', { ThreadId: threadId })
 }
 
+export async function setCommunityThreadLocked(
+  threadId: number,
+  locked: boolean,
+): Promise<{ Id: number; Locked: boolean }> {
+  return invokeHub<{ Id: number; Locked: boolean }>('SetCommunityThreadLocked', {
+    ThreadId: threadId,
+    Locked: locked,
+  })
+}
+
 export async function createCommunityReply(req: CreateCommunityReplyRequest): Promise<CommunityThreadReply> {
   return invokeHub<CommunityThreadReply>('CreateCommunityReply', {
     ThreadId: req.threadId,
