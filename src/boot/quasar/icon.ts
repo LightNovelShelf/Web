@@ -36,6 +36,7 @@ export {
   mdiEmail,
   mdiEmailOutline,
   mdiLock,
+  mdiLockOpenVariant,
   mdiSend,
   mdiEye,
   mdiAlertCircle,
