@@ -1,14 +1,12 @@
-import { PATH } from '@/services/path'
-import { invokeHub, requestHttp } from '@/services/transport'
-import { RequestMethod } from '@/services/types'
+import { invokeHub } from '@/services/transport'
 
 import * as Types from './type'
 
 import type { ShelfItem, SHELF_STRUCT_VER } from '@/types/shelf'
 import type * as ShelfLegacyStruct from '@/utils/migrations/shelf/struct/types'
 
-const publicSummaryCache = new Map<string, { expiresAt: number; value: Types.PublicUserSummary }>()
-const publicSummaryRequests = new Map<string, Promise<Types.PublicUserSummary>>()
+const publicSummaryCache = new Map<number, { expiresAt: number; value: Types.PublicUserSummary }>()
+const publicSummaryRequests = new Map<number, Promise<Types.PublicUserSummary>>()
 const PUBLIC_SUMMARY_CACHE_DURATION_MS = 5 * 60 * 1_000
 
 export function getMyInfo(): Promise<Types.CurrentUser> {
@@ -16,24 +14,20 @@ export function getMyInfo(): Promise<Types.CurrentUser> {
 }
 
 export function getPublicUserSummary(id: number): Promise<Types.PublicUserSummary> {
-  const key = `${PATH.USER_PUBLIC_SUMMARY}:${id}`
-  const cached = publicSummaryCache.get(key)
+  const cached = publicSummaryCache.get(id)
   if (cached && cached.expiresAt > Date.now()) return Promise.resolve(cached.value)
 
-  const pending = publicSummaryRequests.get(key)
+  const pending = publicSummaryRequests.get(id)
   if (pending) return pending
 
-  const request = requestHttp<Types.PublicUserSummary, { id: number }>(PATH.USER_PUBLIC_SUMMARY, {
-    method: RequestMethod.GET,
-    payload: { id },
-  })
+  const request = invokeHub<Types.PublicUserSummary>('GetUserSummary', { UserId: id })
     .then((value) => {
-      publicSummaryCache.set(key, { expiresAt: Date.now() + PUBLIC_SUMMARY_CACHE_DURATION_MS, value })
+      publicSummaryCache.set(id, { expiresAt: Date.now() + PUBLIC_SUMMARY_CACHE_DURATION_MS, value })
       return value
     })
-    .finally(() => publicSummaryRequests.delete(key))
+    .finally(() => publicSummaryRequests.delete(id))
 
-  publicSummaryRequests.set(key, request)
+  publicSummaryRequests.set(id, request)
   return request
 }
 
