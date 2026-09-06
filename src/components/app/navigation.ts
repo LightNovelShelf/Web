@@ -76,7 +76,6 @@ export const accountNavigation: RouteNavigationItem[] = [
   { kind: 'route', key: 'DirectMessage', label: '我的私信', icon: 'mdiMessageText', to: { name: 'DirectMessage' } },
   { kind: 'route', key: 'Contribution', label: '发布管理', icon: 'mdiAccountCog', to: { name: 'UserPublish' } },
   { kind: 'route', key: 'MyShelf', label: '我的书架', icon: 'mdiFolderHeartOutline', to: { name: 'MyShelf' } },
-  { kind: 'route', key: 'Shop', label: '商城', icon: 'mdiStorefrontOutline', to: { name: 'Shop' } },
   { kind: 'route', key: 'ForumMine', label: '我的社区', icon: 'mdiAccountBoxOutline', to: { name: 'ForumMine' } },
   { kind: 'route', key: 'Setting', label: '网站设置', icon: 'mdiCog', to: { name: 'Setting' } },
 ]
