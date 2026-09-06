@@ -111,7 +111,7 @@
                   <div>
                     <div class="thread-card__author-name">
                       {{ thread.AuthorName }}
-                      <span v-if="thread.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                      <span v-if="thread.AuthorIsDeleted" class="text-negative">（已注销）</span>
                     </div>
                     <div class="thread-card__author-time">
                       <time-ago :value="thread.PublishedAt" />
@@ -152,7 +152,7 @@
                 <div v-if="replyTarget" class="reply-composer__target">
                   正在回复
                   <strong>{{ replyTarget.AuthorName }}</strong>
-                  <strong v-if="replyTarget.AuthorIsDeleted" class="text-negative">（被封禁）</strong>
+                  <strong v-if="replyTarget.AuthorIsDeleted" class="text-negative">（已注销）</strong>
                   <q-btn flat dense no-caps color="primary" label="取消" @click="replyTarget = null" />
                 </div>
 
@@ -210,7 +210,7 @@
                         <div class="reply-item__name-row">
                           <span class="reply-item__name">
                             {{ reply.AuthorName }}
-                            <span v-if="reply.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                            <span v-if="reply.AuthorIsDeleted" class="text-negative">（已注销）</span>
                           </span>
                           <span v-if="reply.AuthorBadge" class="reply-item__badge">{{ reply.AuthorBadge }}</span>
                           <button
@@ -220,7 +220,7 @@
                             @click="scrollToReply(reply.ReplyTo.Id)"
                           >
                             回复 {{ reply.ReplyTo.AuthorName
-                            }}<span v-if="reply.ReplyTo.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                            }}<span v-if="reply.ReplyTo.AuthorIsDeleted" class="text-negative">（已注销）</span>
                           </button>
                         </div>
                         <time-ago class="reply-item__time" :value="reply.PublishedAt" />
@@ -288,7 +288,7 @@
                             <div class="reply-item__name-row">
                               <span class="reply-item__name">
                                 {{ child.AuthorName }}
-                                <span v-if="child.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                                <span v-if="child.AuthorIsDeleted" class="text-negative">（已注销）</span>
                               </span>
                               <span v-if="child.AuthorBadge" class="reply-item__badge">{{ child.AuthorBadge }}</span>
                               <button
@@ -298,7 +298,7 @@
                                 @click="scrollToReply(child.ReplyTo.Id)"
                               >
                                 回复 {{ child.ReplyTo.AuthorName
-                                }}<span v-if="child.ReplyTo.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+                                }}<span v-if="child.ReplyTo.AuthorIsDeleted" class="text-negative">（已注销）</span>
                               </button>
                             </div>
                             <time-ago class="reply-item__time" :value="child.PublishedAt" />

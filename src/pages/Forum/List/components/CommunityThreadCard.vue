@@ -23,7 +23,7 @@
           <div class="feed-item__author-copy">
             <span class="feed-item__author-name">
               {{ item.AuthorName }}
-              <span v-if="item.AuthorIsDeleted" class="text-negative">（被封禁）</span>
+              <span v-if="item.AuthorIsDeleted" class="text-negative">（已注销）</span>
             </span>
             <time-ago class="feed-item__author-time" :value="item.PublishedAt" />
           </div>
