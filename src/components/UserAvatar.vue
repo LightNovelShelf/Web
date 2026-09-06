@@ -30,13 +30,22 @@
       <q-card class="user-summary">
         <q-card-section class="row items-center gap-12">
           <base-avatar :src="displayUser.Avatar" :name="displayUser.UserName" size="56px" />
-          <div class="col">
+          <div class="col user-summary__identity">
             <div class="row items-center gap-8">
-              <span class="text-subtitle1 text-weight-medium">{{ displayUser.UserName }}</span>
+              <span class="text-subtitle1 text-weight-medium ellipsis">{{ displayUser.UserName }}</span>
               <q-badge v-if="summary" outline color="primary">Lv{{ summary.Level }}</q-badge>
             </div>
-            <div v-if="summary" class="text-caption text-grey-7">{{ summary.Role }}</div>
+            <div v-if="summary" class="text-caption text-grey-7 ellipsis">{{ summary.Role }}</div>
           </div>
+          <q-btn
+            v-if="canSendDirectMessage"
+            unelevated
+            no-caps
+            color="primary"
+            icon="mdiMessageText"
+            label="私信"
+            @click.stop="goToDirectMessage"
+          />
         </q-card-section>
 
         <q-separator />
@@ -60,13 +69,6 @@
           <q-card-section class="text-caption text-grey-7">
             加入于 <time-ago :value="summary.RegisterAt" />
           </q-card-section>
-        </template>
-
-        <template v-if="canSendDirectMessage">
-          <q-separator />
-          <q-card-actions align="right">
-            <q-btn flat dense color="primary" icon="mdiMessageText" label="私信" @click.stop="goToDirectMessage" />
-          </q-card-actions>
         </template>
       </q-card>
     </q-menu>
@@ -226,6 +228,11 @@ onBeforeUnmount(() => {
 .user-summary {
   width: 320px;
   max-width: calc(100vw - 32px);
+}
+
+/* flex 子项默认按内容撑开，长用户名要能被省略号截断就得允许它收缩 */
+.user-summary__identity {
+  min-width: 0;
 }
 
 .user-summary__stats {
