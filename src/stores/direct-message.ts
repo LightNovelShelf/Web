@@ -297,13 +297,14 @@ export const useDirectMessageStore = defineStore('app.directMessage', {
       if (throughMessageId <= 0 || throughMessageId <= chat.myLastReadMessageId) return
 
       const res = await markDirectMessagesRead({ PeerUserId: peerId, ThroughMessageId: throughMessageId })
+      const unreadDelta = res.UnreadCount - chat.unreadCount
       chat.myLastReadMessageId = Math.max(chat.myLastReadMessageId, res.MyLastReadMessageId)
       chat.unreadCount = res.UnreadCount
+      const user = useSessionStore().user
+      if (user) user.UnreadDirectMessageCount = Math.max(0, user.UnreadDirectMessageCount + unreadDelta)
 
       const conversation = this.conversations.find((item) => item.Peer.Id === peerId)
       if (conversation) conversation.UnreadCount = res.UnreadCount
-
-      this.calibrate()
     },
 
     async setBlock(peerId: number, isBlocked: boolean): Promise<void> {
