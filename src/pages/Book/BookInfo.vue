@@ -174,7 +174,14 @@
     />
     <q-page-sticky position="bottom-right" :offset="fabPos" style="z-index: 1">
       <div class="column gap-8">
-        <q-btn v-if="isActive" round size="md" color="primary" icon="mdiBookMultiple" @click="seriesShow = true">
+        <q-btn
+          v-if="isActive && hasOtherSeriesBooks"
+          round
+          size="md"
+          color="primary"
+          icon="mdiBookMultiple"
+          @click="seriesShow = true"
+        >
           <q-tooltip>系列</q-tooltip>
         </q-btn>
         <q-btn round size="md" color="accent" :icon="scrollIcon" @click="scrollClick" />
@@ -271,6 +278,7 @@ const book = computed(() => bookInfo.value?.Book)
 const isComic = computed(() => book.value?.Type === 'Comic')
 const seriesTitle = computed(() => bookInfo.value?.SeriesTitle ?? '')
 const seriesBooks = computed<BookSeriesItem[]>(() => bookInfo.value?.Series ?? [])
+const hasOtherSeriesBooks = computed(() => seriesBooks.value.some((item) => item.Id !== _bid.value))
 const chapters = computed<DetailChapter[]>(() => book.value?.Chapters ?? [])
 const sortedChapters = computed(() => {
   const result = [...chapters.value]
