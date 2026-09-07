@@ -466,11 +466,15 @@ function commentBeShown(entries: IntersectionObserverEntry) {
   opacity: 0.6;
   line-height: 1;
   padding-top: 6px;
-  :deep(p) {
-    margin: 0;
-  }
-  :deep(img) {
-    max-width: 100%;
+
+  :deep() {
+    :where(h1, h2, h3, h4, h5, h6, p) {
+      margin: 0;
+    }
+
+    img {
+      max-width: 100%;
+    }
   }
 }
 
