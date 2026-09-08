@@ -6,10 +6,13 @@
     @click="onOpenMenuIfCan()"
     @focus="onOpenMenuIfCan()"
     @blur="onBlur"
+    :clearable="community"
+    @clear="searchHandle()"
     ref="inputEleRef"
     :style="{ flexBasis: searchBarWidth, maxWidth: props.maxWidth }"
   >
     <q-menu
+      v-if="!community"
       no-focus
       no-refocus
       no-parent-event
@@ -29,6 +32,9 @@
         </q-item>
       </q-list>
     </q-menu>
+    <template v-if="community" #append>
+      <q-btn flat round dense icon="mdiMagnify" aria-label="搜索帖子" @click="searchHandle()" />
+    </template>
   </q-input>
 </template>
 
@@ -40,9 +46,10 @@ import { useMergeState } from '@/composition/useMergeState'
 import type { SearchMode } from '@/services/book/types'
 
 const props = withDefaults(
-  defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string }>(),
+  defineProps<{ width?: (visible: boolean) => string; modelValue?: string; maxWidth?: string; community?: boolean }>(),
   {
     modelValue: '',
+    community: false,
   },
 )
 const emits = defineEmits<{
@@ -81,7 +88,7 @@ const searchBarWidth = computed(() => {
  * 出于未知原因，在没有keyword（也就是下拉菜单没有item）的情况下打开menu会导致menu无法再打开（除非先close
  */
 function onOpenMenuIfCan() {
-  visible.value = !!keyword.value
+  visible.value = !props.community && !!keyword.value
 }
 
 // 在某次框架更新中，onblur事件比click触发早了，需要手动跳转
@@ -96,9 +103,10 @@ function onBlur(evt: any) {
 }
 
 function syncHandle(evt: string | number | null) {
-  if (typeof evt === 'string') {
-    emits('update:modelValue', evt)
-    keyword.value = evt
+  if (typeof evt === 'string' || evt === null) {
+    const value = typeof evt === 'string' ? evt : ''
+    emits('update:modelValue', value)
+    keyword.value = value
   }
 
   onOpenMenuIfCan()
@@ -107,7 +115,7 @@ function syncHandle(evt: string | number | null) {
 /** 触发搜索，默认回车走标题模糊搜索 */
 function searchHandle(mode: SearchMode = 'fuzzy') {
   emits('update:modelValue', keyword.value)
-  if (!keyword.value) return
+  if (!keyword.value && !props.community) return
   emits('search', keyword.value, mode)
 
   // 因为点menu的话一定会blur没法避免，所以这里统一blur（即使是按回车触发的search）

@@ -188,33 +188,33 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/forum/list',
     name: 'ForumList',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, searchTab: 'Community' },
     component: () => import('../pages/Forum/List/index.vue'),
   },
   {
     path: '/forum/create',
     name: 'ForumCreate',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, searchTab: 'Community' },
     component: () => import('../pages/Forum/Create.vue'),
   },
   {
     path: '/forum/thread/:id/edit',
     name: 'ForumThreadEdit',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, searchTab: 'Community' },
     props: true,
     component: () => import('../pages/Forum/Create.vue'),
   },
   {
     path: '/forum/thread/:id',
     name: 'ForumThread',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, searchTab: 'Community' },
     props: true,
     component: () => import('../pages/Forum/Thread.vue'),
   },
   {
     path: '/forum/mine',
     name: 'ForumMine',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, searchTab: 'Community' },
     component: () => import('../pages/Forum/Mine.vue'),
   },
   {

@@ -66,6 +66,7 @@
             :error="error"
             :order="order"
             :scope="scope"
+            :key-words="keyWords"
             :sub-categories="payload?.SubCategories ?? []"
             :selected-sub-category-key="payload?.SelectedSubCategoryKey ?? ''"
             :pagination="pagination"
@@ -158,9 +159,16 @@ const scope = computed<CommunityFeedScope>(() => {
   return ['all', 'today', 'week'].includes(value) ? (value as CommunityFeedScope) : 'all'
 })
 
+const keyWords = computed(() => {
+  const value = route.query.q
+  return typeof value === 'string' ? value.trim() : ''
+})
+
 const boards = computed(() => payload.value?.Boards ?? [])
 const pagination = computed(() => payload.value?.FeedPage ?? emptyPagination)
-const routeQueryKey = computed(() => [boardKey.value, order.value, scope.value, subCategoryKey.value].join(':'))
+const routeQueryKey = computed(() =>
+  JSON.stringify([boardKey.value, order.value, scope.value, subCategoryKey.value, keyWords.value]),
+)
 const createQuery = computed(() => ({
   board: boardKey.value === 'all' ? undefined : boardKey.value,
   category: subCategoryKey.value || undefined,
@@ -170,6 +178,7 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
   const append = options.append ?? false
   const page = append ? currentPage.value + 1 : 1
   const requestId = ++latestRequestId.value
+  const queryKey = routeQueryKey.value
 
   error.value = ''
   if (append) {
@@ -183,13 +192,14 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
     const nextPayload = await getCommunityHome({
       boardKey: boardKey.value,
       subCategoryKey: subCategoryKey.value || undefined,
+      keyWords: keyWords.value,
       order: order.value,
       scope: scope.value,
       page,
       size: 6,
     })
 
-    if (requestId !== latestRequestId.value) {
+    if (requestId !== latestRequestId.value || queryKey !== routeQueryKey.value) {
       return
     }
 
@@ -197,7 +207,7 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
     currentPage.value = page
     feedItems.value = append ? [...feedItems.value, ...nextPayload.Feed] : nextPayload.Feed
   } catch (err) {
-    if (requestId !== latestRequestId.value) {
+    if (requestId !== latestRequestId.value || queryKey !== routeQueryKey.value) {
       return
     }
 
@@ -206,7 +216,7 @@ async function loadCommunityHome(options: { append?: boolean } = {}) {
       feedItems.value = []
     }
   } finally {
-    if (requestId === latestRequestId.value) {
+    if (requestId === latestRequestId.value && queryKey === routeQueryKey.value) {
       loading.value = false
       loadingMore.value = false
     }
@@ -217,6 +227,7 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
   const append = options.append ?? false
   const page = append ? currentPage.value + 1 : 1
   const requestId = ++latestRequestId.value
+  const queryKey = routeQueryKey.value
 
   error.value = ''
   if (append) {
@@ -230,13 +241,14 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
     const nextPayload = await getCommunityFeed({
       boardKey: boardKey.value,
       subCategoryKey: subCategoryKey.value || undefined,
+      keyWords: keyWords.value,
       order: order.value,
       scope: scope.value,
       page,
       size: 6,
     })
 
-    if (requestId !== latestRequestId.value) {
+    if (requestId !== latestRequestId.value || queryKey !== routeQueryKey.value) {
       return
     }
 
@@ -270,7 +282,7 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
     currentPage.value = page
     feedItems.value = append ? [...feedItems.value, ...nextPayload.Feed] : nextPayload.Feed
   } catch (err) {
-    if (requestId !== latestRequestId.value) {
+    if (requestId !== latestRequestId.value || queryKey !== routeQueryKey.value) {
       return
     }
 
@@ -286,7 +298,7 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
       }
     }
   } finally {
-    if (requestId === latestRequestId.value) {
+    if (requestId === latestRequestId.value && queryKey === routeQueryKey.value) {
       loading.value = false
       loadingMore.value = false
     }
@@ -294,6 +306,11 @@ async function loadCommunityFeed(options: { append?: boolean } = {}) {
 }
 
 function requestCommunityFeedForQueryChange() {
+  if (!payload.value) {
+    void loadCommunityHome()
+    return
+  }
+
   void loadCommunityFeed()
 }
 
@@ -333,7 +350,7 @@ function handleSubCategoryChange(nextSubCategoryKey: string) {
 }
 
 function handleLoadMore() {
-  if (!pagination.value.HasMore || loadingMore.value) {
+  if (!pagination.value.HasMore || loading.value || loadingMore.value) {
     return
   }
 

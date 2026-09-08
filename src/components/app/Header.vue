@@ -19,6 +19,7 @@
       <form @submit.prevent>
         <search-input
           :placeholder="searchPlaceholder"
+          :community="isCommunitySearch"
           dark
           dense
           standout
@@ -169,7 +170,7 @@
 import { useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
@@ -197,7 +198,10 @@ const layout = useLayout()
 const { user } = storeToRefs(appStore)
 const { siderShow, headerHeight, siderBreakpoint } = layout
 
-const searchPlaceholder = computed(() => (route.meta.searchTab === 'Comic' ? '搜索漫画' : '搜索小说'))
+const isCommunitySearch = computed(() => route.meta.searchTab === 'Community')
+const searchPlaceholder = computed(() =>
+  isCommunitySearch.value ? '搜索帖子标题或摘要' : route.meta.searchTab === 'Comic' ? '搜索漫画' : '搜索小说',
+)
 const growth = computed(() => user.value?.Growth)
 const growthLevel = computed<number>(() => growth.value?.GrowthLevel ?? 0)
 const expProgress = computed<number>(() => {
@@ -214,6 +218,13 @@ const expText = computed<string>(() => {
   return `当前经验 ${current.Exp}，还需 ${current.NextLevelExp - current.Exp} 经验升级到 lv${current.GrowthLevel + 1}`
 })
 const searchKey = ref('')
+watch(
+  [isCommunitySearch, () => route.query.q],
+  ([community, query]) => {
+    searchKey.value = community && typeof query === 'string' ? query.trim() : ''
+  },
+  { immediate: true },
+)
 const reveal = useMedia(
   computed(() => `(max-width: ${siderBreakpoint.value}px)`),
   window.innerWidth <= siderBreakpoint.value,
@@ -228,6 +239,15 @@ const searchInputWidth = computed(() => {
 const userInfoMenuOptions = accountNavigation
 
 function onSearch(keywords: string, mode: SearchMode) {
+  if (isCommunitySearch.value) {
+    const query = route.name === 'ForumList' ? { ...route.query } : {}
+    const keyword = keywords.trim()
+    if (keyword) query.q = keyword
+    else delete query.q
+    searchKey.value = keyword
+    void router.push({ name: 'ForumList', query })
+    return
+  }
   const tab = route.meta.searchTab as string | undefined
   void router.push({ name: 'Search', query: { keywords, mode, ...(tab ? { tab } : {}) } })
   searchKey.value = ''

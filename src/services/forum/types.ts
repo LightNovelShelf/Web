@@ -22,6 +22,7 @@ export interface CommunityPagination {
 export interface CommunityListQuery {
   boardKey?: CommunityBoardKey
   subCategoryKey?: string
+  keyWords?: string
   order?: CommunityFeedOrder
   scope?: CommunityFeedScope
   page?: number

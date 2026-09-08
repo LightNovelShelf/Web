@@ -95,8 +95,14 @@
 
     <div v-else class="feed__state">
       <q-icon name="mdiForumOutline" size="38px" color="primary" />
-      <div class="feed__state-title">当前筛选下还没有帖子</div>
-      <div class="feed__state-text">可以切换板块或排序，或者直接发起一个新的讨论。</div>
+      <div class="feed__state-title">{{ keyWords ? '没有找到匹配的帖子' : '当前筛选下还没有帖子' }}</div>
+      <div class="feed__state-text">
+        {{
+          keyWords
+            ? `当前筛选下没有标题或摘要包含“${keyWords}”的帖子，可以修改关键词或清空搜索。`
+            : '可以切换板块或排序，或者直接发起一个新的讨论。'
+        }}
+      </div>
     </div>
 
     <div v-if="items.length" class="feed__footer">
@@ -152,6 +158,7 @@ defineProps<{
   error: string
   order: CommunityFeedOrder
   scope: CommunityFeedScope
+  keyWords: string
   subCategories: CommunitySubCategorySummary[]
   selectedSubCategoryKey: string
   pagination: CommunityPagination

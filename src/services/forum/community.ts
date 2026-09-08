@@ -20,6 +20,7 @@ export async function getCommunityHome(query: CommunityListQuery = {}): Promise<
   return invokeHub<CommunityHomePayload>('GetCommunityHome', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
+    KeyWords: query.keyWords ?? '',
     Order: query.order ?? 'reply',
     Scope: query.scope ?? 'all',
     Page: Math.max(1, query.page ?? 1),
@@ -31,6 +32,7 @@ export async function getCommunityFeed(query: CommunityListQuery = {}): Promise<
   return invokeHub<CommunityFeedPayload>('GetCommunityFeed', {
     BoardKey: query.boardKey ?? 'all',
     SubCategoryKey: query.subCategoryKey ?? '',
+    KeyWords: query.keyWords ?? '',
     Order: query.order ?? 'reply',
     Scope: query.scope ?? 'all',
     Page: Math.max(1, query.page ?? 1),
