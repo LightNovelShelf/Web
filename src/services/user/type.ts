@@ -65,7 +65,7 @@ export namespace QuickCreateComic {
     Title: string
     Author: string
     Introduction: string
-    CategoryName: '原创' | '连载' | '完结'
+    CategoryName: string
   }
   export type Response = number
 }

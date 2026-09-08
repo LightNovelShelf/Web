@@ -100,26 +100,26 @@
                 v-model="createBookData.Count"
               />
               <q-select
-                v-if="tab === GetMyBooks.BookType.Novel"
                 map-options
                 emit-value
                 v-model="createBookData.CategoryId"
                 :options="categoryOptions"
-                label="分类"
-              />
-              <q-select
-                v-else
-                map-options
-                emit-value
-                v-model="comicCategoryName"
-                :options="comicCategoryOptions"
+                :loading="categoryLoading"
+                :disable="categoryLoading || !categoryOptions.length"
+                :rules="[(val) => categoryOptions.some((option) => option.value === val) || '请选择分类']"
                 label="分类"
               />
             </div>
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn type="submit" flat label="创建" color="primary" />
+            <q-btn
+              type="submit"
+              flat
+              label="创建"
+              color="primary"
+              :disable="categoryLoading || !categoryOptions.length || createBookData.CategoryId === null"
+            />
           </q-card-actions>
         </q-form>
       </q-card>
@@ -153,13 +153,13 @@ import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useTimeoutFn } from '@/composition/useTimeoutFn'
 
 import { getSessionToken } from '@/services/auth/session'
-import { deleteBook } from '@/services/book'
+import { deleteBook, getBookCategories } from '@/services/book'
 import { PATH } from '@/services/path'
 import { getMyBooks, quickCreateComic, quickCreateNovel } from '@/services/user'
 import { GetMyBooks } from '@/services/user/type'
 
 import type { BookInList } from '@/services/book/types'
-import type { QuickCreateComic, QuickCreateNovel } from '@/services/user/type'
+import type { QuickCreateNovel } from '@/services/user/type'
 import type { QUploaderFactoryFn } from 'quasar'
 
 defineComponent({ QGrid, QGridItem })
@@ -188,54 +188,32 @@ const _page = ref(1)
 const createBookShow = ref(false)
 const uploadBookShow = ref(false)
 const searchKeyword = ref('')
-const categoryOptions = ref([
-  {
-    label: '录入完成',
-    value: 1,
-  },
-  {
-    label: '翻译完成',
-    value: 2,
-  },
-  {
-    label: '录入中',
-    value: 4,
-  },
-  {
-    label: '翻译中',
-    value: 3,
-  },
-  {
-    label: '转载',
-    value: 5,
-  },
-  {
-    label: '日文原版',
-    value: 6,
-  },
-  {
-    label: '原创',
-    value: 7,
-  },
-  {
-    label: 'AI翻译',
-    value: 8,
-  },
-])
-const comicCategoryOptions: Array<{ label: string; value: QuickCreateComic.Request['CategoryName'] }> = [
-  { label: '原创', value: '原创' },
-  { label: '连载', value: '连载' },
-  { label: '完结', value: '完结' },
-]
-const comicCategoryName = ref<QuickCreateComic.Request['CategoryName']>('连载')
-const createBookData = reactive<QuickCreateNovel.Request>({
+const categoriesByType = ref<Record<GetMyBooks.BookType, Array<{ label: string; value: number }>>>({
+  Novel: [],
+  Comic: [],
+})
+const categoryOptions = computed(() => categoriesByType.value[tab.value])
+const createBookData = reactive<Omit<QuickCreateNovel.Request, 'CategoryId'> & { CategoryId: number | null }>({
   Cover: '',
   Title: '',
   Count: 5,
   Author: '',
   Introduction: '',
-  CategoryId: 1,
+  CategoryId: null,
 })
+
+const categoryRequest = useTimeoutFn(async () => {
+  categoriesByType.value = { Novel: [], Comic: [] }
+  const [novelCategories, comicCategories] = await Promise.all([getBookCategories('Novel'), getBookCategories('Comic')])
+  categoriesByType.value = {
+    Novel: novelCategories.map((category) => ({ label: category.Name, value: category.Id })),
+    Comic: comicCategories.map((category) => ({ label: category.Name, value: category.Id })),
+  }
+  if (!categoryOptions.value.some((category) => category.value === createBookData.CategoryId)) {
+    createBookData.CategoryId = categoryOptions.value[0]?.value ?? null
+  }
+})
+const categoryLoading = categoryRequest.loading
 
 const currentPage = computed({
   get() {
@@ -285,13 +263,16 @@ function delBook(bid: number, index: number) {
 }
 async function createBook() {
   try {
+    const category = categoryOptions.value.find((option) => option.value === createBookData.CategoryId)
+    if (categoryLoading.value || !category) return
+
     if (tab.value === GetMyBooks.BookType.Comic) {
       const bid = await quickCreateComic({
         Cover: createBookData.Cover,
         Title: createBookData.Title,
         Author: createBookData.Author,
         Introduction: createBookData.Introduction,
-        CategoryName: comicCategoryName.value,
+        CategoryName: category.label,
       })
       $q.notify({ type: 'positive', message: '创建成功' })
       createBookShow.value = false
@@ -301,6 +282,7 @@ async function createBook() {
 
     const request = {
       ...createBookData,
+      CategoryId: category.value,
       Count: ~~createBookData.Count,
       Introduction: createBookData.Introduction.replace(/^([\s\S]*?)$/gm, '<p>$1</p>'),
     }
@@ -339,6 +321,7 @@ const loading = request.loading
 watch(tab, (type) => {
   _page.value = 1
   bookData.value = []
+  createBookData.CategoryId = categoryOptions.value[0]?.value ?? null
   request(1, type)
 })
 watch(request.loading, (nextLoading) => {
@@ -349,6 +332,7 @@ watch(request.loading, (nextLoading) => {
 })
 
 useInitRequest(request)
+useInitRequest(categoryRequest)
 </script>
 
 <style lang="scss" scoped>

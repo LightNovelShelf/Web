@@ -5,14 +5,8 @@ export interface BookCategoryOption {
   value: number
 }
 
-const COMIC_CATEGORY_NAMES: Record<string, true> = { 原创: true, 连载: true, 完结: true }
-const COMIC_ONLY_CATEGORY_NAMES: Record<string, true> = { 连载: true, 完结: true }
-
 export function buildBookCategoryOptions(data: GetBookEditInfoResponse): BookCategoryOption[] {
-  const isComic = data.Book.Type === 'Comic'
-  return data.Categories.filter((category) =>
-    isComic ? COMIC_CATEGORY_NAMES[category.Name] : !COMIC_ONLY_CATEGORY_NAMES[category.Name],
-  ).map((category) => ({ label: category.Name, value: category.Id }))
+  return data.Categories.map((category) => ({ label: category.Name, value: category.Id }))
 }
 
 export function toBookInfoUpdate(book: EditableBook): EditBookRequest {

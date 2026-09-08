@@ -104,8 +104,10 @@ export function editBook(bid: number, request: Types.EditBookRequest) {
 }
 
 /** 取编辑用的书籍信息；markdown 时简介由服务端转换 */
-export function getBookEditInfo(bid: number, format: EditorFormat = 'html') {
-  return invokeHub<Types.GetBookEditInfoResponse>('GetBookEditInfo', { Id: bid, Format: format })
+export async function getBookEditInfo(bid: number, format: EditorFormat = 'html') {
+  const data = await invokeHub<Types.GetBookEditInfoResponse>('GetBookEditInfo', { Id: bid, Format: format })
+  data.Categories = await getBookCategories(data.Book.Type)
+  return data
 }
 
 /** 删除书籍 */
