@@ -21,6 +21,10 @@ export default defineBoot(() => {
         instance: Cropper,
       },
     },
+    codeMirrorExtensions(extensions) {
+      // linkShortener 会把超过 30 字符的 URL 在编辑区折叠成 "..."，需要看到原文
+      return extensions.filter((e) => e.type !== 'linkShortener')
+    },
     markdownItConfig(md) {
       md.set({ breaks: false })
     },
