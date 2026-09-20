@@ -516,36 +516,8 @@ onBeforeUnmount(destroyEditorScrollbars)
   overflow: hidden;
 }
 
-:deep(.thread-create__editor .common),
-:deep(.thread-create__editor .simple),
-:deep(.thread-create__editor .md-editor) {
+.thread-create__editor :deep(.html-editor) {
   height: 100%;
-  min-height: 0;
-}
-
-:deep(.thread-create__editor .q-editor),
-:deep(.thread-create__editor .md-editor) {
-  height: 100% !important;
-  min-height: 0;
-  max-height: 100%;
-}
-
-// OverlayScrollbars 把滚动条挂在 .q-editor 下并且是 absolute 定位，
-// q-editor 自身是 static，不给它 relative 滚动条就按视口定位，跑到窗口右边而不是编辑器里
-:deep(.thread-create__editor .q-editor) {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-:deep(.thread-create__editor .q-editor__content) {
-  overflow: auto;
-}
-
-// md-editor 内部由 .cm-scroller / .md-editor-preview-wrapper 各自滚动，外层再给滚动就是第二根滚动条
-:deep(.thread-create__editor .md-editor-content) {
-  min-height: 0;
-  overflow: hidden;
 }
 
 // 编辑器的正文样式来自 css/read（小说排版，段首缩进 2em），

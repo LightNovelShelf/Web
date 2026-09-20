@@ -1,18 +1,13 @@
 <template>
-  <html-editor
-    :mode="mode"
-    :html="content"
-    :style="editorStyle"
-    @update:html="emit('update:html', $event)"
-    v-if="editorMode === 'html'"
-  />
-  <md-editor
-    :mode="mode"
-    :markdown="content"
-    :style="editorStyle"
-    @update:html="emit('update:html', $event)"
-    v-else-if="editorMode === 'markdown'"
-  />
+  <div class="html-editor" :style="editorStyle">
+    <html-editor :mode="mode" :html="content" @update:html="emit('update:html', $event)" v-if="editorMode === 'html'" />
+    <md-editor
+      :mode="mode"
+      :markdown="content"
+      @update:html="emit('update:html', $event)"
+      v-else-if="editorMode === 'markdown'"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -39,4 +34,41 @@ const emit = defineEmits(['update:html'])
 const editorMode = settingStore.activeEditorMode
 </script>
 
-<style lang="scss"></style>
+<style lang="scss" scoped>
+.html-editor {
+  height: calc(100vh - 200px);
+  height: calc(100dvh - 200px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+:deep(.common),
+:deep(.simple),
+:deep(.q-editor),
+:deep(.md-editor) {
+  height: 100%;
+  min-height: 0;
+}
+
+:deep(.q-editor) {
+  position: relative;
+  display: flex;
+  max-height: 100%;
+  flex-direction: column;
+}
+
+:deep(.q-editor__content) {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+:deep(.md-editor) {
+  max-height: 100%;
+}
+
+:deep(.md-editor-content) {
+  min-height: 0;
+  overflow: hidden;
+}
+</style>

@@ -242,22 +242,8 @@ watch(
 
 <style lang="scss" scoped>
 .common {
-  height: calc(100vh - 200px);
-  min-height: 500px;
-
-  :deep(.md-editor) {
-    height: 100%;
-    min-height: 0;
-  }
-
   :deep(.md-editor-preview) {
     @import '../../../css/read';
-  }
-}
-
-.simple {
-  :deep(.md-editor) {
-    height: calc(100vh - 200px);
   }
 }
 
