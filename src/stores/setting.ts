@@ -39,7 +39,14 @@ interface SettingState {
 }
 
 type PersistentSettingKey = 'generalSetting' | 'readSetting' | 'editorSetting'
-const PERSISTENT_SETTING_KEYS: PersistentSettingKey[] = ['generalSetting', 'readSetting', 'editorSetting']
+// 状态键与储存键分开：改储存键就能作废旧值，让所有人回到默认编辑器
+const PERSISTENT_SETTING_STORAGE_KEYS: Record<PersistentSettingKey, string> = {
+  generalSetting: 'generalSetting',
+  readSetting: 'readSetting',
+  editorSetting: 'editorSetting.v2',
+}
+const PERSISTENT_SETTING_KEYS = Object.keys(PERSISTENT_SETTING_STORAGE_KEYS) as PersistentSettingKey[]
+const LEGACY_SETTING_KEYS = ['editorSetting']
 
 function mergeKnownProperties<Setting extends object>(target: Setting, stored: Record<string, unknown> | null): void {
   if (!stored) return
@@ -82,18 +89,21 @@ export const useSettingStore = defineStore('app.setting', {
       if (this.isInit) return
 
       try {
-        await Promise.all(
-          PERSISTENT_SETTING_KEYS.map(async (key) => {
-            mergeKnownProperties(this[key], await userSettingDB.get(key))
+        await Promise.all([
+          ...PERSISTENT_SETTING_KEYS.map(async (key) => {
+            mergeKnownProperties(this[key], await userSettingDB.get(PERSISTENT_SETTING_STORAGE_KEYS[key]))
           }),
-        )
+          ...LEGACY_SETTING_KEYS.map((key) => userSettingDB.remove(key)),
+        ])
         this.activeEditorMode = this.editorSetting.mode
       } finally {
         this.isInit = true
       }
     },
     async save(): Promise<void> {
-      await Promise.all(PERSISTENT_SETTING_KEYS.map((key) => userSettingDB.set(key, toRaw(this[key]))))
+      await Promise.all(
+        PERSISTENT_SETTING_KEYS.map((key) => userSettingDB.set(PERSISTENT_SETTING_STORAGE_KEYS[key], toRaw(this[key]))),
+      )
     },
   },
   getters: {
