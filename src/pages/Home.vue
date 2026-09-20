@@ -8,7 +8,7 @@
               <div class="text-h6">最近更新</div>
               <q-space />
               <div class="text-subtitle2">
-                <router-link :to="{ name: 'BookList', params: { page: 1, order: 'latest' } }">更多</router-link>
+                <router-link :to="{ name: 'BookList' }">更多</router-link>
               </div>
             </div>
           </q-card-section>
@@ -164,7 +164,7 @@ import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/components/grid/'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { getLatestBookList } from '@/services/book'
 import { getOnlineInfo, getAnnouncementList, getBanInfoList } from '@/services/context'
@@ -182,7 +182,7 @@ const banImages = ref<string[]>()
 const viewerRef = ref<any>()
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
-const getInfo = useTimeoutFn(async () => {
+const getInfo = useLoadingFn(async () => {
   // 这样可以使Signalr在一个ws消息中并发调用
   const p1 = getOnlineInfo().then((res) => (onlineInfo.value = res))
   const p2 = getAnnouncementList({ Page: 1, Size: 5 }).then(

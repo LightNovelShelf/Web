@@ -27,16 +27,9 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Announcement/AnnouncementDetail.vue'),
   },
   {
-    path: '/book/list/:order/:page?',
+    path: '/book/list',
     name: 'BookList',
-    props: true,
     component: () => import('../pages/Book/BookList.vue'),
-  },
-  {
-    path: '/book/series/:order/:page?',
-    name: 'BookSeries',
-    props: true,
-    component: () => import('../pages/Book/BookSeries.vue'),
   },
   {
     path: '/book/series-books/:name/:order/:page?',
@@ -70,18 +63,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/Book/BookRank.vue'),
   },
   {
+    // 必须排在 /manga/:bid 前面，否则 /manga/list 会被当成漫画详情
+    path: '/manga/list',
+    name: 'MangaDiscover',
+    meta: { requiresAuth: false, searchTab: 'Comic' },
+    component: () => import('../pages/Manga/Discover.vue'),
+  },
+  {
     path: '/manga/:bid',
     name: 'MangaInfo',
     props: true,
     meta: { searchTab: 'Comic' },
     component: () => import('../pages/Book/BookInfo.vue'),
-  },
-  {
-    path: '/manga/list/:order/:page?',
-    name: 'MangaDiscover',
-    props: true,
-    meta: { requiresAuth: false, searchTab: 'Comic' },
-    component: () => import('../pages/Manga/Discover.vue'),
   },
   {
     path: '/manga/:mangaId/read/:chapterId',

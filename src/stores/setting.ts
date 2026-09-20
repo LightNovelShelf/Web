@@ -8,6 +8,7 @@ export interface GeneralSetting {
   globalWidth: number
   ignoreJapanese: boolean
   ignoreAI: boolean
+  paging: boolean
 }
 
 export interface ReadSetting {
@@ -64,6 +65,7 @@ export const useSettingStore = defineStore('app.setting', {
       globalWidth: 100,
       ignoreJapanese: false,
       ignoreAI: false,
+      paging: true,
     },
     readSetting: {
       fontSize: 16,

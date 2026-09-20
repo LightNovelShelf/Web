@@ -326,7 +326,7 @@ useInitRequest(
   () => {
     needRequest.value = true
   },
-  { isActive },
+  () => [props.type, props.id, currentPage.value],
 )
 </script>
 

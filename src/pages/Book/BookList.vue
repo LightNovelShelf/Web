@@ -7,11 +7,10 @@
         map-options
         filled
         dense
-        :model-value="categoryId"
+        v-model="category"
         :options="categoryOptions"
         label="小说类型"
         style="width: 160px"
-        @update:model-value="onCategoryChange"
       />
       <q-space />
       <q-select
@@ -20,11 +19,10 @@
         map-options
         filled
         dense
-        :model-value="'flat'"
+        v-model="view"
         :options="viewOptions"
         label="展示方式"
         style="width: 160px"
-        @update:model-value="onViewChange"
       />
       <q-select
         :disable="loading"
@@ -39,50 +37,41 @@
       />
     </div>
 
-    <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-      <q-grid-item v-for="book in bookData" :key="book['Id']">
-        <book-card :book="book"></book-card>
-      </q-grid-item>
-    </q-grid>
-
-    <div class="pagination" style="display: flex; justify-content: center; padding-top: 24px">
-      <q-pagination
-        padding="4px"
-        :disable="loading"
-        v-model="currentPage"
-        :max="pageData.totalPage"
-        direction-links
-        icon-first="mdiSkipPrevious"
-        icon-last="mdiSkipNext"
-        icon-prev="mdiChevronLeft"
-        icon-next="mdiChevronRight"
-        :max-pages="8"
-        :input="!$q.screen.gt.sm"
-      />
-    </div>
+    <paged-list :list="list" :item-key="itemKey">
+      <template #item="{ item }">
+        <folder-card
+          v-if="isSeries(item)"
+          :title="item.Name"
+          :covers="[item.Cover]"
+          :count="item.Count"
+          :updated-at="item.LastUpdatedAt"
+          :to="{ name: 'BookSeriesBooks', params: { name: item.Name, order: order, page: 1 } }"
+        />
+        <book-card v-else :book="item" />
+      </template>
+    </paged-list>
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { useQuasar } from 'quasar'
-import { ref, computed, watch, defineComponent } from 'vue'
-import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { ref } from 'vue'
 
 import { useSettingStore } from '@/stores/setting'
 
 import BookCard from '@/components/BookCard.vue'
-import { QGrid, QGridItem } from '@/components/grid'
+import FolderCard from '@/components/FolderCard.vue'
+import PagedList from '@/components/list/PagedList.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { usePagedList } from '@/composition/biz/usePagedList'
+import { nullableNumberQuery, stringQuery, useQueryState } from '@/composition/biz/useQueryState'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
-import { NOOP } from '@/const/empty'
-import { getBookCategories, getBookList } from '@/services/book'
+import { getBookCategories, getBookList, getSeriesList } from '@/services/book'
 
-import type { BookInList } from '@/services/book/types'
+import type { BookInList, SeriesInList } from '@/services/book/types'
 
-defineComponent({ QGrid, QGridItem })
-const props = defineProps<{ page: string; order: 'new' | 'view' | 'latest' }>()
+type ListItem = BookInList | SeriesInList
 
 const options = [
   {
@@ -103,67 +92,42 @@ const viewOptions = [
   { label: '按系列', value: 'series' },
 ]
 
-const router = useRouter()
-const $q = useQuasar()
-const bookData = ref<BookInList[]>([])
-const pageData = ref({ totalPage: 1 })
-const categoryId = ref<number | null>(null)
+const view = useQueryState('view', stringQuery('flat', ['flat', 'series'] as const))
+const order = useQueryState('order', stringQuery('latest', ['latest', 'new', 'view'] as const))
+const category = useQueryState('category', nullableNumberQuery())
+
 const categoryOptions = ref<Array<{ label: string; value: number | null }>>([{ label: '全部类型', value: null }])
 
-const currentPage = computed({
-  get() {
-    return ~~props.page || 1
-  },
-  set(val: number) {
-    router.push({ name: 'BookList', params: { page: val } })
-  },
-})
-const order = computed({
-  get() {
-    return props.order
-  },
-  set(val: string) {
-    router.push({ name: 'BookList', params: { page: 1, order: val } })
-  },
-})
+const { generalSetting } = useSettingStore()
 
-function onViewChange(value: string) {
-  if (value === 'series') {
-    router.push({ name: 'BookSeries', params: { order: props.order, page: 1 } })
-  }
+const list = usePagedList<ListItem>({
+  async fetch(page) {
+    const params = {
+      Page: page,
+      Order: order.value,
+      Size: 24,
+      IgnoreJapanese: generalSetting.ignoreJapanese,
+      IgnoreAI: generalSetting.ignoreAI,
+      CategoryId: category.value ?? undefined,
+    }
+    const res = view.value === 'series' ? await getSeriesList(params) : await getBookList(params)
+
+    return { data: res.Data, totalPages: res.TotalPages }
+  },
+  deps: () => [view.value, order.value, category.value],
+})
+const loading = list.loading
+
+/** 系列项没有 Id，用 Name 区分 */
+function isSeries(item: ListItem): item is SeriesInList {
+  return 'Name' in item
 }
 
-function onCategoryChange(value: number | null) {
-  categoryId.value = value
-  if (currentPage.value === 1) {
-    request(1, props.order, value).catch(NOOP)
-    return
-  }
-
-  router.push({ name: 'BookList', params: { page: 1, order: props.order } })
+function itemKey(item: ListItem) {
+  return isSeries(item) ? item.Name : item.Id
 }
 
-const settingStore = useSettingStore()
-const { generalSetting } = settingStore
-const request = useTimeoutFn(function (
-  page = currentPage.value,
-  order = props.order,
-  selectedCategoryId = categoryId.value,
-) {
-  return getBookList({
-    Page: page,
-    Order: order,
-    Size: 24,
-    IgnoreJapanese: generalSetting.ignoreJapanese,
-    IgnoreAI: generalSetting.ignoreAI,
-    CategoryId: selectedCategoryId ?? undefined,
-  }).then((serverData) => {
-    bookData.value = serverData.Data
-    pageData.value.totalPage = serverData.TotalPages
-  })
-})
-
-const categoryRequest = useTimeoutFn(() =>
+const categoryRequest = useLoadingFn(() =>
   getBookCategories('Novel').then((categories) => {
     categoryOptions.value = [
       { label: '全部类型', value: null },
@@ -173,20 +137,6 @@ const categoryRequest = useTimeoutFn(() =>
 )
 const categoryLoading = categoryRequest.loading
 
-const loading = request.loading
-
-watch(request.loading, (nextLoading) => {
-  $q.loadingBar.stop()
-  if (nextLoading) {
-    $q.loadingBar.start()
-  }
-})
-
-onBeforeRouteUpdate(async (to) => {
-  await request(~~to.params.page || 1, `${to.params.order}`, categoryId.value).catch(NOOP)
-})
-
-useInitRequest(request)
 useInitRequest(categoryRequest)
 </script>
 
@@ -195,11 +145,5 @@ useInitRequest(categoryRequest)
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.pagination {
-  :deep(.q-btn) {
-    min-width: 34px !important;
-  }
 }
 </style>

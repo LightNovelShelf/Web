@@ -32,14 +32,14 @@ export const sidebarNavigation: SidebarNavigationItem[] = [
     key: 'BookList',
     label: '全部小说',
     icon: 'mdiBook',
-    to: { name: 'BookList', params: { order: 'latest', page: '1' } },
+    to: { name: 'BookList' },
   },
   {
     kind: 'route',
     key: 'MangaDiscover',
     label: '全部漫画',
     icon: 'mdiImage',
-    to: { name: 'MangaDiscover', params: { order: 'latest', page: '1' } },
+    to: { name: 'MangaDiscover' },
   },
   {
     kind: 'route',

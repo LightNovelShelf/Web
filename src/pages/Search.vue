@@ -1,89 +1,72 @@
 <template>
   <q-page padding>
-    <!-- todo 不懂他为什么不能放在q-tab-panel里面 -->
-    <q-infinite-scroll @load="onLoad" :offset="100" ref="scrollEleInstanceRef">
-      <template #default>
-        <div class="column no-wrap gap-y-16">
-          <div class="row flex-center">
-            <!-- <q-input rounded outlined dense v-model="searchKey" @keyup.enter="search" /> -->
-            <search-input
-              outlined
-              dense
-              :width="searchInputWidth"
-              max-width="600px"
-              v-model="state.searchKey"
-              @search="onSearch"
-            />
-          </div>
-          <div class="column no-wrap gap-y-16">
-            <q-tabs dense v-model="state.tab" class="text-teal" @update:model-value="onTabChange">
-              <template v-for="option in tabOptions" :key="option.key">
-                <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
-              </template>
-            </q-tabs>
-            <q-tab-panels v-model="state.tab" animated>
-              <q-tab-panel name="Book">
-                <template v-if="state.bookData.length">
-                  <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-                    <q-grid-item v-for="book in state.bookData" :key="book['Id']">
-                      <book-card :book="book"></book-card>
-                    </q-grid-item>
-                  </q-grid>
-                </template>
-                <template v-else-if="!state.loading">
-                  <div class="row justify-center q-my-md text-center text-h5">无{{ modeLabel }}搜索结果</div>
-                </template>
-              </q-tab-panel>
-              <q-tab-panel name="Comic">
-                <template v-if="state.comicData.length">
-                  <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-                    <q-grid-item v-for="manga in state.comicData" :key="manga.id">
-                      <router-link class="series-card" :to="{ name: 'MangaInfo', params: { bid: manga.bookId } }">
-                        <div class="cover-wrap">
-                          <q-card class="overflow-hidden">
-                            <manga-cover :manga="manga" :request-height="512" />
-                          </q-card>
-                          <span class="chapter-count">{{ manga.chapterCount }} 话</span>
-                        </div>
-                        <div class="q-pa-xs">
-                          <div class="series-title">
-                            <div class="series-title-text" :title="manga.title">{{ manga.title }}</div>
-                          </div>
-                          <div class="series-update-time">
-                            <time-ago :value="manga.updatedAt" />
-                          </div>
-                        </div>
-                      </router-link>
-                    </q-grid-item>
-                  </q-grid>
-                </template>
-                <template v-else-if="!state.loading">
-                  <div class="row justify-center q-my-md text-center text-h5">无漫画搜索结果</div>
-                </template>
-              </q-tab-panel>
-            </q-tab-panels>
-          </div>
-        </div>
-      </template>
-      <template #loading>
-        <div class="row justify-center q-my-md">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-      </template>
-    </q-infinite-scroll>
+    <div class="column no-wrap gap-y-16">
+      <div class="row flex-center">
+        <search-input
+          outlined
+          dense
+          :width="searchInputWidth"
+          max-width="600px"
+          v-model="searchInput"
+          @search="onSearch"
+        />
+      </div>
+      <div class="column no-wrap gap-y-16">
+        <q-tabs dense v-model="tab" class="text-teal">
+          <template v-for="option in tabOptions" :key="option.key">
+            <q-tab :disable="option.disable" :name="option.name" :icon="option.icon" :label="option.label" />
+          </template>
+        </q-tabs>
+        <paged-list :list="list" :item-key="itemKey">
+          <template #item="{ item }">
+            <book-card v-if="tab === 'Book'" :book="item as BookInList"></book-card>
+            <router-link
+              v-else
+              class="series-card"
+              :to="{ name: 'MangaInfo', params: { bid: (item as MangaListItem).bookId } }"
+            >
+              <div class="cover-wrap">
+                <q-card class="overflow-hidden">
+                  <manga-cover :manga="item as MangaListItem" :request-height="512" />
+                </q-card>
+                <span class="chapter-count">{{ (item as MangaListItem).chapterCount }} 话</span>
+              </div>
+              <div class="q-pa-xs">
+                <div class="series-title">
+                  <div class="series-title-text" :title="(item as MangaListItem).title">
+                    {{ (item as MangaListItem).title }}
+                  </div>
+                </div>
+                <div class="series-update-time">
+                  <time-ago :value="(item as MangaListItem).updatedAt" />
+                </div>
+              </div>
+            </router-link>
+          </template>
+          <template #empty>
+            <div class="text-center text-h5">
+              {{ tab === 'Comic' ? '无漫画搜索结果' : `无${modeLabel}搜索结果` }}
+            </div>
+          </template>
+        </paged-list>
+      </div>
+    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useSettingStore } from '@/stores/setting'
 
 import BookCard from '@/components/BookCard.vue'
-import { QGrid, QGridItem } from '@/components/grid'
+import PagedList from '@/components/list/PagedList.vue'
 import SearchInput from '@/components/SearchInput.vue'
 import TimeAgo from '@/components/TimeAgo.vue'
+
+import { usePagedList } from '@/composition/biz/usePagedList'
+import { stringQuery, useQueryPatch, useQueryState } from '@/composition/biz/useQueryState'
 
 import MangaCover from '@/pages/Manga/components/MangaCover.vue'
 import { toMangaListItem } from '@/pages/Manga/data'
@@ -97,40 +80,39 @@ import {
 import { searchComicSeries } from '@/services/manga'
 
 import type { MangaListItem } from '@/pages/Manga/types'
-import type { SearchMode } from '@/services/book/types'
+import type { BookInList, SearchMode } from '@/services/book/types'
+import type { LocationQueryRaw } from 'vue-router'
 
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 const { generalSetting } = useSettingStore()
-const scrollEleInstanceRef = ref<null | {
-  stop(): void
-  reset(): void
-  resume(): void
-  poll(): void
-}>(null)
-const state = ref({
-  // 部分组件会在setup初始化，所以不能等 onMounted 等周期再对state内容初始化
-  /** 搜索关键词 @description 用户输入是啥就是啥 */
-  searchKey: '' + (route.query?.keywords ?? ''),
-  /** 搜索维度 @description 兼容旧 url 的 exact 参数 */
-  mode: ((route.query?.mode as SearchMode) || (route.query?.exact ? 'exact' : 'fuzzy')) as SearchMode,
 
-  /** 当前tab @description 来源页为漫画相关页面时 url 带 tab=Comic，其余默认小说 */
-  tab: route.query?.tab === 'Comic' ? 'Comic' : 'Book',
+const keywordsCodec = stringQuery<string>('')
+const modeCodec = stringQuery<SearchMode>('fuzzy', ['fuzzy', 'exact', 'title', 'author', 'name', 'tags'])
 
-  /** 书籍数据 */
-  bookData: [],
+const keywords = useQueryState('keywords', keywordsCodec)
+const mode = useQueryState('mode', modeCodec)
+const tab = useQueryState('tab', stringQuery('Book', ['Book', 'Comic']))
+const patchQuery = useQueryPatch()
 
-  /** 漫画系列数据（按系列聚合） */
-  comicData: [] as MangaListItem[],
+// 旧 url 用 exact=1 表示精确搜索
+if (route.query.exact !== undefined && route.query.mode === undefined) {
+  const query: LocationQueryRaw = { ...route.query, mode: 'exact' }
+  delete query.exact
+  void router.replace({ query })
+}
 
-  /** 搜索结果加载态 @TODO: 使用 useRequest 代替手动管理 */
-  loading: false,
-})
+/** 搜索框自己的输入态，回车或选维度时才写进 query */
+const searchInput = ref(keywords.value)
+watch(keywords, (value) => (searchInput.value = value))
+
+/** 关键词与维度一起写进 query：分两次赋值时后一次会读到未更新的 route.query，把前一次覆盖掉 */
+function onSearch(value: string, searchMode: SearchMode) {
+  patchQuery({ keywords: keywordsCodec.serialize(value), mode: modeCodec.serialize(searchMode), page: null })
+}
 
 const searchInputWidth = () => '60vw'
 
-/** 各搜索维度对应的 service 调用 */
 const modeLabelMap: Record<SearchMode, string> = {
   fuzzy: '',
   exact: '精确',
@@ -139,21 +121,27 @@ const modeLabelMap: Record<SearchMode, string> = {
   name: '作品名',
   tags: '标签',
 }
-const modeLabel = computed(() => modeLabelMap[state.value.mode] ?? '')
+const modeLabel = computed(() => modeLabelMap[mode.value] ?? '')
 
-const requestBook = async (index: number, done: (stop?: boolean) => void) => {
-  state.value.loading = true
-  try {
-    const key = state.value.searchKey
+const list = usePagedList<BookInList | MangaListItem>({
+  async fetch(page) {
+    const key = keywords.value
+    if (!key) return { data: [], totalPages: 0 }
+
     const baseParam = {
-      Page: index,
+      Page: page,
       Size: 24,
       IgnoreJapanese: generalSetting.ignoreJapanese,
       IgnoreAI: generalSetting.ignoreAI,
     }
 
+    if (tab.value === 'Comic') {
+      const res = await searchComicSeries({ ...baseParam, KeyWords: key, Mode: mode.value })
+      return { data: res.Data.map(toMangaListItem), totalPages: res.TotalPages }
+    }
+
     let res
-    switch (state.value.mode) {
+    switch (mode.value) {
       case 'title':
         res = await getBookListByTitle({ ...baseParam, KeyWords: key })
         break
@@ -169,95 +157,17 @@ const requestBook = async (index: number, done: (stop?: boolean) => void) => {
       case 'exact':
         res = await getBookList({ ...baseParam, KeyWords: `"${key}"` })
         break
-      default: // fuzzy
+      default:
         res = await getBookList({ ...baseParam, KeyWords: key })
         break
     }
 
-    state.value.bookData.push(...res.Data)
-    if (res.TotalPages === index || res.TotalPages === 0) scrollEleInstanceRef.value.stop()
-    else done()
-  } finally {
-    state.value.loading = false
-  }
-}
+    return { data: res.Data, totalPages: res.TotalPages }
+  },
+  deps: () => [keywords.value, mode.value, tab.value],
+})
 
-/** 漫画系列搜索：沿用 book 搜索维度（mode），结果按系列聚合展示 */
-const requestComic = async (index: number, done: (stop?: boolean) => void) => {
-  state.value.loading = true
-  try {
-    const res = await searchComicSeries({
-      KeyWords: state.value.searchKey,
-      Mode: state.value.mode,
-      Page: index,
-      Size: 24,
-      IgnoreJapanese: generalSetting.ignoreJapanese,
-      IgnoreAI: generalSetting.ignoreAI,
-    })
-
-    state.value.comicData.push(...res.Data.map(toMangaListItem))
-    if (res.TotalPages === index || res.TotalPages === 0) scrollEleInstanceRef.value.stop()
-    else done()
-  } finally {
-    state.value.loading = false
-  }
-}
-
-/** 按当前 tab 分发无限滚动加载 */
-const onLoad = (index: number, done: (stop?: boolean) => void) => {
-  if (state.value.tab === 'Comic') return requestComic(index, done)
-  return requestBook(index, done)
-}
-
-function onSearch(val: string, mode: SearchMode) {
-  state.value.searchKey = val
-  state.value.mode = mode
-
-  // sync state to url, so it can restore after refresh
-  router.replace({ name: 'Search', query: { keywords: val, mode, tab: state.value.tab } })
-
-  triggerSearchReq()
-}
-
-/** 用户点击切换 tab：同步 url 并按当前关键词在新维度重新搜索 */
-function onTabChange(tab: string) {
-  router.replace({ name: 'Search', query: { keywords: state.value.searchKey, mode: state.value.mode, tab } })
-  triggerSearchReq()
-}
-
-/** 重新初始化搜素 */
-function triggerSearchReq() {
-  const instance = scrollEleInstanceRef.value
-  if (!instance) {
-    return
-  }
-
-  instance.reset()
-  instance.resume()
-  // 通过 q-infinite-scroll 的 poll 方法来触发加载
-  instance.poll()
-
-  // 数组在这重置还有一层用意：触发滚动容器回调；poll调用后理应就会触发回调，但实际情况并非如此
-  // TODO: 探明滚动容器触发条件
-  state.value.bookData.length = 0
-  state.value.comicData.length = 0
-}
-
-/** 从url上提取搜索关键词，触发请求 @idempotent 对外幂等 */
-function tryResyncSearchStateFromUrl(toRoute = route) {
-  const keyword = '' + (toRoute.query?.keywords ?? '')
-  const mode = ((toRoute.query?.mode as SearchMode) || (toRoute.query?.exact ? 'exact' : 'fuzzy')) as SearchMode
-  const tab = toRoute.query?.tab === 'Comic' ? 'Comic' : 'Book'
-
-  const isSameSearchQuery = keyword === state.value.searchKey && mode === state.value.mode && tab === state.value.tab
-  // 搜索条件对比url上的没变就不再触发
-  if (isSameSearchQuery) return
-
-  state.value.searchKey = keyword
-  state.value.mode = mode
-  state.value.tab = tab
-  triggerSearchReq()
-}
+const itemKey = (item: BookInList | MangaListItem) => ('Id' in item ? item.Id : item.id)
 
 const tabOptions: Array<Record<string, any>> = [
   {
@@ -275,11 +185,6 @@ const tabOptions: Array<Record<string, any>> = [
     disable: false,
   },
 ]
-
-// 初始化
-onMounted(tryResyncSearchStateFromUrl)
-onActivated(tryResyncSearchStateFromUrl)
-onBeforeRouteUpdate(tryResyncSearchStateFromUrl)
 </script>
 
 <style scoped lang="scss">

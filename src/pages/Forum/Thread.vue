@@ -431,7 +431,7 @@ import TimeAgo from '@/components/TimeAgo.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import {
   createCommunityReply,
@@ -513,7 +513,6 @@ const notificationFocusKey = computed(() =>
   notificationReplyId.value ? `${props.id}:${notificationReplyId.value}` : '',
 )
 const handledNotificationFocusKey = ref('')
-const isActive = computed(() => thread.value?.Id === threadId.value)
 const replyPlaceholder = computed(() => {
   if (thread.value?.Locked) {
     return '当前帖子已锁定'
@@ -942,17 +941,17 @@ function handleLoadMoreReplies() {
   void loadThread({ appendReplies: true })
 }
 
-const requestThread = useTimeoutFn(async () => {
+const requestThread = useLoadingFn(async () => {
   handledNotificationFocusKey.value = ''
   await loadThread()
 })
 
-useInitRequest(requestThread, { isActive })
+useInitRequest(requestThread, () => threadId.value)
 
 watch(
   () => threadId.value,
   () => {
-    void requestThread.syncCall()
+    void requestThread()
   },
 )
 

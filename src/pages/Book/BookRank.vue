@@ -28,7 +28,7 @@ import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/components/grid'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { NOOP } from '@/const/empty'
 import { getRank } from '@/services/book'
@@ -65,7 +65,7 @@ const router = useRouter()
 const $q = useQuasar()
 const bookData = ref<BookInList[]>([])
 
-const request = useTimeoutFn(function (type = props.type) {
+const request = useLoadingFn(function (type = props.type) {
   const days = type == 'daily' ? 1 : type == 'weekly' ? 7 : 31
   return getRank(days).then((serverData) => {
     bookData.value = serverData

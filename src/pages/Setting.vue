@@ -24,6 +24,7 @@
                 <div class="row gap-4">
                   <q-toggle v-model="generalSetting.ignoreJapanese" label="隐藏日版" />
                   <q-toggle v-model="generalSetting.ignoreAI" label="隐藏AI内容" />
+                  <q-toggle v-model="generalSetting.paging" label="分页" />
                 </div>
               </div>
               <q-separator />

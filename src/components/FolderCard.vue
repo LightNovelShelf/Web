@@ -1,12 +1,6 @@
 <!-- 通用文件夹卡片：2×3 卡片内以 2×2 网格展示最多 4 张封面，右下角文件夹角标 + 可选数量徽标 -->
 <template>
-  <component
-    :is="to ? 'router-link' : 'a'"
-    class="cursor-pointer"
-    :to="to"
-    :href="to ? undefined : '#'"
-    @click="onClick"
-  >
+  <component :is="to ? 'router-link' : 'a'" class="folder-card cursor-pointer" v-bind="linkAttrs" @click="onClick">
     <div class="folder-cover">
       <q-card v-intersection.once="onIntersection">
         <q-responsive :ratio="2 / 3">
@@ -78,6 +72,9 @@ const emit = defineEmits<{ click: [] }>()
 
 const limitedCovers = computed(() => (props.covers ?? []).filter(Boolean).slice(0, 4))
 
+// href 只在 <a> 分支上给：传 href=undefined 会盖掉 RouterLink 自己算出的 href，导致中键/新标签打不开
+const linkAttrs = computed(() => (props.to ? { to: props.to } : { href: '#' }))
+
 const visible = ref(false)
 function onIntersection(entry: IntersectionObserverEntry) {
   visible.value = entry.isIntersecting
@@ -94,6 +91,11 @@ function onClick(evt: MouseEvent) {
 
 <style lang="scss" scoped>
 @import '@/css/mixin';
+
+// 整张卡都在链接里，有 href 后文字会被 UA 样式染蓝
+.folder-card {
+  color: inherit;
+}
 
 .folder-cover {
   position: relative;

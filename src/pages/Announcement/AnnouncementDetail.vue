@@ -37,7 +37,7 @@ import { Comment } from '@/components'
 import HtmlReader from '@/components/html/HtmlReader.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { announcementFormat } from '@/pages/Announcement/announcementFormat'
 import { CommentType } from '@/services/comment/types'
@@ -52,13 +52,13 @@ const appStore = useSessionStore()
 const user = computed(() => appStore.user)
 const announcement = ref<Announcement>()
 
-const request = useTimeoutFn(async () => {
+const request = useLoadingFn(async () => {
   const res = await getAnnouncementDetail({ Id: _id.value })
   announcement.value = announcementFormat(res)
 })
 const isActive = computed(() => _id.value === announcement.value?.Id)
 
-useInitRequest(request, { isActive })
+useInitRequest(request, () => _id.value)
 </script>
 
 <style scoped lang="scss">

@@ -72,7 +72,7 @@ import { QGrid, QGridItem } from '@/components/grid'
 import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import MangaCover from '@/pages/Manga/components/MangaCover.vue'
 import { toMangaListItem } from '@/pages/Manga/data'
@@ -134,7 +134,7 @@ const confirmClear = async () => {
     .catch(noop)
 }
 
-const requestHistory = useTimeoutFn(async () => {
+const requestHistory = useLoadingFn(async () => {
   await getReadHistory()
     .then((res) => {
       if (res) {
@@ -155,7 +155,10 @@ const resetScroll = () => {
   scroll.value?.reset()
 }
 
-useInitRequest(requestHistory, { before: resetScroll })
+useInitRequest(() => {
+  resetScroll()
+  return requestHistory()
+})
 
 // 切换 tab 时重置滚动状态并按新 tab 重新拉取
 watch(tab, () => {

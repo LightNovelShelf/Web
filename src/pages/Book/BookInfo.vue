@@ -245,7 +245,7 @@ import TimeAgo from '@/components/TimeAgo.vue'
 
 import { useBookDownload } from '@/composition/biz/useBookDownload'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { loadHistory } from '@/pages/Book/Read/history'
 import { useMangaProgress } from '@/pages/Manga/useMangaProgress'
@@ -298,7 +298,7 @@ function cachedPosition(): ReadPosition | null {
   return loadHistory(appStore.userId, _bid.value) ?? null
 }
 
-const getInfo = useTimeoutFn(async () => {
+const getInfo = useLoadingFn(async () => {
   try {
     const response = await getBookInfo(_bid.value)
     bookInfo.value = response
@@ -369,7 +369,7 @@ watch(_bid, () => {
   position.value = null
   void getInfo()
 })
-useInitRequest(getInfo, { isActive })
+useInitRequest(getInfo, () => _bid.value)
 onActivated(() => {
   position.value = cachedPosition() ?? position.value
 })

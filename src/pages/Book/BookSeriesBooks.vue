@@ -52,7 +52,7 @@ import BookCard from '@/components/BookCard.vue'
 import { QGrid, QGridItem } from '@/components/grid'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { NOOP } from '@/const/empty'
 import { getBooksBySeries } from '@/services/book'
@@ -97,13 +97,16 @@ function backToSeries() {
   if (typeof back === 'string' && back.includes('/book/series/')) {
     router.go(-1)
   } else {
-    router.push({ name: 'BookSeries', params: { order: props.order, page: 1 } })
+    router.push({
+      name: 'BookList',
+      query: { view: 'series', ...(props.order === 'latest' ? {} : { order: props.order }) },
+    })
   }
 }
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
-const request = useTimeoutFn(function (name = props.name, page = currentPage.value, order = props.order) {
+const request = useLoadingFn(function (name = props.name, page = currentPage.value, order = props.order) {
   bookData.value = []
   pageData.value.totalPage = 1
   return getBooksBySeries({

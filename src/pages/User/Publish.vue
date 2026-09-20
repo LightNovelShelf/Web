@@ -31,8 +31,8 @@
             </div>
           </div>
 
-          <q-grid :x-gap="12" :y-gap="8" cols="6" xs="3" sm="4" md="5" xl="6" lg="6" style="margin-top: 12px">
-            <q-grid-item v-for="(book, index) in bookData" :key="book['Id']">
+          <paged-list :list="list" :item-key="(book) => book.Id">
+            <template #item="{ item: book, index }">
               <div class="publish-card">
                 <book-card :book="book"></book-card>
                 <div>
@@ -49,24 +49,8 @@
                   </div>
                 </div>
               </div>
-            </q-grid-item>
-          </q-grid>
-
-          <div class="pagination" style="display: flex; justify-content: center; padding-top: 24px">
-            <q-pagination
-              padding="4px"
-              :disable="loading"
-              v-model="currentPage"
-              :max="pageData.totalPage"
-              direction-links
-              icon-first="mdiSkipPrevious"
-              icon-last="mdiSkipNext"
-              icon-prev="mdiChevronLeft"
-              icon-next="mdiChevronRight"
-              :max-pages="8"
-              :input="!$q.screen.gt.sm"
-            />
-          </div>
+            </template>
+          </paged-list>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -133,6 +117,7 @@
         multiple
         batch
         style="max-width: 500px"
+        @uploaded="list.reload()"
       />
     </q-dialog>
   </q-page>
@@ -140,17 +125,19 @@
 
 <script lang="ts" setup>
 import { useQuasar } from 'quasar'
-import { ref, computed, watch, defineComponent, reactive } from 'vue'
+import { ref, computed, watch, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 
 import { ImageInput } from '@/components'
 import BookCard from '@/components/BookCard.vue'
-import { QGrid, QGridItem } from '@/components/grid'
+import PagedList from '@/components/list/PagedList.vue'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { usePagedList } from '@/composition/biz/usePagedList'
+import { stringQuery, useQueryState } from '@/composition/biz/useQueryState'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { getSessionToken } from '@/services/auth/session'
 import { deleteBook, getBookCategories } from '@/services/book'
@@ -161,8 +148,6 @@ import { GetMyBooks } from '@/services/user/type'
 import type { BookInList } from '@/services/book/types'
 import type { QuickCreateNovel } from '@/services/user/type'
 import type { QUploaderFactoryFn } from 'quasar'
-
-defineComponent({ QGrid, QGridItem })
 
 const tabOptions: Array<{ name: GetMyBooks.BookType; key: string; label: string; icon: string }> = [
   {
@@ -179,15 +164,19 @@ const tabOptions: Array<{ name: GetMyBooks.BookType; key: string; label: string;
   },
 ]
 
-const tab = ref(GetMyBooks.BookType.Novel)
 const router = useRouter()
 const $q = useQuasar()
-const bookData = ref<BookInList[]>([])
-const pageData = ref({ totalPage: 1 })
-const _page = ref(1)
+
+const tab = useQueryState(
+  'tab',
+  stringQuery(GetMyBooks.BookType.Novel, [GetMyBooks.BookType.Novel, GetMyBooks.BookType.Comic]),
+)
+// 显式给 string，否则空串字面量会把类型收窄成 ''
+const keywords = useQueryState('keywords', stringQuery<string>(''))
+const searchKeyword = ref(keywords.value)
+
 const createBookShow = ref(false)
 const uploadBookShow = ref(false)
-const searchKeyword = ref('')
 const categoriesByType = ref<Record<GetMyBooks.BookType, Array<{ label: string; value: number }>>>({
   Novel: [],
   Comic: [],
@@ -202,7 +191,7 @@ const createBookData = reactive<Omit<QuickCreateNovel.Request, 'CategoryId'> & {
   CategoryId: null,
 })
 
-const categoryRequest = useTimeoutFn(async () => {
+const categoryRequest = useLoadingFn(async () => {
   categoriesByType.value = { Novel: [], Comic: [] }
   const [novelCategories, comicCategories] = await Promise.all([getBookCategories('Novel'), getBookCategories('Comic')])
   categoriesByType.value = {
@@ -215,28 +204,16 @@ const categoryRequest = useTimeoutFn(async () => {
 })
 const categoryLoading = categoryRequest.loading
 
-const currentPage = computed({
-  get() {
-    return _page.value
+const list = usePagedList<BookInList>({
+  fetch: async (page) => {
+    const res = await getMyBooks({ Page: page, Size: 24, Type: tab.value, KeyWords: keywords.value })
+    return { data: res.Data, totalPages: res.TotalPages }
   },
-  set(val) {
-    request(val, tab.value)
-  },
-})
-
-const request = useTimeoutFn(function (page = currentPage.value, type = tab.value) {
-  return getMyBooks({ Page: page, Size: 24, Type: type, KeyWords: searchKeyword.value }).then((serverData) => {
-    if (type === tab.value) {
-      bookData.value = serverData.Data
-      pageData.value.totalPage = serverData.TotalPages
-      _page.value = serverData.Page
-    }
-  })
+  deps: () => [tab.value, keywords.value],
 })
 
 function searchBook() {
-  _page.value = 1
-  request(1, tab.value)
+  keywords.value = searchKeyword.value
 }
 
 function delBook(bid: number, index: number) {
@@ -252,7 +229,7 @@ function delBook(bid: number, index: number) {
         type: 'positive',
         message: '删除成功',
       })
-      bookData.value.splice(index, 1)
+      list.items.value.splice(index, 1)
     } catch (e) {
       $q.notify({
         type: 'negative',
@@ -317,21 +294,14 @@ const factoryFn: QUploaderFactoryFn = (files) => {
   })
 }
 
-const loading = request.loading
-watch(tab, (type) => {
-  _page.value = 1
-  bookData.value = []
-  createBookData.CategoryId = categoryOptions.value[0]?.value ?? null
-  request(1, type)
+// 前进后退改了 url 上的 keywords 时，输入框跟着回到对应值
+watch(keywords, (value) => {
+  searchKeyword.value = value
 })
-watch(request.loading, (nextLoading) => {
-  $q.loadingBar.stop()
-  if (nextLoading) {
-    $q.loadingBar.start()
-  }
+watch(tab, () => {
+  createBookData.CategoryId = categoryOptions.value[0]?.value ?? null
 })
 
-useInitRequest(request)
 useInitRequest(categoryRequest)
 </script>
 
@@ -355,11 +325,6 @@ useInitRequest(categoryRequest)
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.pagination {
-  :deep(.q-btn) {
-    min-width: 34px !important;
-  }
 }
 .create-book-dialog {
   width: 500px;

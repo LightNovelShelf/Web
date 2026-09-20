@@ -19,7 +19,7 @@ import { EditorSaveAction, NovelChapterFields } from '@/components/editor'
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useEditorAction } from '@/composition/editor/useEditorAction'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { getNovelEditInfo, updateNovelChapter } from '@/services/chapter'
 
@@ -33,7 +33,7 @@ const isActive = computed(() => chapter.value?.BookId === bid.value && chapter.v
 const { activeEditorMode } = useSettingStore()
 const { saving, runEditorAction } = useEditorAction()
 
-const request = useTimeoutFn(async () => {
+const request = useLoadingFn(async () => {
   chapter.value = await getNovelEditInfo({ Bid: bid.value, SortNum: sortNum.value, Format: activeEditorMode })
 })
 
@@ -48,5 +48,5 @@ async function save() {
   )
 }
 
-useInitRequest(request, { isActive })
+useInitRequest(request, () => [bid.value, sortNum.value])
 </script>

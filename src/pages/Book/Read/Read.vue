@@ -153,7 +153,7 @@ import { DragPageSticky } from '@/components'
 import { useLayout } from '@/components/app/useLayout'
 import HtmlReader from '@/components/html/HtmlReader.vue'
 
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { NOOP } from '@/const/empty'
 import { PROVIDE } from '@/const/provide'
@@ -199,7 +199,7 @@ const userId = computed(() => appStore.userId)
 const loading = computed(() => chapter.value?.BookId !== bid.value || chapter.value['SortNum'] !== sortNum.value)
 const chapterContent = computed(() => sanitizerHtml(chapter.value?.Content ?? ''))
 
-const getContent = useTimeoutFn(async () => {
+const getContent = useLoadingFn(async () => {
   const requestedBookId = bid.value
   const requestedSortNumber = sortNum.value
   try {
@@ -366,7 +366,7 @@ onDeactivated(() => {
 })
 
 onMounted(() => {
-  getContent.syncCall()
+  getContent()
 })
 
 watch(

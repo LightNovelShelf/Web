@@ -20,7 +20,7 @@ import { buildBookCategoryOptions, toBookInfoUpdate } from '@/components/editor/
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useEditorAction } from '@/composition/editor/useEditorAction'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { editBook, getBookEditInfo } from '@/services/book'
 
@@ -35,7 +35,7 @@ const isActive = computed(() => book.value?.Id === bid.value)
 const { activeEditorMode } = useSettingStore()
 const { saving, runEditorAction } = useEditorAction()
 
-const request = useTimeoutFn(async () => {
+const request = useLoadingFn(async () => {
   const data = await getBookEditInfo(bid.value, activeEditorMode)
   categoryOptions.value = buildBookCategoryOptions(data)
   book.value = data.Book
@@ -49,5 +49,5 @@ async function save() {
   )
 }
 
-useInitRequest(request, { isActive })
+useInitRequest(request, () => bid.value)
 </script>

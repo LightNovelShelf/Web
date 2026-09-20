@@ -201,7 +201,7 @@ import { buildBookCategoryOptions, toBookInfoUpdate } from '@/components/editor/
 
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useEditorAction } from '@/composition/editor/useEditorAction'
-import { useTimeoutFn } from '@/composition/useTimeoutFn'
+import { useLoadingFn } from '@/composition/useFnLoading'
 
 import { editBook, getBookEditInfo } from '@/services/book'
 import {
@@ -478,7 +478,7 @@ async function handleChange(event: DraggableChangeEvent) {
   }
 }
 
-const request = useTimeoutFn(async () => {
+const request = useLoadingFn(async () => {
   const requestedBookId = bookId.value
   const data = await getBookEditInfo(requestedBookId, activeEditorMode)
   if (bookId.value !== requestedBookId) return
@@ -508,7 +508,13 @@ function resetEditor() {
   creatingChapterContent.sortNum = ''
 }
 
-useInitRequest(request, { before: resetEditor, isActive })
+useInitRequest(
+  () => {
+    resetEditor()
+    return request()
+  },
+  () => bookId.value,
+)
 </script>
 
 <style lang="scss" scoped>
