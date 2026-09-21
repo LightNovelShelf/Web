@@ -10,6 +10,7 @@ import { useLoadingFn } from '../useFnLoading'
 import { useInitRequest } from './useInitRequest'
 import { numberQuery, useQueryState } from './useQueryState'
 
+import type { InitRequestContext } from './useInitRequest'
 import type { QInfiniteScroll } from 'quasar'
 import type { ComputedRef, Ref, WritableComputedRef } from 'vue'
 
@@ -84,7 +85,7 @@ export function usePagedList<T>(options: PagedListOptions<T>): PagedList<T> {
   }
 
   const init = useInitRequest(
-    async (params: { page: number; deps: string }, reason) => {
+    async ({ params, reason }: InitRequestContext<{ page: number; deps: string }>) => {
       // 非分页模式不认 url 上的页码，顺手把它抹掉
       if (!paging.value && route.query.page !== undefined) {
         const query = { ...route.query }

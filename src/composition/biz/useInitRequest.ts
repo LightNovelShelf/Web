@@ -15,16 +15,25 @@ const PASSIVE_DELAY_MS = 200
 /** 本次请求因何发起 */
 export type InitRequestReason = 'mount' | 'params' | 'activate'
 
+/** 传给回调的本次请求上下文 */
+export interface InitRequestContext<P> {
+  /** params 的当前值 */
+  params: P
+  /** 本次请求因何发起 */
+  reason: InitRequestReason
+}
+
 /**
  * 请求初始化流程
  *
- * @param cb 发起请求，入参是 params 的当前值与本次请求的来源；要在请求前后做别的事就自己在这里包
+ * @param cb 发起请求，入参是本次请求的上下文；要在请求前后做别的事就自己在这里包。
+ * 收成一个对象是为了让多参业务函数能直接传进来而不会被位置参数污染
  * @param params 请求参数快照，一般是路由参数。页面停留期间它一变就防抖重新请求；
  * keep-alive 回到本页时，前进一律重新请求，后退只有它与上次请求时不同才重新请求，相同就沿用页面缓存
  * @returns `data` 是 cb 的返回值，`loading` 与 `error` 覆盖本流程发起的每次请求，`reload` 立刻重来一次
  */
 export function useInitRequest<P = void, R = unknown>(
-  cb: (params: P, reason: InitRequestReason) => R | Promise<R>,
+  cb: (context: InitRequestContext<P>) => R | Promise<R>,
   params?: () => P,
 ) {
   const route = useRoute()
@@ -56,7 +65,7 @@ export function useInitRequest<P = void, R = unknown>(
     loading.value = true
     error.value = null
     try {
-      data.value = await cb(current, reason)
+      data.value = await cb({ params: current, reason })
     } catch (err) {
       error.value = err
     } finally {
