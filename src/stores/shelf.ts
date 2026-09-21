@@ -1,7 +1,7 @@
 import { produce } from 'immer'
 import { nanoid } from 'nanoid'
 import { defineStore } from 'pinia'
-import { is, Notify } from 'quasar'
+import { Notify } from 'quasar'
 import { toRaw } from 'vue'
 
 import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
@@ -72,6 +72,15 @@ function lastItem<T>(arr: T[]): T | null {
   return arr[arr.length - 1] ?? null
 }
 
+function notifyError(message: string) {
+  Notify.create({ type: 'negative', timeout: 1500, position: 'bottom', message })
+}
+
+/** 两条文件夹路径是否相同 */
+export function isSameFolderPath(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index])
+}
+
 /** @private 书架store */
 const shelfStore = defineStore('app.shelf', {
   state: createInitialState,
@@ -92,6 +101,30 @@ const shelfStore = defineStore('app.shelf', {
     folders(): ShelfFolderItem[] {
       return toRaw(this.shelf).filter((i): i is ShelfFolderItem => i.type === ShelfItemTypeEnum.FOLDER)
     },
+    /** 文件夹ID到文件夹的映射 */
+    folderMap(): Map<string, ShelfFolderItem> {
+      return new Map(this.folders.map((folder) => [folder.id, folder]))
+    },
+    /**
+     * 解析文件夹路径，返回路径上每一层的文件夹
+     *
+     * 路径里有不存在的ID、或者父子关系对不上（比如文件夹被删后的旧URL）时返回null
+     */
+    resolveFolderPath(): (parents: string[]) => ShelfFolderItem[] | null {
+      return (parents) => {
+        const path: ShelfFolderItem[] = []
+        for (const [depth, id] of parents.entries()) {
+          const folder = this.folderMap.get(id)
+          if (!folder || !isSameFolderPath(folder.parents, parents.slice(0, depth))) return null
+          path.push(folder)
+        }
+        return path
+      }
+    },
+    /** 文件夹内的全部书籍，含所有下级文件夹里的 */
+    booksInFolderTree(): (id: string) => ShelfBookItem[] {
+      return (id) => this.books.filter((book) => book.parents.includes(id))
+    },
     /** 根据最后一层文件夹名称获取书籍 */
     getItemsByParent(): (parent: string | number | null) => ShelfItem[] {
       return (parent) => {
@@ -103,7 +136,7 @@ const shelfStore = defineStore('app.shelf', {
       return (parents: string[]) => {
         // 有可能是空字符串数组，过滤掉无效的那些空字符串
         const _parents = parents.filter((i) => !!i)
-        return toRaw(this.shelf).filter((i) => is.deepEqual(i.parents, _parents))
+        return toRaw(this.shelf).filter((i) => isSameFolderPath(i.parents, _parents))
       }
     },
     /** 当前书架数据里最大的index（为空时返回-1） */
@@ -197,21 +230,30 @@ const shelfStore = defineStore('app.shelf', {
 
     /** git end -------- */
 
-    /** 从服务器同步 */
-    async syncFromRemote() {
+    /**
+     * 从服务器同步，返回服务器上的数据是否被改写过
+     *
+     * 改写只有两种来源：老结构迁移、index 挤压；两者都没发生时不需要回写服务器
+     */
+    async syncFromRemote(): Promise<boolean> {
       const serve = await getBookShelfBinary()
       let shelf: ShelfItem[]
+      let migrated = false
 
       if (serve.ver !== SHELF_STRUCT_VER_LATEST) {
+        // 迁移逻辑只有老数据用得上，动态导入避免把它打进主包
         shelf = await (
           await import('@/utils/migrations/shelf/struct/action')
         ).shelfStructMigration(serve.data, serve.ver ?? null)
+        migrated = true
       } else {
         shelf = serve.data as ShelfItem[]
       }
 
-      // 记录版本到本地
-      this.commit({ shelf: this.squeezeShelfItemIndex(shelf) })
+      const normalized = this.squeezeShelfItemIndex(shelf)
+      this.commit({ shelf: normalized })
+      // squeeze 走 immer，没改到的项目会保持原引用，逐项比引用就能判断有没有真的变化
+      return migrated || normalized.length !== shelf.length || normalized.some((item, i) => item !== shelf[i])
     },
     /** 同步到服务器 */
     async syncToRemote() {
@@ -260,7 +302,7 @@ const shelfStore = defineStore('app.shelf', {
       })
       await this.push({ syncRemote: true })
     },
-    /** 移出书架 */
+    /** 移出书架；传入文件夹ID时，文件夹内所有下级内容一并移出 */
     async removeFromShelf(payload: { books: (string | number)[]; push: boolean }) {
       const items = new Set(payload.books)
 
@@ -268,7 +310,9 @@ const shelfStore = defineStore('app.shelf', {
         // 移出后index就会出现空洞，squeeze一次
         shelf: this.squeezeShelfItemIndex(
           // 删除项目
-          produce(toRaw(this.shelf), (draft) => draft.filter((i) => !items.has(i.id))),
+          produce(toRaw(this.shelf), (draft) =>
+            draft.filter((i) => !items.has(i.id) && !i.parents.some((parent) => items.has(parent))),
+          ),
         ),
       })
 
@@ -301,7 +345,7 @@ const shelfStore = defineStore('app.shelf', {
             // 剩下的依次左移/右移
             draft.forEach((item, index) => {
               // 不是本层的，不要动
-              if (!is.deepEqual(item.parents, parents)) {
+              if (!isSameFolderPath(item.parents, parents)) {
                 return
               }
 
@@ -336,50 +380,79 @@ const shelfStore = defineStore('app.shelf', {
     clearSelected() {
       this.selected = new Set()
     },
-    /** 添加到文件夹 */
-    addToFolder(payload: { parents: string[] }) {
+    /**
+     * 把项目移动到指定文件夹路径，返回实际移动的项目数
+     *
+     * parents存的是从根到父级的完整路径，所以移动文件夹时，它下级所有项目的路径前缀都要跟着重写
+     */
+    moveItems(payload: { ids: (string | number)[]; parents: string[] }): number {
+      const shelf = toRaw(this.shelf)
+      const requested = new Set(payload.ids)
+      const requestedFolders = new Set(payload.ids.filter((id): id is string => typeof id === 'string'))
+      const moving = new Set<string | number>()
+      let blocked = 0
+
+      for (const item of shelf) {
+        if (!requested.has(item.id)) continue
+        // 已经在目标文件夹里
+        if (isSameFolderPath(item.parents, payload.parents)) continue
+        // 祖先也在移动列表里，跟着祖先一起走
+        if (item.parents.some((parent) => requestedFolders.has(parent))) continue
+        // 目标路径经过这个文件夹自己，移进去会把它自己从树上摘下来
+        if (payload.parents.includes(String(item.id))) {
+          blocked += 1
+          continue
+        }
+        moving.add(item.id)
+      }
+
+      if (blocked) notifyError('不能把文件夹移动到它自己或它的下级里')
+      if (!moving.size) return 0
+
+      const count = moving.size
       this.commit({
         shelf: this.squeezeShelfItemIndex(
-          produce(toRaw(this.shelf), (draft) => {
-            draft.forEach((item) => {
-              // 如果是待加入的项目，记录新的文件夹路径
-              if (this.selected.has(item.id)) {
-                // 排在开头
-                item.index = 0
-
-                item.parents = payload.parents
-              } else if (is.deepEqual(item.parents, payload.parents)) {
-                item.index += 1
+          produce(shelf, (draft) => {
+            // 移动过来的项目排在目标文件夹开头，彼此之间保持原来的先后顺序
+            let nextIndex = 0
+            for (const item of draft) {
+              if (moving.has(item.id)) {
+                item.parents = [...payload.parents]
+                item.index = nextIndex++
+              } else if (isSameFolderPath(item.parents, payload.parents)) {
+                item.index += count
               }
-            })
+            }
+
+            // 重写被移动文件夹下级的路径前缀
+            for (const item of draft) {
+              if (moving.has(item.id)) continue
+              const anchor = item.parents.findIndex((parent) => moving.has(parent))
+              if (anchor === -1) continue
+              item.parents = [...payload.parents, ...item.parents.slice(anchor)]
+            }
           }),
         ),
       })
 
       // 清掉选择状态，不然会导致数据一直认为有已选的项目
       this.clearSelected()
+      return count
     },
-    /** 新建文件夹, 返回文件夹ID */
-    createFolder(payload: { name: string }): string {
-      if (payload.name === ROOT_LEVEL_FOLDER_NAME) {
-        Notify.create({
-          type: 'negative',
-          timeout: 1500,
-          position: 'bottom',
-          message: '该文件夹名字无效',
-        })
+    /** 在指定路径下新建文件夹, 返回文件夹ID；失败时返回空字符串 */
+    createFolder(payload: { name: string; parents?: string[] }): string {
+      const name = payload.name.trim()
+      const parents = payload.parents ?? []
+
+      if (!name || name === ROOT_LEVEL_FOLDER_NAME) {
+        notifyError('该文件夹名字无效')
         return ''
       }
 
-      // 校验重名
+      // 只跟同一层的文件夹校验重名
       for (const folder of this.folders) {
-        if (payload.name === folder.title) {
-          Notify.create({
-            type: 'negative',
-            timeout: 1500,
-            position: 'bottom',
-            message: '已有同名文件夹',
-          })
+        if (folder.title === name && isSameFolderPath(folder.parents, parents)) {
+          notifyError('这一层已有同名文件夹')
           return ''
         }
       }
@@ -391,17 +464,17 @@ const shelfStore = defineStore('app.shelf', {
         // 固定在第一
         index: 0,
         type: ShelfItemTypeEnum.FOLDER,
-        parents: [],
+        parents: [...parents],
         id: folderID,
-        title: payload.name,
+        title: name,
         updateAt: new Date().toISOString(),
       }
 
       this.commit({
         shelf: this.squeezeShelfItemIndex(
-          produce(this.shelf, (draft) => {
+          produce(toRaw(this.shelf), (draft) => {
             for (const item of draft) {
-              if (item.parents.length === 0) item.index += 1
+              if (isSameFolderPath(item.parents, parents)) item.index += 1
             }
             draft.unshift(folder)
           }),
@@ -410,54 +483,64 @@ const shelfStore = defineStore('app.shelf', {
 
       return folderID
     },
-    /** 重命名文件夹 */
-    renameFolder(payload: { name: string; id: string }) {
+    /** 重命名文件夹，返回是否改名成功 */
+    renameFolder(payload: { name: string; id: string }): boolean {
+      const name = payload.name.trim()
+      const folder = this.folderMap.get(payload.id)
+
+      if (!folder) {
+        notifyError('文件夹ID无效，请联系开发者')
+        return false
+      }
+      if (!name || name === ROOT_LEVEL_FOLDER_NAME) {
+        notifyError('该文件夹名字无效')
+        return false
+      }
+      for (const other of this.folders) {
+        if (other.id !== folder.id && other.title === name && isSameFolderPath(other.parents, folder.parents)) {
+          notifyError('这一层已有同名文件夹')
+          return false
+        }
+      }
+
       this.commit({
         shelf: produce(toRaw(this.shelf), (draft) => {
           for (const item of draft) {
             if (item.type === ShelfItemTypeEnum.FOLDER && item.id === payload.id) {
-              item.title = payload.name
+              item.title = name
               return
             }
           }
         }),
       })
+      return true
     },
-    /** 删除文件夹 */
+    /** 删除文件夹，内容提升到它所在的上一层 */
     deleteFolder(payload: { id: string }) {
+      const folder = this.folderMap.get(payload.id)
+      if (!folder) {
+        notifyError('文件夹ID无效，请联系开发者')
+        return
+      }
+      const parents = folder.parents
+
       this.commit({
         shelf: this.squeezeShelfItemIndex(
           produce(toRaw(this.shelf), (draft) => {
-            let currentMaxIndex = this.curMaxIndexInFolder(null)
+            // 提升上来的内容排在上一层末尾
+            let nextIndex = this.curMaxIndexInFolder(lastItem(parents)) + 1
 
-            let folderIndex = -1
-            // 遍历所有书籍同时找到文件夹所在index
-            draft.forEach((item, index) => {
-              if (item.type === ShelfItemTypeEnum.BOOK) {
-                if (item.parents.includes(payload.id)) {
-                  // 放回根文件夹
-                  item.parents = []
-                  // 更新index，不然index会出现重复
-                  item.index = ++currentMaxIndex
-                }
-              } else if (item.type === ShelfItemTypeEnum.FOLDER && item.id === payload.id) {
-                folderIndex = index
-              }
-            })
+            for (const item of draft) {
+              const depth = item.parents.indexOf(payload.id)
+              if (depth === -1) continue
 
-            // 校验一次index
-            if (folderIndex === -1) {
-              // 错误的id，没有这个文件夹，提示
-              Notify.create({
-                type: 'negative',
-                timeout: 1500,
-                position: 'bottom',
-                message: '文件夹ID无效，请联系开发者',
-              })
-              return
+              // 从路径里摘掉这个文件夹，更深层的层级关系保持不变
+              const isDirectChild = depth === item.parents.length - 1
+              item.parents = [...item.parents.slice(0, depth), ...item.parents.slice(depth + 1)]
+              if (isDirectChild) item.index = nextIndex++
             }
 
-            // 删除文件夹
+            const folderIndex = draft.findIndex((item) => item.id === payload.id)
             draft.splice(folderIndex, 1)
           }),
         ),
@@ -478,12 +561,8 @@ const shelfStore = defineStore('app.shelf', {
       }
       this.initialized = true
 
-      await this.syncFromRemote()
-      const currentData = toRaw(this.shelf)
-      const normalizedData = this.squeezeShelfItemIndex(currentData)
-      const hasChange = currentData !== normalizedData
-      if (hasChange) this.commit({ shelf: normalizedData })
-      await this.push({ syncRemote: hasChange })
+      const changed = await this.syncFromRemote()
+      await this.push({ syncRemote: changed })
     },
 
     /** actions end */

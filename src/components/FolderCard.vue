@@ -12,7 +12,7 @@
               <system-image
                 v-if="limitedCovers.length <= 1"
                 class="single-cover"
-                :url="limitedCovers[0]"
+                :url="limitedCovers[0] ?? ''"
                 :request-height="512"
                 :ratio="2 / 3"
               />

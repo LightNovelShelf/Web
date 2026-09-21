@@ -11,7 +11,6 @@ export interface ShelfSortMove {
 export function useShelfSortable(options: {
   element: Ref<HTMLElement | null | undefined>
   enabled: Ref<boolean>
-  hasParentFolder: Ref<boolean>
   onMove: (move: ShelfSortMove) => void
   onInvalid: () => void
 }): void {
@@ -27,7 +26,6 @@ export function useShelfSortable(options: {
       sortable = new Sortable(element, {
         animation: 400,
         handle: '.js-drag-target',
-        onMove: (event) => !event.related.classList.contains('no-drop'),
         onEnd: ({ oldIndex, newIndex }) => {
           if (oldIndex === undefined || newIndex === undefined) {
             options.onInvalid()
@@ -35,8 +33,7 @@ export function useShelfSortable(options: {
           }
           if (oldIndex === newIndex) return
 
-          const offset = options.hasParentFolder.value ? 1 : 0
-          options.onMove({ from: oldIndex - offset, to: newIndex - offset })
+          options.onMove({ from: oldIndex, to: newIndex })
         },
       })
     },

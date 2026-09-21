@@ -40,4 +40,7 @@ export interface ShelfFolderItem extends ShelfCommonItem {
 
 export type ShelfItem = ShelfBookItem | ShelfFolderItem
 
-export type ShelfFolderDestination = { kind: 'existing'; parents: string[] } | { kind: 'new'; name: string }
+/** 移动目标：已有的文件夹路径，或者在某个路径下新建的文件夹 */
+export type ShelfFolderDestination =
+  | { kind: 'existing'; parents: string[] }
+  | { kind: 'new'; name: string; parents: string[] }

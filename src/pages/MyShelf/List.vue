@@ -1,23 +1,65 @@
 <template>
   <q-page padding>
-    <!-- 编辑模式下的确认按钮等 -->
-    <q-slide-transition>
-      <div v-show="editMode">
-        <!-- 占高度用的div -->
-        <div class="actions-wrap-placeholder"></div>
-        <!-- 实际展示的block -->
-        <div :class="actionBarClass">
-          <div style="flex-grow: 1" />
-          <q-btn class="action" color="primary" outline @click="exitEditMode">取消</q-btn>
-          <q-btn class="action" color="primary" @click="submitListChange">保存</q-btn>
-        </div>
+    <!-- 路径 + 操作栏，滚动时吸附在页头下面 -->
+    <div :class="toolbarClass">
+      <shelf-breadcrumb class="shelf-toolbar-path" :path="folderPath" />
 
-        <div style="height: 24px"></div>
+      <div class="shelf-toolbar-actions">
+        <template v-if="editMode">
+          <div class="shelf-toolbar-count">已选 {{ selectedCount }} 项</div>
+          <q-btn
+            flat
+            dense
+            no-caps
+            icon="mdiCheckAll"
+            :label="compactActions ? undefined : selectAllLabel"
+            :disable="!shelfData.length"
+            @click="toggleSelectAllHandle"
+          >
+            <q-tooltip>{{ selectAllLabel }}</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            no-caps
+            icon="mdiFolderPlusOutline"
+            :label="compactActions ? undefined : '新建文件夹'"
+            @click="createFolderHandle"
+          >
+            <q-tooltip>新建文件夹</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            no-caps
+            icon="mdiFolderMoveOutline"
+            :label="compactActions ? undefined : '移动到...'"
+            :disable="!selectedCount"
+            @click="openFolderPicker()"
+          >
+            <q-tooltip>移动到...</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            no-caps
+            icon="mdiHeartRemoveOutline"
+            :label="compactActions ? undefined : '移出书架'"
+            :disable="!selectedCount"
+            @click="removeSelectedHandle"
+          >
+            <q-tooltip>移出书架</q-tooltip>
+          </q-btn>
+          <q-btn outline dense no-caps color="primary" label="取消" @click="exitEditMode" />
+          <q-btn unelevated dense no-caps color="primary" label="保存" :loading="saving" @click="submitListChange" />
+        </template>
+
+        <q-btn v-else flat dense no-caps icon="mdiSquareEditOutline" label="整理书架" @click="enterEditMode" />
       </div>
-    </q-slide-transition>
+    </div>
 
     <!-- 书籍列表 -->
-    <template v-if="shelfData.length || parentFolder">
+    <template v-if="shelfData.length">
       <q-grid
         :x-gap="12"
         :y-gap="8"
@@ -31,9 +73,6 @@
         @contextmenu="preventListContextMenuHandle"
         :class="editMode ? 'sortable-list-in-edit-mode' : ''"
       >
-        <!-- 如果有父层文件夹，显示返回卡片 -->
-        <q-grid-item v-if="parentFolder" class="no-drop no-drag"><nav-back-to-parent-folder /></q-grid-item>
-
         <!-- 渲染书架列表内容 -->
         <q-grid-item v-for="item in shelfData" :key="item.id" @click.capture="listItemClickHandle(item, $event)">
           <!-- 书架项目 -->
@@ -55,16 +94,28 @@
                   />
                 </div>
               </q-responsive>
+
+              <!-- 整理模式下进文件夹的入口，点卡片本身是选中 -->
+              <q-btn
+                v-if="item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER"
+                class="shelf-item-open-btn js-open-folder"
+                round
+                dense
+                size="sm"
+                color="primary"
+                icon="mdiFolderOpen"
+                @click="openFolderHandle(item)"
+              >
+                <q-tooltip>打开文件夹</q-tooltip>
+              </q-btn>
             </div>
 
             <!-- 选中态icon -->
-            <div v-if="editMode && item.type !== ShelfTypes.ShelfItemTypeEnum.FOLDER" class="shelf-item-check-icon">
+            <div v-if="editMode" class="shelf-item-check-icon">
               <!-- @todo icon的切换参照多看实现一个回弹缩放动画 -->
               <q-icon v-if="selected.has(item.id)" size="24px" color="primary" name="mdiCheckCircle" />
               <q-icon v-else size="24px" color="grey" name="mdiCheckboxBlankCircleOutline" />
             </div>
-
-            <template v-else />
           </div>
 
           <!-- 编辑状态下，书架项目有单独右键菜单 -->
@@ -87,31 +138,32 @@
 
               <q-separator />
 
-              <!-- 书籍相关的 -->
-              <template v-if="item.type === ShelfTypes.ShelfItemTypeEnum.BOOK">
-                <!-- 有父层文件夹，代表已经在文件夹里了 -->
-                <q-item v-if="parentFolder" clickable v-close-popup @click="openFolderPicker(item)">
-                  <q-item-section>移动到...</q-item-section>
-                </q-item>
-                <!-- 否则就是在root层 -->
-                <q-item v-else clickable v-close-popup @click="openFolderPicker(item)">
-                  <q-item-section>加入到...</q-item-section>
-                </q-item>
-
-                <q-item clickable v-close-popup @click="removeItemHandle(item)">
-                  <q-item-section>移出书架</q-item-section>
-                </q-item>
-              </template>
-
-              <template v-else-if="item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER">
+              <template v-if="item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER">
                 <!-- 文件夹相关的 -->
+                <q-item clickable v-close-popup @click="openFolderHandle(item)">
+                  <q-item-section>打开</q-item-section>
+                </q-item>
                 <q-item clickable v-close-popup @click="currentFolderToRename = item">
                   <q-item-section>重命名</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="removeFolderHandle(item)">
-                  <q-item-section title="文件夹内书籍会放回书架顶层">删除文件夹</q-item-section>
-                </q-item>
               </template>
+
+              <q-item clickable v-close-popup @click="openFolderPicker(item)">
+                <q-item-section>移动到...</q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup @click="removeItemHandle(item)">
+                <q-item-section>移出书架</q-item-section>
+              </q-item>
+
+              <q-item
+                v-if="item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER"
+                clickable
+                v-close-popup
+                @click="removeFolderHandle(item)"
+              >
+                <q-item-section :title="`文件夹内的内容会放回${currentFolderTitle}`">删除文件夹</q-item-section>
+              </q-item>
             </q-list>
           </q-menu>
         </q-grid-item>
@@ -120,7 +172,10 @@
         <q-menu v-if="!editMode" touch-position context-menu>
           <q-list dense style="min-width: 100px">
             <q-item clickable v-close-popup @click="enterEditMode">
-              <q-item-section>编辑</q-item-section>
+              <q-item-section>整理书架</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="createFolderHandle">
+              <q-item-section>新建文件夹</q-item-section>
             </q-item>
           </q-list>
         </q-menu>
@@ -131,17 +186,17 @@
     <div v-else-if="initialized" class="empty-placeholder">
       <div>
         <q-icon class="empty-placeholder-icon" size="160px" color="grey" name="mdiFolderOpen" />
-        <div class="empty-placeholder-label">{{ loading ? '读取中...' : '空空如也' }}</div>
+        <div class="empty-placeholder-label">{{ emptyLabel }}</div>
       </div>
     </div>
 
     <template v-else />
 
+    <!-- 移动到文件夹弹层 -->
     <shelf-folder-picker
       v-model="folderSelectorVisible"
-      :folders="shelfStore.folders"
-      :parent-folder="parentFolder"
-      :selected-count="selectedCount"
+      :moving-ids="movingIds"
+      :current-parents="parentFolders"
       @submit="moveSelectionToFolder"
     />
 
@@ -168,17 +223,16 @@ import { useShelfSortable } from '@/composition/shelf/useShelfSortable'
 import { useIsActivated } from '@/composition/useIsActivated'
 
 import { isRealtimeConnected } from '@/services/transport'
-import { ROOT_LEVEL_FOLDER_NAME } from '@/types/shelf'
 import * as ShelfTypes from '@/types/shelf'
 
-import NavBackToParentFolder from './components/NavBackToParentFolder.vue'
 import RenameDialog from './components/RenameDialog.vue'
+import ShelfBreadcrumb from './components/ShelfBreadcrumb.vue'
 import ShelfCard from './components/ShelfCard.vue'
 import ShelfFolderPicker from './components/ShelfFolderPicker.vue'
 
 import type { BookInList } from '@/services/book/types'
 import type { ShelfFolderDestination } from '@/types/shelf'
-import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
 const $q = useQuasar()
 const { headerOffset } = useLayout()
@@ -195,26 +249,36 @@ const selectedCount = computed(() => shelfStore.selectedCount)
 const initialized = computed(() => shelfStore.initialized)
 const editMode = computed(() => shelfStore.branch === ShelfBranch.draft)
 const folderSelectorVisible = ref(false)
+const saving = ref(false)
 const contextMenuShelfItemID = ref<number | string>(-1)
+const movingIds = ref<(number | string)[]>([])
 const currentFolderToRename = ref<ShelfTypes.ShelfFolderItem | null>(null)
 const [listWrapRef, setListWrapRef] = useForwardRef()
 
 const parentFolders = ref<string[]>(getParentFolders(route))
+/** 当前路径上的文件夹链；路径失效时是null */
+const resolvedPath = computed(() => shelfStore.resolveFolderPath(parentFolders.value))
+const folderPath = computed(() => resolvedPath.value ?? [])
 const parentFolder = computed(() => parentFolders.value.at(-1) ?? null)
-const hasParentFolder = computed(() => parentFolder.value !== null)
+const currentFolderTitle = computed(() => folderPath.value.at(-1)?.title ?? '我的书架')
 const shelfData = computed(() => shelfStore.getItemsByParents(parentFolders.value))
-const actionBarClass = computed(() => [
-  'actions-wrap',
-  { 'actions-wrap-visible': editMode.value },
-  $q.dark.isActive ? 'bg-grey-10' : 'bg-grey-1',
-])
+const allSelected = computed(
+  () => shelfData.value.length > 0 && shelfData.value.every((item) => selected.value.has(item.id)),
+)
+const selectAllLabel = computed(() => (allSelected.value ? '取消全选' : '全选本层'))
+// 窄屏放不下六个带文字的按钮，收成纯图标
+const compactActions = computed(() => $q.screen.lt.md)
+const emptyLabel = computed(() => {
+  if (loading.value) return '读取中...'
+  return parentFolder.value ? '这个文件夹是空的' : '空空如也'
+})
+const toolbarClass = computed(() => ['shelf-toolbar', $q.dark.isActive ? 'bg-grey-10' : 'bg-grey-1'])
 
 const contextMenuShelfItem = computed<ShelfTypes.ShelfFolderItem | BookInList | null>(() => {
   const id = contextMenuShelfItemID.value
   if (!id || Number(id) < 0) return null
 
   const shelfItem = shelfStore.shelfInMap.get(id)
-  if (!shelfItem) return null
   return shelfItem.type === ShelfTypes.ShelfItemTypeEnum.BOOK ? bookListStore.getBook(shelfItem.id) : shelfItem
 })
 const contextMenuShelfItemTitle = computed(() => {
@@ -229,33 +293,87 @@ function getParentFolders(currentRoute: RouteLocationNormalizedLoaded): string[]
   return Array.isArray(folderId) ? folderId.filter(Boolean) : [folderId]
 }
 
-function openFolderPicker(item: ShelfTypes.ShelfItem) {
-  if (selectedCount.value === 0) shelfStore.selectItem({ id: item.id })
+function navToFolder(parents: string[], replace = false) {
+  const location = { name: 'MyShelf' as const, params: { folderID: parents } }
+  return replace ? router.replace(location) : router.push(location)
+}
+
+function openFolderHandle(item: ShelfTypes.ShelfItem) {
+  if (item.type !== ShelfTypes.ShelfItemTypeEnum.FOLDER) return
+  void navToFolder([...item.parents, item.id])
+}
+
+function openFolderPicker(item?: ShelfTypes.ShelfItem) {
+  if (item && !selected.value.has(item.id)) {
+    movingIds.value = [item.id]
+  } else {
+    movingIds.value = [...selected.value]
+  }
+  if (!movingIds.value.length) {
+    $q.notify({ type: 'warning', message: '请先选择要移动的项目' })
+    return
+  }
   folderSelectorVisible.value = true
 }
 
 async function moveSelectionToFolder(destination: ShelfFolderDestination) {
-  if (!selected.value.size) {
-    $q.notify({ type: 'warning', message: '请先选择要移动的项目' })
-    return
-  }
+  const ids = movingIds.value
+  if (!ids.length) return
 
-  let parents: string[]
+  let parents = destination.parents
   if (destination.kind === 'new') {
-    const folderId = shelfStore.createFolder({ name: destination.name })
+    const folderId = shelfStore.createFolder({ name: destination.name, parents: destination.parents })
     if (!folderId) return
-    parents = [folderId]
-  } else {
-    parents = destination.parents
+    parents = [...destination.parents, folderId]
   }
 
-  shelfStore.addToFolder({ parents })
+  const moved = shelfStore.moveItems({ ids, parents })
+  if (moved) $q.notify({ type: 'positive', timeout: 1200, message: `已移动 ${moved} 项` })
   await removeFolderIfEmpty()
 }
 
+function createFolderHandle() {
+  const parents = [...parentFolders.value]
+  $q.dialog({
+    title: '新建文件夹',
+    prompt: { model: '', type: 'text', label: '文件夹名称', isValid: (value: string) => !!value.trim() },
+    cancel: true,
+  }).onOk((name: string) => {
+    if (!editMode.value) enterEditMode()
+    shelfStore.createFolder({ name, parents })
+  })
+}
+
+function toggleSelectAllHandle() {
+  const nextSelected = !allSelected.value
+  for (const item of shelfData.value) {
+    shelfStore.selectItem({ id: item.id, selected: nextSelected })
+  }
+}
+
 async function removeItemHandle(item: ShelfTypes.ShelfItem) {
-  const books = selectedCount.value === 0 ? [item.id] : shelfStore.selectedBooks.map((selectedBook) => selectedBook.id)
-  await shelfStore.removeFromShelf({ books, push: false })
+  const ids = selected.value.has(item.id) ? [...selected.value] : [item.id]
+  await removeItems(ids)
+}
+
+async function removeSelectedHandle() {
+  await removeItems([...selected.value])
+}
+
+/** 移出书架；带文件夹时要提示里面的内容会一起移出 */
+async function removeItems(ids: (number | string)[]) {
+  if (!ids.length) return
+
+  const folderCount = ids.filter((id) => typeof id === 'string').length
+  if (
+    folderCount &&
+    !(await confirmDialog('移出书架', `选中的 ${folderCount} 个文件夹，连同里面的所有内容都会移出书架`))
+  ) {
+    return
+  }
+
+  await shelfStore.removeFromShelf({ books: ids, push: false })
+  shelfStore.clearSelected()
   await removeFolderIfEmpty()
 }
 
@@ -264,18 +382,16 @@ async function removeFolderIfEmpty() {
   if (!folderId || shelfData.value.length > 0) return
   if (!(await confirmDialog('删除文件夹', '该文件夹为空，是否删除文件夹？'))) return
 
+  // 先退到上一层再删；反过来的话当前路径会先失效，失效守卫会把人踢回书架顶层
+  await navToFolder(parentFolders.value.slice(0, -1), true)
   shelfStore.deleteFolder({ id: folderId })
-  await router.replace({
-    ...route,
-    params: { folderID: parentFolders.value.filter((id) => id !== folderId) },
-  } as RouteLocationRaw)
 }
 
 async function removeFolderHandle(item: ShelfTypes.ShelfFolderItem) {
-  const children = shelfStore.getItemsByParent(item.id)
+  const children = shelfStore.getItemsByParents([...item.parents, item.id])
   if (
     children.length > 0 &&
-    !(await confirmDialog('删除文件夹', `该文件夹不为空，删除后内容会转移到${ROOT_LEVEL_FOLDER_NAME}`))
+    !(await confirmDialog('删除文件夹', `该文件夹不为空，删除后里面的内容会放回${currentFolderTitle.value}`))
   ) {
     return
   }
@@ -303,7 +419,7 @@ function exitEditMode() {
   shelfStore.checkout({ to: ShelfBranch.main })
 }
 
-function renameHandle(name: string, done: (promise: Promise<unknown> | void) => void) {
+function renameHandle(name: string, done: (success: boolean) => void) {
   if (!currentFolderToRename.value) return
   done(shelfStore.renameFolder({ name, id: currentFolderToRename.value.id }))
 }
@@ -316,10 +432,8 @@ function preventListContextMenuHandle(event: MouseEvent) {
 
 function listItemClickHandle(item: ShelfTypes.ShelfItem, event: MouseEvent) {
   if (!editMode.value) return
-  if (item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER) {
-    void router.push({ ...route, params: { folderID: item.id } } as RouteLocationRaw)
-    return
-  }
+  // 打开文件夹的按钮自己处理点击
+  if ((event.target as HTMLElement | null)?.closest('.js-open-folder')) return
 
   event.preventDefault()
   event.stopPropagation()
@@ -331,17 +445,20 @@ function prepareBookContextDataHandle(item: ShelfTypes.ShelfItem) {
 }
 
 async function submitListChange() {
+  saving.value = true
   try {
     await shelfStore.submitChange()
+    $q.notify({ type: 'positive', timeout: 1200, message: '书架已保存' })
   } catch (error) {
     $q.notify({ type: 'negative', message: getErrMsg(error) })
+  } finally {
+    saving.value = false
   }
 }
 
 useShelfSortable({
   element: listWrapRef,
   enabled: editMode,
-  hasParentFolder,
   onMove: ({ from, to }) => shelfStore.commitSortInfo({ from, to, parents: parentFolders.value }),
   onInvalid: () => $q.notify({ type: 'warning', message: '排序字段缺失，本次排序操作无效' }),
 })
@@ -354,46 +471,49 @@ watch(
   { immediate: true, deep: true },
 )
 
+// 文件夹被删掉之后的旧链接会解析失败，回到书架顶层
+watch([resolvedPath, initialized, loading], ([path, ready, busy]) => {
+  if (!isActivated.value || !ready || busy || path !== null) return
+  $q.notify({ type: 'warning', timeout: 1500, message: '文件夹不存在，已返回书架' })
+  void navToFolder([], true)
+})
+
 onDeactivated(exitEditMode)
 </script>
 
 <style lang="scss" scoped>
-// 顶部操作栏
-.actions-wrap-placeholder {
-  height: 48.1px;
-}
-
-.actions-wrap {
-  display: flex;
-  position: fixed;
-  z-index: 1;
-  padding-bottom: 12px;
-  height: 0;
-
-  // top: 12px + 58px;
+// 顶部路径+操作栏
+.shelf-toolbar {
+  position: sticky;
+  z-index: 2;
   top: v-bind(headerHeight);
-  padding-top: 12px;
 
-  // right: 12px;
-  right: 0;
-  padding-right: 12px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 
-  opacity: 0;
-  width: 100%;
-  box-shadow:
-    0 1px 5px rgb(0 0 0 / 20%),
-    0 2px 2px rgb(0 0 0 / 14%),
-    0 3px 1px -2px rgb(0 0 0 / 12%);
-  transition: all var(--animate-duration);
-
-  .action {
-    margin-left: 10px;
-  }
+  // q-page 自带 16px padding，靠负 margin 让吸顶栏通栏
+  margin: -16px -16px 12px;
+  padding: 8px 16px;
+  min-height: 48px;
 }
 
-.actions-wrap-visible {
-  opacity: 1;
-  height: 60px;
+.shelf-toolbar-path {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.shelf-toolbar-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shelf-toolbar-count {
+  font-size: 12px;
+  opacity: 0.7;
 }
 
 // 列表
@@ -429,30 +549,18 @@ onDeactivated(exitEditMode)
   top: 0;
   left: 0;
   right: 0;
-  // bottom: 0;
   background-color: rgba(#000, 0.4);
   border-radius: 4px;
   cursor: pointer;
 }
 
-// // 列表项动画
-// .shelf-item-enter-active,
-// .shelf-item-enter-move,
-// .shelf-item-leave-active {
-//   // 移动的动画需要换成flex才能做
-//   transition: all var(--q-transition-duration);
-//   // transition: all 5s;
-// }
-
-// .shelf-item-leave-active {
-//   position: absolute;
-// }
-
-// .shelf-item-enter-from,
-// .shelf-item-leave-to {
-//   opacity: 0;
-//   transform: scale(0.9) translateY(20%);
-// }
+// 整理模式下的打开文件夹按钮
+.shelf-item-open-btn {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 1;
+}
 
 // 列表项选中icon
 .shelf-item-check-icon {
