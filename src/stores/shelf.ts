@@ -9,7 +9,7 @@ import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 import { getBookShelfBinary, saveBookShelf } from '@/services/user'
 import { isShelfBookItem, ROOT_LEVEL_FOLDER_NAME, ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
 
-import type { ShelfItem, ShelfBookItem, ShelfFolderItem, SHELF_STRUCT_VER } from '@/types/shelf'
+import type { ShelfItem, ShelfBookItem, ShelfBookType, ShelfFolderItem, SHELF_STRUCT_VER } from '@/types/shelf'
 
 export enum ShelfBranch {
   main = 'main',
@@ -121,9 +121,10 @@ const shelfStore = defineStore('app.shelf', {
         return path
       }
     },
-    /** 文件夹内的全部书籍，含所有下级文件夹里的 */
-    booksInFolderTree(): (id: string) => ShelfBookItem[] {
-      return (id) => this.books.filter((book) => book.parents.includes(id))
+    /** 文件夹内的全部书籍，含所有下级文件夹里的；传 type 时只要这一类 */
+    booksInFolderTree(): (id: string, type?: ShelfBookType | null) => ShelfBookItem[] {
+      return (id, type = null) =>
+        this.books.filter((book) => book.parents.includes(id) && (!type || book.type === type))
     },
     /** 根据最后一层文件夹名称获取书籍 */
     getItemsByParent(): (parent: string | number | null) => ShelfItem[] {
@@ -269,7 +270,7 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** 添加书籍到书架，立即生效 */
-    async addToShelf(payload: { id: number; type: ShelfItemTypeEnum.NOVEL | ShelfItemTypeEnum.COMIC }) {
+    async addToShelf(payload: { id: number; type: ShelfBookType }) {
       const item: ShelfBookItem = {
         id: payload.id,
         type: payload.type,

@@ -29,8 +29,11 @@ interface ShelfCommonItem {
   updateAt: string
 }
 
+/** 书籍条目的类型：小说或漫画 */
+export type ShelfBookType = ShelfItemTypeEnum.NOVEL | ShelfItemTypeEnum.COMIC
+
 export interface ShelfBookItem extends ShelfCommonItem {
-  type: ShelfItemTypeEnum.NOVEL | ShelfItemTypeEnum.COMIC
+  type: ShelfBookType
   id: number
 }
 export interface ShelfFolderItem extends ShelfCommonItem {

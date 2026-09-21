@@ -79,7 +79,7 @@
         <q-grid-item v-for="item in shelfData" :key="item.id" @click.capture="listItemClickHandle(item, $event)">
           <!-- 书架项目 -->
           <div class="shelf-item-wrap">
-            <shelf-card :item="item" />
+            <shelf-card :item="item" :book-kind="bookKind" />
 
             <!-- 遮罩 -->
             <div v-if="editMode" class="shelf-item-mask">
@@ -273,13 +273,22 @@ const kindOptions = [
   { label: '小说', value: 'novel' },
   { label: '漫画', value: 'comic' },
 ]
-/** 文件夹始终显示，筛选只作用在书籍上 */
+/** 筛选的目标类型；`null` 表示不筛选 */
+const bookKind = computed<ShelfTypes.ShelfBookType | null>(() => {
+  if (kind.value === 'all' || editMode.value) return null
+  return kind.value === 'comic' ? ShelfTypes.ShelfItemTypeEnum.COMIC : ShelfTypes.ShelfItemTypeEnum.NOVEL
+})
 const shelfData = computed(() => {
   const items = shelfStore.getItemsByParents(parentFolders.value)
-  if (kind.value === 'all' || editMode.value) return items
+  const type = bookKind.value
+  if (!type) return items
 
-  const kept = kind.value === 'comic' ? ShelfTypes.ShelfItemTypeEnum.COMIC : ShelfTypes.ShelfItemTypeEnum.NOVEL
-  return items.filter((item) => item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER || item.type === kept)
+  // 文件夹按整棵子树判断，子树里一本该类型的书都没有就不显示
+  return items.filter((item) =>
+    item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER
+      ? shelfStore.booksInFolderTree(item.id, type).length > 0
+      : item.type === type,
+  )
 })
 const allSelected = computed(
   () => shelfData.value.length > 0 && shelfData.value.every((item) => selected.value.has(item.id)),

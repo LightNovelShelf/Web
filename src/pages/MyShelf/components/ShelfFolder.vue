@@ -23,10 +23,10 @@ import TimeAgo from '@/components/TimeAgo.vue'
 
 import { ShelfItemTypeEnum } from '@/types/shelf'
 
-import type { ShelfFolderItem } from '@/types/shelf'
+import type { ShelfBookType, ShelfFolderItem } from '@/types/shelf'
 import type { RouteLocationRaw } from 'vue-router'
 
-const props = defineProps<{ item: ShelfFolderItem }>()
+const props = defineProps<{ item: ShelfFolderItem; bookKind: ShelfBookType | null }>()
 const shelfStore = useShelfStore()
 const listDataStore = useBookListStore()
 
@@ -35,11 +35,19 @@ const folderIDs = computed(() => [...props.item.parents, props.item.id])
 const to = computed<RouteLocationRaw | undefined>(() =>
   shelfStore.branch === ShelfBranch.draft ? undefined : { name: 'MyShelf', params: { folderID: folderIDs.value } },
 )
-/** 文件夹内所有层级的书籍，封面和数量都按整棵子树算 */
-const booksInTree = computed(() => shelfStore.booksInFolderTree(props.item.id))
+/** 文件夹内所有层级的书籍，封面和数量都按整棵子树算；筛选时只算被筛中的那一类 */
+const booksInTree = computed(() => shelfStore.booksInFolderTree(props.item.id, props.bookKind))
 const bookCount = computed(() => booksInTree.value.length)
+// 筛选时，子树里没有该类型书的子文件夹进去也是空的，不计入
 const subFolderCount = computed(
-  () => shelfStore.getItemsByParents(folderIDs.value).filter((item) => item.type === ShelfItemTypeEnum.FOLDER).length,
+  () =>
+    shelfStore
+      .getItemsByParents(folderIDs.value)
+      .filter(
+        (item) =>
+          item.type === ShelfItemTypeEnum.FOLDER &&
+          (!props.bookKind || shelfStore.booksInFolderTree(item.id, props.bookKind).length > 0),
+      ).length,
 )
 // 限制最多四本书的封面
 const covers = computed<string[]>(() =>
