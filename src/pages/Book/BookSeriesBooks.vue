@@ -44,7 +44,7 @@
 <script lang="ts" setup>
 import { useQuasar } from 'quasar'
 import { ref, computed, watch, defineComponent } from 'vue'
-import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 import { useSettingStore } from '@/stores/setting'
 
@@ -54,7 +54,6 @@ import { QGrid, QGridItem } from '@/components/grid'
 import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useLoadingFn } from '@/composition/useFnLoading'
 
-import { NOOP } from '@/const/empty'
 import { getBooksBySeries } from '@/services/book'
 
 import type { BookInList } from '@/services/book/types'
@@ -106,7 +105,7 @@ function backToSeries() {
 
 const settingStore = useSettingStore()
 const { generalSetting } = settingStore
-const request = useLoadingFn(function (name = props.name, page = currentPage.value, order = props.order) {
+const request = useLoadingFn(function (name: string, page: number, order: 'new' | 'view' | 'latest') {
   bookData.value = []
   pageData.value.totalPage = 1
   return getBooksBySeries({
@@ -131,11 +130,11 @@ watch(request.loading, (nextLoading) => {
   }
 })
 
-onBeforeRouteUpdate(async (to) => {
-  await request(`${to.params.name}`, ~~to.params.page || 1, `${to.params.order}`).catch(NOOP)
-})
-
-useInitRequest(request)
+// 参数交给 useInitRequest 跟踪；直接把 request 传进去的话，它给回调的第二个入参 reason 会落到 page 上
+useInitRequest(
+  () => request(props.name, currentPage.value, props.order),
+  () => [props.name, currentPage.value, props.order],
+)
 </script>
 
 <style lang="scss" scoped>
