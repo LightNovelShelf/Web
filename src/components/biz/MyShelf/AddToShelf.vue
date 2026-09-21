@@ -11,6 +11,7 @@ import { getErrMsg } from '@/utils/getErrMsg'
 import { useShelfStore } from '@/stores/shelf'
 
 import { isRealtimeConnected } from '@/services/transport'
+import { ShelfItemTypeEnum } from '@/types/shelf'
 
 import type { BookServicesTypes } from '@/services/book'
 import type { AnyVoidFunc } from '@/types/utils'
@@ -19,7 +20,8 @@ const props = defineProps<{ book: BookServicesTypes.BookInList | null }>()
 const quasar = useQuasar()
 const shelfStore = useShelfStore()
 const bookId = computed(() => props.book?.Id ?? null)
-const liked = computed(() => shelfStore.booksMap.has(bookId.value ?? -1))
+const bookType = computed(() => (props.book?.Type === 'Comic' ? ShelfItemTypeEnum.COMIC : ShelfItemTypeEnum.NOVEL))
+const liked = computed(() => bookId.value !== null && shelfStore.booksMap.has(bookId.value))
 const loading = computed(
   () => shelfStore.useLoading((state) => state.pull || state.push).value || !isRealtimeConnected.value,
 )
@@ -34,7 +36,7 @@ async function toggleShelf() {
 
   try {
     if (nextLiked) {
-      await shelfStore.addToShelf({ id: bookId.value })
+      await shelfStore.addToShelf({ id: bookId.value, type: bookType.value })
     } else {
       await shelfStore.removeFromShelf({ books: [bookId.value], push: true })
     }

@@ -97,7 +97,7 @@ function backToSeries() {
     router.go(-1)
   } else {
     router.push({
-      name: 'BookList',
+      name: 'NovelList',
       query: { view: 'series', ...(props.order === 'latest' ? {} : { order: props.order }) },
     })
   }

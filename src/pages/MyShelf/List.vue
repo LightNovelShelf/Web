@@ -4,6 +4,8 @@
     <div :class="toolbarClass">
       <shelf-breadcrumb class="shelf-toolbar-path" :path="folderPath" />
 
+      <!-- 整理模式下拖拽排序按可视位置写 index，过滤掉条目会算错，所以只在浏览态提供筛选 -->
+      <q-btn-toggle v-if="!editMode" v-model="kind" flat dense no-caps toggle-color="primary" :options="kindOptions" />
       <div class="shelf-toolbar-actions">
         <template v-if="editMode">
           <div class="shelf-toolbar-count">已选 {{ selectedCount }} 项</div>
@@ -219,6 +221,7 @@ import { ShelfBranch, useShelfStore } from '@/stores/shelf'
 import { useLayout } from '@/components/app/useLayout'
 import { QGrid, QGridItem } from '@/components/grid'
 
+import { stringQuery, useQueryState } from '@/composition/biz/useQueryState'
 import { useShelfSortable } from '@/composition/shelf/useShelfSortable'
 import { useIsActivated } from '@/composition/useIsActivated'
 
@@ -233,6 +236,9 @@ import ShelfFolderPicker from './components/ShelfFolderPicker.vue'
 import type { BookInList } from '@/services/book/types'
 import type { ShelfFolderDestination } from '@/types/shelf'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
+
+/** 书架筛选：全部 / 只看小说 / 只看漫画 */
+type ShelfKind = 'all' | 'novel' | 'comic'
 
 const $q = useQuasar()
 const { headerOffset } = useLayout()
@@ -261,7 +267,20 @@ const resolvedPath = computed(() => shelfStore.resolveFolderPath(parentFolders.v
 const folderPath = computed(() => resolvedPath.value ?? [])
 const parentFolder = computed(() => parentFolders.value.at(-1) ?? null)
 const currentFolderTitle = computed(() => folderPath.value.at(-1)?.title ?? '我的书架')
-const shelfData = computed(() => shelfStore.getItemsByParents(parentFolders.value))
+const kind = useQueryState('kind', stringQuery<ShelfKind>('all', ['all', 'novel', 'comic']))
+const kindOptions = [
+  { label: '全部', value: 'all' },
+  { label: '小说', value: 'novel' },
+  { label: '漫画', value: 'comic' },
+]
+/** 文件夹始终显示，筛选只作用在书籍上 */
+const shelfData = computed(() => {
+  const items = shelfStore.getItemsByParents(parentFolders.value)
+  if (kind.value === 'all' || editMode.value) return items
+
+  const kept = kind.value === 'comic' ? ShelfTypes.ShelfItemTypeEnum.COMIC : ShelfTypes.ShelfItemTypeEnum.NOVEL
+  return items.filter((item) => item.type === ShelfTypes.ShelfItemTypeEnum.FOLDER || item.type === kept)
+})
 const allSelected = computed(
   () => shelfData.value.length > 0 && shelfData.value.every((item) => selected.value.has(item.id)),
 )
@@ -279,7 +298,8 @@ const contextMenuShelfItem = computed<ShelfTypes.ShelfFolderItem | BookInList | 
   if (!id || Number(id) < 0) return null
 
   const shelfItem = shelfStore.shelfInMap.get(id)
-  return shelfItem.type === ShelfTypes.ShelfItemTypeEnum.BOOK ? bookListStore.getBook(shelfItem.id) : shelfItem
+  if (!shelfItem) return null
+  return ShelfTypes.isShelfBookItem(shelfItem) ? bookListStore.getBook(shelfItem.id) : shelfItem
 })
 const contextMenuShelfItemTitle = computed(() => {
   if (selected.value.size) return `已选${selected.value.size}项`
@@ -352,8 +372,7 @@ function toggleSelectAllHandle() {
 }
 
 async function removeItemHandle(item: ShelfTypes.ShelfItem) {
-  const ids = selected.value.has(item.id) ? [...selected.value] : [item.id]
-  await removeItems(ids)
+  await removeItems(selected.value.has(item.id) ? [...selected.value] : [item.id])
 }
 
 async function removeSelectedHandle() {

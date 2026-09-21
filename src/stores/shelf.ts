@@ -7,7 +7,7 @@ import { toRaw } from 'vue'
 import { shelfDB, shelfStructVerDB } from '@/utils/storage/db'
 
 import { getBookShelfBinary, saveBookShelf } from '@/services/user'
-import { ROOT_LEVEL_FOLDER_NAME, ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
+import { isShelfBookItem, ROOT_LEVEL_FOLDER_NAME, ShelfItemTypeEnum, SHELF_STRUCT_VER_LATEST } from '@/types/shelf'
 
 import type { ShelfItem, ShelfBookItem, ShelfFolderItem, SHELF_STRUCT_VER } from '@/types/shelf'
 
@@ -93,9 +93,9 @@ const shelfStore = defineStore('app.shelf', {
     shelfInMap(): Map<string | number, ShelfItem> {
       return new Map<string | number, ShelfItem>(this.shelf.map((i) => [i.id, i]))
     },
-    /** 所有书籍（包括已经被放入文件夹的） */
+    /** 所有书籍（小说和漫画，包括已经被放入文件夹的） */
     books(): ShelfBookItem[] {
-      return toRaw(this.shelf).filter((i): i is ShelfBookItem => i.type === ShelfItemTypeEnum.BOOK)
+      return toRaw(this.shelf).filter(isShelfBookItem)
     },
     /** 所有文件夹 */
     folders(): ShelfFolderItem[] {
@@ -165,9 +165,7 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 选中的书籍 */
     selectedBooks(): ShelfBookItem[] {
-      return this.shelf.filter(
-        (i): i is ShelfBookItem => !!(i.type === ShelfItemTypeEnum.BOOK && this.selected.has(i.id)),
-      )
+      return this.shelf.filter((i): i is ShelfBookItem => isShelfBookItem(i) && this.selected.has(i.id))
     },
   },
   actions: {
@@ -271,10 +269,10 @@ const shelfStore = defineStore('app.shelf', {
     },
 
     /** 添加书籍到书架，立即生效 */
-    async addToShelf(payload: { id: number }) {
+    async addToShelf(payload: { id: number; type: ShelfItemTypeEnum.NOVEL | ShelfItemTypeEnum.COMIC }) {
       const item: ShelfBookItem = {
         id: payload.id,
-        type: ShelfItemTypeEnum.BOOK,
+        type: payload.type,
         // 添加到书架默认就是添加到root @todo 支持添加到指定文件夹
         parents: [],
         // 添加到首位

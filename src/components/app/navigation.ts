@@ -29,10 +29,10 @@ export const sidebarNavigation: SidebarNavigationItem[] = [
   { kind: 'separator', key: 'separator-content' },
   {
     kind: 'route',
-    key: 'BookList',
+    key: 'NovelList',
     label: '全部小说',
     icon: 'mdiBook',
-    to: { name: 'BookList' },
+    to: { name: 'NovelList' },
   },
   {
     kind: 'route',

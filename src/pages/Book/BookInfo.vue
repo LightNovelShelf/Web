@@ -85,7 +85,7 @@
               <div style="margin-top: 24px"></div>
 
               <div class="row book-actions" v-if="isActive">
-                <add-to-shelf v-if="!isComic" :book="bookInList" />
+                <add-to-shelf :book="bookInList" />
                 <q-btn color="primary" :disable="chapters.length === 0" @click="startRead">
                   {{ position ? '继续阅读' : '开始阅读' }}
                 </q-btn>
