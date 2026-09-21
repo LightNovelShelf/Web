@@ -233,27 +233,16 @@ const shelfStore = defineStore('app.shelf', {
     /**
      * 从服务器同步，返回服务器上的数据是否被改写过
      *
-     * 改写只有两种来源：老结构迁移、index 挤压；两者都没发生时不需要回写服务器
+     * 改写只有 index 挤压一种来源，没发生时不需要回写服务器
      */
     async syncFromRemote(): Promise<boolean> {
       const serve = await getBookShelfBinary()
-      let shelf: ShelfItem[]
-      let migrated = false
-
-      if (serve.ver !== SHELF_STRUCT_VER_LATEST) {
-        // 迁移逻辑只有老数据用得上，动态导入避免把它打进主包
-        shelf = await (
-          await import('@/utils/migrations/shelf/struct/action')
-        ).shelfStructMigration(serve.data, serve.ver ?? null)
-        migrated = true
-      } else {
-        shelf = serve.data as ShelfItem[]
-      }
+      const shelf = serve.data
 
       const normalized = this.squeezeShelfItemIndex(shelf)
       this.commit({ shelf: normalized })
       // squeeze 走 immer，没改到的项目会保持原引用，逐项比引用就能判断有没有真的变化
-      return migrated || normalized.length !== shelf.length || normalized.some((item, i) => item !== shelf[i])
+      return normalized.length !== shelf.length || normalized.some((item, i) => item !== shelf[i])
     },
     /** 同步到服务器 */
     async syncToRemote() {

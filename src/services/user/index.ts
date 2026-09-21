@@ -3,7 +3,6 @@ import { invokeHub } from '@/services/transport'
 import * as Types from './type'
 
 import type { ShelfItem, SHELF_STRUCT_VER } from '@/types/shelf'
-import type * as ShelfLegacyStruct from '@/utils/migrations/shelf/struct/types'
 
 const publicSummaryCache = new Map<number, { expiresAt: number; value: Types.PublicUserSummary }>()
 const publicSummaryRequests = new Map<number, Promise<Types.PublicUserSummary>>()
@@ -44,10 +43,7 @@ export function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT_VER }
 }
 
 export function getBookShelfBinary() {
-  return invokeHub<{
-    data: (ShelfItem | ShelfLegacyStruct.ServerShelfItem)[]
-    ver?: SHELF_STRUCT_VER
-  }>('GetBookShelf')
+  return invokeHub<{ data: ShelfItem[]; ver?: SHELF_STRUCT_VER }>('GetBookShelf')
 }
 
 export function clearHistory() {
