@@ -13,7 +13,9 @@
     />
 
     <div class="message-composer__actions">
-      <div class="text-caption" :class="overLimit ? 'text-negative' : 'text-opacity'">{{ length }}/{{ MAX_LENGTH }}</div>
+      <div class="text-caption" :class="overLimit ? 'text-negative' : 'text-opacity'">
+        {{ length }}/{{ MAX_LENGTH }}
+      </div>
       <q-btn dense unelevated color="primary" icon="mdiSend" label="发送" :disable="!canSubmit" @click="submit" />
     </div>
   </div>

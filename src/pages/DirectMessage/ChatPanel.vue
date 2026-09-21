@@ -15,7 +15,10 @@
             <q-item clickable @click="toggleBlock">
               <q-item-section>
                 <div class="chat-panel__menu-item">
-                  <q-icon :name="chat.isBlockedByMe ? 'mdiAccountCheckOutline' : 'mdiAccountCancelOutline'" size="17px" />
+                  <q-icon
+                    :name="chat.isBlockedByMe ? 'mdiAccountCheckOutline' : 'mdiAccountCancelOutline'"
+                    size="17px"
+                  />
                   {{ chat.isBlockedByMe ? '取消拉黑' : '拉黑' }}
                 </div>
               </q-item-section>
@@ -155,7 +158,9 @@ store.ensureChat(props.peerId)
 
 const myId = computed(() => sessionStore.userId)
 const chat = computed<ChatState>(() => store.chat(props.peerId) ?? EMPTY_CHAT)
-const peer = computed(() => chat.value.peer ?? store.conversations.find((i) => i.Peer.Id === props.peerId)?.Peer ?? null)
+const peer = computed(
+  () => chat.value.peer ?? store.conversations.find((i) => i.Peer.Id === props.peerId)?.Peer ?? null,
+)
 const peerName = computed(() => {
   if (!peer.value) return '私信'
   return peer.value.IsDeleted ? '已注销用户' : peer.value.UserName

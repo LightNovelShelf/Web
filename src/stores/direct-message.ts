@@ -101,7 +101,8 @@ function mergeMessages(target: DirectMessageItem[], incoming: DirectMessageItem[
 
   let appended = false
   for (const item of incoming) {
-    const index = indexById.get(item.Id) ?? (item.ClientMessageId ? indexByClientId.get(item.ClientMessageId) : undefined)
+    const index =
+      indexById.get(item.Id) ?? (item.ClientMessageId ? indexByClientId.get(item.ClientMessageId) : undefined)
     if (index === undefined) {
       indexById.set(item.Id, target.length)
       if (item.ClientMessageId) indexByClientId.set(item.ClientMessageId, target.length)
