@@ -48,14 +48,16 @@ export function nullableNumberQuery(): QueryCodec<number | null> {
 /**
  * 把一个状态挂到 url query 上
  *
- * @description 读走 route.query，写走 router.push，因此刷新、前进后退都能恢复
+ * @description 读走本页 route.query，离页时保留缓存值；写走 router.push，因此刷新、前进后退都能恢复
  */
 export function useQueryState<T>(key: string, codec: QueryCodec<T>): WritableComputedRef<T> {
   const route = useRoute()
   const router = useRouter()
+  const routeName = route.name
+  const initialValue = codec.parse(readRaw(route.query[key]))
 
   return computed<T>({
-    get: () => codec.parse(readRaw(route.query[key])),
+    get: (previous = initialValue) => (route.name === routeName ? codec.parse(readRaw(route.query[key])) : previous),
     set: (value) => {
       const raw = codec.serialize(value)
       const query = { ...route.query }
