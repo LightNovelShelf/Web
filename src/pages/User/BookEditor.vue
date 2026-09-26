@@ -99,17 +99,13 @@
         <q-tab-panel name="chapter">
           <template v-if="chapter">
             <q-input v-if="isComic" label="标题" v-model="chapter.Title" />
-            <comic-chapter-images v-if="isComic" v-model="chapter.Images" v-model:uploading="comicUploading" />
+            <comic-chapter-images v-if="isComic" v-model="chapter.Images" v-model:pending="comicPending" />
             <novel-chapter-fields v-else v-model="chapter" />
           </template>
         </q-tab-panel>
         <q-tab-panel name="new">
           <q-input v-if="isComic" label="标题" v-model="creatingChapterContent.Title" />
-          <comic-chapter-images
-            v-if="isComic"
-            v-model="creatingChapterContent.Images"
-            v-model:uploading="comicUploading"
-          />
+          <comic-chapter-images v-if="isComic" v-model="creatingChapterContent.Images" v-model:pending="comicPending" />
           <novel-chapter-fields v-else v-model="creatingChapterModel" />
         </q-tab-panel>
       </q-tab-panels>
@@ -253,7 +249,7 @@ const bookId = computed(() => Number(props.bookId))
 const selectedChapterId = ref(-1)
 const chapter = ref<ChapterEditState>()
 const chapterLoaded = ref(true)
-const comicUploading = ref(false)
+const comicPending = ref(false)
 const creatingChapterContent = reactive<CreatingChapterState>({
   sortNum: '',
   Title: '',
@@ -300,7 +296,7 @@ watch(selectedChapterId, async (chapterId) => {
 })
 
 function getSaveState(): boolean {
-  if (saving.value || !isActive.value || comicUploading.value) return true
+  if (saving.value || !isActive.value || comicPending.value) return true
   return tab.value === 'chapter' && (!chapterLoaded.value || !chapter.value)
 }
 

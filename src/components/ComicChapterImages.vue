@@ -3,11 +3,23 @@
     <div class="comic-image-toolbar">
       <div>
         <div class="text-subtitle1">漫画图片</div>
-        <div class="text-caption text-opacity">共 {{ images.length }} 页，可拖拽调整顺序</div>
+        <div class="text-caption text-opacity">共 {{ items.length }} 页，可拖拽调整顺序</div>
+        <div v-if="failedItems.length > 0" class="text-caption text-negative">
+          {{ failedItems.length }} 张图片上传失败，重试或删除后才能保存
+        </div>
       </div>
       <div class="comic-image-actions">
+        <q-btn
+          v-if="failedItems.length > 0"
+          outline
+          color="negative"
+          icon="mdiRefresh"
+          label="全部重试"
+          :disable="uploading"
+          @click="retryAll"
+        />
         <q-btn color="secondary" label="添加图片" :disable="uploading" @click="pickImages" />
-        <q-btn flat color="negative" label="清空" :disable="uploading || images.length === 0" @click="clearImages" />
+        <q-btn flat color="negative" label="清空" :disable="uploading || items.length === 0" @click="clearImages" />
       </div>
     </div>
 
@@ -18,35 +30,70 @@
       <div class="text-caption text-opacity">正在上传 {{ uploadedCount }} / {{ uploadTotal }}</div>
     </div>
 
-    <q-banner v-if="images.length === 0 && !uploading" rounded class="bg-grey-2 text-grey-7">
+    <q-banner v-if="items.length === 0" rounded class="bg-grey-2 text-grey-7">
       暂无图片，请按阅读顺序选择漫画图片。
     </q-banner>
 
     <Draggable
       v-else
-      v-model="images"
-      :item-key="imageKey"
+      :model-value="items"
+      item-key="key"
       :animation="150"
       class="comic-image-grid"
       ghost-class="comic-image-ghost"
       :disabled="uploading"
+      @update:model-value="onReorder"
     >
       <template #item="{ element, index }">
-        <q-card flat bordered class="comic-image-card">
+        <q-card
+          flat
+          bordered
+          class="comic-image-card"
+          :class="{ 'comic-image-card--failed': element.status === 'failed' }"
+        >
           <div class="comic-image-preview">
             <system-image
+              v-if="element.status === 'done'"
               class="comic-image-thumbnail"
-              :url="element"
+              :url="element.url"
               :request-height="256"
               fit="cover"
               loading="lazy"
               :alt="`第 ${index + 1} 页`"
-              @click="previewImage(element, index)"
+              @click="previewImage(element.url, index)"
             />
+            <q-img
+              v-else
+              class="comic-image-thumbnail"
+              :src="element.url"
+              fit="cover"
+              :alt="`第 ${index + 1} 页`"
+              @click="previewImage(element.url, index)"
+            >
+              <div class="absolute-full column flex-center gap-8">
+                <q-spinner v-if="element.status === 'uploading'" size="32px" />
+                <template v-else>
+                  <q-icon name="mdiAlertCircleOutline" size="32px" color="negative" />
+                  <div class="text-caption">上传失败</div>
+                  <q-tooltip v-if="element.error">{{ element.error }}</q-tooltip>
+                </template>
+              </div>
+            </q-img>
           </div>
           <q-card-section class="comic-image-meta">
             <div class="text-caption">第 {{ index + 1 }} 页</div>
-            <q-btn flat dense color="negative" label="删除" :disable="uploading" @click="removeImage(index)" />
+            <div class="comic-image-buttons">
+              <q-btn
+                v-if="element.status === 'failed'"
+                flat
+                dense
+                color="primary"
+                label="重试"
+                :disable="uploading"
+                @click="retryItem(element)"
+              />
+              <q-btn flat dense color="negative" label="删除" :disable="uploading" @click="removeImage(index)" />
+            </div>
           </q-card-section>
         </q-card>
       </template>
@@ -63,44 +110,86 @@ import SystemImage from '@/components/SystemImage.vue'
 import { PROVIDE } from '@/const/provide'
 import { uploadImage } from '@/services/user'
 
+interface ComicImageItem {
+  key: number
+  status: 'done' | 'uploading' | 'failed'
+  /** done 时为服务端地址，其余状态为本地 object URL */
+  url: string
+  file?: File
+  error?: string
+}
+
 const props = defineProps<{
   modelValue: string[]
-  uploading?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string[]]
-  'update:uploading': [value: boolean]
+  /** 存在上传中或上传失败的图片时为 true，此时 modelValue 不是完整的章节图片 */
+  'update:pending': [value: boolean]
 }>()
 
 const $q = useQuasar()
 const imagePreview = inject<{ show: (src: string, alt: string) => void }>(PROVIDE.IMAGE_PREVIEW)
 const fileInputRef = ref<HTMLInputElement>()
+const items = ref<ComicImageItem[]>([])
 const uploadTotal = ref(0)
 const uploadedCount = ref(0)
 const fileNameCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+let nextKey = 0
+let lastEmitted: string[] | undefined
 
-const images = computed({
-  get: () => props.modelValue ?? [],
-  set: (value: string[]) => emit('update:modelValue', value),
-})
-const uploading = computed(() => props.uploading ?? false)
+const failedItems = computed(() => items.value.filter((item) => item.status === 'failed'))
+const uploading = computed(() => items.value.some((item) => item.status === 'uploading'))
+const pending = computed(() => uploading.value || failedItems.value.length > 0)
 const uploadProgress = computed(() => (uploadTotal.value === 0 ? 0 : uploadedCount.value / uploadTotal.value))
+
+// 自己 emit 出去的数组回流时跳过，只有外部换了数组（如切换章节）才重建列表并丢弃未完成的图片
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value !== undefined && toRaw(value) === lastEmitted) return
+    releaseLocalImages(items.value)
+    items.value = (value ?? []).map((url) => ({ key: nextKey++, status: 'done', url }))
+  },
+  { immediate: true },
+)
+
+watch(pending, (value) => emit('update:pending', value), { immediate: true })
+
+onBeforeUnmount(() => {
+  releaseLocalImages(items.value)
+  if (pending.value) emit('update:pending', false)
+})
+
+function emitModel() {
+  lastEmitted = items.value.filter((item) => item.status === 'done').map((item) => item.url)
+  emit('update:modelValue', lastEmitted)
+}
+
+function releaseLocalImages(list: ComicImageItem[]) {
+  for (const item of list) {
+    if (item.status !== 'done') URL.revokeObjectURL(item.url)
+  }
+}
 
 function pickImages() {
   fileInputRef.value?.click()
-}
-
-function imageKey(url: string) {
-  return url
 }
 
 function previewImage(url: string, index: number) {
   imagePreview?.show(url, `第 ${index + 1} 页`)
 }
 
+function onReorder(value: ComicImageItem[]) {
+  items.value = value
+  emitModel()
+}
+
 function removeImage(index: number) {
-  images.value = images.value.filter((_, imageIndex) => imageIndex !== index)
+  releaseLocalImages(items.value.slice(index, index + 1))
+  items.value = items.value.filter((_, itemIndex) => itemIndex !== index)
+  emitModel()
 }
 
 function clearImages() {
@@ -109,58 +198,83 @@ function clearImages() {
     message: '确定移除本章的全部图片吗？保存章节后才会生效。',
     cancel: true,
   }).onOk(() => {
-    images.value = []
+    releaseLocalImages(items.value)
+    items.value = []
+    emitModel()
   })
+}
+
+function retryItem(item: ComicImageItem) {
+  void uploadItems([item])
+}
+
+function retryAll() {
+  void uploadItems(failedItems.value)
 }
 
 async function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement
   const files = Array.from(input.files ?? []).sort((a, b) => fileNameCollator.compare(a.name, b.name))
+  input.value = ''
   if (files.length === 0) return
 
-  emit('update:uploading', true)
-  uploadTotal.value = files.length
+  items.value.push(
+    ...files.map((file): ComicImageItem => ({
+      key: nextKey++,
+      status: 'uploading',
+      url: URL.createObjectURL(file),
+      file,
+    })),
+  )
+  // 取回响应式代理，上传过程中改状态才能触发渲染
+  await uploadItems(items.value.slice(-files.length))
+}
+
+async function uploadItems(targets: ComicImageItem[]) {
+  if (targets.length === 0) return
+  for (const item of targets) {
+    item.status = 'uploading'
+    item.error = undefined
+  }
+  uploadTotal.value = targets.length
   uploadedCount.value = 0
 
-  const uploadedImages = Array.from<{ Url: string } | undefined>({ length: files.length })
-  const failedFiles: string[] = []
   let cursor = 0
-
   const uploadWorker = async () => {
-    while (cursor < files.length) {
-      const index = cursor++
-      const file = files[index]
+    while (cursor < targets.length) {
+      const item = targets[cursor++]
+      const file = item.file!
       try {
-        uploadedImages[index] = await uploadImage({
+        const { Url } = await uploadImage({
           FileName: file.name,
           ImageData: new Uint8Array(await file.arrayBuffer()),
         })
-      } catch {
-        failedFiles.push(file.name)
+        URL.revokeObjectURL(item.url)
+        item.status = 'done'
+        item.url = Url
+        item.file = undefined
+        if (items.value.includes(item)) emitModel()
+      } catch (error) {
+        item.status = 'failed'
+        item.error = error instanceof Error ? error.message : String(error)
       } finally {
         uploadedCount.value += 1
       }
     }
   }
+  await Promise.all(Array.from({ length: Math.min(3, targets.length) }, uploadWorker))
 
-  try {
-    await Promise.all(Array.from({ length: Math.min(3, files.length) }, uploadWorker))
-    const successfulImages = uploadedImages.filter((image): image is { Url: string } => Boolean(image))
-    images.value = [...images.value, ...successfulImages.map((image) => image.Url)]
-
-    if (failedFiles.length === 0) {
-      $q.notify({ type: 'positive', message: `已上传 ${successfulImages.length} 张图片` })
-    } else {
-      $q.notify({
-        type: 'warning',
-        message: `成功 ${successfulImages.length} 张，失败 ${failedFiles.length} 张`,
-        caption: failedFiles.join('、'),
-        timeout: 5000,
-      })
-    }
-  } finally {
-    emit('update:uploading', false)
-    input.value = ''
+  const failedCount = targets.filter((item) => item.status === 'failed').length
+  const successCount = targets.length - failedCount
+  if (failedCount === 0) {
+    $q.notify({ type: 'positive', message: `已上传 ${successCount} 张图片` })
+  } else {
+    $q.notify({
+      type: 'warning',
+      message: `成功 ${successCount} 张，失败 ${failedCount} 张`,
+      caption: '失败的图片已保留在列表中，可点击重试',
+      timeout: 5000,
+    })
   }
 }
 </script>
@@ -201,6 +315,10 @@ async function onFileChange(event: Event) {
   cursor: grabbing;
 }
 
+.comic-image-card--failed {
+  border-color: var(--q-negative);
+}
+
 .comic-image-preview {
   height: 210px;
   background: rgba(127, 127, 127, 0.12);
@@ -220,6 +338,11 @@ async function onFileChange(event: Event) {
 
 .comic-image-meta > div {
   min-width: 0;
+}
+
+.comic-image-buttons {
+  display: flex;
+  flex-shrink: 0;
 }
 
 .comic-image-ghost {
