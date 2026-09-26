@@ -116,6 +116,7 @@ export {
   mdiNumeric7Box,
   mdiFormatFont,
   mdiContentSave,
+  mdiBookSync,
   mdiSquareEditOutline,
   mdiWalletOutline,
   mdiWeatherNight,

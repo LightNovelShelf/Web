@@ -1,6 +1,6 @@
 import { getSessionToken } from '@/services/auth/session'
 import { ServerError } from '@/services/ServerError'
-import { invokeHub } from '@/services/transport'
+import { invokeHub, requestHttp } from '@/services/transport'
 
 import { PATH } from '../path'
 import * as Types from './types'
@@ -113,6 +113,17 @@ export async function getBookEditInfo(bid: number, format: EditorFormat = 'html'
 /** 删除书籍 */
 export function deleteBook(bid: number) {
   return invokeHub('DeleteBook', { Id: bid })
+}
+
+/** 上传 epub 完整重建小说，章节、书名、作者、封面、简介全部替换；重建期间该书禁止编辑 */
+export async function rebuildBook(bid: number, file: File) {
+  const payload = new FormData()
+  payload.append('file', file)
+  const token = await getSessionToken()
+  return requestHttp<number>(`${PATH.USER_REBUILD_BOOK}?bid=${bid}`, {
+    payload,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
 }
 
 interface DownloadOptions {

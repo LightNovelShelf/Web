@@ -6,6 +6,7 @@
           保存
         </q-tooltip>
       </q-fab-action>
+      <slot :is-dragging="isDragging" />
     </q-fab>
   </drag-page-sticky>
 </template>
@@ -15,4 +16,5 @@ import { DragPageSticky } from '@/components'
 
 defineProps<{ disabled?: boolean }>()
 const emit = defineEmits<{ save: [] }>()
+defineSlots<{ default?: (props: { isDragging: boolean }) => unknown }>()
 </script>

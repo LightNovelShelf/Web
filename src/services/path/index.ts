@@ -42,6 +42,9 @@ export const PATH = {
   get USER_UPLOAD_BOOK() {
     return `${apiServer.value}/api/user/upload_book`
   },
+  get USER_REBUILD_BOOK() {
+    return `${apiServer.value}/api/user/rebuild_book`
+  },
   /** ----- end user ----- */
 
   /** ----- book ----- */

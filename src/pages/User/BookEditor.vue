@@ -115,6 +115,12 @@
         label-class="text-teal"
         label-style="font-size: 1.1em"
       />
+      <q-inner-loading
+        :showing="rebuilding"
+        label="正在从 EPUB 重建，请勿关闭页面..."
+        label-class="text-teal"
+        label-style="font-size: 1.1em"
+      />
     </div>
     <div v-else class="absolute-full">
       <q-inner-loading :showing="!isActive" label="加载中..." label-class="text-teal" label-style="font-size: 1.1em" />
@@ -122,7 +128,21 @@
     <q-page-sticky position="top-right" :offset="[18, 18]" v-if="!siderShow">
       <q-btn fab icon="mdiArrowLeft" color="accent" @click="show = !show" />
     </q-page-sticky>
-    <editor-save-action :disabled="getSaveState()" @save="save" />
+    <editor-save-action :disabled="getSaveState()" @save="save">
+      <template v-if="isActive && !isComic" #default="{ isDragging }">
+        <q-fab-action
+          color="warning"
+          icon="mdiBookSync"
+          :disable="isDragging || saving || rebuilding"
+          @click="epubInput?.click()"
+        >
+          <q-tooltip transition-show="scale" transition-hide="scale" anchor="center left" self="center right">
+            从 EPUB 重建
+          </q-tooltip>
+        </q-fab-action>
+      </template>
+    </editor-save-action>
+    <input ref="epubInput" type="file" accept=".epub" class="hidden" @change="onEpubPicked" />
   </q-page>
   <q-drawer
     v-if="route.name === 'UserBookEditor'"
@@ -159,7 +179,7 @@
               }
             "
             :active="tab === 'chapter' && selectedChapterId === element.Id"
-            :disable="disableDrawer"
+            :disable="disableDrawer || rebuilding"
           >
             <q-item-section>{{ element.Title }}</q-item-section>
             <q-item-section side>
@@ -199,7 +219,7 @@ import { useInitRequest } from '@/composition/biz/useInitRequest'
 import { useEditorAction } from '@/composition/editor/useEditorAction'
 import { useLoadingFn } from '@/composition/useFnLoading'
 
-import { editBook, getBookEditInfo } from '@/services/book'
+import { editBook, getBookEditInfo, rebuildBook } from '@/services/book'
 import {
   createNewComicChapter,
   createNewNovelChapter,
@@ -243,6 +263,8 @@ const { saving, runEditorAction } = useEditorAction()
 const show = ref(siderShow.value)
 const options = ref<BookCategoryOption[]>([])
 const disableDrawer = ref(false)
+const rebuilding = ref(false)
+const epubInput = ref<HTMLInputElement>()
 const book = ref<EditableBook>()
 const chapters = ref<ChapterInfo[]>([])
 const bookId = computed(() => Number(props.bookId))
@@ -452,6 +474,34 @@ function finishChapterCreation(response: CreateChapterResponse) {
   creatingChapterContent.sortNum = ''
   tab.value = 'chapter'
   selectedChapterId.value = response.NewCid
+}
+
+function onEpubPicked(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  // 清空后同一个文件还能再选一次
+  input.value = ''
+  if (!file) return
+
+  $q.dialog({
+    title: '从 EPUB 重建',
+    // 文件名不可信，不开 html
+    message:
+      `将用「${file.name}」替换本书全部章节，读者的阅读进度会丢失；` +
+      '书名、作者、封面、简介以 EPUB 为准，分类信息清空后重新识别。重建期间本书禁止编辑。',
+    cancel: true,
+  }).onOk(async () => {
+    rebuilding.value = true
+    try {
+      await runEditorAction({ successMessage: '重建完成' }, async () => {
+        await rebuildBook(bookId.value, file)
+        resetEditor()
+        await request()
+      })
+    } finally {
+      rebuilding.value = false
+    }
+  })
 }
 
 async function handleChange(event: DraggableChangeEvent) {
