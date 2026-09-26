@@ -22,7 +22,7 @@ export interface PagedListPage<T> {
 export interface PagedListOptions<T> {
   /** 取一页数据 */
   fetch(page: number): Promise<PagedListPage<T>>
-  /** 影响结果集的筛选项，变化时回到第一页重新加载 */
+  /** 影响结果集的筛选项，页内向前切换时回到第一页，后退时保留历史页码 */
   deps?: () => unknown
 }
 
@@ -48,12 +48,13 @@ export interface PagedList<T> {
  * @description
  * 分页模式（设置项 generalSetting.paging）下页码走 url query，刷新与前进后退都能恢复；
  * 关掉分页后滚动到底自动追加，页码只在内存里，url 上不留 page。
- * 覆盖式加载全部交给 useInitRequest：页码与筛选项就是它的请求参数。
+ * 覆盖式加载交给 useInitRequest，前进刷新，后退仅在页码或筛选项与缓存不匹配时刷新。
  */
 export function usePagedList<T>(options: PagedListOptions<T>): PagedList<T> {
   const $q = useQuasar()
   const route = useRoute()
   const router = useRouter()
+  const routeName = route.name
   const { generalSetting } = useSettingStore()
 
   const items = ref([]) as Ref<T[]>
@@ -105,12 +106,19 @@ export function usePagedList<T>(options: PagedListOptions<T>): PagedList<T> {
   const append = useLoadingFn((page: number) => fetchPage(page, true))
   const loading = computed(() => init.loading.value || append.loading.value)
 
-  // 换筛选项就回到第一页；旧结果属于上一组条件，留着会被新条件的模板当成自己的数据渲染
-  watch(depsKey, () => {
-    items.value = []
-    totalPage.value = 1
-    currentPage.value = 1
-  })
+  // 缓存页仍会收到其他路由的 query 变化，只处理本页的筛选条件。
+  let activeDepsKey = depsKey.value
+  watch(
+    () => ({ name: route.name, deps: depsKey.value }),
+    (next, previous) => {
+      if (next.name !== routeName || next.deps === activeDepsKey) return
+      activeDepsKey = next.deps
+      items.value = []
+      totalPage.value = 1
+      // 返回缓存页时保留目标历史记录中的页码。
+      if (previous.name === routeName && route.meta.reload) currentPage.value = 1
+    },
+  )
 
   async function onLoad(index: number, done: (stop?: boolean) => void) {
     if (loading.value) return done()
