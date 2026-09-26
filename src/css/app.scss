@@ -39,6 +39,11 @@ body.desktop {
   }
 }
 
+// tooltip 显示时会往按钮内容里挂 teleport 节点，部分浏览器随后把指针移进图标算成离开按钮，tooltip 立刻被收起
+.q-fab__actions .q-btn__content {
+  pointer-events: none;
+}
+
 // 编辑器用伪元素显示编号，权威 HTML 与阅读器注文不含编号。
 :is(.q-editor__content, .md-editor-preview) .footnotes {
   counter-reset: editor-footnote;
