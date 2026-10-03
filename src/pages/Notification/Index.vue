@@ -74,7 +74,7 @@
 
       <!-- 底部操作按钮 -->
       <q-page-sticky position="bottom-right" :offset="[18, 18]">
-        <q-btn v-if="unreadIds.length > 0" round color="primary" icon="mdiCheckAll" @click="markAllAsRead">
+        <q-btn v-if="hasUnreadNotifications" round color="primary" icon="mdiCheckAll" @click="markAllAsRead">
           <q-tooltip>全部标记为已读</q-tooltip>
         </q-btn>
       </q-page-sticky>
@@ -108,9 +108,9 @@ const pageSize = 20
 const loading = ref(false)
 const infiniteScroll = ref()
 
-const unreadIds = computed(() => {
-  return notifications.value.filter((n) => !n.IsRead).map((n) => n.Id)
-})
+const hasUnreadNotifications = computed(
+  () => (appStore.user?.UnreadNotificationCount ?? 0) > 0 || notifications.value.some((n) => !n.IsRead),
+)
 
 const refreshUnreadCount = async () => {
   if (!appStore.user) {
@@ -191,9 +191,9 @@ const handleNotificationClick = async (notification: GetNotifications.Notificati
 
 // 全部标记为已读
 const markAllAsRead = async () => {
-  if (unreadIds.value.length === 0) return
+  if (!hasUnreadNotifications.value) return
 
-  await markNotifications({ Ids: unreadIds.value })
+  await markNotifications({ All: true })
 
   // 更新本地状态
   notifications.value.forEach((n) => {

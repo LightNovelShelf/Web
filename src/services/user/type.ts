@@ -119,7 +119,8 @@ export namespace GetNotifications {
 
 export namespace MarkNotifications {
   export interface Request {
-    Ids: number[]
+    All?: boolean
+    Ids?: number[]
   }
 
   export type Response = void
