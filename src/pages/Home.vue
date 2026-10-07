@@ -129,8 +129,8 @@
                 </div>
                 <div v-else>
                   <base-avatar
-                    v-for="ban in banList"
-                    :key="ban.Id"
+                    v-for="(ban, index) in banList"
+                    :key="index"
                     class="cursor-pointer"
                     :src="ban.Avatar"
                     :name="ban.Description || '封禁'"
