@@ -55,9 +55,10 @@
               <q-icon name="mdiShieldCheck" />
             </template>
             <template v-slot:after>
-              <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
+              <q-btn @click="sendEmail" :loading="sending" :disable="!turnstileToken">发送验证码</q-btn>
             </template>
           </q-input>
+          <div ref="turnstileEl" class="q-my-sm"></div>
           <q-input v-model="inviteCode" label="邀请码">
             <template v-slot:prepend>
               <q-icon name="mdiLockPlus" />
@@ -80,11 +81,13 @@
 
 <script lang="ts" setup>
 import { useQuasar } from 'quasar'
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 import { sha256 } from '@/utils/hash'
+
+import { TURNSTILE_SITEKEY } from '@/const'
 
 import { useSessionStore } from '@/stores/session'
 
@@ -104,10 +107,81 @@ const loading = ref(false)
 const sending = ref(false)
 const router = useRouter()
 
+interface Turnstile {
+  render(
+    container: HTMLElement,
+    options: {
+      sitekey: string
+      callback: (token: string) => void
+      'expired-callback': () => void
+      'error-callback': () => void
+    },
+  ): string
+  reset(widgetId: string): void
+  remove(widgetId: string): void
+}
+
+declare global {
+  interface Window {
+    turnstile?: Turnstile
+  }
+}
+
+const TURNSTILE_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+let turnstileLoader: Promise<Turnstile> | undefined
+
+function loadTurnstile(): Promise<Turnstile> {
+  if (window.turnstile) return Promise.resolve(window.turnstile)
+  turnstileLoader ??= new Promise<Turnstile>((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = TURNSTILE_SCRIPT
+    script.async = true
+    script.onload = () => (window.turnstile ? resolve(window.turnstile) : reject(new Error('人机验证加载失败')))
+    script.onerror = () => {
+      turnstileLoader = undefined
+      script.remove()
+      reject(new Error('人机验证加载失败'))
+    }
+    document.head.appendChild(script)
+  })
+  return turnstileLoader
+}
+
+const turnstileEl = ref<HTMLElement>()
+const turnstileToken = ref('')
+let widgetId: string | undefined
+let unmounted = false
+
+onMounted(async () => {
+  try {
+    const turnstile = await loadTurnstile()
+    if (unmounted || !turnstileEl.value) return
+    widgetId = turnstile.render(turnstileEl.value, {
+      sitekey: TURNSTILE_SITEKEY,
+      callback: (token) => (turnstileToken.value = token),
+      'expired-callback': () => (turnstileToken.value = ''),
+      'error-callback': () => (turnstileToken.value = ''),
+    })
+  } catch (e) {
+    $q.notify({ type: 'negative', message: getErrMsg(e) })
+  }
+})
+
+onBeforeUnmount(() => {
+  unmounted = true
+  if (widgetId !== undefined) window.turnstile?.remove(widgetId)
+  widgetId = undefined
+})
+
+function resetTurnstile() {
+  turnstileToken.value = ''
+  if (widgetId !== undefined) window.turnstile?.reset(widgetId)
+}
+
 const sendEmail = async () => {
   sending.value = true
   try {
-    await sendRegisterEmail(email.value)
+    await sendRegisterEmail(email.value, turnstileToken.value)
 
     $q.notify({
       message: '发送成功',
@@ -119,6 +193,7 @@ const sendEmail = async () => {
       message: getErrMsg(e),
     })
   }
+  resetTurnstile()
   sending.value = false
 }
 

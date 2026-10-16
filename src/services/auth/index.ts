@@ -47,9 +47,9 @@ export function sendResetEmail(email: string): Promise<void> {
   })
 }
 
-export function sendRegisterEmail(email: string): Promise<void> {
-  return requestHttp<void, { email: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
-    payload: { email },
+export function sendRegisterEmail(email: string, token: string): Promise<void> {
+  return requestHttp<void, { email: string; token: string }>(PATH.USER_SEND_REGISTER_EMAIL, {
+    payload: { email, token },
     method: RequestMethod.GET,
   })
 }
