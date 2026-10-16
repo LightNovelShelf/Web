@@ -40,9 +40,9 @@ export async function logout(): Promise<void> {
   await restartRealtimeConnection()
 }
 
-export function sendResetEmail(email: string): Promise<void> {
-  return requestHttp<void, { email: string }>(PATH.USER_SEND_RESET_EMAIL, {
-    payload: { email },
+export function sendResetEmail(email: string, token: string): Promise<void> {
+  return requestHttp<void, { email: string; token: string }>(PATH.USER_SEND_RESET_EMAIL, {
+    payload: { email, token },
     method: RequestMethod.GET,
   })
 }

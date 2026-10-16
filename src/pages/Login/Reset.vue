@@ -50,9 +50,10 @@
               <q-icon name="mdiShieldCheck" />
             </template>
             <template v-slot:after>
-              <q-btn @click="sendEmail" :loading="sending">发送验证码</q-btn>
+              <q-btn @click="sendEmail" :loading="sending" :disable="!turnstileToken">发送验证码</q-btn>
             </template>
           </q-input>
+          <Turnstile ref="turnstile" v-model="turnstileToken" action="reset_password" />
           <div class="row">
             <q-btn rounded flat :to="{ name: 'Register' }">注册</q-btn>
             <q-space />
@@ -70,11 +71,13 @@
 
 <script lang="ts" setup>
 import { useQuasar } from 'quasar'
-import { ref } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getErrMsg } from '@/utils/getErrMsg'
 import { sha256 } from '@/utils/hash'
+
+import Turnstile from '@/components/Turnstile.vue'
 
 import { resetPassword, sendResetEmail } from '@/services/auth'
 
@@ -88,11 +91,13 @@ const isPwd = ref(true)
 const loading = ref(false)
 const sending = ref(false)
 const router = useRouter()
+const turnstile = useTemplateRef('turnstile')
+const turnstileToken = ref('')
 
 const sendEmail = async () => {
   sending.value = true
   try {
-    await sendResetEmail(email.value)
+    await sendResetEmail(email.value, turnstileToken.value)
 
     $q.notify({
       message: '发送成功',
@@ -104,6 +109,7 @@ const sendEmail = async () => {
       message: getErrMsg(e),
     })
   }
+  turnstile.value?.reset()
   sending.value = false
 }
 
