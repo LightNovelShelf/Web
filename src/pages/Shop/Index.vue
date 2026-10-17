@@ -71,6 +71,16 @@
                   @click="signInVisible = true"
                 />
                 <q-btn
+                  v-if="item.Key === RENAME_CARD_KEY"
+                  outline
+                  size="sm"
+                  color="primary"
+                  label="改名"
+                  :loading="using === item.Key"
+                  :disable="!!using && using !== item.Key"
+                  @click="rename(item)"
+                />
+                <q-btn
                   v-if="item.Usable"
                   outline
                   size="sm"
@@ -112,7 +122,15 @@ import SignInDialog from '@/components/points/SignInDialog.vue'
 import SystemImage from '@/components/SystemImage.vue'
 
 import { apiServer } from '@/services/apiServer'
-import { SIGN_MAKEUP_KEY, buyShopItem, getMyItems, getShop, useShopItem } from '@/services/shop'
+import {
+  RENAME_CARD_KEY,
+  SIGN_MAKEUP_KEY,
+  buyShopItem,
+  getMyItems,
+  getShop,
+  useRenameCard,
+  useShopItem,
+} from '@/services/shop'
 
 import type { OwnedItem, ShopItem } from '@/services/shop'
 
@@ -184,6 +202,33 @@ function useItem(item: OwnedItem) {
       const res = await useShopItem({ Key: item.Key })
       $q.notify({ type: 'positive', message: res.Message })
       await load()
+    } catch (err) {
+      $q.notify({ type: 'negative', message: getErrMsg(err) })
+    } finally {
+      using.value = ''
+    }
+  })
+}
+
+function rename(item: OwnedItem) {
+  if (using.value) return
+  $q.dialog({
+    title: '使用改名卡',
+    prompt: {
+      model: user.value?.UserName ?? '',
+      type: 'text',
+      isValid: (val: string) => {
+        const name = val.trim()
+        return name.length > 0 && name.length <= 50
+      },
+    },
+    cancel: true,
+  }).onOk(async (val: string) => {
+    using.value = item.Key
+    try {
+      const res = await useRenameCard({ UserName: val.trim() })
+      $q.notify({ type: 'positive', message: `改名成功，现在的用户名是「${res.UserName}」` })
+      await Promise.all([appStore.refreshUser(), load()])
     } catch (err) {
       $q.notify({ type: 'negative', message: getErrMsg(err) })
     } finally {

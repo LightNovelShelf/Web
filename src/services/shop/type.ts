@@ -71,6 +71,16 @@ export namespace UseSignMakeupCard {
   }
 }
 
+export namespace UseRenameCard {
+  export interface Request {
+    UserName: string
+  }
+  export interface Response {
+    UserName: string
+    Owned: number
+  }
+}
+
 export namespace UseShopItem {
   export interface Request {
     Key: string
