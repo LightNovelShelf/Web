@@ -7,9 +7,6 @@ export type { ShopItem, OwnedItem } from './type'
 /** 补签卡的道具 key，与后端 ShopService.SignMakeupKey 一致 */
 export const SIGN_MAKEUP_KEY = 'sign_makeup'
 
-/** 漫画额度卡的道具 key，与后端 ShopService.ComicQuota50Key 一致 */
-export const COMIC_QUOTA_50_KEY = 'comic_quota_50'
-
 /** 商城货架（含余额、持有量、本月已购数） */
 export function getShop() {
   return invokeHub<Types.GetShop.Response>('GetShop', {})
@@ -30,7 +27,7 @@ export function useSignMakeupCard(req: Types.UseSignMakeupCard.Request) {
   return invokeHub<Types.UseSignMakeupCard.Response>('UseSignMakeupCard', req)
 }
 
-/** 使用漫画额度卡，获得 50 点漫画额度 */
-export function useComicQuotaCard() {
-  return invokeHub<Types.UseComicQuotaCard.Response>('UseComicQuotaCard', {})
+/** 使用一个无需额外参数的道具（GetMyItems 中 Usable 为 true） */
+export function useShopItem(req: Types.UseShopItem.Request) {
+  return invokeHub<Types.UseShopItem.Response>('UseShopItem', req)
 }

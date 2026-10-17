@@ -24,6 +24,8 @@ export interface OwnedItem {
   Description: string
   Image: string
   Quantity: number
+  /** 为 true 时可直接调用 UseShopItem 使用；序列化可能丢掉 false，缺省按不可用处理 */
+  Usable?: boolean
 }
 
 export namespace GetShop {
@@ -69,15 +71,15 @@ export namespace UseSignMakeupCard {
   }
 }
 
-export namespace UseComicQuotaCard {
-  export type Request = Record<string, never>
+export namespace UseShopItem {
+  export interface Request {
+    Key: string
+  }
   export interface Response {
     Key: string
-    /** 本次发放的额度点数 */
-    Granted: number
-    /** 使用后的漫画额度余额 */
-    Quota: number
     /** 使用后的道具持有数量 */
     Owned: number
+    /** 后端拼好的结果文案，直接展示 */
+    Message: string
   }
 }

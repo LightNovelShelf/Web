@@ -71,13 +71,14 @@
                   @click="signInVisible = true"
                 />
                 <q-btn
-                  v-if="item.Key === COMIC_QUOTA_50_KEY"
+                  v-if="item.Usable"
                   outline
                   size="sm"
                   color="primary"
                   label="使用"
-                  :loading="usingQuota"
-                  @click="useQuota()"
+                  :loading="using === item.Key"
+                  :disable="!!using && using !== item.Key"
+                  @click="useItem(item)"
                 />
               </div>
             </q-item-section>
@@ -111,14 +112,7 @@ import SignInDialog from '@/components/points/SignInDialog.vue'
 import SystemImage from '@/components/SystemImage.vue'
 
 import { apiServer } from '@/services/apiServer'
-import {
-  COMIC_QUOTA_50_KEY,
-  SIGN_MAKEUP_KEY,
-  buyShopItem,
-  getMyItems,
-  getShop,
-  useComicQuotaCard,
-} from '@/services/shop'
+import { SIGN_MAKEUP_KEY, buyShopItem, getMyItems, getShop, useShopItem } from '@/services/shop'
 
 import type { OwnedItem, ShopItem } from '@/services/shop'
 
@@ -134,7 +128,7 @@ const shopCoin = ref(0)
 const items = ref<ShopItem[]>([])
 const ownedItems = ref<OwnedItem[]>([])
 const buying = ref('')
-const usingQuota = ref(false)
+const using = ref('')
 const signInVisible = ref(false)
 
 function remaining(item: ShopItem) {
@@ -177,21 +171,23 @@ function buy(item: ShopItem) {
   })
 }
 
-function useQuota() {
+function useItem(item: OwnedItem) {
+  if (using.value) return
   $q.dialog({
-    title: '使用漫画额度卡',
-    message: '使用后立即获得 50 点漫画额度，永不过期。',
+    title: '使用道具',
+    message: item.Description ? `使用 1 个「${item.Name}」？\n${item.Description}` : `使用 1 个「${item.Name}」？`,
+    style: 'white-space: pre-line',
     cancel: true,
   }).onOk(async () => {
-    usingQuota.value = true
+    using.value = item.Key
     try {
-      const res = await useComicQuotaCard()
-      $q.notify({ type: 'positive', message: `已发放 ${res.Granted} 点漫画额度，当前余额 ${res.Quota} 点` })
+      const res = await useShopItem({ Key: item.Key })
+      $q.notify({ type: 'positive', message: res.Message })
       await load()
     } catch (err) {
       $q.notify({ type: 'negative', message: getErrMsg(err) })
     } finally {
-      usingQuota.value = false
+      using.value = ''
     }
   })
 }
