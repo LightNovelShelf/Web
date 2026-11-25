@@ -23,7 +23,7 @@ const bookId = computed(() => props.book?.Id ?? null)
 const bookType = computed(() => (props.book?.Type === 'Comic' ? ShelfItemTypeEnum.COMIC : ShelfItemTypeEnum.NOVEL))
 const liked = computed(() => bookId.value !== null && shelfStore.booksMap.has(bookId.value))
 const loading = computed(
-  () => shelfStore.useLoading((state) => state.pull || state.push).value || !isRealtimeConnected.value,
+  () => shelfStore.useLoading((state) => !!(state.pull || state.push)).value || !isRealtimeConnected.value,
 )
 const label = computed(() => (liked.value ? '移出书架' : '加入书架'))
 let dismissNotification: AnyVoidFunc | undefined

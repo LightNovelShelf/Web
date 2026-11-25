@@ -236,7 +236,8 @@ const shelfStore = defineStore('app.shelf', {
      */
     async syncFromRemote(): Promise<boolean> {
       const serve = await getBookShelfBinary()
-      const shelf = serve.data
+      // 从没保存过书架的用户，服务端返回的是 {}，没有 data
+      const shelf = serve.data ?? []
 
       const normalized = this.squeezeShelfItemIndex(shelf)
       this.commit({ shelf: normalized })

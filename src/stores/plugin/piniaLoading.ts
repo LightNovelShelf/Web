@@ -168,8 +168,14 @@ export const createPiniaLoading = (): PiniaPlugin => {
         // 记录 actionID
         dispatchRecordMap.value[storeName][actionName].add(actionID)
 
-        // 记录函数调用结果
-        const result = originActionFunc(...args)
+        // 记录函数调用结果；同步 action 抛错时也要清理调用记录
+        let result: unknown
+        try {
+          result = originActionFunc(...args)
+        } catch (error) {
+          dispatchRecordMap.value[storeName][actionName].delete(actionID)
+          throw error
+        }
 
         // 处理异步调用
         if (result instanceof Promise) {

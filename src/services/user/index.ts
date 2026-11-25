@@ -43,7 +43,7 @@ export function saveBookShelf(json: { data: ShelfItem[]; ver: SHELF_STRUCT_VER }
 }
 
 export function getBookShelfBinary() {
-  return invokeHub<{ data: ShelfItem[]; ver?: SHELF_STRUCT_VER }>('GetBookShelf')
+  return invokeHub<{ data?: ShelfItem[]; ver?: SHELF_STRUCT_VER }>('GetBookShelf')
 }
 
 export function clearHistory() {
