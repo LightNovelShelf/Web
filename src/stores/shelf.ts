@@ -245,7 +245,8 @@ const shelfStore = defineStore('app.shelf', {
       const shelf = serve.data ?? []
 
       const normalized = this.squeezeShelfItemIndex(shelf)
-      this.commit({ shelf: normalized })
+      // 初次同步固定写入 main，不随当前分支落进草稿
+      this.source[ShelfBranch.main] = normalized
       // squeeze 走 immer，没改到的项目会保持原引用，逐项比引用就能判断有没有真的变化
       return normalized.length !== shelf.length || normalized.some((item, i) => item !== shelf[i])
     },
@@ -558,8 +559,8 @@ const shelfStore = defineStore('app.shelf', {
       }
 
       const changed = await this.syncFromRemote()
-      this.initialized = true
       await this.push({ syncRemote: changed })
+      this.initialized = true
     },
 
     /** actions end */

@@ -368,7 +368,7 @@ function createFolderHandle() {
     prompt: { model: '', type: 'text', label: '文件夹名称', isValid: (value: string) => !!value.trim() },
     cancel: true,
   }).onOk((name: string) => {
-    if (!editMode.value) enterEditMode()
+    if (!editMode.value && !enterEditMode()) return
     shelfStore.createFolder({ name, parents })
   })
 }
@@ -437,9 +437,15 @@ function confirmDialog(title: string, message: string): Promise<boolean> {
   })
 }
 
-function enterEditMode() {
+/** 远端书架读回之前不能整理，否则同步结果和草稿会互相覆盖 */
+function enterEditMode(): boolean {
+  if (!initialized.value) {
+    $q.notify({ type: 'warning', message: '书架尚未同步完成，请稍后再试' })
+    return false
+  }
   shelfStore.checkout({ to: ShelfBranch.draft, reset: true })
   bookListStore.queryBooks({ ids: shelfStore.books.map((book) => book.id) })
+  return true
 }
 
 function exitEditMode() {
