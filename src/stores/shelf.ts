@@ -20,7 +20,7 @@ type ShelfSourceStruct = {
 }
 
 export interface ShelfStore {
-  /** 是否已经初始化 */
+  /** 是否已经从服务器读回书架；读回之前本地数据可能不完整，不能整表保存 */
   initialized: boolean
   /** 选中项ID集合 */
   selected: Set<number | string>
@@ -74,6 +74,11 @@ function lastItem<T>(arr: T[]): T | null {
 
 function notifyError(message: string) {
   Notify.create({ type: 'negative', timeout: 1500, position: 'bottom', message })
+}
+
+/** 远端书架读回之前拒绝写入，避免用不完整的本地数据整表覆盖服务器 */
+function assertInitialized(initialized: boolean) {
+  if (!initialized) throw new Error('书架尚未同步完成，请稍后再试')
 }
 
 /** 两条文件夹路径是否相同 */
@@ -272,6 +277,7 @@ const shelfStore = defineStore('app.shelf', {
 
     /** 添加书籍到书架，立即生效 */
     async addToShelf(payload: { id: number; type: ShelfBookType }) {
+      assertInitialized(this.initialized)
       const item: ShelfBookItem = {
         id: payload.id,
         type: payload.type,
@@ -293,6 +299,7 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 移出书架；传入文件夹ID时，文件夹内所有下级内容一并移出 */
     async removeFromShelf(payload: { books: (string | number)[]; push: boolean }) {
+      if (payload.push) assertInitialized(this.initialized)
       const items = new Set(payload.books)
 
       this.commit({
@@ -537,6 +544,7 @@ const shelfStore = defineStore('app.shelf', {
     },
     /** 保存修改 */
     async submitChange() {
+      assertInitialized(this.initialized)
       this.clearSelected()
       this.merge({ to: ShelfBranch.main })
       this.checkout({ to: ShelfBranch.main })
@@ -548,9 +556,9 @@ const shelfStore = defineStore('app.shelf', {
       } catch {
         this.commit({ shelf: [] })
       }
-      this.initialized = true
 
       const changed = await this.syncFromRemote()
+      this.initialized = true
       await this.push({ syncRemote: changed })
     },
 
